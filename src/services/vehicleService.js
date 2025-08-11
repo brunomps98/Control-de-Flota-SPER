@@ -32,9 +32,11 @@ export default class VehicleManager {
 
 
     addVehicle = async (product) => {
+
+        console.log("Adding vehicle with product data:", product);
         // correccion para manejar todos los datos solicitados
         try {
-            const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
+            const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
             const newProduct = await productsModel.create({
                 title,
                 description,
@@ -51,7 +53,8 @@ export default class VehicleManager {
                 rodado,
                 reparaciones,
                 marca,
-                thumbnail
+                thumbnail,
+                usuario,
             });
             return newProduct;
         } catch (err) {
@@ -59,33 +62,8 @@ export default class VehicleManager {
         }
     }
 
-
-
-    // updateVehicle = async (id, product) => {
-    //     try {
-    //         console.log(id, product)
-    //         return 
-            
-    //     } catch (err) {
-    //         return err
-    //     }
-    // }
-
-    // updateVehicle = async (id, product) => {
-    //     try {
-    //         console.log(id, product)
-    //         await productsModel.findByIdAndUpdate(id, { $addToSet: {kilometros: product.kilometros} }); 
-    //         await productsModel.findByIdAndUpdate(id, { $addToSet: {service: product.service} }); 
-    //         await productsModel.findByIdAndUpdate(id, { $addToSet: {rodado: product.rodado} }); 
-    //         await productsModel.findByIdAndUpdate(id, { $addToSet: {reparaciones: product.reparaciones} }); 
-    //     } catch (err) {
-    //         return err
-    //     }
-    // }
     updateVehicle = async (id, product) => {
-        try {
-            console.log(id, product);
-    
+        try {    
             const updateFields = {
                 $addToSet: {
                     kilometros: product.kilometros,
@@ -93,7 +71,7 @@ export default class VehicleManager {
                     description: product.description,
                     service: product.service,
                     rodado: product.rodado,
-                    reparaciones: product.reparaciones
+                    reparaciones: product.reparaciones,
                 }
             };
     

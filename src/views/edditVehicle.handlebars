@@ -77,7 +77,7 @@
             const service = $('#service').val();
             const rodado = $('#rodado').val();
             const reparaciones = $('#reparaciones').val();
-
+            const usuario = $('#usuario').val();
 
             $.ajax({
                 url: `/vehicle/${productId}`,
@@ -89,6 +89,7 @@
                     destino: destino,
                     service: service,
                     rodado: rodado,
+                    usuario: usuario,
                     
                 },
                 success: function (response) {

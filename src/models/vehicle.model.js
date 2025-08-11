@@ -68,8 +68,12 @@ const productSchema = new mongoose.Schema({
     },
     marca: {
         type: String,
-        required: false // Establecemos el valor por defecto en false
-    }
+        required: false 
+    },
+    usuario: {
+        type: String,
+        required: false 
+    },
 })
 
 

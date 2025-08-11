@@ -1,4 +1,5 @@
 {{>navBar}}
+<div id="message-container"></div> <form id="formProduct" enctype="multipart/form-data">
 
 <form id="formProduct" enctype="multipart/form-data">
     <div class="title-add-product">
@@ -81,13 +82,18 @@
                 required>
         </div>
     </div>
+    <div class="stock-code-price">
     <div class="price-product">
         <p>Reparaciones</p>
         <input class="controls" type="text" min="0" name="reparaciones" id="reparaciones"
             placeholder="indicar reparaciones realizadas" required>
     </div>
-
-
+    <div class="price-product">
+        <p>Chofer</p>
+        <input class="controls" type="text" min="0" name="usuario" id="usuario"
+            placeholder="indicar el chofer actual" required>
+    </div>
+    </div>
     <div class="url-product">
         <p>Imagenes</p>
         <input class="controls" type="file" name="thumbnail" id="thumbnail"multiple required title="Por favor, al seleccionar las imagenes que desea subir. 1° debe seleccionar la imagen de frente del vehiculo, 2° imagen  de perfil derecho, 3° imagen  de perfil izquierdo, 4° imagen trasera del vehiculo y 5° imagen del interior todas juntas con ctrl+click del cursor">
@@ -110,5 +116,8 @@
             {{error}}
         </div>
     {{/if}}
+    {{>navBar}}
+
+    </form>
 <script src="/socket.io/socket.io.js" defer></script>
 <script src="/js/scripts.js" defer></script>

@@ -993,4 +993,46 @@ a {
     transform: perspective(600px) rotateY(360deg);
 }
 
+.user-info {
+    display: flex;
+    justify-content: end;
+    align-items: right;
+    width: 99%;
+    margin-top: 1px;
+}
 
+.user-info h6 {
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+}
+.button-login {
+    display: flex;
+    height: 100vh;
+    justify-content: center;
+    align-items: end;
+    width: 100%;
+    
+}
+.button-support {
+    width: 200px;
+    height: 100vh;
+    padding: 15px 0;
+    text-align: center;
+    margin: 10px 10px;
+    border-radius: 25px;
+    font-weight: bold;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    position: relative;
+
+}
+
+
+
+.buttons-init{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

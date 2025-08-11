@@ -20,6 +20,7 @@
                 <p>CHASIS N°: {{vehicle.chasis}}</p>
                 <p>MOTOR N°: {{vehicle.motor}}</p>
                 <p>CEDULA N°: {{vehicle.cedula}}</p>
+            
                 {{#with (lookup vehicle.kilometros lastIndexK)}}
                 <p>KILOMETRAJE: {{this}}</p>
                 {{/with}}
@@ -79,6 +80,7 @@
         <button class="signup-btn3"><a href="/vehicle">Volver</a></button>
         <button class="signup-btn3" onclick="imprimirPagina()">Imprimir</button>
         <button class="signup-btn3 edit-btn" data-product-id="{{vehicle._id}}">Editar</button>
+        <button class="signup-btn3 delete-btn " data-product-id="{{vehicle._id}}">eliminar</button>
     </div>
 </div>
 
@@ -86,3 +88,4 @@
 <script>function imprimirPagina() { window.print(); }</script>
 <script src="js/script.js" defer></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
