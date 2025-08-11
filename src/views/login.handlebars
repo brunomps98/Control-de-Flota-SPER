@@ -1,0 +1,35 @@
+<div class="login1">
+
+<div class="container login">
+    
+    <form class="login-form" id="login-form" action="/login" method="POST">
+        <div class="mb-3"> 
+            <label for="exampleInputUsername" class="form-label">Nombre de usuario</label>
+            <input type="text" class="form-control" id="exampleInputUsername" name="username">
+        </div>
+        <div class="mb-3">
+            <label for="exampleInputPassword1" class="form-label">Contraseña</label>
+            <input type="password" name="passw" class="form-control" id="exampleInputPassword1">
+        </div>
+        <div>
+        <button type="submit" class="signup-btn1">Iniciar sesión</button>
+
+        </div>
+    </form>
+    {{#if error}}
+        <div class="alert alert-danger" role="alert">
+            {{error}}
+        </div>
+    {{/if}}
+</div>
+
+
+
+
+</div>
+
+<footer>
+    {{>footer}}
+</footer>
+
+
