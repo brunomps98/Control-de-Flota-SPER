@@ -1,0 +1,996 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+body {
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+
+}
+
+@media print {
+
+    .navbar,
+    .signup-btn3 {
+        display: none !important;
+    }
+}
+
+#nnavbarNavDropdown {
+    flex-grow: 0 !important;
+}
+
+
+
+.navbar-expand-lg .navbar-collapse {
+
+    flex-direction: row-reverse;
+}
+
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+
+#list-products {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    width: 150vh;
+    margin-bottom: 50px;
+}
+
+.container {
+    position: relative;
+}
+
+.cards-container {
+    display: flex;
+    padding: 10px;
+}
+
+.card-img-top {
+    height: 250px !important;
+}
+/*------------ form edit vehicle---------------*/
+#formEditVehicle{
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    width: 1000px;
+    background: #24303c;
+    padding: 30px;
+    margin: auto;
+    margin-top: 30px;
+    margin-bottom: 60px;
+    border-radius: 4px;
+    font-family: 'calibri';
+    color: white;
+    box-shadow: 7px 13px 37px #000;
+}
+#formEditVehicle4 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+#formEditVehicle p {
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 40px;
+}
+
+#formEditVehicle h2 {
+    height: 40px;
+    text-align: center;
+    font-size: 45px;
+    line-height: 40px;
+}
+
+#formEditVehicle a {
+    color: white;
+    text-decoration: none;
+}
+
+#formEditVehicle a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+#formEditVehicle .botons {
+    width: 100%;
+    background: #1f53c5;
+    border: none;
+    padding: 12px;
+    color: white;
+    margin: 16px 0;
+    font-size: 16px;
+}
+/*------------ form edit vehicle---------------*/
+
+#formProduct {
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    width: 1000px;
+    background: #24303c;
+    padding: 30px;
+    margin: auto;
+    margin-top: 30px;
+    margin-bottom: 60px;
+    border-radius: 4px;
+    font-family: 'calibri';
+    color: white;
+    box-shadow: 7px 13px 37px #000;
+}
+
+.title-add-product {
+    align-items: center;
+    width: 900px;
+}
+
+
+
+.name-desc {
+    display: flex;
+    flex-direction: row;
+}
+
+.name-product {
+    width: 250px;
+    margin: 15px;
+}
+
+.desc-product {
+    width: 650px;
+    margin: 15px;
+}
+
+.stock-code-price {
+    display: flex;
+    flex-direction: row;
+}
+
+.stock-product {
+    margin: 15px;
+}
+
+.code-product {
+    margin: 15px;
+}
+
+.price-product {
+    margin: 15px;
+}
+
+
+
+
+
+.category-product {
+    margin: 15px;
+}
+
+.url-product {
+    width: 850px;
+}
+
+.add-quantity {
+    display: flex;
+    flex-direction: row;
+}
+
+#formProducth4 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.quantity-input-field {
+    width: 50px;
+    padding-left: 10px;
+    height: 48px;
+    border-radius: 6px;
+    font-size: 20px;
+}
+
+.quantity-input {
+    display: flex;
+    flex-direction: row;
+    padding-left: 10px;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+}
+
+.quantity-button {
+    width: 20px;
+    margin: 5px;
+}
+
+
+.controls {
+    width: 100%;
+    background: #24303c;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    border: 1px solid #1f53c5;
+    font-family: 'calibri';
+    font-size: 18px;
+    color: white;
+}
+
+#formProduct p {
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    line-height: 40px;
+}
+
+#formProduct h2 {
+    height: 40px;
+    text-align: center;
+    font-size: 45px;
+    line-height: 40px;
+}
+
+#formProduct a {
+    color: white;
+    text-decoration: none;
+}
+
+#formProduct a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+#formProduct .botons {
+    width: 100%;
+    background: #1f53c5;
+    border: none;
+    padding: 12px;
+    color: white;
+    margin: 16px 0;
+    font-size: 16px;
+}
+
+.titulo-products h1 {
+    margin-top: 25px;
+    color: rgb(0, 0, 0);
+}
+
+/* --------------productDetail-------- */
+.label-filt{
+width: 150px;
+margin-top: -10px;
+
+
+}
+.btn-filt{
+width: 150px;
+margin-left: 5px;
+margin-top: -11px;
+
+}
+
+.form-filt{
+display: flex;
+justify-content: center;
+align-items: center;
+
+
+}
+.mb-31{
+display: flex;
+align-items: center;
+
+
+}
+
+.titulo-imp {
+    display: flex;
+    justify-content: center;
+    font-size: larger;
+
+}
+
+.body-p {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    background-color: #F2F2F2;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card-p {
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 20px;
+    height: auto;
+    
+}
+
+.header-p {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+    background-color: #EAEAEA;
+
+}
+
+.header-p h1 {
+    background-color: #EAEAEA;
+    padding: 10px;
+}
+
+.header-p img {
+    display: flex;
+    justify-content: end;
+
+}
+
+.content-p {
+    display: flex;
+    flex-direction: row;
+}
+
+.vehicle-image-p {
+    width: 50%;
+    margin-top: 50px;
+}
+
+.image-description-p {
+
+    background-color: #EAEAEA;
+}
+
+.vehicle-image-p img {
+    width: 100%;
+    height: auto;
+
+}
+
+.h4-p {
+    margin-left: 10px;
+
+}
+
+.vehicle-info-p {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    
+    margin: 0 auto;
+    margin-left: 25px;
+}
+
+.vehicle-info-p p {
+    font-size: 1rem;
+
+}
+
+.vehicle-description-p,
+.service-info-p,
+.oil-change-info-p {
+    background-color: #EAEAEA;
+    margin: 10px 0;
+    padding: 8px;
+
+}
+.vehicle-description-p{
+    max-height: 143px;
+    overflow-y: auto;
+}
+.footer-p {
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-p>div {
+    flex-basis: 48%;
+}
+
+h2,
+h3,
+h4 {
+    font-size: 0.8rem;
+    display: flex;
+    margin: 0 auto;
+
+}
+
+.controls-p {
+    display: flex;
+    width: 100%;
+    height: auto;
+
+}
+
+.img-div {
+    display: flex;
+    justify-content: center;
+    margin: 0 auto;
+    padding: 20px;
+
+
+
+}
+
+.logo-dtail{
+width: 70px;
+height: 70px;
+
+}
+
+.img-p {
+    width: 25%;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.img-p:hover {
+    transform: scale(1.4);
+    transition: transform 0.3s ease;
+}
+
+.buttons-impre {
+    display: flex;
+    justify-content: center;
+    
+
+}
+
+.h6-imp {
+    display: flex;
+    justify-content: center;
+    margin-top: 5px;
+    font-size: 0.7rem;
+
+
+}
+
+/* --------------home-------- */
+
+.page {
+    display: flex;
+    flex-direction: row;
+}
+
+.prev-page {
+    padding: 10px;
+
+}
+
+.count-page {
+    padding: 10px;
+}
+
+.next-page {
+    padding: 10px;
+}
+
+/* --------------home-------- */
+/* -----------------------------newhome---------------------------------------- */
+.banner {
+    width: 100%;
+    height: 100vh;
+    background-image: url(../images/portadadg1.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.navbar-home {
+    width: 85%;
+    margin: auto;
+    padding: 35px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    width: 17vh;
+    margin-left: 80vh;
+    margin-top: 10px;
+}
+
+.navbar-home ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+
+.navbar-home ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-home ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-home ul li:hover::after {
+    width: 100%;
+}
+
+.content {
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    color: #fff;
+}
+
+.content h1 {
+    font-size: 170px;
+    margin-top: 80px;
+}
+
+.content a {
+    text-decoration: none;
+}
+
+.content p {
+    margin: 20px auto;
+    font-weight: 100;
+    line-height: 25px;
+}
+
+.login-btn {
+    width: 200px;
+    padding: 15px 0;
+    text-align: center;
+    margin: 20px 10px;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 2px solid #009688;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.signup-btn {
+    width: 200px;
+    padding: 15px 0;
+    text-align: center;
+    margin: 20px 10px;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 2px solid #009688;
+    background: transparent;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.cover {
+    background: #009688;
+    height: 100%;
+    width: 0%;
+    border-radius: 25px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    transition: 0.5s;
+}
+
+button:hover span {
+    width: 100%;
+}
+
+button:hover {
+    border: none;
+}
+
+
+
+/* -----------------------------newhome---------------------------------------- */
+/* --------------filtros-------- */
+.saludo-bienvenida h2 {
+    color: rgb(0, 0, 0);
+}
+
+.saludo-bienvenida h4 {
+    color: rgb(0, 0, 0);
+}
+
+.filters {
+    display: flex;
+    justify-content: end;
+    width: 100%;
+}
+
+.offcanvas.offcanvas-end {
+    top: 94px;
+    border-radius: 1rem;
+    width: 250px;
+}
+
+.unidades {
+    width: 100%;
+    height: 150px;
+    background: #24303c;
+    background-size: cover;
+}
+
+.navbar-uni {
+    padding-top: 20px;
+    height: 100px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.navbar-uni ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 20px;
+    position: relative;
+}
+
+.navbar-uni ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-uni ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-uni ul li:hover::after {
+    width: 100%;
+}
+
+/* --------------filtros-------- */
+
+
+/* --------------login-------- */
+.banner-productos {
+    width: 100%;
+    height: 170px;
+    background: #000;
+}
+
+.login {
+    width: 50vh;
+    padding-top: 10vh;
+}
+
+
+.alert-danger {
+    margin: 20px;
+    color: #842029;
+    width: 200px;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+/* --------------login-------- */
+
+/* --------------footer------- */
+
+footer {
+    background-color: black;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    height: 70px;
+    
+    bottom: 0;
+    padding-top: 20px;
+    z-index: 100;
+}
+
+footer div h3 {
+    color: #fff;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+
+/* --------------register-------- */
+.mb-3 {
+    margin-bottom: 1rem !important;
+    width: 40vh;
+}
+
+.register {
+    width: 50vh;
+    height: 100vh;
+    padding-top: 45px;
+}
+
+.btn-primary a {
+    color: white !important;
+    text-decoration: none;
+}
+
+
+
+/* --------------register-------- */
+
+/* --------------navBar short-------- */
+.navbar-short {
+    padding-top: 48px;
+    height: 100px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+.navbar-short ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+
+.navbar-short ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-short ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-short ul li:hover::after {
+    width: 100%;
+}
+.navbar-r{
+display: flex;
+justify-content: center;
+
+}
+.logo-r{
+width: 150px;
+
+
+}
+/* --------------navBar short-------- */
+
+.login1 {
+    width: 100%;
+    height: 100vh;
+    background-image: url(../images/ingreso.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff56;
+    width: 400px;
+    height: 300px;
+    border-radius: 8px;
+    border-color: 3px #243340;
+    min-width: 250px;
+    color: #000000;
+    margin: 0 auto;
+
+}
+
+.signup-btn1 {
+
+    width: 120px;
+    height: 50px;
+    background-color: black;
+    border-radius: 50px;
+    color: #ffffff;
+
+
+}
+
+a {
+    text-decoration: none;
+    list-style: none;
+    color: #ffffff;
+    gap: 30px;
+}
+
+.signup-btn2 {
+
+    width: 120px;
+    height: 50px;
+    background-color: black;
+    border-radius: 50px;
+    color: #ffffff;
+}
+
+.signup-btn3 {
+
+    width: 100px;
+    height: 40px;
+    background-color: black;
+    border-radius: 50px;
+    color: #ffffff;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.footer1 {
+    font-size: 15px;
+
+}
+
+.image-vehiculos {
+    width: 600px;
+    height: 400px;
+    image-resolution: 600px;
+
+}
+
+.detalle-vehiculo {
+    display: flex;
+    flex-direction: column;
+    width: 900px;
+    background-color: #ffffff;
+
+}
+
+.product-detail {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.container-p {
+    display: flex;
+    flex-direction: column;
+    width: 900px;
+    height: 900px;
+    background-color: #98a8b53b;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
+.img-pd {
+    display: flex;
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 300px;
+    height: 350px;
+    border-radius: 10px;
+}
+
+/* --------------card vehiculos-------- */
+.card-s {
+    position: relative;
+    width: 250px;
+    height: 250px;
+    margin: 20px;
+}
+
+.card-s .face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: .5s;
+}
+
+.card-s .front {
+    transform: perspective(600px) rotateY(0deg);
+    box-shadow: 0 5px 10px #000;
+}
+
+.card-s .front img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    object-fit: fill;
+
+}
+
+.card-s .front h3 {
+    position: absolute;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    color: #fff;
+    background: rgba(125, 120, 16, 0.353);
+
+}
+
+.card-s .back {
+    transform: perspective(600px) rotateY(180deg);
+    background: rgb(3, 35, 54);
+    padding: 15px;
+    color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: center;
+    box-shadow: 0 5px 10px #000;
+}
+
+.card-s .back .link {
+    border-top: solid 1px #f3f3f3;
+    height: 50px;
+    line-height: 50px;
+}
+
+.card-s .back .link a {
+    color: #f3f3f3;
+}
+
+.card-s .back h3 {
+    font-size: 30px;
+    margin-top: 20px;
+    letter-spacing: 2px;
+}
+
+.card-s .back p {
+    letter-spacing: 1px;
+}
+
+.card-s:hover .front {
+    transform: perspective(600px) rotateY(180deg);
+}
+
+.card-s:hover .back {
+    transform: perspective(600px) rotateY(360deg);
+}
+
+

@@ -1,0 +1,114 @@
+{{>navBar}}
+
+<form id="formProduct" enctype="multipart/form-data">
+    <div class="title-add-product">
+        <h2 class="title-add">Cargar Vehiculo</h2>
+    </div>
+    <div class="name-desc">
+        <div class="name-product">
+            <p>Establecimiento</p>
+            <input class="controls" type="text" name="title" id="title" value="{{user.unidad}}" readonly>
+        </div>
+        <div class="desc-product">
+            <p>Descripcion de estado de Vehiculo</p>
+            <input class="controls" type="text" name="description" id="description" placeholder="descripcíon del vehiculo y utilizacion especifica"
+                required>
+        </div>
+    </div>
+
+    <div class="stock-code-price">
+        <div class="code-product">
+            <p>Patente</p>
+            <input class="controls" type="text" name="dominio" id="dominio" placeholder="Ingrese el dominio" required>
+        </div>
+        <div class="stock-product">
+            <p>Kilometros</p>
+            <input class="controls" type="number" min="0" name="kilometros" id="kilometros"
+                placeholder="kilometraje actual" required>
+        </div>
+        <div class="code-product">
+            <p>Destino</p>
+            <input class="controls" type="text" name="destino" id="destino" placeholder="Unidad asignado" required>
+        </div>
+    </div>
+    <div class="stock-code-price">
+        <div class="code-product">
+            <p>Año</p>
+            <input class="controls" type="text" name="anio" id="anio" placeholder="año del vehiculo" required>
+        </div>
+        <div class="code-product">
+            <p>Modelo</p>
+            <input class="controls" type="text" name="modelo" id="modelo" placeholder="Ej:s10, berlingo" required>
+        </div>
+        <div class="code-product">
+            <p>Tipo</p>
+            <input class="controls" type="text" name="tipo" id="tipo" placeholder="Ingrese tipo de vehiculo" required>
+        </div>
+    </div>
+
+    <div class="stock-code-price">
+        <div class="price-product">
+            <p>N° Chasis</p>
+            <input class="controls" type="text" min="0" name="chasis" id="chasis" placeholder="Ingrese n° de chasis"
+                required>
+        </div>
+        <div class="price-product">
+            <p>N° Motor</p>
+            <input class="controls" type="text" min="0" name="motor" id="motor" placeholder="Ingrese n° de motor"
+                required>
+        </div>
+        <div class="price-product">
+            <p>N° Cedula</p>
+            <input class="controls" type="text" min="0" name="cedula" id="cedula" placeholder="Ingrese n° de cedula"
+                required>
+        </div>
+    </div>
+
+    <div class="stock-code-price">
+        <div class="price-product">
+            <p>Service</p>
+            <input class="controls" type="date" min="0" name="service" id="service" placeholder="fecha de ultimo service"
+                required>
+        </div>
+        <div class="price-product">
+            <p>Rodado</p>
+            <input class="controls" type="date" min="0" name="rodado" id="rodado" placeholder="fecha de cambio de rodado"
+                required>
+        </div>
+        <div class="price-product">
+            <p>Marca</p>
+            <input class="controls" type="text" min="0" name="marca" id="marca" placeholder="ingrese marca del vehiculo"
+                required>
+        </div>
+    </div>
+    <div class="price-product">
+        <p>Reparaciones</p>
+        <input class="controls" type="text" min="0" name="reparaciones" id="reparaciones"
+            placeholder="indicar reparaciones realizadas" required>
+    </div>
+
+
+    <div class="url-product">
+        <p>Imagenes</p>
+        <input class="controls" type="file" name="thumbnail" id="thumbnail"multiple required title="Por favor, al seleccionar las imagenes que desea subir. 1° debe seleccionar la imagen de frente del vehiculo, 2° imagen  de perfil derecho, 3° imagen  de perfil izquierdo, 4° imagen trasera del vehiculo y 5° imagen del interior todas juntas con ctrl+click del cursor">
+    </div>
+
+
+    <div class="button-reg">
+        <button class="botons" type="submit" id="add-btn">Registrar Vehiculo</button>
+    </div>
+
+</form>
+{{#if success}}
+    <div class="alert alert-success" role="alert">
+        Producto cargado con éxito
+    </div>
+{{/if}}
+
+    {{#if error}}
+        <div class="alert alert-danger" role="alert">
+            {{error}}
+        </div>
+    {{/if}}
+<script src="/socket.io/socket.io.js" defer></script>
+<script src="/js/scripts.js" defer></script>
