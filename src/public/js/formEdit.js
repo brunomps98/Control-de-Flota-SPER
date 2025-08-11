@@ -8,6 +8,8 @@ $(document).ready(function() {
         const destino = $('#destino').val();
         const service = $('#service').val();
         const rodado = $('#rodado').val();
+        const usuario = $('#usuario').val(); // Obtener el valor del campo usuario
+        
 
         $.ajax({
             url: `/vehicle/${productId}`,
@@ -17,11 +19,11 @@ $(document).ready(function() {
                 kilometros: kilometros,
                 destino: destino,
                 service: service,
-                rodado: rodado
+                rodado: rodado,
+                usuario: usuario,
             },
             success: function(response) {
                 // Manejar la respuesta de la actualización exitosa
-                console.log(response);
                 // Mostrar mensaje de éxito en la página
             },
             error: function(error) {

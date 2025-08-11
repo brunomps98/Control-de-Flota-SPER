@@ -5,8 +5,10 @@ import { vehicleDao } from "../repository/index.js";
 class VehicleDao {
 
     static addVehicleWithImage = async (req, res) => {
+
+
         try {
-            const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca } = req.body;
+            const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, usuario } = req.body;
             const thumbnail = req.files.map(file => file.filename);
             const product = {
                 title,
@@ -24,9 +26,11 @@ class VehicleDao {
                 rodado,
                 reparaciones,
                 marca,
-                thumbnail
+                thumbnail,
+                usuario
             };
             const newProduct = await productsModel.create(product);
+    
             res.status(201).json(newProduct);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -37,7 +41,7 @@ class VehicleDao {
         try {
             const id = req.params.cid;
             const vehicle = await productsModel.findById(id).lean().exec();
-            console.log(vehicle)
+           
             if (vehicle == null) {
                 return res.status(404).json({ status: 'error', error: 'product not found' });
             }
@@ -49,7 +53,6 @@ class VehicleDao {
             const lastIndexT = vehicle.destino.length - 1;
 
             const allImages = vehicle.thumbnail
-            console.log(allImages);
             const firstImage = true;
 
             res.render('partials/vehicleDetail', { vehicle, allImages, firstImage, lastIndexS, lastIndexK, lastIndexR, lastIndexD, lastIndexT });
@@ -63,7 +66,6 @@ class VehicleDao {
             const dominio = req.query.dominio;
             const user = req.session.user;
             const userUnidad = user.unidad;
-            console.log(userUnidad);
             let filteredVehicles = await productsModel.find({ dominio: dominio }).lean();
             if (user.admin) {
                 filteredVehicles = filteredVehicles;
@@ -87,7 +89,6 @@ class VehicleDao {
         try {
             const productId = req.params.productId;
             const vehicle = await productsModel.findById(productId).lean()
-            console.log(vehicle)
             res.render('edditVehicle', { vehicle });
         }catch (error) {
             res.status(500).json({ message: error.message });
@@ -120,7 +121,6 @@ class VehicleDao {
 
             products.page = products.page;
             products.totalPages = products.totalPages;
-            console.log(products)
             res.render('vehicle', products);
         } catch (error) {
             console.log('Error al leer los productos', error);
@@ -145,7 +145,6 @@ class VehicleDao {
             vehicle.nextLink = vehicle.hasNextPage ? `?limit=${itemsPorPage}&page=${vehicle.nextPage}` : '';
             vehicle.page = vehicle.page;
             vehicle.totalPages = vehicle.totalPages;
-            console.log(vehicle)
             res.render('vehicleGeneral', vehicle);
         } catch (error) {
             console.log('Error al leer los productos', error);
@@ -156,6 +155,7 @@ class VehicleDao {
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid;
+            console.log("Deleting vehicle with ID:", id);
             const deletedProduct = await productsModel.findByIdAndDelete(id);
             res.status(200).json({ status: "success", deletedProduct });
         } catch (error) {

@@ -1,22 +1,9 @@
-const productContainers = [...document.querySelectorAll('.product-container')];
-const nxtBtn = [...document.querySelectorAll('.nxt-btn')];
-const preBtn = [...document.querySelectorAll('.pre-btn')];
-
-productContainers.forEach((item, i) => {
-    let containerDimensions = item.getBoundingClientRect();
-    let containerWidth = containerDimensions.width;
-    nxtBtn[i].addEventListener('click', () => {
-        item.scrollLeft += containerWidth;
-    })
-    preBtn[i].addEventListener('click', () => {
-        item.scrollLeft -= containerWidth;
-    })
-})
-
 const form = document.getElementById('formProduct');
+const messageContainer = document.getElementById('message-container'); // Obtener el contenedor
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    messageContainer.innerHTML = ''; // Limpiar mensajes anteriores
 
     const formData = new FormData(form);
 
@@ -25,20 +12,22 @@ form.addEventListener('submit', async (e) => {
             method: 'POST',
             body: formData
         });
+
+
+        const data = await response.json(); // Asumimos que el servidor responde con JSON
+
         if (response.ok) {
-            const data = await response.json();
             console.log('Producto agregado con éxito:', data);
-            // Aquí puedes realizar acciones adicionales después de agregar el producto
+            // Crear y mostrar el mensaje de éxito
+            messageContainer.innerHTML = `<div class="alert alert-success" role="alert">${data.message || 'Vehículo cargado con éxito'}</div>`;
+            form.reset();
         } else {
             console.error('Error al agregar el producto');
+             // Crear y mostrar el mensaje de error
+            messageContainer.innerHTML = `<div class="alert alert-danger" role="alert">${data.error || 'Ocurrió un error'}</div>`;
         }
     } catch (error) {
         console.error('Error al realizar la solicitud:', error);
+        messageContainer.innerHTML = `<div class="alert alert-danger" role="alert">Error de conexión.</div>`;
     }
-    form.reset();
 });
-
-const log = document.getElementById("login");
-
-
-

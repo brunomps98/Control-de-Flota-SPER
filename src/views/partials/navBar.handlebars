@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">SPER</a>
-    <img src="/images/logo.png" alt="" width="60" height="60" class="d-inline-block align-text-top">
+    <img src="/images/logo.png" alt="" width="80" height="80" class="d-inline-block align-text-top">
     </a>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -48,6 +48,8 @@
             {{#if user}}{{#if user.up9}}<li><a class="dropdown-item" href="?unidad=up9">Unidad Penal 9</a></li>
             {{/if}}{{/if}}
             {{#if user}}{{#if user.inst}}<li><a class="dropdown-item" href="?unidad=inst">Instituto</a></li>
+            {{/if}}{{/if}}
+            {{#if user}}{{#if user.inst}}<li><a class="dropdown-item" href="?unidad=trat">Tratamiento</a></li>
             {{/if}}{{/if}}
           </ul>
         </li>
