@@ -5,6 +5,10 @@
 </div>
 
 <div class="container register">
+    <div class="title-r">
+    <h1>Registro</h1>
+    </div>
+    <br
     <form action="/register" method="POST">
         <div class="mb-3"> 
             <label for="exampleInputUsername" class="form-label">Nombre de usuario</label>
@@ -23,8 +27,11 @@
             <label for="exampleInputPassword1" class="form-label">Contraseña</label>
             <input type="password" class="form-control" id="exampleInputPassword1" name="passw">
         </div>
-        <button type="submit" class="btn btn-primary">Registrate</button>
-        <button  class="btn btn-primary"><a href="/login">Iniciar sesión</a></button>
+         <div class="text-center">
+        <button type="submit" class="btn btn-primary">Registrarse</button>
+        </div>
+        <!--  Este boton está deshabilitado
+    <button  class="btn btn-primary"><a href="/login">Iniciar sesión</a></button> -->  
     </form>
     {{#if error}}
         <div class="alert alert-danger" role="alert">
