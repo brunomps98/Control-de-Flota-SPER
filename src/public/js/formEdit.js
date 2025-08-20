@@ -21,6 +21,9 @@ $(document).ready(function() {
                 service: service,
                 rodado: rodado,
                 usuario: usuario,
+                modelo: modelo,
+                marca: marca
+                
             },
             success: function(response) {
                 // Manejar la respuesta de la actualización exitosa

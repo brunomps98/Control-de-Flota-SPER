@@ -4,11 +4,11 @@
     <div class="title-add-product">
         <h2 class="title-add">Cargar Vehiculo</h2>
     </div>
+    <br>
     <div class="desc-product">
         <p>Descripcion de estado de Vehiculo</p>
         <input class="controls" type="text" name="description"  id="description"
             placeholder="Descripcíon del vehiculo y utilizacion especifica">
-    </div>
     </div>
     <div class="name-product">
         <p>ID</p>
@@ -50,6 +50,8 @@
         <button class="botons" type="submit" id="add-btn">Registrar Cambios</button>
     </div>
 
+
+
 </form>
 {{#if success}}
 <div class="alert alert-success" role="alert">
@@ -62,6 +64,8 @@
     {{error}}
 </div>
 {{/if}}
+
+    {{>navBar}}
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 

@@ -1,5 +1,5 @@
-import {productsModel} from "../models/vehicle.model.js";
-import { vehicleDao } from "../repository/index.js";
+import { productsModel } from "../models/vehicle.model.js";
+
 
 
 class VehicleDao {
@@ -30,7 +30,7 @@ class VehicleDao {
                 usuario
             };
             const newProduct = await productsModel.create(product);
-    
+
             res.status(201).json(newProduct);
         } catch (error) {
             res.status(500).json({ message: error.message });
@@ -41,7 +41,7 @@ class VehicleDao {
         try {
             const id = req.params.cid;
             const vehicle = await productsModel.findById(id).lean().exec();
-           
+
             if (vehicle == null) {
                 return res.status(404).json({ status: 'error', error: 'product not found' });
             }
@@ -63,23 +63,49 @@ class VehicleDao {
 
     static vehicleFilter = async (req, res) => {
         try {
-            const dominio = req.query.dominio;
-            const user = req.session.user;
-            const userUnidad = user.unidad;
-            let filteredVehicles = await productsModel.find({ dominio: dominio }).lean();
-            if (user.admin) {
-                filteredVehicles = filteredVehicles;
-            } else {
-                const filteredByUnidad = await productsModel.find({ dominio: dominio }).lean();
-                filteredVehicles = filteredByUnidad.filter(vehicle => vehicle.title === userUnidad);
+
+            const { dominio, modelo, destino, marca, año, tipo, chofer } = req.query;
+
+            const filter = {};
+
+            if (modelo) {
+
+                filter.modelo = new RegExp(modelo, 'i');
             }
-            const firstImage = true;
-            res.render('vehicle', { docs: filteredVehicles, firstImage });
+
+            if (marca) {
+
+                filter.marca = new RegExp(marca, 'i');
+            }
+
+            if (dominio) filter.dominio = new RegExp(dominio, 'i');
+            if (destino) filter.destino = new RegExp(destino, 'i');
+            if (año) filter.año = new RegExp(año, 'i');
+            if (tipo) filter.tipo = new RegExp(tipo, 'i');
+            if (chofer) filter.usuario = new RegExp(chofer, 'i');
+
+
+
+            const user = req.session.user;
+            if (user && !user.admin) {
+                filter.title = user.unidad;
+            }
+
+
+            const filteredVehicles = await productsModel.find(filter).lean();
+
+
+            res.render('vehicle', { docs: filteredVehicles, user });
+
         } catch (error) {
-            console.log('Error al filtrar productos', error);
-            res.status(500).json({ error: 'Error al filtrar productos' });
+
         }
     }
+
+
+
+
+
 
     static realtimeVehicle = async (req, res) => {
         res.render('realtimeVehicle')
@@ -90,7 +116,7 @@ class VehicleDao {
             const productId = req.params.productId;
             const vehicle = await productsModel.findById(productId).lean()
             res.render('edditVehicle', { vehicle });
-        }catch (error) {
+        } catch (error) {
             res.status(500).json({ message: error.message });
         }
 
@@ -167,7 +193,7 @@ class VehicleDao {
         try {
             const id = req.params.pid;
             const obj = req.body;
-            const updatedProduct = await vehicleDao.updateVehicle(id, obj);
+           const updatedProduct = await productsModel.findByIdAndUpdate(id, obj, { new: true });
             res.status(200).json({ status: "success", updatedProduct });
         } catch (error) {
             res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
