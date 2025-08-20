@@ -1,37 +1,108 @@
 {{>navBar}}
-<h1> </h1>
-<div class="user-info">
-<h6>Usuario conectado: {{user.username}}</h6>    
-</div>
-<div class="titulo-products">
-    <h1>Flota de Vehículos</h1>
-</div>
 
-<form class="form-filt" action="/vehicle/filtrar" method="GET">
-    <div class="mb-31">
-        <label for="dominio" class="form-label ">Ingresar dominio:</label>
-        <input type="text" class="form-control label-filt" id="dominio" name="dominio">
+<main>
+    <div class="titulo-products">
+        <h1>Flota de Vehículos</h1>
     </div>
-    <button type="submit" class="btn btn-primary btn-filt">Filtrar</button>
-</form>
 
-<div id="list-products">
-    {{#each docs}}
-    <div class="card-s">
-        <div class="face front">
-            <img src="/uploads/{{thumbnail.[0]}}" alt="">
-            <h3>{{destino}}</h3>
-        </div>
-        <div class="face back">
-            <h3>{{marca}}</h3>
-            <p>{{tipo}}</p>
-            <p>{{dominio}}</p>
-            <div class="link">
-                <a href="/{{this._id}}">Ver mas</a>
+
+
+
+    <section class="filter-title">
+        <h2>Filtrar datos </h2>
+    </section>
+
+    <br>
+
+    <form class="form-filt" action="/vehicle/filtrar" method="GET">
+        <div class="filter-inputs">
+            <div class="mb-31">
+                <label for="dominio" class="form-label ">Dominio:</label>
+                <input type="text" class="form-control label-filt" id="dominio" name="dominio">
+            </div>
+            <div class="mb-31">
+                <label for="modelo" class="form-label ">Modelo:</label>
+                <input type="text" class="form-control label-filt" id="modelo" name="modelo">
+            </div>
+            <div class="mb-31">
+                <label for="destino" class="form-label ">Destino:</label>
+                <input type="text" class="form-control label-filt" id="destino" name="destino">
+            </div>
+            <div class="mb-31">
+                <label for="marca" class="form-label ">Marca:</label>
+                <input type="text" class="form-control label-filt" id="marca" name="marca">
+            </div>
+            <div class="mb-31">
+                <label for="año" class="form-label ">Año:</label>
+                <input type="text" class="form-control label-filt" id="año" name="año">
+            </div>
+            <div class="mb-31">
+                <label for="tipo" class="form-label ">Tipo:</label>
+                <input type="text" class="form-control label-filt" id="tipo" name="tipo">
+            </div>
+            <div class="mb-31">
+                <label for="chofer" class="form-label ">Chofer:</label>
+                <input type="text" class="form-control label-filt" id="chofer" name="usuario">
             </div>
         </div>
-    </div>
-    {{/each}}
+        <button type="submit" class="btn btn-primary btn-filt">Filtrar</button>
+        <button type="button" id="borrar-filtros-btn" class="btn btn-primary btn-filt">Borrar</button>
+    </form>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <main id="list-products">
+        {{#each docs}}
+        <div class="card-s">
+            <div class="face front">
+                <img src="/uploads/{{thumbnail.[0]}}" alt="">
+                <h3>
+                    {{#if destino.nombre}}
+                    {{destino.nombre}} {{else}}
+                    {{destino}} {{/if}}
+                </h3>
+            </div>
+            <div class="face back">
+                <h3>{{marca}}</h3>
+                <p>{{tipo}}</p>
+                <p>{{dominio}}</p>
+                <div class="link">
+                    <a href="/{{this._id}}">Ver mas</a>
+                </div>
+            </div>
+        </div>
+
+        {{/each}}
+    </main>
+    </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="downbar">
+    <footer class="footer-bar-vehicle">
+        <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+    </footer>
+</div>
+
+</div>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+
+        const borrarBtn = document.getElementById('borrar-filtros-btn');
+
+        borrarBtn.addEventListener('click', function () {
+
+
+            const form = document.querySelector('.form-filt');
+
+
+            const inputs = form.querySelectorAll('input[type="text"]');
+
+
+            inputs.forEach(input => {
+                input.value = '';
+            });
+        });
+    });
+</script>
