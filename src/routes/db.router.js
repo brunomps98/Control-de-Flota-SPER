@@ -46,4 +46,7 @@ router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), Vehi
 
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
 
+
+
+
 export default router

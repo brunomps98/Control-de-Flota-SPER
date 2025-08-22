@@ -1,24 +1,25 @@
 <div class="banner-productos">
-        <div class="navbar-r">
-            <img src="/images/logo.png" alt="" class="logo-r">
-        </div>
+    <div class="navbar-r">
+        <img src="/images/logo.png" alt="" class="logo-r">
+    </div>
 </div>
 
-<div class="container register">
-    <div class="title-r">
-    <h1>Registro</h1>
-    </div>
-    <br
-    <form action="/register" method="POST">
-        <div class="mb-3"> 
+<main>
+
+    <div class="container register">
+        <div class="title-r">
+            <h1>Registro</h1>
+        </div>
+        <br <form action="/register" method="POST">
+        <div class="mb-3">
             <label for="exampleInputUsername" class="form-label">Nombre de usuario</label>
             <input type="text" class="form-control" id="exampleInputUsername" name="username">
         </div>
-        <div class="mb-3"> 
+        <div class="mb-3">
             <label for="exampleInputUnidad" class="form-label">Unidad</label>
             <input type="text" class="form-control" id="exampleInputUnidad" name="unidad">
         </div>
-        <div class="mb-3"> 
+        <div class="mb-3">
             <label for="exampleInputEmail1" class="form-label">Email</label>
             <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" name="email">
             <div id="emailHelp" class="form-text">Nunca compartiremos su correo electrónico con nadie más.</div>
@@ -27,18 +28,20 @@
             <label for="exampleInputPassword1" class="form-label">Contraseña</label>
             <input type="password" class="form-control" id="exampleInputPassword1" name="passw">
         </div>
-         <div class="text-center">
-        <button type="submit" class="btn btn-primary">Registrarse</button>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Registrarse</button>
         </div>
         <!--  Este boton está deshabilitado
-    <button  class="btn btn-primary"><a href="/login">Iniciar sesión</a></button> -->  
-    </form>
-    {{#if error}}
+    <button  class="btn btn-primary"><a href="/login">Iniciar sesión</a></button> -->
+        </form>
+        {{#if error}}
         <div class="alert alert-danger" role="alert">
             {{error}}
         </div>
-    {{/if}}
-</div>
+        {{/if}}
+    </div>
+
+</main>
 
 
 
