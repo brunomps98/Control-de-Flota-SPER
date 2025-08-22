@@ -40,10 +40,6 @@
                 <label for="tipo" class="form-label ">Tipo:</label>
                 <input type="text" class="form-control label-filt" id="tipo" name="tipo">
             </div>
-            <div class="mb-31">
-                <label for="chofer" class="form-label ">Chofer:</label>
-                <input type="text" class="form-control label-filt" id="chofer" name="chofer">
-            </div>
         </div>
         <section>
             <button type="submit" class="btn btn-primary btn-filt">Filtrar</button>
@@ -52,6 +48,7 @@
             <button type="button" id="borrar-filtros-btn" class="btn btn-primary btn-filt">Limpiar</button>
         </section>
     </form>
+
 
     <div id="list-products">
         {{#each docs}}

@@ -10,6 +10,7 @@ import VehicleDao from "../dao/vehicleDao.js";
 
 
 
+
 const router = Router()
 
 const storage = multer.diskStorage({
@@ -36,6 +37,9 @@ router.use(setUserInLocals);
 router.use('/vehicle', express.static(path.join(__dirname, 'public')));
 router.use('/eddit/:productId', express.static(path.join(__dirname, 'public')));
 router.use('/realtimevehicle', express.static(path.join(__dirname, 'public')));
+router.use('/support', express.static(path.join(__dirname, 'public')))
+router.use('/information', express.static(path.join(__dirname, 'public')))
+router.use('/case', express.static(path.join(__dirname, 'public')))
 
 
 
@@ -45,9 +49,25 @@ router.get("/realtimevehicle", requireAuth, VehicleDao.realtimeVehicle);
 
 router.get('/', UserDao.home);
 
+
 router.get('/login', UserDao.login);
 
-router.get('/register',  UserDao.register);
+router.get('/register', UserDao.register);
+
+router.get('/support', (req, res) => {
+    res.render('support');
+});
+
+router.get('/information', (req, res) => {
+    res.render('information');
+});
+
+router.get('/case', (req, res) => {
+    res.render('case');
+});
+
+
+
 
 router.get('/logout', UserDao.logout);
 
@@ -58,6 +78,8 @@ router.get("/vehicle", requireAuth, VehicleDao.vehicle);
 router.get("/:cid", requireAuth, VehicleDao.vehicleDetail);
 
 router.get("/vehicle/filtrar", requireAuth, VehicleDao.vehicleFilter);
+
+
 
 
 export default router

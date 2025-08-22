@@ -1,58 +1,21 @@
-{{!--
+<header class="top-bar-support">
+    <a href="/">
+        <div class="top-bar-left-support">
+            <div class="logo-support">
+                <img src="../images/logo.png" alt="Logo Sper" width="60" height="60">
+            </div>
+            <div class="title-support">
+                <h1>SPER</h1>
+            </div>
 
-## El Proceso Completo para Crear una Nueva Página
-### 1. Crear la Vista (informes.handlebars)
-Creas un nuevo archivo en tu carpeta src/views/ llamado informes.handlebars. Aquí irá toda la estructura HTML de tu nueva sección: los filtros de fecha, el selector de choferes, una tabla para mostrar los resultados, etc.
+        </div>
+    </a>
+</header>
 
-### 2. Crear la Ruta en el Servidor
-Necesitas decirle a tu servidor qué hacer cuando un usuario visita la URL de los informes (por ejemplo, /informes).
+<main>
 
-Abre tu archivo de rutas, probablemente src/routes/views.router.js.
+</main>
 
-Añade una nueva ruta que apunte a un método en tu VehicleDao (siguiendo la estructura de tu proyecto).
-
-JavaScript
-
-// En src/routes/views.router.js
-// ... tus otras rutas
-router.get('/informes', requireAuth, VehicleDao.renderInformesPage); // Nueva ruta
-### 3. Crear la Lógica en el DAO
-La ruta que creaste en el paso anterior necesita una función que le diga qué página renderizar.
-
-Abre tu archivo src/dao/vehicleDao.js.
-
-Agrega un nuevo método para manejar la renderización de la página de informes.
-
-JavaScript
-
-// Dentro de la clase VehicleDao en src/dao/vehicleDao.js
-
-async renderInformesPage(req, res) {
-    try {
-        // Por ahora, esta función solo renderiza la página.
-        // En el futuro, aquí podrías cargar datos iniciales si los necesitas.
-        res.render('informes');
-    } catch (error) {
-        console.error("Error al cargar la página de informes:", error);
-        res.status(500).send("Error interno del servidor");
-    }
-}
-### 4. Agregar el Vínculo en la Barra de Navegación
-Finalmente, necesitas que los usuarios puedan llegar a esta nueva página desde el menú principal.
-
-Abre tu archivo de la barra de navegación: src/views/partials/navBar.handlebars.
-
-Agrega un nuevo elemento a la lista de enlaces.
-
-HTML
-
-<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-  <li class="nav-item">
-    <a class="nav-link" href="/vehiclegeneral">Flota General</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/informes">Informes</a> </li>
-</ul>
-Siguiendo estos cuatro pasos, tendrás tu nueva sección de "Informes" correctamente integrada en la aplicación y lista para que comiences a construir su funcionalidad. */
-
---}}
+<footer class="footer-bar">
+    <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+</footer>
