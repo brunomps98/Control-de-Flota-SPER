@@ -14,6 +14,12 @@ dotenv.config()
 
 const app=express()
 
+app.use((req, res, next) => {
+    console.log(`--> Petición recibida: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+
 app.use(express.static(__dirname+"/public"))
 app.use(cors({origin:"http://127.0.0.1:5500", methods:["GET","POST","PUT","DELETE"]}))
 
@@ -65,7 +71,7 @@ app.get('/getCookies', (req, res) => {
 
 
 app.use("/",viewRouter)
-app.use("/",dbRouter)
+    app.use("/api", dbRouter);
 
  
 const httpServer = app.listen(PORT, () => {

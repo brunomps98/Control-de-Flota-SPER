@@ -12,11 +12,20 @@
 
 
 <main>
-    <div>
-        <h1 class="title-case">Caso</h1>
-    </div>
+    <h1>Detalle del Caso</h1>
+    <h2>De: {{ticket.name}} {{ticket.surname}}</h2>
+    <p><strong>Email:</strong> {{ticket.email}}</p>
+    <p><strong>Teléfono:</strong> {{ticket.phone}}</p>
+    <p><strong>Descripción del Problema:</strong></p>
+    <p>{{ticket.problem_description}}</p>
+    <button class="delete-case-btn" data-ticket-id="{{ticket._id}}">Eliminar Caso</button>
+</main>
 </main>
 
 <footer class="footer-bar">
     <p>© 2025 SPER - Departamento de Seguridad Informática</p>
 </footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="/js/script.js"></script>

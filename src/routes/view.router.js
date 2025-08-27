@@ -6,6 +6,9 @@ import multer from "multer";
 import path from 'path';
 import UserDao from "../dao/userDao.js";
 import VehicleDao from "../dao/vehicleDao.js";
+import SupportController from "../controllers/support.controller.js";
+
+
 
 
 
@@ -34,12 +37,13 @@ const setUserInLocals = (req, res, next) => {
 // Usar el middleware en todas las rutas
 router.use(setUserInLocals);
 
-router.use('/vehicle', express.static(path.join(__dirname, 'public')));
-router.use('/eddit/:productId', express.static(path.join(__dirname, 'public')));
-router.use('/realtimevehicle', express.static(path.join(__dirname, 'public')));
 router.use('/support', express.static(path.join(__dirname, 'public')))
 router.use('/information', express.static(path.join(__dirname, 'public')))
 router.use('/case', express.static(path.join(__dirname, 'public')))
+router.use('/vehicle', express.static(path.join(__dirname, 'public')));
+router.use('/eddit/:productId', express.static(path.join(__dirname, 'public')));
+router.use('/realtimevehicle', express.static(path.join(__dirname, 'public')));
+
 
 
 
@@ -54,19 +58,14 @@ router.get('/login', UserDao.login);
 
 router.get('/register', UserDao.register);
 
-router.get('/support', (req, res) => {
-    res.render('support');
-});
+// Muestra el formulario en /support
+router.get('/support', SupportController.renderSupportForm);
 
-router.get('/information', (req, res) => {
-    res.render('information');
-});
+// Muestra la lista de tickets en /information
+router.get('/information', SupportController.renderInformationPage);
 
-router.get('/case', (req, res) => {
-    res.render('case');
-});
-
-
+// Muestra un caso específico. Nota el parámetro dinámico ':tid'
+router.get('/case/:tid', SupportController.renderCasePage);
 
 
 router.get('/logout', UserDao.logout);
@@ -75,9 +74,11 @@ router.get("/vehiclegeneral", requireAuth, isAdmin, VehicleDao.vehicleGeneral);
 
 router.get("/vehicle", requireAuth, VehicleDao.vehicle);
 
+router.get("/vehicle/filtrar", requireAuth, VehicleDao.vehicleFilter);
+
 router.get("/:cid", requireAuth, VehicleDao.vehicleDetail);
 
-router.get("/vehicle/filtrar", requireAuth, VehicleDao.vehicleFilter);
+
 
 
 

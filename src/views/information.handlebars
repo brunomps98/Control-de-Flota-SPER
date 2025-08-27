@@ -14,8 +14,28 @@
 
 <main>
 
+    <h2 id="information-title">Listado de casos</h2>
+    {{#each tickets}}
+    <div>
+        <h2>{{this.name}} {{this.surname}}</h2>
+
+        <p><strong>Email:</strong> {{this.email}}</p>
+        <p><strong>Teléfono:</strong> {{this.phone}}</p>
+
+        <p><strong>Problema:</strong> {{this.problem_description}}</p>
+        <a href="/case/{{this._id}}">Ver Caso Completo</a>
+        <button class="delete-case-btn" data-ticket-id="{{this._id}}">Eliminar Caso</button>
+    </div>
+    <hr>
+
+    {{/each}}
+
 </main>
 
 <footer class="footer-bar">
     <p>© 2025 SPER - Departamento de Seguridad Informática</p>
 </footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script src="/js/script.js"></script>

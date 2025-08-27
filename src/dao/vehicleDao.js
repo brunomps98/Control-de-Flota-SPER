@@ -2,6 +2,7 @@ import { productsModel } from "../models/vehicle.model.js";
 
 
 
+
 class VehicleDao {
 
     static addVehicleWithImage = async (req, res) => {
@@ -193,7 +194,7 @@ class VehicleDao {
         try {
             const id = req.params.pid;
             const obj = req.body;
-           const updatedProduct = await productsModel.findByIdAndUpdate(id, obj, { new: true });
+            const updatedProduct = await productsModel.findByIdAndUpdate(id, obj, { new: true });
             res.status(200).json({ status: "success", updatedProduct });
         } catch (error) {
             res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });

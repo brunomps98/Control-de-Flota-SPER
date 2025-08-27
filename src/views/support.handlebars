@@ -26,11 +26,16 @@
     <br>
 
     <section>
-        <form action="/api/support" method="POST">
+        <form action="/api/support" method="POST" enctype="multipart/form-data">
             <div class="mb-32">
-                <label for="exampleName" class="form-support">Nombre y apellido</label>
+                <label for="exampleName" class="form-support">Nombre</label>
                 <input type="text" class="form-control" id="exampleName" name="name" required title=""
-                    placeholder="Nombre y apellido del solicitante">
+                    placeholder="Nombre del solicitante">
+            </div>
+            <div class="mb-32">
+                <label for="exampleName" class="form-support">Apellido</label>
+                <input type="text" class="form-control" id="exampleSurname" name="surname" required title=""
+                    placeholder="Apellido del solicitante">
             </div>
             <div class="mb-32">
                 <label for="exampleEmail" class="form-support">Email</label>
@@ -45,17 +50,18 @@
             </div>
             <div class="mb-32">
                 <label for="exampleDescription" class="form-support">Descripción del Problema</label>
-                <textarea class="form-control" id="exampleDescription" name="description" required
+
+                <textarea class="form-control" id="exampleDescription" name="problem_description" required
                     placeholder="Escriba detalladamente su problema acá" rows="4"></textarea>
             </div>
-            <div class="mb-32">
+            <!--   <div class="mb-32">
                 <label for="exampleFile" class="form-support">Capturas de pantalla del problema</label>
                 <input type="file" class="form-control" id="exampleFile" name="file" multiple
                     placeholder="Inserte sus archivos mostrando el problema acá" accept="image/*">
                 <br>
             </div>
 
-
+    -->
             <div class="form-buttons-container">
                 <button class="btn-submit" type="submit">Enviar datos</button>
                 <button class="btn-submit" type="reset">Limpiar campos</button>
