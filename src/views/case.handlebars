@@ -2,24 +2,57 @@
     <a href="/">
         <div class="top-bar-left-support">
             <div class="logo-support">
-                <img src="../images/logo.png" alt="Logo Sper" width="60" height="60">
+                <img src="/images/logo.png" alt="Logo Sper" width="60" height="60">
             </div>
             <div class="title-support">
-
+                <h1>SPER</h1>
             </div>
+        </div>
     </a>
 </header>
 
+<main class="main-case-view">
 
-<main>
-    <h1>Detalle del Caso</h1>
-    <h2>De: {{ticket.name}} {{ticket.surname}}</h2>
-    <p><strong>Email:</strong> {{ticket.email}}</p>
-    <p><strong>Teléfono:</strong> {{ticket.phone}}</p>
-    <p><strong>Descripción del Problema:</strong></p>
-    <p>{{ticket.problem_description}}</p>
-    <button class="delete-case-btn" data-ticket-id="{{ticket._id}}">Eliminar Caso</button>
-</main>
+    <div class="case-container">
+        <h1>Detalle del Caso de Soporte</h1>
+
+        <div class="ticket-header">
+            <h2>Reportado por: {{ticket.name}} {{ticket.surname}}</h2>
+        </div>
+
+        <div class="case-details">
+            <p><strong>Email de Contacto:</strong> {{ticket.email}}</p>
+            <p><strong>Teléfono de Contacto:</strong> {{ticket.phone}}</p>
+
+            <hr style="margin: 20px 0;">
+
+            <h3>Descripción del Problema Reportado:</h3>
+            <p>{{ticket.problem_description}}</p>
+        </div>
+
+        <hr style="margin: 20px 0;">
+
+        {{#if ticket.files.length}}
+        <h3>Imágenes Adjuntas:</h3>
+        <div class="image-gallery" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
+            {{#each ticket.files}}
+            <a href="/uploads/{{this}}" target="_blank">
+                <img src="/uploads/{{this}}" alt="Imagen del caso"
+                    style="max-width: 200px; border-radius: 5px; border: 1px solid #ddd;">
+            </a>
+            {{/each}}
+        </div>
+        {{/if}}
+
+
+
+        <div class="ticket-actions">
+            <a href="/information" class="btn-action btn-view-case">Volver a la Lista</a>
+            <button class="btn-action btn-delete-case delete-case-btn" data-ticket-id="{{ticket._id}}">Eliminar
+                Caso</button>
+        </div>
+    </div>
+
 </main>
 
 <footer class="footer-bar">
@@ -27,5 +60,4 @@
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
 <script src="/js/script.js"></script>

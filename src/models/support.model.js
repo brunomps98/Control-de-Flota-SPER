@@ -26,6 +26,10 @@ const supportSchema = new mongoose.Schema({
     problem_description: {
         type: [String],
         required: false
+    },
+    files: {
+        type: [String],
+        required: false,
     }
 });
 
