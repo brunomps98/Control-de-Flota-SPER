@@ -38,21 +38,28 @@ class SupportController {
 
     // --- MÉTODOS DE API ---
 
-    // 4. Crea un nuevo ticket con los datos del formulario
-    static createTicket = async (req, res) => {
-        try {
-            const ticketData = req.body;
-            await supportRepository.addSupportTicket(ticketData);
-            res.redirect('/information');
-        } catch (error) {
-            // --- ESTE ES EL CAMBIO IMPORTANTE ---
-            // Imprime el error DETALLADO en la consola del servidor.
-            console.error("ERROR AL CREAR TICKET:", error);
-
-            // Ahora renderiza la página de error que creamos.
-            res.status(500).render('error', { message: 'No se pudo crear el ticket. Revisa la consola del servidor para más detalles.' });
+static createTicket = async (req, res) => {
+    try {
+        // Los campos de texto del formulario están en req.body
+        const ticketData = req.body;
+        
+        // --- LÓGICA NUEVA PARA MANEJAR ARCHIVOS ---
+        // Multer pone la información de los archivos subidos en req.files
+        if (req.files && req.files.length > 0) {
+            // Creamos un array con solo los nombres de los archivos
+            // y lo guardamos en la propiedad 'files' de nuestro objeto
+            ticketData.files = req.files.map(file => file.filename);
         }
-    };
+
+        // Guardamos el ticket con los datos de texto y los nombres de archivo
+        await supportRepository.addSupportTicket(ticketData);
+        
+        res.redirect('/information');
+    } catch (error) {
+        console.error("ERROR AL CREAR TICKET:", error);
+        res.status(500).render('error', { message: 'No se pudo crear el ticket.' });
+    }
+};
 
     // 5. Elimina un ticket (este ya lo tenías)
     static deleteTicket = async (req, res) => {
