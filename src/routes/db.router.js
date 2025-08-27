@@ -6,11 +6,18 @@ import multer from "multer";
 import path from 'path';
 import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
+import SupportController from "../controllers/support.controller.js";
 
 
 
 
 const router = Router()
+
+router.use((req, res, next) => {
+    console.log(`--> Petición llegó a db.router.js: ${req.method} ${req.url}`);
+    next();
+});
+
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -33,18 +40,30 @@ const setUserInLocals = (req, res, next) => {
 // Usar el middleware en todas las rutas
 router.use(setUserInLocals);
 
-router.use('/vehicle', express.static(path.join(__dirname, 'public')));
-router.use('/realtimevehicle', express.static(path.join(__dirname, 'public')));
+
+
+
+
+
 
 router.post('/register', UserDao.registerUser);
 
 router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
 
+
+
 router.post('/login',limitFailedAttempts, UserDao.loginUser);
 
 router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), VehicleDao.addVehicleWithImage);
 
+router.post('/support', upload.array('file'), SupportController.createTicket);
+
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
+
+
+router.delete('/support/:pid', SupportController.deleteTicket);
+
+
 
 
 
