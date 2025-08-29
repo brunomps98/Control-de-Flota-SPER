@@ -10,10 +10,10 @@ class SupportController {
     };
 
     // 2. Obtiene todos los tickets y los muestra en la página de información
-    static renderInformationPage = async (req, res) => {
+    static renderSupportTicketsPage = async (req, res) => {
         try {
             const tickets = await supportRepository.getAllSupportTickets();
-            res.render('information', { tickets });
+            res.render('support-tickets', { tickets });
         } catch (error) {
             res.status(500).render('error', { message: 'Error al cargar los tickets' });
         }
@@ -54,7 +54,7 @@ static createTicket = async (req, res) => {
         // Guardamos el ticket con los datos de texto y los nombres de archivo
         await supportRepository.addSupportTicket(ticketData);
         
-        res.redirect('/information');
+        res.redirect('/support-tickets');
     } catch (error) {
         console.error("ERROR AL CREAR TICKET:", error);
         res.status(500).render('error', { message: 'No se pudo crear el ticket.' });
