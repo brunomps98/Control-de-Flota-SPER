@@ -1,0 +1,47 @@
+<header class="top-bar-support">
+    <a href="/">
+        <div class="top-bar-left-support">
+            <div class="logo-support">
+                <img src="/images/logo.png" alt="Logo Sper" width="60" height="60">
+            </div>
+            <div class="title-support">
+                <h1>SPER</h1>
+            </div>
+        </div>
+    </a>
+</header>
+
+<main>
+    <div class="tickets-container">
+        <h1 id="information-title">Listado de Casos de Soporte</h1>
+        
+        {{#each tickets}}
+            <div class="ticket-card">
+                <div class="ticket-header">
+                    <h2>{{this.name}} {{this.surname}}</h2>
+                </div>
+                <div class="ticket-body">
+                    <p><strong>Email:</strong> {{this.email}}</p>
+                    <p><strong>Teléfono:</strong> {{this.phone}}</p>
+                    <p><strong>Problema:</strong> {{this.problem_description}}</p>
+                </div>
+                <div class="ticket-actions">
+                    <a href="/case/{{this._id}}" class="btn-action btn-view-case">Ver Caso Completo</a>
+                    <button class="btn-action btn-delete-case delete-case-btn" data-ticket-id="{{this._id}}">Eliminar Caso</button>
+                </div>
+            </div>
+        {{else}}
+            <div class="no-tickets-message">
+                <p>Aún no hay casos de soporte para mostrar.</p>
+                <p>Puedes crear uno nuevo desde la sección de Soporte.</p>
+            </div>
+        {{/each}}
+    </div>
+</main>
+
+<footer class="footer-bar">
+    <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="/js/script.js"></script>

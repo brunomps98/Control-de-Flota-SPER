@@ -38,7 +38,7 @@ const setUserInLocals = (req, res, next) => {
 router.use(setUserInLocals);
 
 router.use('/support', express.static(path.join(__dirname, 'public')))
-router.use('/information', express.static(path.join(__dirname, 'public')))
+router.use('/support-tickets', express.static(path.join(__dirname, 'public')))
 router.use('/case', express.static(path.join(__dirname, 'public')))
 router.use('/vehicle', express.static(path.join(__dirname, 'public')));
 router.use('/eddit/:productId', express.static(path.join(__dirname, 'public')));
@@ -61,8 +61,8 @@ router.get('/register', UserDao.register);
 // Muestra el formulario en /support
 router.get('/support', SupportController.renderSupportForm);
 
-// Muestra la lista de tickets en /information
-router.get('/information', SupportController.renderInformationPage);
+// Muestra la lista de tickets en /support-tickets
+router.get('/support-tickets', SupportController.renderSupportTicketsPage);
 
 // Muestra un caso específico. Nota el parámetro dinámico ':tid'
 router.get('/case/:tid', SupportController.renderCasePage);
