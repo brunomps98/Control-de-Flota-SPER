@@ -1459,7 +1459,7 @@ main {
 /* Estilos para los campos del formulario (achicados y centrados) */
 .form-control {
     display: block; /* Necesario para que el centrado con 'margin' funcione */
-    width: 80%; /* Hacemos que el campo sea más angosto */
+    width: 100%; /* Hacemos que el campo sea más angosto */
     max-width: 700px; /* Un ancho máximo para pantallas grandes */
     margin-left: auto; /* Estas dos líneas centran el campo */
     margin-right: auto;
