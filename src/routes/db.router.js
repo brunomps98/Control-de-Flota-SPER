@@ -11,6 +11,7 @@ import SupportController from "../controllers/support.controller.js";
 
 
 
+
 const router = Router()
 
 router.use((req, res, next) => {
@@ -58,10 +59,16 @@ router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), Vehi
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
 
+
+
+
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
 
-
 router.delete('/support/:pid', SupportController.deleteTicket);
+
+/* Ruta para eliminar registros en la pagina de Information */
+
+router.delete('/vehicle/:vid/history/:fieldName', requireAuth, VehicleDao.deleteLastHistoryEntry);
 
 
 

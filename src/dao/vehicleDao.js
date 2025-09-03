@@ -56,7 +56,7 @@ class VehicleDao {
             const allImages = vehicle.thumbnail
             const firstImage = true;
 
-            res.render('partials/vehicleDetail', { vehicle, allImages, firstImage, lastIndexS, lastIndexK, lastIndexR, lastIndexD, lastIndexT });
+            res.render('vehicleDetail', { vehicle, allImages, firstImage, lastIndexS, lastIndexK, lastIndexR, lastIndexD, lastIndexT });
         } catch (error) {
             res.status(500).json({ error: 'error al leer el vehicle' });
         }
@@ -104,9 +104,7 @@ class VehicleDao {
     }
 
 
-
-
-
+    // Cargar vista de vehicleInformation 
 
     static realtimeVehicle = async (req, res) => {
         res.render('realtimeVehicle')
@@ -121,6 +119,28 @@ class VehicleDao {
             res.status(500).json({ message: error.message });
         }
 
+    }
+
+    static deleteLastHistoryEntry = async (req, res) => {
+        try {
+            const { vid, fieldName } = req.params;
+
+            // Lista de campos permitidos para evitar modificaciones no deseadas
+            const allowedFields = ['kilometros', 'service', 'rodado', 'reparaciones', 'description'];
+
+            if (!allowedFields.includes(fieldName)) {
+                return res.status(400).json({ status: 'error', message: 'Campo no válido' });
+            }
+
+            // Usamos el operador $pop de MongoDB. { $pop: { campo: 1 } } elimina el último elemento.
+            const update = { $pop: { [fieldName]: 1 } };
+
+            await productsModel.findByIdAndUpdate(vid, update);
+
+            res.status(200).json({ status: "success", message: `Último registro de ${fieldName} eliminado.` });
+        } catch (error) {
+            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
+        }
     }
 
     static vehicle = async (req, res) => {
@@ -155,6 +175,32 @@ class VehicleDao {
         }
     }
 
+    static vehicleInformation = async (req, res) => {
+        try {
+            // 1. Obtenemos el ID del vehículo desde la URL (ej: /vehicleInformation/60f8c2b7c9e77c001f8e4d3a)
+            const id = req.params.cid;
+            const vehicle = await productsModel.findById(id).lean().exec();
+
+            // 2. Verificamos si el vehículo existe
+            if (vehicle == null) {
+                return res.status(404).json({ status: 'error', error: 'product not found' });
+            }
+
+            // 3. Calculamos los últimos índices de los arrays (para mostrar el último servicio, kilometraje, etc.)
+            const lastIndexS = vehicle.service.length - 1;
+            const lastIndexR = vehicle.rodado.length - 1;
+            const lastIndexK = vehicle.kilometros.length - 1;
+            const lastIndexD = vehicle.description.length - 1;
+
+            // 4. Renderizamos la vista 'vehicleInformation' y le pasamos los datos del vehículo
+            res.render('vehicleInformation', { vehicle, lastIndexS, lastIndexK, lastIndexR, lastIndexD });
+
+        } catch (error) {
+            // Manejo de errores
+            res.status(500).json({ error: 'error al leer el vehicle' });
+        }
+    }
+
     static vehicleGeneral = async (req, res) => {
         try {
             let pageNum = parseInt(req.query.page) || 1;
@@ -179,6 +225,52 @@ class VehicleDao {
         }
     }
 
+    static updateVehicle = async (req, res) => {
+        try {
+            const id = req.params.pid;
+            const body = req.body;
+
+            const updateData = {
+                $push: {}, // Objeto para los campos que son arrays (historial)
+                $set: {}   // Objeto para los campos que se actualizan directamente
+            };
+
+            // Lista COMPLETA de campos que deben tratarse como un historial
+            const arrayFields = ['kilometros', 'service', 'rodado', 'reparaciones', 'description'];
+
+            // Recorremos los datos que llegan del formulario
+            for (const key in body) {
+                // Solo procesamos si el campo tiene un valor y no está vacío
+                if (body[key] && body[key] !== '') {
+                    if (arrayFields.includes(key)) {
+                        // Si es un campo de historial, lo añadimos a $push
+                        updateData.$push[key] = body[key];
+                    } else {
+                        // Si no, es un campo normal que se debe reemplazar (ej: destino)
+                        updateData.$set[key] = body[key];
+                    }
+                }
+            }
+
+            // Limpiamos los objetos si quedaron vacíos para no enviar operadores innecesarios
+            if (Object.keys(updateData.$push).length === 0) delete updateData.$push;
+            if (Object.keys(updateData.$set).length === 0) delete updateData.$set;
+
+            // Si no hay nada que actualizar, simplemente retornamos éxito.
+            if (!updateData.$push && !updateData.$set) {
+                return res.status(200).json({ status: "success", message: "No fields to update" });
+            }
+
+            // Ejecutamos la actualización con la estructura correcta
+            const updatedProduct = await productsModel.findByIdAndUpdate(id, updateData, { new: true });
+
+            res.status(200).json({ status: "success", updatedProduct });
+        } catch (error) {
+            res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
+        }
+    }
+
+
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid;
@@ -190,16 +282,6 @@ class VehicleDao {
         }
     }
 
-    static updateVehicle = async (req, res) => {
-        try {
-            const id = req.params.pid;
-            const obj = req.body;
-            const updatedProduct = await productsModel.findByIdAndUpdate(id, obj, { new: true });
-            res.status(200).json({ status: "success", updatedProduct });
-        } catch (error) {
-            res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
-        }
-    }
 
 }
 

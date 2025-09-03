@@ -13,6 +13,14 @@ body {
     font-family: 'Inter', sans-serif;
 }
 
+html,
+body,
+#root {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    /* Evita el scroll horizontal */
+}
 
 body {
     display: flex;
@@ -22,7 +30,7 @@ body {
     /* Se asegura de que ocupe, como mínimo, toda la altura de la pantalla */
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
+
 }
 
 @media print {
@@ -529,15 +537,6 @@ h4 {
 } */
 
 
-.banner {
-    flex-grow: 1;
-    /* <-- Esta es la línea mágica que lo hace ocupar todo el espacio sobrante */
-    position: relative;
-    /* Mantiene la base para los botones de adentro */
-    width: 100%;
-    background-color: #ffffff;
-    background: radial-gradient(ellipse at center, #34495e 0%, #24303c 100%);
-}
 
 .navbar-home {
     width: 85%;
@@ -582,46 +581,10 @@ h4 {
     width: 100%;
 }
 
-.content {
-    width: 100%;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    text-align: center;
-    color: #fff;
-}
 
 
-.content a {
-    text-decoration: none;
-}
 
-.content p {
-    margin: 20px auto;
-    font-weight: 100;
-    line-height: 25px;
-}
 
-.login-btn {
-    width: 200px;
-    padding: 15px 0;
-    text-align: center;
-    margin: 20px 10px;
-    border-radius: 25px;
-    font-weight: bold;
-    border: 2px solid #009688;
-    background: transparent;
-    color: rgb(0, 0, 0);
-    cursor: pointer;
-    position: absolute;
-    overflow: hidden;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #009688;
-    color: white;
-    border: none;
-}
 
 .signup-btn {
     width: 200px;
@@ -638,25 +601,13 @@ h4 {
     overflow: hidden;
 }
 
-.cover {
-    background: #009688;
-    height: 100%;
-    width: 0%;
-    border-radius: 25px;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    z-index: -1;
-    transition: 0.5s;
-}
+
 
 button:hover span {
     width: 100%;
 }
 
-button:hover {
-    border: none;
-}
+
 
 
 
@@ -901,14 +852,25 @@ a {
 }
 
 .signup-btn3 {
+    padding: 10px 20px;
 
-    width: 100px;
-    height: 40px;
     background-color: black;
-    border-radius: 50px;
-    color: #ffffff;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.signup-btn3:hover {
+    background-color: #333;
+}
+
+.signup-btn3 a {
+    color: white;
+    text-decoration: none;
 }
 
 .footer1 {
@@ -1055,28 +1017,9 @@ a {
     font-weight: 500;
 }
 
-/*-------------Home------------------*/
-
-.button-login {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.button-support {
-    position: absolute;
-    bottom: 10px;
-    right: 10px
-}
 
 
 
-.buttons-init {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 .logo {
     position: absolute;
@@ -1100,25 +1043,6 @@ a {
     color: #ffffff;
 }
 
-.top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #24303c;
-    height: 90px;
-    width: 100%;
-    padding: 0 30px;
-    box-sizing: border-box;
-}
-
-.title h1 {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 0.7em;
-    color: white;
-    font-weight: bold;
-    margin: 0;
-    text-shadow: 1px 0px 1px #E83C68, -1px 0px 1px #00FFFF;
-}
 
 .topText h1 {
     font-size: 1rem;
@@ -1132,14 +1056,8 @@ a {
     color: #cccccc;
 }
 
-.top-bar-left {
-    display: flex;
-    align-items: center;
-}
 
-.logo {
-    margin-right: 15px;
-}
+
 
 .footer-bar {
 
@@ -1153,9 +1071,7 @@ a {
 
 
 
-.login-btn:hover {
-    background-color: #007a6e;
-}
+
 
 .title-r {
     font-size: 0.5em;
@@ -1274,6 +1190,18 @@ body {
     margin: 0;
     padding: 0;
     height: 100%;
+    /* Asegura que html y body ocupen el 100% de la altura */
+    width: 100%;
+    overflow-x: hidden;
+    /* Evita scroll horizontal si hay contenido fuera de pantalla */
+    font-family: Arial, sans-serif;
+    /* Puedes ajustar la fuente global aquí */
+    line-height: 1.6;
+
+    /* Un color de fondo general si no hay un banner */
+    color: #333;
+    font-family: 'Inter', sans-serif;
+    background-color: #fff;
 }
 
 .footer-bar-vehicle {
@@ -1341,21 +1269,7 @@ main {
     /* Espacio entre la etiqueta (ej. "Dominio:") y su campo de texto */
 }
 
-.support-btn {
-    width: 200px;
-    padding: 15px 0;
-    text-align: center;
-    margin: 20px 10px;
-    border-radius: 25px;
-    font-weight: bold;
-    border: none;
-    background-color: #009688;
-    color: white;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
 
-}
 
 /* Estilos para la pagina de soporte */
 
@@ -1363,7 +1277,8 @@ main {
 .support-title {
 
     text-align: center;
-    margin-top: 30px; /* Espacio entre la barra del logo y el título "Soporte" */
+    margin-top: 30px;
+    /* Espacio entre la barra del logo y el título "Soporte" */
 }
 
 .mb-32 {
@@ -1411,20 +1326,25 @@ main {
     box-sizing: border-box;
     /* Usamos Flexbox para controlar el layout interno */
     display: flex;
-    flex-direction: column; /* Apila los elementos hijos verticalmente */
-    align-items: center;   /* Centra los elementos hijos horizontalmente */
+    flex-direction: column;
+    /* Apila los elementos hijos verticalmente */
+    align-items: center;
+    /* Centra los elementos hijos horizontalmente */
 }
 
 .top-bar-support .top-bar-left-support {
-    width: 100%; /* Ocupa todo el ancho para poder alinear su contenido */
+    width: 100%;
+    /* Ocupa todo el ancho para poder alinear su contenido */
     display: flex;
-    justify-content: flex-start; /* Alinea el logo y SPER a la izquierda */
+    justify-content: flex-start;
+    /* Alinea el logo y SPER a la izquierda */
     align-items: center;
 }
 
 .top-bar-support .support-title {
     text-align: center;
-    margin-top: 20px; /* Espacio entre la línea del logo y el título principal */
+    margin-top: 20px;
+    /* Espacio entre la línea del logo y el título principal */
 }
 
 .top-bar-support .support-title h1 {
@@ -1449,19 +1369,23 @@ main {
 /*Estilos Formularios */
 
 .form-support {
-  display: block; 
-  text-align: center; 
-  margin-bottom: 8px; 
+    display: block;
+    text-align: center;
+    margin-bottom: 8px;
 }
 
 
 
 /* Estilos para los campos del formulario (achicados y centrados) */
 .form-control {
-    display: block; /* Necesario para que el centrado con 'margin' funcione */
-    width: 100%; /* Hacemos que el campo sea más angosto */
-    max-width: 700px; /* Un ancho máximo para pantallas grandes */
-    margin-left: auto; /* Estas dos líneas centran el campo */
+    display: block;
+    /* Necesario para que el centrado con 'margin' funcione */
+    width: 100%;
+    /* Hacemos que el campo sea más angosto */
+    max-width: 700px;
+    /* Un ancho máximo para pantallas grandes */
+    margin-left: auto;
+    /* Estas dos líneas centran el campo */
     margin-right: auto;
     padding: 12px 15px;
     font-size: 1rem;
@@ -1478,21 +1402,25 @@ main {
 
 /* Estilos para las etiquetas, para que se alineen con los campos */
 .form-support {
-  display: block;
-  text-align: center;
-  margin-bottom: 8px;
-  /* Añadimos estas líneas para que la etiqueta se alinee con el campo */
-  width: 80%;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
+    display: block;
+    text-align: center;
+    margin-bottom: 8px;
+    /* Añadimos estas líneas para que la etiqueta se alinee con el campo */
+    width: 80%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .form-buttons-container {
-    display: flex; /* Activa Flexbox para alinear los elementos en línea */
-    justify-content: center; /* Centra los botones como grupo */
-    gap: 20px; /* Crea un espacio entre los botones */
-    margin-bottom: 50px; /* Mantiene el espacio con el footer */
+    display: flex;
+    /* Activa Flexbox para alinear los elementos en línea */
+    justify-content: center;
+    /* Centra los botones como grupo */
+    gap: 20px;
+    /* Crea un espacio entre los botones */
+    margin-bottom: 50px;
+    /* Mantiene el espacio con el footer */
 }
 
 .title-case {
@@ -1515,7 +1443,8 @@ main {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 25px; /* Espacio entre cada tarjeta de ticket */
+    gap: 25px;
+    /* Espacio entre cada tarjeta de ticket */
 }
 
 /* Estilo para cada tarjeta individual en la lista */
@@ -1524,12 +1453,12 @@ main {
     border: 1px solid #e0e0e0;
     border-radius: 8px;
     padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.3s ease;
 }
 
 .ticket-card:hover {
-    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Encabezado de la tarjeta con el nombre */
@@ -1555,7 +1484,8 @@ main {
 /* Contenedor para los botones de acción */
 .ticket-actions {
     display: flex;
-    gap: 15px; /* Espacio entre botones */
+    gap: 15px;
+    /* Espacio entre botones */
     margin-top: 20px;
 }
 
@@ -1577,6 +1507,7 @@ main {
     background-color: #3498db;
     color: white;
 }
+
 .btn-view-case:hover {
     background-color: #2980b9;
 }
@@ -1586,6 +1517,7 @@ main {
     background-color: #e74c3c;
     color: white;
 }
+
 .btn-delete-case:hover {
     background-color: #c0392b;
 }
@@ -1609,20 +1541,21 @@ main {
 .main-case-view {
     display: flex;
     justify-content: center;
-    align-items: center;    
-    padding: 40px 20px;    
-    background-color: #f4f7f6; }
+    align-items: center;
+    padding: 40px 20px;
+    background-color: #f4f7f6;
+}
 
 
 .case-container {
-    width: 100%; 
-    max-width: 900px; 
-    margin: 0; 
-    padding: 40px; 
+    width: 100%;
+    max-width: 900px;
+    margin: 0;
+    padding: 40px;
     background-color: #fff;
     border: 1px solid #e0e0e0;
-    border-radius: 10px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08); 
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
 .case-container h1 {
@@ -1639,7 +1572,306 @@ main {
 
 .case-container .case-details h3 {
     font-size: 1.2rem;
-    color: #009688; 
+    color: #009688;
     margin-top: 25px;
 }
 
+/* Estilos para la pagina de Vehicle Information */
+
+.history-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 2%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.history-card h4 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #0056b3;
+    padding-bottom: 5px;
+}
+
+.history-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.history-list li {
+    background-color: #fff;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.history-list li:last-child {
+    border-bottom: none;
+}
+
+.history-list li,
+.reparaciones-table td {
+    display: flex;
+    align-items: center;
+}
+
+.delete-history-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 1.2em;
+}
+
+.delete-history-btn:hover {
+    color: #c82333;
+}
+
+.delete-history-btn {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 1.2em;
+    margin-left: auto;
+    padding-left: 15px;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 20px 0;
+    width: 100%;
+}
+
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+
+/* Estilo especial para el botón de eliminar */
+.destructive-btn {
+    background-color: #dc3545 !important;
+    /* Rojo para indicar peligro */
+    color: white !important;
+}
+
+.destructive-btn:hover {
+    background-color: #c82333 !important;
+}
+
+.signup-btn3.destructive-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.signup-btn3.destructive-btn:hover {
+    background-color: #c82333;
+}
+
+/* ============================================= */
+/* --- ESTILOS PARA VISTA MOBILE (RESPONSIVE) --- */
+/* ============================================= */
+
+@media (max-width: 768px) {
+
+    /* Hacemos la tarjeta principal un poco más sencilla */
+    .card-p {
+        padding: 10px;
+        box-shadow: none;
+    }
+
+    /* * La parte más importante:
+     * Apilamos la imagen y la información del vehículo una encima de la otra.
+    */
+    .content-p {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Ajustamos la imagen y la información para que ocupen el ancho completo */
+    .vehicle-image-p,
+    .vehicle-info-p {
+        width: 100%;
+        margin-left: 0;
+        text-align: center;
+        /* Centramos el texto de los detalles */
+    }
+
+    .vehicle-image-p {
+        margin-bottom: 20px;
+        /* Añadimos espacio entre la imagen y los datos */
+    }
+
+    /* Apilamos las cajas de 'Último Service' y 'Último Cambio de Rodado' */
+    .footer-p {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+
+    .header-p h1 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+}
+
+
+/* Estilos Responsive para vista mobile en edditVehicle y realTimeVehicles */
+
+@media (max-width: 768px) {
+
+    /* --- Estilos generales para ambos formularios en mobile --- */
+    #formProduct,
+    #formEditVehicle {
+        padding: 20px;
+        /* Reducimos el padding masivo para ganar espacio */
+    }
+
+    /* Reducimos el tamaño del título principal */
+    #formProduct h2,
+    #formEditVehicle h2 {
+        font-size: 28px;
+        line-height: 1.2;
+        margin-bottom: 20px;
+    }
+
+    /* --- Apilamos los campos que están en filas --- */
+
+    /* Contenedor de "Establecimiento" y "Descripción" */
+    .name-desc {
+        flex-direction: column;
+    }
+
+    /* Contenedor de varios inputs en línea */
+    .stock-code-price {
+        flex-direction: column;
+        /* La clave: apila los campos verticalmente */
+    }
+
+    /* --- Hacemos que los contenedores de inputs ocupen todo el ancho --- */
+    .name-product,
+    .desc-product,
+    .stock-product,
+    .code-product,
+    .price-product,
+    .url-product {
+        width: 100%;
+        /* Ocupan todo el ancho disponible */
+        margin: 10px 0;
+        /* Ajustamos el margen para un espaciado vertical */
+    }
+}
+
+/* --- 1. Formulario de Filtros --- */
+.filter-container {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    /* Alinea los botones con los campos de texto */
+    gap: 15px 20px;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-sizing: border-box;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.filter-group input {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 180px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* --- 2. Grilla de Vehículos Adaptable --- */
+.vehicle-grid {
+    display: grid;
+    /* La clave para la grilla automática y responsive: */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 30px;
+    padding: 0 20px;
+    /* Espacio a los lados de la grilla */
+    margin-bottom: 40px;
+}
+
+/* --- 3. Nuevo Diseño de Tarjetas (Cards) --- */
+.vehicle-card {
+    text-decoration: none;
+    /* Quita el subrayado del link */
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+    /* Asegura que la tarjeta se comporte como un bloque */
+    aspect-ratio: 4 / 3;
+    /* Proporción para que todas las tarjetas sean iguales */
+}
+
+.vehicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.vehicle-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* La imagen cubre todo el espacio sin deformarse */
+}
+
+.vehicle-card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
+    color: white;
+    padding: 30px 15px 15px 15px;
+    box-sizing: border-box;
+}
+
+.vehicle-card-info h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Pone "..." si el texto es muy largo */
+}
+
+.vehicle-card-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #ddd;
+}

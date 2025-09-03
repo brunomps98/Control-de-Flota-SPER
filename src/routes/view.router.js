@@ -43,6 +43,7 @@ router.use('/case', express.static(path.join(__dirname, 'public')))
 router.use('/vehicle', express.static(path.join(__dirname, 'public')));
 router.use('/eddit/:productId', express.static(path.join(__dirname, 'public')));
 router.use('/realtimevehicle', express.static(path.join(__dirname, 'public')));
+router.use('/vehicleInformation', express.static(path.join(__dirname, 'public')));
 
 
 
@@ -51,7 +52,13 @@ router.get('/eddit/:productId', VehicleDao.edditVehicle);
 
 router.get("/realtimevehicle", requireAuth, VehicleDao.realtimeVehicle);
 
-router.get('/', UserDao.home);
+
+
+router.get('/', (req, res) => {
+    res.render('home'); // Renderiza el caparazón
+});
+
+
 
 
 router.get('/login', UserDao.login);
@@ -64,7 +71,7 @@ router.get('/support', SupportController.renderSupportForm);
 // Muestra la lista de tickets en /support-tickets
 router.get('/support-tickets', SupportController.renderSupportTicketsPage);
 
-// Muestra un caso específico. Nota el parámetro dinámico ':tid'
+// Muestra un caso específico
 router.get('/case/:tid', SupportController.renderCasePage);
 
 
@@ -75,6 +82,10 @@ router.get("/vehiclegeneral", requireAuth, isAdmin, VehicleDao.vehicleGeneral);
 router.get("/vehicle", requireAuth, VehicleDao.vehicle);
 
 router.get("/vehicle/filtrar", requireAuth, VehicleDao.vehicleFilter);
+
+// Obtener información de vehiculos 
+
+router.get("/vehicleInformation/:cid", requireAuth, VehicleDao.vehicleInformation);
 
 router.get("/:cid", requireAuth, VehicleDao.vehicleDetail);
 

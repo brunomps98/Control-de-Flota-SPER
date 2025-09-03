@@ -1,0 +1,131 @@
+<header class="top-bar-support">
+    <a href="/">
+        <div class="top-bar-left-support">
+            <div class="logo-support">
+                <img src="/images/logo.png" alt="Logo Sper" width="60" height="60">
+            </div>
+            <div class="title-support">
+                <h1>SPER - Historial del Vehículo</h1>
+            </div>
+        </div>
+    </a>
+</header>
+
+<main>
+    <div class="body-p">
+        <div class="card-p">
+            <div class="header-p">
+                <h1>Ficha de Mantenimiento</h1>
+                <img class="logo-dtail" src="/images/logo.png" alt="">
+            </div>
+            <div class="content-p">
+                <div class="vehicle-image-p">
+                    <img src="/uploads/{{vehicle.thumbnail.[0]}}" alt="{{vehicle.marca}} {{vehicle.modelo}}" />
+                </div>
+                <div class="vehicle-info-p">
+                    <p>UNIDAD: {{vehicle.title}}</p>
+                    <p>MARCA: {{vehicle.marca}}</p>
+                    <p>MODELO: {{vehicle.modelo}}</p>
+                    <p>AÑO: {{vehicle.anio}}</p>
+                    <p>DOMINIO: {{vehicle.dominio}}</p>
+                </div>
+            </div>
+
+            <div class="history-card">
+                <h4>Historial de Kilometraje</h4>
+                <ul class="history-list">
+                    {{#each vehicle.kilometros}}
+                    <li>
+                        Registro #{{@index}}: <strong>{{this}} km</strong>
+                        {{#if @last}}
+                        <button class="delete-history-btn" data-vehicle-id="{{../vehicle._id}}"
+                            data-field-name="kilometros" title="Eliminar último registro">🗑️</button>
+                        {{/if}}
+                    </li>
+                    {{else}}
+                    <li>No hay registros de kilometraje.</li>
+                    {{/each}}
+                </ul>
+            </div>
+
+            <div class="history-card">
+                <h4>Historial de Services</h4>
+                <ul class="history-list">
+                    {{#each vehicle.service}}
+                    <li>
+                        Registro #{{@index}}: <strong>{{this}}</strong>
+                        {{#if @last}}
+                        <button class="delete-history-btn" data-vehicle-id="{{../vehicle._id}}"
+                            data-field-name="service" title="Eliminar último registro">🗑️</button>
+                        {{/if}}
+                    </li>
+                    {{else}}
+                    <li>No hay registros de services.</li>
+                    {{/each}}
+                </ul>
+            </div>
+
+            <div class="history-card">
+                <h4>Historial de Cambio de Rodado</h4>
+                <ul class="history-list">
+                    {{#each vehicle.rodado}}
+                    <li>
+                        Registro #{{@index}}: <strong>{{this}}</strong>
+                        {{#if @last}}
+                        <button class="delete-history-btn" data-vehicle-id="{{../vehicle._id}}" data-field-name="rodado"
+                            title="Eliminar último registro">🗑️</button>
+                        {{/if}}
+                    </li>
+                    {{else}}
+                    <li>No hay registros de cambio de rodado.</li>
+                    {{/each}}
+                </ul>
+            </div>
+
+            <div class="history-card">
+                <h4>Historial de Reparaciones</h4>
+                <ul class="history-list">
+                    {{#each vehicle.reparaciones}}
+                    <li>
+                        Registro #{{@index}}: <strong>{{this}}</strong>
+                        {{#if @last}}
+                        <button class="delete-history-btn" data-vehicle-id="{{../vehicle._id}}"
+                            data-field-name="reparaciones" title="Eliminar último registro">🗑️</button>
+                        {{/if}}
+                    </li>
+                    {{else}}
+                    <li>No hay reparaciones registradas.</li>
+                    {{/each}}
+                </ul>
+            </div>
+
+            <div class="history-card">
+                <h4>Historial de Descripciones del Vehículo</h4>
+                <ul class="history-list">
+                    {{#each vehicle.description}}
+                    <li>
+                        Registro #{{@index}}: <strong>{{this}}</strong>
+                        {{#if @last}}
+                        <button class="delete-history-btn" data-vehicle-id="{{../vehicle._id}}"
+                            data-field-name="description" title="Eliminar último registro">🗑️</button>
+                        {{/if}}
+                    </li>
+                    {{else}}
+                    <li>No hay descripciones guardadas.</li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+        <div class="buttons-impre">
+            <button class="signup-btn3"><a href="/{{vehicle._id}}">Volver</a></button>
+            <button class="signup-btn3 edit-btn" data-product-id="{{vehicle._id}}">Editar</button>
+        </div>
+    </div>
+</main>
+
+<footer class="footer-bar">
+    <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+</footer>
+
+
+<script src="/js/script.js" defer></script>

@@ -1,23 +1,27 @@
-class vehicleRepository { 
-    constructor(dao){
+class vehicleRepository {
+    constructor(dao) {
         this.dao = dao
-        
+
     }
-    async getVehicle(){
+    async getVehicle() {
         return await this.dao.getVehicle()
     }
-    async addVehicle(vehicle){
+    async addVehicle(vehicle) {
         return await this.dao.addVehicle(vehicle)
     }
-    async getVehicleById(id){
+    async getVehicleById(id) {
         return await this.dao.getVehicleById(id)
     }
-    async updateVehicle(id, vehicle){
+    async updateVehicle(id, vehicle) {
         return await this.dao.updateVehicle(id, vehicle)
     }
-    async deleteVehicle(id){
+    async deleteVehicle(id) {
         return await this.dao.deleteVehicle(id)
     }
-    
-} 
-export {vehicleRepository}
+    async vehicleInformation(id, vehicle) {
+        return await this.dao.vehicleInformation(id, vehicle)
+    }
+
+
+}
+export { vehicleRepository }
