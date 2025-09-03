@@ -26,7 +26,7 @@ const productSchema = new mongoose.Schema({
         required: false // Ahora el campo no es requerido
     },
     destino: {
-        type: [String],
+        type: String,
         required: false
     },
     anio: {

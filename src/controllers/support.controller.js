@@ -43,8 +43,6 @@ static createTicket = async (req, res) => {
         // Los campos de texto del formulario están en req.body
         const ticketData = req.body;
         
-        // --- LÓGICA NUEVA PARA MANEJAR ARCHIVOS ---
-        // Multer pone la información de los archivos subidos en req.files
         if (req.files && req.files.length > 0) {
             // Creamos un array con solo los nombres de los archivos
             // y lo guardamos en la propiedad 'files' de nuestro objeto
@@ -61,7 +59,7 @@ static createTicket = async (req, res) => {
     }
 };
 
-    // 5. Elimina un ticket (este ya lo tenías)
+    // 5. Elimina un ticket 
     static deleteTicket = async (req, res) => {
         try {
             const id = req.params.pid;

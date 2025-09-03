@@ -20,7 +20,7 @@
                 <p>CHASIS N°: {{vehicle.chasis}}</p>
                 <p>MOTOR N°: {{vehicle.motor}}</p>
                 <p>CEDULA N°: {{vehicle.cedula}}</p>
-            
+
                 {{#with (lookup vehicle.kilometros lastIndexK)}}
                 <p>KILOMETRAJE: {{this}}</p>
                 {{/with}}
@@ -44,8 +44,8 @@
             <div class="oil-change-info-p">
                 <h4>ULTIMO CAMBIO DE RODADO:</h4>
                 {{#with (lookup vehicle.rodado lastIndexR)}}
-                <input class="controls-p" type="text" name="rodado" value="{{this}}" id="rodado"
-                    placeholder="FECHA" readonly>
+                <input class="controls-p" type="text" name="rodado" value="{{this}}" id="rodado" placeholder="FECHA"
+                    readonly>
                 {{/with}}
             </div>
         </div>
@@ -76,11 +76,17 @@
         </div>
     </div>
     <h6 class="h6-imp">@Deparamento de Seguridad Informatica y Monitoreo Electronico</h6>
-    <div class="buttons-impre">
-        <button class="signup-btn3"><a href="/vehicle">Volver</a></button>
-        <button class="signup-btn3" onclick="imprimirPagina()">Imprimir</button>
-        <button class="signup-btn3 edit-btn" data-product-id="{{vehicle._id}}">Editar</button>
-        <button class="signup-btn3 delete-btn " data-product-id="{{vehicle._id}}">Eliminar</button>
+    <div class="buttons-container">
+        <div class="button-group">
+            <button class="signup-btn3"><a href="/vehicle">Volver</a></button>
+        </div>
+
+        <div class="button-group">
+            <button class="signup-btn3" onclick="imprimirPagina()">Imprimir</button>
+            <button class="signup-btn3 edit-btn" data-product-id="{{vehicle._id}}">Editar</button>
+            <button class="signup-btn3"> <a href="/vehicleInformation/{{vehicle._id}}">Services</a></button>
+            <button class="signup-btn3 delete-btn destructive-btn" data-product-id="{{vehicle._id}}">Eliminar</button>
+        </div>
     </div>
 </div>
 
@@ -88,4 +94,3 @@
 <script>function imprimirPagina() { window.print(); }</script>
 <script src="js/script.js" defer></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
