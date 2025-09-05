@@ -40,7 +40,7 @@
     align-items: center;
     text-align: center;
     color: white;
-    /* Estiramos el fondo de este a este */
+   
     background: radial-gradient(ellipse at center, #34495e 0%, #24303c 100%);
 
     /* Agregado para que ocupe todo el espacio y no tenga bordes */
@@ -99,9 +99,9 @@
 
 /* Posicionamiento del botón de login */
 .button-login {
-    /* Ya no es absolute en el banner, se posiciona con flexbox */
+  
     margin-bottom: 20px;
-    /* Espacio para que no esté pegado al borde inferior */
+    
 }
 
 /* Posicionamiento del botón de soporte */
@@ -121,7 +121,7 @@
 
     /* --- Ajustes en la Cabecera (Header) --- */
     .title h1 {
-        font-size: 1.1rem; /* Achicamos el título del header para que no se parta */
+        font-size: 1.1rem; 
     }
 
     .top-bar-left {
@@ -131,18 +131,18 @@
 
     /* --- Ajustes en el Contenido Principal (Banner) --- */
     .content h1 {
-        font-size: 1.8rem; /* Reducimos drásticamente el título principal */
-        line-height: 1.2;  /* Mejoramos el espaciado entre líneas si se parte */
+        font-size: 1.8rem;
+        line-height: 1.2;  
     }
 
     .content p {
-        font-size: 1.1rem; /* Ajustamos el tamaño del párrafo */
+        font-size: 1.1rem; 
     }
 
     /* --- Ajustes en los Botones --- */
     .button-container {
-        flex-direction: column; /* Apilamos los botones verticalmente */
-        align-items: center;    /* Centramos los botones apilados */
+        flex-direction: column; 
+        align-items: center;    
         width: 100%;
         justify-content: center;
     }
