@@ -1,0 +1,160 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Estilos para la barra superior (Header) --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #24303c;
+    height: 90px;
+    padding: 0 30px;
+    color: white;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0;
+    margin-left: 60px;
+
+}
+
+/* --- Estilos del banner principal --- */
+.banner {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* Cambiado a columna para centrar mejor contenido y botones */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    /* Estiramos el fondo de este a este */
+    background: radial-gradient(ellipse at center, #34495e 0%, #24303c 100%);
+
+    /* Agregado para que ocupe todo el espacio y no tenga bordes */
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    /* No hay estilos aquí porque el banner ya centra el texto */
+    margin-bottom: 30px;
+    /* Espacio entre el texto y el botón de Iniciar Sesión */
+}
+
+/* --- Estilos para los Botones --- */
+
+/* Estos estilos ahora aplican a ambos botones */
+.login-btn,
+.support-btn {
+    /* <-- ¡El cambio principal aquí! */
+    width: 200px;
+    padding: 15px 0;
+    text-align: center;
+    margin: 0 10px;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 2px solid #009688;
+    background-color: #009688;
+    /* Fondo sólido */
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* El span para el efecto cover ahora se comparte */
+.cover {
+    background: #007a6e;
+    /* Un poco más oscuro para el efecto */
+    height: 100%;
+    width: 0%;
+    border-radius: 25px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    transition: 0.5s;
+}
+
+.login-btn:hover .cover,
+.support-btn:hover .cover {
+    /* Ambos botones tienen el efecto */
+    width: 100%;
+}
+
+/* Posicionamiento del botón de login */
+.button-login {
+    /* Ya no es absolute en el banner, se posiciona con flexbox */
+    margin-bottom: 20px;
+    /* Espacio para que no esté pegado al borde inferior */
+}
+
+/* Posicionamiento del botón de soporte */
+.button-support {
+    position: absolute;
+    /* Este sigue siendo absoluto para la esquina */
+    bottom: 20px;
+    right: 20px;
+}
+
+/* ============================================= */
+/* ---        ESTILOS PARA VISTA MÓVIL       --- */
+/* ============================================= */
+
+/* Aplica estos estilos en pantallas de 768px de ancho o menos (tablets y celulares) */
+@media (max-width: 768px) {
+
+    /* --- Ajustes en la Cabecera (Header) --- */
+    .title h1 {
+        font-size: 1.1rem; /* Achicamos el título del header para que no se parta */
+    }
+
+    .top-bar-left {
+        height: auto; /* Hacemos la altura flexible */
+        padding: 5px 0;
+    }
+
+    /* --- Ajustes en el Contenido Principal (Banner) --- */
+    .content h1 {
+        font-size: 1.8rem; /* Reducimos drásticamente el título principal */
+        line-height: 1.2;  /* Mejoramos el espaciado entre líneas si se parte */
+    }
+
+    .content p {
+        font-size: 1.1rem; /* Ajustamos el tamaño del párrafo */
+    }
+
+    /* --- Ajustes en los Botones --- */
+    .button-container {
+        flex-direction: column; /* Apilamos los botones verticalmente */
+        align-items: center;    /* Centramos los botones apilados */
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Le damos un ancho máximo a los botones para que no ocupen toda la pantalla */
+    .login-btn,
+    .support-btn {
+        width: 90%;
+        max-width: 320px;
+        text-align: center;
+        padding: 15px 25px;     
+        font-size: 1.05rem;     
+
+    }
+}

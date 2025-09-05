@@ -1,6 +1,6 @@
-// src/react/pages/Home.jsx
+import { Link } from 'react-router-dom';
 import './Home.css';
-import logoSper from '../assets/logo.png';
+import logoSper from '../../assets/images/logo.png';
 
 const Home = () => {
   return (
@@ -25,21 +25,21 @@ const Home = () => {
         </div>
         
         <div className="button-login">
-          <a href="/login">
-            <button className="login-btn" type="button">
-              <span className="cover"></span> {/* Agregado o confirmado */}
+          <Link to="/login">
+            <button className="login-btn" Link to="/login" type="button">
+              <span className="cover"></span> 
               Iniciar sesión
             </button>
-          </a>
+          </Link>
         </div>
 
         <div className="button-support">
-            <a href="/support">
+            <Link to href="/support">
                 <button className="support-btn" type="button">
-                    <span className="cover"></span> {/* Agregado o confirmado */}
+                    <span className="cover"></span> 
                     Soporte
                 </button>
-            </a>
+            </Link>
         </div>
       </div>
 
