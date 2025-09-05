@@ -33,17 +33,6 @@ body {
 
 }
 
-@media print {
-
-    .navbar,
-    .signup-btn3 {
-        display: none !important;
-    }
-}
-
-#nnavbarNavDropdown {
-    flex-grow: 0 !important;
-}
 
 
 
@@ -52,11 +41,7 @@ body {
     flex-direction: row-reverse;
 } */
 
-.navbar {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
+
 
 
 #list-products {
@@ -538,48 +523,6 @@ h4 {
 
 
 
-.navbar-home {
-    width: 85%;
-    margin: auto;
-    padding: 35px 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.logo {
-    position: absolute;
-    top: 30px;
-    left: 30px;
-}
-
-.navbar-home ul li {
-    list-style: none;
-    display: inline-block;
-    margin: 0 20px;
-    position: relative;
-}
-
-.navbar-home ul li a {
-    text-decoration: none;
-    color: #fff;
-    text-transform: uppercase;
-}
-
-.navbar-home ul li::after {
-    content: "";
-    height: 3px;
-    width: 0;
-    background: #009688;
-    position: absolute;
-    left: 0;
-    bottom: -10px;
-    transition: 0.5s;
-}
-
-.navbar-home ul li:hover::after {
-    width: 100%;
-}
 
 
 
@@ -640,43 +583,7 @@ button:hover span {
     background-size: cover;
 }
 
-.navbar-uni {
-    padding-top: 20px;
-    height: 100px;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 
-}
-
-.navbar-uni ul li {
-    list-style: none;
-    display: inline-block;
-    margin: 20px;
-    position: relative;
-}
-
-.navbar-uni ul li a {
-    text-decoration: none;
-    color: #fff;
-    text-transform: uppercase;
-}
-
-.navbar-uni ul li::after {
-    content: "";
-    height: 3px;
-    width: 0;
-    background: #009688;
-    position: absolute;
-    left: 0;
-    bottom: -10px;
-    transition: 0.5s;
-}
-
-.navbar-uni ul li:hover::after {
-    width: 100%;
-}
 
 /* --------------filtros-------- */
 
@@ -725,11 +632,6 @@ footer div h3 {
 }
 
 
-/* --------------register-------- */
-.mb-3 {
-    margin-bottom: 1rem !important;
-    width: 40vh;
-}
 
 .register {
     width: 50vh;
@@ -745,46 +647,6 @@ footer div h3 {
 
 
 
-/* --------------register-------- */
-
-/* --------------navBar short-------- */
-.navbar-short {
-    padding-top: 48px;
-    height: 100px;
-    margin: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-}
-
-.navbar-short ul li {
-    list-style: none;
-    display: inline-block;
-    margin: 0 20px;
-    position: relative;
-}
-
-.navbar-short ul li a {
-    text-decoration: none;
-    color: #fff;
-    text-transform: uppercase;
-}
-
-.navbar-short ul li::after {
-    content: "";
-    height: 3px;
-    width: 0;
-    background: #009688;
-    position: absolute;
-    left: 0;
-    bottom: -10px;
-    transition: 0.5s;
-}
-
-.navbar-short ul li:hover::after {
-    width: 100%;
-}
 
 .navbar-r {
     display: flex;
@@ -824,16 +686,6 @@ footer div h3 {
 
 }
 
-.signup-btn1 {
-
-    width: 120px;
-    height: 50px;
-    background-color: black;
-    border-radius: 50px;
-    color: #ffffff;
-
-
-}
 
 a {
     text-decoration: none;
@@ -1003,19 +855,9 @@ a {
     transform: perspective(600px) rotateY(360deg);
 }
 
-.user-info {
-    display: flex;
-    justify-content: end;
-    align-items: right;
-    width: 99%;
-    margin-top: 1px;
-}
 
-.user-info h6 {
-    color: #000;
-    font-size: 18px;
-    font-weight: 500;
-}
+
+
 
 
 
@@ -1024,24 +866,12 @@ a {
 .logo {
     position: absolute;
     top: 15px;
-    left: 105px;
+    left: 15px;
     width: 100px;
     z-index: 10;
 
 }
 
-.title {
-
-    position: absolute;
-    top: -8px;
-    left: 35px;
-    height: 110px;
-    display: flex;
-    align-items: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #ffffff;
-}
 
 
 .topText h1 {
@@ -1080,36 +910,8 @@ a {
     margin: 0;
 }
 
-/* Estilos Login */
 
-.main-container {
-    display: flex;
-    height: 100vh;
-    width: 100vw;
-}
 
-.left-side {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-}
-
-.right-side {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #07090a;
-}
-
-.right-side img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: cover;
-}
 
 /* Estilos para el formulario de login */
 .container.login {
@@ -1122,23 +924,6 @@ a {
     background-color: #fff; */
 }
 
-.form-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 10px;
-}
-
-.form-subtitle {
-    font-size: 1.1rem;
-    color: #666;
-    margin-bottom: 30px;
-}
-
-.login-form {
-    width: 100%;
-    align-items: stretch;
-}
 
 .signup-btn1 {
     width: 100%;
@@ -1160,27 +945,6 @@ a {
     padding: 15px;
 }
 
-/* Vista mobile login */
-
-@media (max-width: 768px) {
-    .main-container {
-        flex-direction: column;
-    }
-
-    .left-side {
-        width: 100%;
-        flex: none;
-    }
-
-    .right-side {
-        display: none;
-    }
-
-    .container.login {
-        max-width: 100%;
-        padding: 20px;
-    }
-}
 
 /* Css Reset */
 
@@ -1236,14 +1000,7 @@ main {
     flex-grow: 1;
 }
 
-/*------------ Centrado Navbar ---------------*/
 
-.navbar-brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-}
 
 .filter-title {
     display: flex;
@@ -1365,34 +1122,6 @@ main {
     color: #ffffff;
 }
 
-
-/*Estilos Formularios */
-
-.form-support {
-    display: block;
-    text-align: center;
-    margin-bottom: 8px;
-}
-
-
-
-/* Estilos para los campos del formulario (achicados y centrados) */
-.form-control {
-    display: block;
-    /* Necesario para que el centrado con 'margin' funcione */
-    width: 100%;
-    /* Hacemos que el campo sea más angosto */
-    max-width: 700px;
-    /* Un ancho máximo para pantallas grandes */
-    margin-left: auto;
-    /* Estas dos líneas centran el campo */
-    margin-right: auto;
-    padding: 12px 15px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-}
 
 .form-control:focus {
     outline: none;

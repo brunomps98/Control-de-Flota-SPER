@@ -1,0 +1,77 @@
+/* Estilo principal de la etiqueta footer */
+footer {
+    background-color: rgb(0, 0, 0);
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    height: 80px;
+    bottom: 0;
+    padding-top: 20px;
+    z-index: 100;
+}
+
+footer div h3 {
+    color: #fff;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.footer1 {
+    font-size: 15px;
+}
+
+/* Clase genérica para la barra de footer */
+.footer-bar {
+    position: relative;
+    bottom: unset;
+    height: auto;
+    padding: 15px;
+    background-color: #24303c;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Variantes del footer para páginas específicas */
+.footer-bar-vehicle {
+    position: relative;
+    bottom: unset;
+    height: auto;
+    padding: 15px;
+    background-color: #24303c;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.footer-bar-vehicle-general {
+    position: relative;
+    bottom: unset;
+    height: auto;
+    padding: 15px;
+    background-color: #24303c;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Estilos del footer dentro de la card de detalle de producto */
+.footer-p {
+    display: flex;
+    justify-content: space-between;
+}
+
+.footer-p>div {
+    flex-basis: 48%;
+}
+
+/* Ajuste responsive para el footer de la card */
+@media (max-width: 768px) {
+    .footer-p {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

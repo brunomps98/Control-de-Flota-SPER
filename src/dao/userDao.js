@@ -1,4 +1,4 @@
-import { createHash , isValidatePassword } from "../config/bcryps.js";
+import { createHash, isValidatePassword } from "../config/bcryps.js";
 import { userDao } from "../repository/index.js";
 
 
@@ -7,24 +7,30 @@ class UserDao {
 
     static loginUser = async (req, res) => {
         try {
-            const { username, passw } = req.body;
+            const { username, password } = req.body;
             const user = await userDao.getUserByUsername(username);
+
             if (!user) {
-                req.session.failedAttempts = (req.session.failedAttempts || 0) + 1;
-                throw new Error('Usuario no encontrado');
+                // Envía un error 401 (No autorizado) con un mensaje JSON
+                return res.status(401).json({ message: 'Credenciales inválidas' });
             }
-            const isValidPassword = await isValidatePassword(passw, user.password);
+
+            const isValidPassword = await isValidatePassword(password, user.password);
+
             if (isValidPassword) {
                 req.session.user = user;
-                req.session.failedAttempts = 0; // reset the counter on successful login
-                res.redirect('/vehicle');
+                req.session.failedAttempts = 0;
+                // Envía una respuesta 200 (OK) con un mensaje y los datos del usuario
+                return res.status(200).json({ message: 'Login exitoso', user: user });
             } else {
                 req.session.failedAttempts = (req.session.failedAttempts || 0) + 1;
-                throw new Error('Credenciales inválidas');
+                // Envía un error 401 (No autorizado) con un mensaje JSON
+                return res.status(401).json({ message: 'Credenciales inválidas' });
             }
         } catch (error) {
             console.log('Error de autenticación', error);
-            res.render('login', { error: 'Credenciales inválidas' });
+            // Envía un error 500 (Error interno del servidor)
+            return res.status(500).json({ message: 'Error interno del servidor' });
         }
     }
 
@@ -43,13 +49,13 @@ class UserDao {
             res.redirect('/')
         })
     }
-    
+
     static registerUser = async (req, res) => {
         const { username, unidad, email, passw } = req.body;
         try {
             let password = await createHash(passw);
             console.log(password);
-            const newUser = await userDao.registerUser(username, unidad, email, password); 
+            const newUser = await userDao.registerUser(username, unidad, email, password);
             req.session.user = newUser;
             console.log(newUser);
             res.redirect('/login');
@@ -65,6 +71,6 @@ class UserDao {
             }
         }
     }
-    
+
 }
 export default UserDao;
