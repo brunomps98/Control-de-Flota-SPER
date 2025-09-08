@@ -6,8 +6,8 @@ const Footer = () => {
     <footer>
       <div>
         <h3 className="footer1">
-           Departamento de Seguridad Informatica
-        [cite_start]</h3> [cite: 8]
+          Departamento de Seguridad Informatica
+        </h3>
       </div>
     </footer>
   );

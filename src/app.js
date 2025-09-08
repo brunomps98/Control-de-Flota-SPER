@@ -20,8 +20,8 @@ app.use((req, res, next) => {
 });
 
 
-app.use(express.static(__dirname + "/public"))
-app.use(cors({ origin: "http://localhost:5173", methods: ["GET", "POST", "PUT", "DELETE"] }))
+app.use(express.static("public"))
+app.use(cors({ origin: "http://localhost:5173", methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }))
 
 app.use(cookieParser("CoderCookie"))
 app.use(session({

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './login.css';
+import './Login.css';
 import blackLogo from '../../assets/images/black-logo.png';
 
 const Login = () => {
@@ -20,6 +20,7 @@ const Login = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ username, password }),
+                credentials: 'include',
             });
 
             const data = await response.json();
@@ -28,7 +29,7 @@ const Login = () => {
                 throw new Error(data.message || 'Error al iniciar sesión');
             }
 
-            console.log('Login exitoso:', data);
+         
 
             if (data.user && data.user.isAdmin) {
                 navigate('/vehicle-general');

@@ -34,6 +34,17 @@ class UserDao {
         }
     }
 
+    static getCurrentSession = async (req, res) => {
+        if (req.session.user) {
+            // Si hay un usuario en la sesión, lo devolvemos en formato JSON
+            res.status(200).json({ status: 'success', user: req.session.user });
+        } else {
+            // Si no hay sesión, devolvemos un error de no autorizado
+            res.status(401).json({ status: 'error', message: 'No hay sesión activa' });
+        }
+    }
+
+
     static home = async (req, res) => {
         res.render('home')
     }

@@ -22,7 +22,7 @@ router.use((req, res, next) => {
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, 'public/uploads'));
+        cb(null, 'public/uploads');
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -55,6 +55,9 @@ router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
 
 router.post('/login',limitFailedAttempts, UserDao.loginUser);
 
+router.get('/session/current', UserDao.getCurrentSession);
+
+
 router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), VehicleDao.addVehicleWithImage);
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
@@ -69,6 +72,8 @@ router.delete('/support/:pid', SupportController.deleteTicket);
 /* Ruta para eliminar registros en la pagina de Information */
 
 router.delete('/vehicle/:vid/history/:fieldName', requireAuth, VehicleDao.deleteLastHistoryEntry);
+
+router.get('/vehicles', requireAuth, VehicleDao.getVehiclesForUser);
 
 
 
