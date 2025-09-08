@@ -271,6 +271,44 @@ class VehicleDao {
     }
 
 
+    static getVehiclesForUser = async (req, res) => {
+        try {
+            const user = req.session.user;
+            if (!user) {
+                return res.status(401).json({ message: 'Usuario no autenticado' });
+            }
+
+            // 1. Empezamos con el objeto de filtro (antes llamado 'query')
+            const filter = {};
+            // Obtenemos los posibles filtros desde la URL (req.query)
+            const { dominio, modelo, destino, marca, año, tipo } = req.query;
+
+            // 2. APLICAMOS LA LÓGICA DE FILTROS QUE YA TENÍAS
+            if (dominio) filter.dominio = new RegExp(dominio, 'i');
+            if (modelo) filter.modelo = new RegExp(modelo, 'i');
+            if (destino) filter.destino = new RegExp(destino, 'i');
+            if (marca) filter.marca = new RegExp(marca, 'i');
+            if (año) filter.año = new RegExp(año, 'i');
+            if (tipo) filter.tipo = new RegExp(tipo, 'i');
+
+            // 3. APLICAMOS LA LÓGICA DE ROLES (admin vs. usuario)
+            // Esto se añade al mismo objeto 'filter', por lo que ambas lógicas conviven
+            if (!user.admin) {
+                filter.title = user.unidad;
+            }
+
+            // 4. Ejecutamos la búsqueda con el objeto 'filter' completo
+            const vehicles = await productsModel.find(filter).lean();
+
+            // 5. Devolvemos los vehículos filtrados como JSON
+            res.status(200).json({ docs: vehicles });
+
+        } catch (error) {
+            console.error('Error al obtener vehículos:', error);
+            res.status(500).json({ message: 'Error interno del servidor' });
+        }
+    }
+
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid;
@@ -281,6 +319,8 @@ class VehicleDao {
             res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
         }
     }
+
+
 
 
 }

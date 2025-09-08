@@ -278,12 +278,6 @@ body {
     font-size: 16px;
 }
 
-.titulo-products h1 {
-    margin-top: 25px;
-    color: rgb(0, 0, 0);
-    text-align: center;
-    /* <-- Agregá esta línea para centrar el texto */
-}
 
 /* --------------productDetail-------- */
 .label-filt {
@@ -871,6 +865,7 @@ a {
     z-index: 10;
 
 }
+
 
 
 
@@ -1500,107 +1495,4 @@ main {
     }
 }
 
-/* --- 1. Formulario de Filtros --- */
-.filter-container {
-    width: 100%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-end;
-    /* Alinea los botones con los campos de texto */
-    gap: 15px 20px;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    margin-bottom: 40px;
-    box-sizing: border-box;
-}
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-}
-
-.filter-group label {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.filter-group input {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    min-width: 180px;
-}
-
-.filter-buttons {
-    display: flex;
-    gap: 10px;
-}
-
-/* --- 2. Grilla de Vehículos Adaptable --- */
-.vehicle-grid {
-    display: grid;
-    /* La clave para la grilla automática y responsive: */
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 30px;
-    padding: 0 20px;
-    /* Espacio a los lados de la grilla */
-    margin-bottom: 40px;
-}
-
-/* --- 3. Nuevo Diseño de Tarjetas (Cards) --- */
-.vehicle-card {
-    text-decoration: none;
-    /* Quita el subrayado del link */
-    position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: block;
-    /* Asegura que la tarjeta se comporte como un bloque */
-    aspect-ratio: 4 / 3;
-    /* Proporción para que todas las tarjetas sean iguales */
-}
-
-.vehicle-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.vehicle-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* La imagen cubre todo el espacio sin deformarse */
-}
-
-.vehicle-card-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-    color: white;
-    padding: 30px 15px 15px 15px;
-    box-sizing: border-box;
-}
-
-.vehicle-card-info h3 {
-    margin: 0 0 5px 0;
-    font-size: 1.2rem;
-    font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    /* Pone "..." si el texto es muy largo */
-}
-
-.vehicle-card-info p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #ddd;
-}

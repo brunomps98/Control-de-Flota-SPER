@@ -7,7 +7,7 @@ const Home = () => {
     <div className="home-container"> 
       <header className="top-bar">
         <div className="top-bar-left">
-          <div className="logo">
+          <div className="logoHome">
             <img src={logoSper} alt="Logo Sper" width="60" height="60" />
           </div>
           <div className="title">
@@ -26,7 +26,7 @@ const Home = () => {
         
         <div className="button-login">
           <Link to="/login">
-            <button className="login-btn" Link to="/login" type="button">
+            <button className="login-btn" type="button">
               <span className="cover"></span> 
               Iniciar sesión
             </button>
