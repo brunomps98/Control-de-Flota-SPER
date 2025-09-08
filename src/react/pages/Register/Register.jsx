@@ -5,10 +5,19 @@ import logoSper from '../../assets/images/logo.png';
 const Register = () => {
     return (
         <div className="home-container">
-        <footer className="footer-bar">
-            <p>© 2025 SPER - Departamento de Seguridad Informática</p>
-        </footer>
-    </div >
+
+            <div class="banner-productos">
+                <div class="navbar-r">
+                    <img src={logoSper} alt="Logo SPER" className="logo-r"/>
+                </div>
+            </div>
+
+            <div>
+            <footer className="footer-bar">
+                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+            </footer>
+            </div>
+        </div >
     )
 }
 
