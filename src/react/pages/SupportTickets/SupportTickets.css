@@ -1,0 +1,149 @@
+.top-bar-support {
+    background-color: #24303c;
+    color: white;
+    width: 100%;
+    padding: 20px 30px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.top-bar-support .top-bar-left-support {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.logo-support {
+    margin-right: 15px;
+}
+
+.title-support {
+    display: flex;
+    align-items: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.top-bar-support .support-title {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.top-bar-support .support-title h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+/* --- CONTENEDOR PRINCIPAL Y TÍTULO DE LA LISTA --- */
+
+/* #information-title {
+
+}
+
+*/
+
+.tickets-container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    /* Espacio entre cada tarjeta de ticket */
+}
+
+/* --- ESTILOS DE LAS TARJETAS DE TICKET --- */
+
+.ticket-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.3s ease;
+}
+
+.ticket-card:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-header h2 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+.ticket-body {
+    margin: 15px 0;
+    color: #555;
+}
+
+.ticket-body p {
+    margin: 8px 0;
+    line-height: 1.6;
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.btn-view-case {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-view-case:hover {
+    background-color: #2980b9;
+}
+
+.btn-delete-case {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-delete-case:hover {
+    background-color: #c0392b;
+}
+
+/* --- MENSAJE PARA CUANDO NO HAY TICKETS --- */
+
+.no-tickets-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #777;
+    padding: 50px;
+    background-color: #f9f9f9;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column; 
+  min-height: 100vh;      
+}
+
+/* 2. Estilos para que la sección de contenido principal crezca */
+.page-container main {
+  flex-grow: 1; 
+}

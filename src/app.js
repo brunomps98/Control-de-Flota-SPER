@@ -70,8 +70,9 @@ app.get('/getCookies', (req, res) => {
 });
 
 
-app.use("/", viewRouter)
 app.use("/api", dbRouter);
+app.use("/", viewRouter)
+
 
 
 const httpServer = app.listen(PORT, () => {

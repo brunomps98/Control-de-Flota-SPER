@@ -1,10 +1,13 @@
 export const requireAuth = (req, res, next) => {
     if (req.session && req.session.user) {
+        // Si el usuario está autenticado en la sesión, permite continuar.
         next();
     } else {
-        res.redirect('/login');
+        // Si no está autenticado, devuelve un error 401 en formato JSON.
+        res.status(401).json({ message: 'Acceso no autorizado. Por favor, inicie sesión.' });
     }
 };
+
 
 export const isAdmin = (req, res, next) => {
     if (req.session && req.session.user && req.session.user.admin === true) {

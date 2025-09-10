@@ -19,6 +19,16 @@ class SupportController {
         }
     };
 
+    static getTicketsAPI = async (req, res) => {
+        try {
+            const tickets = await supportRepository.getAllSupportTickets();
+            // ¡IMPORTANTE! En lugar de res.render, devolvemos JSON con res.json
+            res.status(200).json({ tickets: tickets });
+        } catch (error) {
+            res.status(500).json({ message: 'Error al obtener los tickets' });
+        }
+    };
+
     // 3. Obtiene un ticket por su ID y muestra sus detalles
     static renderCasePage = async (req, res) => {
         try {
@@ -40,22 +50,21 @@ class SupportController {
 
 static createTicket = async (req, res) => {
     try {
-        // Los campos de texto del formulario están en req.body
-        const ticketData = req.body;
+        const ticketData = req.body; 
         
         if (req.files && req.files.length > 0) {
-            // Creamos un array con solo los nombres de los archivos
-            // y lo guardamos en la propiedad 'files' de nuestro objeto
-            ticketData.files = req.files.map(file => file.filename);
+            ticketData.files = req.files.map(file => file.filename); 
         }
 
-        // Guardamos el ticket con los datos de texto y los nombres de archivo
-        await supportRepository.addSupportTicket(ticketData);
+        await supportRepository.addSupportTicket(ticketData); 
         
-        res.redirect('/support-tickets');
+        // --- CAMBIO CLAVE: EN LUGAR DE REDIRIGIR, ENVIAMOS UNA RESPUESTA JSON ---
+        res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
+
     } catch (error) {
-        console.error("ERROR AL CREAR TICKET:", error);
-        res.status(500).render('error', { message: 'No se pudo crear el ticket.' });
+        console.error("ERROR AL CREAR TICKET:", error); 
+        // --- CAMBIO CLAVE: ENVIAMOS UN ERROR EN FORMATO JSON ---
+        res.status(500).json({ message: 'No se pudo crear el ticket.' });
     }
 };
 
@@ -70,6 +79,25 @@ static createTicket = async (req, res) => {
             res.status(200).json({ status: "success", message: "Ticket deleted successfully" });
         } catch (error) {
             res.status(500).json({ status: "error", message: error.message });
+        }
+    };
+
+     static getTicketByIdAPI = async (req, res) => {
+        try {
+            const { ticketId } = req.params; // Obtenemos el ID de la URL
+            const ticket = await supportRepository.getSupportTicketById(ticketId);
+
+            if (!ticket) {
+                // Si no se encuentra el ticket, devolvemos un 404
+                return res.status(404).json({ message: 'Ticket no encontrado' });
+            }
+
+            // Si se encuentra, lo devolvemos como JSON
+            res.status(200).json({ ticket: ticket });
+
+        } catch (error) {
+            console.error("Error al obtener el ticket por ID:", error);
+            res.status(500).json({ message: 'Error interno del servidor' });
         }
     };
 }

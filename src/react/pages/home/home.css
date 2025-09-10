@@ -22,7 +22,7 @@
 }
 
 .title h1 {
-    font-size: 1.5em;
+    font-size: 1.0em;
     font-weight: bold;
     margin: 0;
     margin-left: 60px;
@@ -122,6 +122,11 @@
     width: 100px;
     z-index: 10;
 
+}
+
+.h2-home {
+    font-size: 1.9em;
+    align-items: center;
 }
 
 

@@ -595,13 +595,6 @@ button:hover span {
 }
 
 
-.alert-danger {
-    margin: 20px;
-    color: #842029;
-    width: 200px;
-    background-color: #f8d7da;
-    border-color: #f5c2c7;
-}
 
 /* --------------login-------- */
 
@@ -627,11 +620,7 @@ footer div h3 {
 
 
 
-.register {
-    width: 50vh;
-    height: 120vh;
-    padding-top: 45px;
-}
+
 
 .btn-primary a {
     color: white !important;
@@ -642,17 +631,6 @@ footer div h3 {
 
 
 
-.navbar-r {
-    display: flex;
-    justify-content: center;
-
-}
-
-.logo-r {
-    width: 105px;
-
-
-}
 
 /* --------------navBar short-------- */
 
@@ -850,13 +828,6 @@ a {
 }
 
 
-
-
-
-
-
-
-
 .logo {
     position: absolute;
     top: 15px;
@@ -1025,17 +996,9 @@ main {
 
 /* Estilos para la pagina de soporte */
 
-/* Estilos para el titulo de la página */
-.support-title {
 
-    text-align: center;
-    margin-top: 30px;
-    /* Espacio entre la barra del logo y el título "Soporte" */
-}
 
-.mb-32 {
-    margin-bottom: 24px;
-}
+
 
 .support-subtitle {
     text-align: center;
@@ -1048,74 +1011,13 @@ main {
 
 /* Para el boton, osea el elemento visible */
 
-/* Boton enviar datos del support */
 
-.btn-submit {
-    width: 250px;
-    padding: 18px 0;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: white;
-    background-color: #000000;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-}
 
-.btn-submit:hover {
-    background-color: #007a6e;
-}
 
-/* Estilos para la barra superior de la pagina soporte */
 
-.top-bar-support {
-    background-color: #24303c;
-    color: white;
-    width: 100%;
-    padding: 20px 30px;
-    box-sizing: border-box;
-    /* Usamos Flexbox para controlar el layout interno */
-    display: flex;
-    flex-direction: column;
-    /* Apila los elementos hijos verticalmente */
-    align-items: center;
-    /* Centra los elementos hijos horizontalmente */
-}
 
-.top-bar-support .top-bar-left-support {
-    width: 100%;
-    /* Ocupa todo el ancho para poder alinear su contenido */
-    display: flex;
-    justify-content: flex-start;
-    /* Alinea el logo y SPER a la izquierda */
-    align-items: center;
-}
 
-.top-bar-support .support-title {
-    text-align: center;
-    margin-top: 20px;
-    /* Espacio entre la línea del logo y el título principal */
-}
 
-.top-bar-support .support-title h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-}
-
-/* Clases para los elementos internos que ya tenías */
-.logo-support {
-    margin-right: 15px;
-}
-
-.title-support {
-    display: flex;
-    align-items: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #ffffff;
-}
 
 
 .form-control:focus {
@@ -1124,181 +1026,13 @@ main {
     box-shadow: 0 0 5px rgba(0, 150, 136, 0.5);
 }
 
-/* Estilos para las etiquetas, para que se alineen con los campos */
-.form-support {
-    display: block;
-    text-align: center;
-    margin-bottom: 8px;
-    /* Añadimos estas líneas para que la etiqueta se alinee con el campo */
-    width: 80%;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.form-buttons-container {
-    display: flex;
-    /* Activa Flexbox para alinear los elementos en línea */
-    justify-content: center;
-    /* Centra los botones como grupo */
-    gap: 20px;
-    /* Crea un espacio entre los botones */
-    margin-bottom: 50px;
-    /* Mantiene el espacio con el footer */
-}
-
-.title-case {
-    position: center;
-}
-
-#information-title {
-    position: center;
-}
 
 
 
 
-/* Estilos para informacion y case */
-
-/* Contenedor principal para la lista de tickets */
-.tickets-container {
-    max-width: 900px;
-    margin: 30px auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    /* Espacio entre cada tarjeta de ticket */
-}
-
-/* Estilo para cada tarjeta individual en la lista */
-.ticket-card {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease;
-}
-
-.ticket-card:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Encabezado de la tarjeta con el nombre */
-.ticket-header h2 {
-    margin: 0 0 15px 0;
-    color: #333;
-    font-size: 1.5rem;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 10px;
-}
-
-/* Cuerpo de la tarjeta con los detalles */
-.ticket-body {
-    margin: 15px 0;
-    color: #555;
-}
-
-.ticket-body p {
-    margin: 8px 0;
-    line-height: 1.6;
-}
-
-/* Contenedor para los botones de acción */
-.ticket-actions {
-    display: flex;
-    gap: 15px;
-    /* Espacio entre botones */
-    margin-top: 20px;
-}
-
-/* Estilo general para los botones de acción */
-.btn-action {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-/* Botón para ver el caso (azul) */
-.btn-view-case {
-    background-color: #3498db;
-    color: white;
-}
-
-.btn-view-case:hover {
-    background-color: #2980b9;
-}
-
-/* Botón para eliminar (rojo) */
-.btn-delete-case {
-    background-color: #e74c3c;
-    color: white;
-}
-
-.btn-delete-case:hover {
-    background-color: #c0392b;
-}
-
-/* Mensaje para cuando no hay tickets */
-.no-tickets-message {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #777;
-    padding: 50px;
-    background-color: #f9f9f9;
-    border: 2px dashed #ddd;
-    border-radius: 8px;
-}
 
 
 
-
-/* Estilos para la vista de cada case */
-
-.main-case-view {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-    background-color: #f4f7f6;
-}
-
-
-.case-container {
-    width: 100%;
-    max-width: 900px;
-    margin: 0;
-    padding: 40px;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-}
-
-.case-container h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 2.2rem;
-    color: #2c3e50;
-}
-
-.case-container .ticket-header h2 {
-    font-size: 1.8rem;
-    color: #34495e;
-}
-
-.case-container .case-details h3 {
-    font-size: 1.2rem;
-    color: #009688;
-    margin-top: 25px;
-}
 
 /* Estilos para la pagina de Vehicle Information */
 
@@ -1494,5 +1228,3 @@ main {
         /* Ajustamos el margen para un espaciado vertical */
     }
 }
-
-

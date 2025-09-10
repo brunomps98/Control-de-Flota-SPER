@@ -62,7 +62,9 @@ router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), Vehi
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
 
+router.get('/support-tickets', SupportController.getTicketsAPI)
 
+router.get('/support/:ticketId', SupportController.getTicketByIdAPI);
 
 
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);

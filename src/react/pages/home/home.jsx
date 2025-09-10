@@ -18,10 +18,9 @@ const Home = () => {
 
       <div className="banner">
         <div className="content">
-          <h1>SISTEMA DE GESTION Y CONTROL DE FLOTA S.P.E.R</h1>
-          <p>
-            Bienvenido al sistema de control de flota del Servicio Penitenciario de Entre Ríos.
-          </p>
+          <h2 className='h2-home'>
+            Bienvenido al Sistema de Control de Flota del Servicio Penitenciario de Entre Ríos.
+          </h2>
         </div>
         
         <div className="button-login">
@@ -34,7 +33,7 @@ const Home = () => {
         </div>
 
         <div className="button-support">
-            <Link to href="/support">
+            <Link to ="/support">
                 <button className="support-btn" type="button">
                     <span className="cover"></span> 
                     Soporte
