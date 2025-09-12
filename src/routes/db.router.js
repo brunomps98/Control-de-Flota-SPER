@@ -8,17 +8,12 @@ import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
 import SupportController from "../controllers/support.controller.js";
 
-
-
-
-
-const router = Router()
+const router = Router();
 
 router.use((req, res, next) => {
     console.log(`--> Petición llegó a db.router.js: ${req.method} ${req.url}`);
     next();
 });
-
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -41,45 +36,30 @@ const setUserInLocals = (req, res, next) => {
 // Usar el middleware en todas las rutas
 router.use(setUserInLocals);
 
-
-
-
-
-
-
 router.post('/register', UserDao.registerUser);
 
 router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
 
-
-
-router.post('/login',limitFailedAttempts, UserDao.loginUser);
+router.post('/login', limitFailedAttempts, UserDao.loginUser);
 
 router.get('/session/current', UserDao.getCurrentSession);
-
 
 router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), VehicleDao.addVehicleWithImage);
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
 
-router.get('/support-tickets', SupportController.getTicketsAPI)
+// --- CONFLICTO RESUELTO: Se conservan las rutas para la API de React ---
+router.get('/support-tickets', SupportController.getTicketsAPI);
 
 router.get('/support/:ticketId', SupportController.getTicketByIdAPI);
-
 
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
 
 router.delete('/support/:pid', SupportController.deleteTicket);
 
 /* Ruta para eliminar registros en la pagina de Information */
-
 router.delete('/vehicle/:vid/history/:fieldName', requireAuth, VehicleDao.deleteLastHistoryEntry);
 
 router.get('/vehicles', requireAuth, VehicleDao.getVehiclesForUser);
 
-
-
-
-
-
-export default router
+export default router;

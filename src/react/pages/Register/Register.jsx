@@ -1,9 +1,14 @@
+<<<<<<< HEAD
 import React, { useState } from 'react';
 // import { Link } from 'react-router-dom'; // Descomentar si se usa para navegar
+=======
+import { Link } from 'react-router-dom';
+>>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
 import './Register.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Register = () => {
+<<<<<<< HEAD
     // 1. Estado para guardar los datos de todos los inputs
     const [formData, setFormData] = useState({
         username: '',
@@ -50,10 +55,18 @@ const Register = () => {
         <div className="register-page-container">
             <div className="banner-productos">
                 <div className="navbar-r">
+=======
+    return (
+        <div className="home-container">
+
+            <div class="banner-productos">
+                <div class="navbar-r">
+>>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
                     <img src={logoSper} alt="Logo SPER" className="logo-r"/>
                 </div>
             </div>
 
+<<<<<<< HEAD
                 <main>
                
                 <div className="container register">
@@ -142,6 +155,15 @@ const Register = () => {
             </div>
         </div>
     );
+=======
+            <div>
+            <footer className="footer-bar">
+                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+            </footer>
+            </div>
+        </div >
+    )
+>>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
 }
 
 export default Register;

@@ -24,23 +24,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/register" element={<Register />} />
         <Route path="/support" element={<Support />} />
         <Route path="/support-tickets" element={<SupportTickets />} />
-        <Route path="/case" element={<Case />} />
-
-
-        {/* --- Rutas dinamicas --- */}
+        
+        {/* --- Ruta dinámica para un caso específico --- */}
         <Route path="/case/:ticketId" element={<Case />} />
 
         {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
         <Route element={<Layout />}>
           <Route path="/vehicle" element={<Vehicle />} />
-
-
           {/*
-            Paginas que necesitan el layout
+            Aquí irían otras páginas que necesiten el Layout (ej: Navbar y Footer consistentes)
           */}
         </Route>
-
-
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

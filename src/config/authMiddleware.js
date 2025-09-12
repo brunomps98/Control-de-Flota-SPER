@@ -8,15 +8,14 @@ export const requireAuth = (req, res, next) => {
     }
 };
 
-
 export const isAdmin = (req, res, next) => {
     if (req.session && req.session.user && req.session.user.admin === true) {
-        next(); 
+        next();
     } else {
+        // Podrías cambiar esto a res.status(403).json({ message: '...'}) también
         res.status(403).send('Acceso denegado. Debes ser administrador para acceder a esta página.');
     }
 };
-
 
 export const limitFailedAttempts = (req, res, next) => {
     const MAX_FAILED_ATTEMPTS = 3;
@@ -28,6 +27,7 @@ export const limitFailedAttempts = (req, res, next) => {
 
         if (currentTime < blockEndTime) {
             const remainingTime = Math.ceil((blockEndTime - currentTime) / 1000);
+            // Podrías cambiar esto a res.status(403).json({ message: '...'}) también
             res.status(403).send(`Demasiados intentos fallidos. Por favor, inténtelo de nuevo después de ${remainingTime} segundos.`);
         } else {
             req.session.failedAttempts = 0;

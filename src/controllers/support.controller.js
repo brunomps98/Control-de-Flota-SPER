@@ -2,14 +2,13 @@ import { supportRepository } from "../repository/index.js";
 
 class SupportController {
 
-    // --- MÉTODOS PARA RENDERIZAR VISTAS ---
+    // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
+    // (Estos se pueden borrar si ya no usás Handlebars para estas páginas)
 
-    // 1. Muestra el formulario para crear un ticket
     static renderSupportForm = (req, res) => {
         res.render('support');
     };
 
-    // 2. Obtiene todos los tickets y los muestra en la página de información
     static renderSupportTicketsPage = async (req, res) => {
         try {
             const tickets = await supportRepository.getAllSupportTickets();
@@ -19,56 +18,63 @@ class SupportController {
         }
     };
 
-    static getTicketsAPI = async (req, res) => {
-        try {
-            const tickets = await supportRepository.getAllSupportTickets();
-            // ¡IMPORTANTE! En lugar de res.render, devolvemos JSON con res.json
-            res.status(200).json({ tickets: tickets });
-        } catch (error) {
-            res.status(500).json({ message: 'Error al obtener los tickets' });
-        }
-    };
-
-    // 3. Obtiene un ticket por su ID y muestra sus detalles
     static renderCasePage = async (req, res) => {
         try {
-            const ticketId = req.params.tid; // El ID viene de la URL
+            const ticketId = req.params.tid;
             const ticket = await supportRepository.getSupportTicketById(ticketId);
             if (!ticket) {
                 return res.status(404).render('error', { message: 'Ticket no encontrado' });
             }
-
-
-
             res.render('case', { ticket });
         } catch (error) {
             res.status(500).render('error', { message: 'Error al cargar el caso' });
         }
     };
 
-    // --- MÉTODOS DE API ---
 
-static createTicket = async (req, res) => {
-    try {
-        const ticketData = req.body; 
-        
-        if (req.files && req.files.length > 0) {
-            ticketData.files = req.files.map(file => file.filename); 
+    // --- MÉTODOS DE API (PARA REACT) ---
+
+    // Obtiene TODOS los tickets para la API
+    static getTicketsAPI = async (req, res) => {
+        try {
+            const tickets = await supportRepository.getAllSupportTickets();
+            res.status(200).json({ tickets: tickets });
+        } catch (error) {
+            res.status(500).json({ message: 'Error al obtener los tickets' });
         }
+    };
 
-        await supportRepository.addSupportTicket(ticketData); 
-        
-        // --- CAMBIO CLAVE: EN LUGAR DE REDIRIGIR, ENVIAMOS UNA RESPUESTA JSON ---
-        res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
+    // Obtiene UN ticket por su ID para la API
+    static getTicketByIdAPI = async (req, res) => {
+        try {
+            const { ticketId } = req.params;
+            const ticket = await supportRepository.getSupportTicketById(ticketId);
+            if (!ticket) {
+                return res.status(404).json({ message: 'Ticket no encontrado' });
+            }
+            res.status(200).json({ ticket: ticket });
+        } catch (error) {
+            console.error("Error al obtener el ticket por ID:", error);
+            res.status(500).json({ message: 'Error interno del servidor' });
+        }
+    };
 
-    } catch (error) {
-        console.error("ERROR AL CREAR TICKET:", error); 
-        // --- CAMBIO CLAVE: ENVIAMOS UN ERROR EN FORMATO JSON ---
-        res.status(500).json({ message: 'No se pudo crear el ticket.' });
-    }
-};
+    // Crea un nuevo ticket desde la API
+    static createTicket = async (req, res) => {
+        try {
+            const ticketData = req.body;
+            if (req.files && req.files.length > 0) {
+                ticketData.files = req.files.map(file => file.filename);
+            }
+            await supportRepository.addSupportTicket(ticketData);
+            res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
+        } catch (error) {
+            console.error("ERROR AL CREAR TICKET:", error);
+            res.status(500).json({ message: 'No se pudo crear el ticket.' });
+        }
+    };
 
-    // 5. Elimina un ticket 
+    // Elimina un ticket desde la API
     static deleteTicket = async (req, res) => {
         try {
             const id = req.params.pid;
@@ -81,27 +87,6 @@ static createTicket = async (req, res) => {
             res.status(500).json({ status: "error", message: error.message });
         }
     };
-
-     static getTicketByIdAPI = async (req, res) => {
-        try {
-            const { ticketId } = req.params; // Obtenemos el ID de la URL
-            const ticket = await supportRepository.getSupportTicketById(ticketId);
-
-            if (!ticket) {
-                // Si no se encuentra el ticket, devolvemos un 404
-                return res.status(404).json({ message: 'Ticket no encontrado' });
-            }
-
-            // Si se encuentra, lo devolvemos como JSON
-            res.status(200).json({ ticket: ticket });
-
-        } catch (error) {
-            console.error("Error al obtener el ticket por ID:", error);
-            res.status(500).json({ message: 'Error interno del servidor' });
-        }
-    };
 }
-
-
 
 export default SupportController;

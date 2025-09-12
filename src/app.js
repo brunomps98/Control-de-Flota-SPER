@@ -19,7 +19,6 @@ app.use((req, res, next) => {
     next();
 });
 
-
 app.use(express.static("public"))
 app.use(cors({ origin: "http://localhost:5173", methods: ["GET", "POST", "PUT", "DELETE"], credentials: true }))
 
@@ -34,15 +33,10 @@ app.use(session({
     saveUninitialized: true
 }))
 
-
-
 const PORT = process.env.PORT || 8080;
-
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-
-
 
 app.engine("handlebars", handlebars.engine())
 app.set('view engine', 'handlebars');
@@ -50,14 +44,11 @@ app.set("views", __dirname + "/views")
 
 app.get('/setSession', (req, res) => {
     req.session.user = 'userName',
-        req.session.admin = true
-
+    req.session.admin = true
     res.send('Usuario Logueado')
 })
 
 app.get('/getSession', (req, res) => {
-
-
     res.send(req.session.user)
 })
 
@@ -69,11 +60,8 @@ app.get('/getCookies', (req, res) => {
     res.send(req.cookies)
 });
 
-
 app.use("/api", dbRouter);
-app.use("/", viewRouter)
-
-
+app.use("/", viewRouter);
 
 const httpServer = app.listen(PORT, () => {
     try {
@@ -85,6 +73,3 @@ const httpServer = app.listen(PORT, () => {
     }
 });
 connectToDB()
-
-
-
