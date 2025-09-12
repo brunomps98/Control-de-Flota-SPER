@@ -13,6 +13,12 @@ import Register from './pages/Register/Register';
 import Support from './pages/Support/Support';
 import SupportTickets from './pages/SupportTickets/SupportTickets';
 import Case from './pages/Case/Case';
+import RealTimeVehicle from './pages/RealTimeVehicle/RealTimeVehicle';
+import EdditVehicle from './pages/EdditVehicle/EdditVehicle';
+import VehicleDetail from './pages/VehicleDetail/VehicleDetail';
+import VehicleInformation from './pages/VehicleInformation/VehicleInformation';
+
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -25,15 +31,18 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/support" element={<Support />} />
         <Route path="/support-tickets" element={<SupportTickets />} />
 
+
         {/* --- Ruta dinámica para un caso específico --- */}
         <Route path="/case/:ticketId" element={<Case />} />
 
         {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
         <Route element={<Layout />}>
           <Route path="/vehicle" element={<Vehicle />} />
-          {/*
-            Aquí irían otras páginas que necesiten el Layout (ej: Navbar y Footer consistentes)
-          */}
+          <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
+          <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
+          <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
+          <Route path="/vehicle-information/:cid" element={<VehicleInformation />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

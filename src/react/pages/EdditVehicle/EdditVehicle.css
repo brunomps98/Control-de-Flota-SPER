@@ -1,0 +1,92 @@
+/* --- Estilos para el Formulario de Editar Vehículo --- */
+
+#formEditVehicle {
+    flex-grow: 1;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    flex-direction: column;
+    width: 100%;
+    background: #24303c;
+    padding: 60px;
+    border-radius: 4px;
+    font-family: 'calibri';
+    color: white;
+    box-shadow: 7px 13px 37px #000;
+}
+
+#formEditVehicle h2 {
+    text-align: center !important;
+    font-size: 45px;
+    line-height: 40px;
+}
+
+.title-add-product {
+    width: 900px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* --- Estructura de los campos del formulario --- */
+.desc-product {
+    width: 650px;
+    margin: 15px;
+}
+
+.name-product {
+    width: 250px;
+    margin: 15px;
+}
+
+.stock-code-price {
+    display: flex;
+    flex-direction: row;
+}
+
+.stock-product,
+.code-product,
+.price-product {
+    margin: 15px;
+}
+
+/* Botón específico de este formulario */
+.botons {
+    width: 100%;
+    background: #1f53c5;
+    border: none;
+    padding: 12px;
+    color: white;
+    margin: 16px 0;
+    font-size: 16px;
+}
+
+/*    .button-reg {
+
+}*/
+
+/* --- ESTILOS RESPONSIVE ESPECÍFICOS --- */
+
+@media (max-width: 768px) {
+    #formEditVehicle {
+        padding: 20px;
+    }
+
+    #formEditVehicle h2 {
+        font-size: 28px;
+    }
+
+    .stock-code-price {
+        flex-direction: column;
+    }
+
+    .desc-product,
+    .name-product,
+    .stock-product,
+    .code-product,
+    .price-product {
+        width: 100%;
+        margin: 10px 0;
+    }
+}

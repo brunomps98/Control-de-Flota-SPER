@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     },
     dominio: {
         type: String,
-        unique: true, // Se asegura que el código sea único
+        unique: true, 
         required: false
     },
     kilometros: {

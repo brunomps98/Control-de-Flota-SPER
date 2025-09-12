@@ -38,6 +38,8 @@ router.use(setUserInLocals);
 
 router.post('/register', UserDao.registerUser);
 
+router.get("/vehicle/:cid", requireAuth, VehicleDao.getVehicleByIdAPI);
+
 router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
 
 router.post('/login', limitFailedAttempts, UserDao.loginUser);

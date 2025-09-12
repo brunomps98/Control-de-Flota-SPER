@@ -1,14 +1,27 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo.png';
 import './Navbar.css';
 
 const Navbar = ({ user }) => {
-  // Si el usuario no está logueado (user no existe), no renderizamos nada o un navbar alternativo.
-  // En este caso, retornamos null para no mostrar nada si no hay sesión.
+  const navigate = useNavigate();
+
+  // Si el usuario no está logueado, no renderizamos nada.
   if (!user) {
     return null;
   }
+
+  // Función para manejar el cierre de sesión
+  const handleLogout = async () => {
+    try {
+      // Llama a la ruta de la API para destruir la sesión en el backend
+      await fetch('/api/logout', { method: 'POST' });
+      // Redirige al usuario a la página de login
+      navigate('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -20,18 +33,15 @@ const Navbar = ({ user }) => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link active" aria-current="page" to="/realtimevehicle">Cargar Vehiculo</Link>
+              <Link className="nav-link active" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
             </li>
 
-            {/* Si el usuario es admin, muestra "Flota General" */}
-            {user.admin && (
+            {/* Lógica para mostrar "Flota General" o "Flota" */}
+            {user.admin ? (
               <li className="nav-item">
-                <Link className="nav-link" to="/vehiclegeneral">Flota General</Link>
+                <Link className="nav-link" to="/vehicle">Flota General</Link>
               </li>
-            )}
-
-            {/* Si el usuario NO es admin, muestra "Flota" */}
-            {!user.admin && (
+            ) : (
               <li className="nav-item">
                 <Link className="nav-link" to="/vehicle">Flota</Link>
               </li>
@@ -41,24 +51,28 @@ const Navbar = ({ user }) => {
               <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Unidades
               </a>
+              {/*
+                AQUÍ ESTÁ LA CORRECCIÓN:
+                Se cambió el parámetro "?unidad=..." por "?title=..."
+                y el valor del parámetro ahora es el nombre completo de la unidad.
+              */}
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                {/* Lógica para mostrar las unidades según los permisos del usuario */}
-                {user.dg && <li><a className="dropdown-item" href="?unidad=dg">Direccion General</a></li>}
-                {user.up1 && <li><a className="dropdown-item" href="?unidad=up1">Unidad Penal 1</a></li>}
-                {user.up3 && <li><a className="dropdown-item" href="?unidad=up3">Unidad Penal 3</a></li>}
-                {user.up4 && <li><a className="dropdown-item" href="?unidad=up4">Unidad Penal 4</a></li>}
-                {user.up5 && <li><a className="dropdown-item" href="?unidad=up5">Unidad Penal 5</a></li>}
-                {user.up6 && <li><a className="dropdown-item" href="?unidad=up6">Unidad Penal 6</a></li>}
-                {user.up7 && <li><a className="dropdown-item" href="?unidad=up7">Unidad Penal 7</a></li>}
-                {user.up8 && <li><a className="dropdown-item" href="?unidad=up8">Unidad Penal 8</a></li>}
-                {user.up9 && <li><a className="dropdown-item" href="?unidad=up9">Unidad Penal 9</a></li>}
-                {user.inst && <li><a className="dropdown-item" href="?unidad=inst">Instituto</a></li>}
-                {user.inst && <li><a className="dropdown-item" href="?unidad=trat">Tratamiento</a></li>} 
+                {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General">Direccion General</Link></li>}
+                {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1">Unidad Penal 1</Link></li>}
+                {user.up3 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3">Unidad Penal 3</Link></li>}
+                {user.up4 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 4">Unidad Penal 4</Link></li>}
+                {user.up5 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 5">Unidad Penal 5</Link></li>}
+                {user.up6 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 6">Unidad Penal 6</Link></li>}
+                {user.up7 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 7">Unidad Penal 7</Link></li>}
+                {user.up8 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 8">Unidad Penal 8</Link></li>}
+                {user.up9 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 9">Unidad Penal 9</Link></li>}
+                {user.inst && <li><Link className="dropdown-item" to="/vehicle?title=Instituto">Instituto</Link></li>}
+                {user.trat && <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento">Tratamiento</Link></li>}
               </ul>
             </li>
 
             <li className="nav-item">
-              <a className="nav-link" href="/" tabIndex="-1" aria-disabled="true">LogOut</a>
+              <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
             </li>
           </ul>
           <span className="navbar-text text-white">

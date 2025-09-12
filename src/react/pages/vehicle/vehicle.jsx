@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 
@@ -7,31 +7,38 @@ const Vehicle = () => {
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // El estado de los filtros se inicializa a partir de la URL
     const [filters, setFilters] = useState({
-        dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: ''
+        dominio: searchParams.get('dominio') || '',
+        modelo: searchParams.get('modelo') || '',
+        destino: searchParams.get('destino') || '',
+        marca: searchParams.get('marca') || '',
+        año: searchParams.get('año') || '',
+        tipo: searchParams.get('tipo') || '',
+        title: searchParams.get('title') || ''
     });
 
-    const fetchVehicles = async (queryParams = '') => {
-        setLoading(true);
-        try {
-            const response = await fetch(`/api/vehicles?${queryParams}`, {
-                credentials: 'include'
-            });
-            if (!response.ok) {
-                throw new Error('La respuesta de la red no fue exitosa');
-            }
-            const data = await response.json();
-            setVehicles(data.docs || []);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchVehicles = async () => {
+            setLoading(true);
+            try {
+                const queryParams = searchParams.toString();
+                const response = await fetch(`/api/vehicles?${queryParams}`, {
+                    credentials: 'include'
+                });
+                if (!response.ok) throw new Error('La respuesta de la red no fue exitosa');
+                const data = await response.json();
+                setVehicles(data.docs || []);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchVehicles();
-    }, []);
+    }, [searchParams]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -43,15 +50,20 @@ const Vehicle = () => {
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        const queryParams = new URLSearchParams(filters).toString();
-        fetchVehicles(queryParams);
+        const newFilters = {};
+        for (const key in filters) {
+            if (filters[key]) {
+                newFilters[key] = filters[key];
+            }
+        }
+        setSearchParams(newFilters);
     };
     
     const handleClearFilters = () => {
         setFilters({
-            dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: ''
+            dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
         });
-        fetchVehicles();
+        setSearchParams({});
     };
 
     if (error) return <div>Error al cargar los datos: {error}</div>;
@@ -62,6 +74,7 @@ const Vehicle = () => {
                 <h1>Flota de Vehículos</h1>
             </div>
 
+            {/* --- FORMULARIO DE FILTROS COMPLETO --- */}
             <form className="filter-container" onSubmit={handleFilterSubmit}>
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
@@ -99,12 +112,9 @@ const Vehicle = () => {
                         <VehicleCard key={vehicle._id} vehicle={vehicle} />
                     ))
                 ) : (
-                    // No mostramos este mensaje mientras carga la primera vez
                     !loading && <p style={{ textAlign: 'center' }}>No se encontraron vehículos.</p>
                 )}
             </div>
-
-            
         </>
     );
 };

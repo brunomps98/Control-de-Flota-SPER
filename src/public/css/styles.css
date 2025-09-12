@@ -142,16 +142,8 @@ footer div h3 {
 }
 
 
-/* --- ESTILOS ESPECÍFICOS DE PÁGINAS (PARA SER MOVIDOS LUEGO) --- */
 
-/* Formulario de Editar Vehículo */
-#formEditVehicle {
-    flex-grow: 1; margin: 0 auto; display: flex; align-items: center; align-content: center;
-    flex-direction: column; width: 100%; background: #24303c; padding: 60px;
-    border-radius: 4px; font-family: 'calibri'; color: white; box-shadow: 7px 13px 37px #000;
-}
-#formEditVehicle h2 { text-align: center !important; font-size: 45px; line-height: 40px; }
-#formEditVehicle .botons { width: 100%; background: #1f53c5; border: none; padding: 12px; color: white; margin: 16px 0; font-size: 16px; }
+
 
 /* Formulario de Agregar Vehículo */
 #formProduct {
@@ -159,8 +151,6 @@ footer div h3 {
     flex-direction: column; width: 100%; background: #24303c; padding: 60px;
     border-radius: 4px; font-family: 'calibri'; color: white; box-shadow: 7px 13px 37px #000;
 }
-.title-add-product { width: 900px; display: flex; justify-content: center; align-items: center; }
-.name-desc { display: flex; flex-direction: row; }
 .name-product { width: 250px; margin: 15px; }
 .desc-product { width: 650px; margin: 15px; }
 .stock-code-price { display: flex; flex-direction: row; }
@@ -246,8 +236,5 @@ footer div h3 {
     .content-p { flex-direction: column; align-items: center; }
     .vehicle-image-p, .vehicle-info-p { width: 100%; margin-left: 0; text-align: center; }
     .footer-p { flex-direction: column; gap: 10px; }
-    #formProduct, #formEditVehicle { padding: 20px; }
-    #formProduct h2, #formEditVehicle h2 { font-size: 28px; }
-    .name-desc, .stock-code-price { flex-direction: column; }
     .name-product, .desc-product, .stock-product, .code-product, .price-product, .url-product { width: 100%; margin: 10px 0; }
 }

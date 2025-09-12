@@ -1,0 +1,104 @@
+/* --- ESTILO PARA LA BARRA DE BOTONES EXTERNA --- */
+
+.action-footer {
+    /* Alineación de la barra completa */
+    /* Usa el mismo max-width que tenga tu ficha (.card-p) para que coincidan */
+    max-width: 960px;
+    /* Centra la barra en la página y le da espacio superior */
+    margin: 20px auto;
+
+    /* Alineación de los botones dentro de la barra */
+    display: flex;
+    justify-content: flex-end; /* Empuja los botones a la derecha */
+    gap: 10px;
+}
+
+/* --- Estilos de los botones (sin cambios) --- */
+
+.action-btn {
+    padding: 9px 20px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+.btn-primary:hover { background-color: #0069d9; }
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #4A5568;
+    border-color: #CBD5E0;
+}
+.btn-secondary:hover { background-color: #F7FAFC; }
+
+.destructive-btn {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+.destructive-btn:hover { background-color: #c82333; }
+
+
+/* --- AJUSTE RESPONSIVE --- */
+
+@media (max-width: 768px) {
+    .action-footer {
+        flex-direction: column;   /* Apila los botones en una columna */
+        align-items: stretch;   /* Los estira a lo ancho para que sean fáciles de tocar */
+        margin-left: 15px;      /* Añade un margen en móvil para que no pegue a los bordes */
+        margin-right: 15px;
+    }
+}
+
+
+
+@media print {
+
+    /* 1. Ocultamos todo lo que no queremos en el papel */
+    .action-footer,
+    .h6-imp,
+    .navbar-container /* Asumo que tu barra de navegación tiene una clase así, ajústala si es necesario */ {
+        display: none !important;
+    }
+
+    /* 2. Reseteamos el layout para que el contenido fluya */
+    body, html, .body-p {
+        overflow-y: visible !important; /* ¡La clave! Quitamos el scroll */
+        height: auto !important;        /* Dejamos que el contenido determine la altura */
+        background: none !important;    /* Fondo blanco por si acaso */
+    }
+
+    /* 3. Nos aseguramos de que la ficha ocupe todo el ancho y se vea bien */
+    .card-p {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important; /* Quitamos sombras que gastan tinta */
+    }
+
+    /* Opcional: Evitar que la imagen del vehículo se corte entre páginas */
+    .vehicle-image-p {
+        page-break-inside: avoid;
+    }
+}

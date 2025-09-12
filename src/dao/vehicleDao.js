@@ -6,16 +6,14 @@ import { productsModel } from "../models/vehicle.model.js";
 class VehicleDao {
 
     static addVehicleWithImage = async (req, res) => {
-
-
         try {
+            // --- CORRECCIÓN: Se añade 'description' a la lista de variables ---
             const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, usuario } = req.body;
             const thumbnail = req.files.map(file => file.filename);
+
             const product = {
                 title,
-                description,
                 dominio,
-                kilometros,
                 destino,
                 anio,
                 modelo,
@@ -23,18 +21,22 @@ class VehicleDao {
                 chasis,
                 motor,
                 cedula,
-                service,
-                rodado,
-                reparaciones,
                 marca,
+                usuario,
                 thumbnail,
-                usuario
+                description: [description],
+                kilometros: [kilometros],
+                service: [service],
+                rodado: [rodado],
+                reparaciones: [reparaciones]
             };
+
             const newProduct = await productsModel.create(product);
 
             res.status(201).json(newProduct);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            console.error("Error al crear vehículo:", error);
+            res.status(500).json({ message: "Error interno del servidor", error: error.message });
         }
     }
 
@@ -271,6 +273,26 @@ class VehicleDao {
     }
 
 
+    static getVehicleByIdAPI = async (req, res) => {
+        try {
+            const { cid } = req.params; // Obtenemos el ID de la URL
+            const vehicle = await productsModel.findById(cid).lean();
+
+            if (!vehicle) {
+                // Si no se encuentra el vehículo, devolvemos un 404
+                return res.status(404).json({ message: 'Vehículo no encontrado' });
+            }
+
+            // Si se encuentra, lo devolvemos como JSON para que React lo pueda usar
+            res.status(200).json({ vehicle: vehicle });
+
+        } catch (error) {
+            console.error("Error al obtener vehículo por ID para la API:", error);
+            res.status(500).json({ message: 'Error interno del servidor' });
+        }
+    };
+
+
     static getVehiclesForUser = async (req, res) => {
         try {
             const user = req.session.user;
@@ -278,12 +300,11 @@ class VehicleDao {
                 return res.status(401).json({ message: 'Usuario no autenticado' });
             }
 
-            // 1. Empezamos con el objeto de filtro (antes llamado 'query')
             const filter = {};
             // Obtenemos los posibles filtros desde la URL (req.query)
-            const { dominio, modelo, destino, marca, año, tipo } = req.query;
+            const { dominio, modelo, destino, marca, año, tipo, title } = req.query;
 
-            // 2. APLICAMOS LA LÓGICA DE FILTROS QUE YA TENÍAS
+            // Aplicamos los filtros de texto del formulario
             if (dominio) filter.dominio = new RegExp(dominio, 'i');
             if (modelo) filter.modelo = new RegExp(modelo, 'i');
             if (destino) filter.destino = new RegExp(destino, 'i');
@@ -291,16 +312,18 @@ class VehicleDao {
             if (año) filter.año = new RegExp(año, 'i');
             if (tipo) filter.tipo = new RegExp(tipo, 'i');
 
-            // 3. APLICAMOS LA LÓGICA DE ROLES (admin vs. usuario)
-            // Esto se añade al mismo objeto 'filter', por lo que ambas lógicas conviven
-            if (!user.admin) {
+            // --- LÓGICA MEJORADA PARA EL FILTRO DE UNIDAD ---
+            if (title) {
+                // Si la URL pide un 'title' (ej: desde la NavBar), ese es el filtro que usamos.
+                filter.title = new RegExp(title, 'i');
+            } else if (!user.admin) {
+                // Si la URL NO pide un 'title', y el usuario NO es admin,
+                // entonces filtramos por la unidad del usuario logueado.
                 filter.title = user.unidad;
             }
+            // Si el usuario es admin y no se especifica un 'title', no se aplica ningún filtro de unidad.
 
-            // 4. Ejecutamos la búsqueda con el objeto 'filter' completo
             const vehicles = await productsModel.find(filter).lean();
-
-            // 5. Devolvemos los vehículos filtrados como JSON
             res.status(200).json({ docs: vehicles });
 
         } catch (error) {

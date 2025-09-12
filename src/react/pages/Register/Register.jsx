@@ -130,4 +130,3 @@ const Register = () => {
 }
 
 export default Register;
-// Se eliminó la llave '}' extra que causaba un error de sintaxis.
