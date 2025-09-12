@@ -24,7 +24,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/register" element={<Register />} />
         <Route path="/support" element={<Support />} />
         <Route path="/support-tickets" element={<SupportTickets />} />
-        
+
         {/* --- Ruta dinámica para un caso específico --- */}
         <Route path="/case/:ticketId" element={<Case />} />
 

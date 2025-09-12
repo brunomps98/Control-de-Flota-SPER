@@ -1,14 +1,9 @@
-<<<<<<< HEAD
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom'; // Descomentar si se usa para navegar
-=======
-import { Link } from 'react-router-dom';
->>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
+// import { Link } from 'react-router-dom'; // Se mantiene comentado ya que no se usa en este formulario
 import './Register.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Register = () => {
-<<<<<<< HEAD
     // 1. Estado para guardar los datos de todos los inputs
     const [formData, setFormData] = useState({
         username: '',
@@ -43,43 +38,27 @@ const Register = () => {
         // Si todo está bien, mostramos los datos y los preparamos para el envío
         console.log('Datos a enviar al backend:', formData);
         
-        // Aquí iría la lógica para enviar los datos a tu API, por ejemplo:
-        // fetch('/register', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(formData)
-        // }).then(response => ...).catch(error => ...);
+        // Aquí iría la lógica para enviar los datos a tu API
+        // fetch('/api/register', { method: 'POST', ... });
     };
 
     return (
         <div className="register-page-container">
             <div className="banner-productos">
                 <div className="navbar-r">
-=======
-    return (
-        <div className="home-container">
-
-            <div class="banner-productos">
-                <div class="navbar-r">
->>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
                     <img src={logoSper} alt="Logo SPER" className="logo-r"/>
                 </div>
             </div>
 
-<<<<<<< HEAD
-                <main>
-               
+            <main>
                 <div className="container register">
                     <div className="title-r">
                         <h1>Registro</h1>
                     </div>
-                    {/* 4. Quitamos action/method y usamos onSubmit */}
+                    
                     <form onSubmit={handleSubmit}>
-                        {/* Campo de Nombre de usuario */}
                         <div className="mb-3">
-                           
                             <label htmlFor="exampleInputUsername" className="form-label">Nombre de usuario</label>
-                            {/* 6. Conectamos el input al estado con 'value' y 'onChange' */}
                             <input 
                                 type="text" 
                                 className="form-control" 
@@ -90,7 +69,6 @@ const Register = () => {
                             />
                         </div>
 
-                        {/* Campo de Unidad */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputUnidad" className="form-label">Unidad</label>
                             <input 
@@ -103,7 +81,6 @@ const Register = () => {
                             />
                         </div>
 
-                        {/* Campo de Email */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputEmail1" className="form-label">Email</label>
                             <input 
@@ -118,7 +95,6 @@ const Register = () => {
                             <div id="emailHelp" className="form-text">Nunca compartiremos su correo electrónico con nadie más.</div>
                         </div>
 
-                        {/* Campo de Contraseña */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputPassword1" className="form-label">Contraseña</label>
                             <input 
@@ -134,18 +110,14 @@ const Register = () => {
                         <div className="text-center">
                             <button type="submit" className="btn btn-primary">Registrarse</button> 
                         </div>
-                        
-                        
                     </form>
 
-                    
                     {error && (
                         <div className="alert alert-danger mt-3" role="alert">
                             {error}
                         </div>
                     )}
                 </div>
-            
             </main>
 
             <div>
@@ -155,15 +127,7 @@ const Register = () => {
             </div>
         </div>
     );
-=======
-            <div>
-            <footer className="footer-bar">
-                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
-            </footer>
-            </div>
-        </div >
-    )
->>>>>>> 40402f90bc4202fb56023d534e577ce34bb6e75e
 }
 
 export default Register;
+// Se eliminó la llave '}' extra que causaba un error de sintaxis.
