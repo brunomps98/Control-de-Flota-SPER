@@ -7,3 +7,6 @@ node_modules
 # Archivos comprimidos 
 *.rar
 *.zip
+
+# Carpeta de build de producción
+dist/

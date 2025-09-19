@@ -25,6 +25,7 @@ const RealTimeVehicle = () => {
         thumbnail: [] // Para guardar los archivos de imagen
     });
 
+
     // Estados para la retroalimentación al usuario
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
@@ -33,7 +34,7 @@ const RealTimeVehicle = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                // Suponiendo que tienes una ruta de API para obtener la sesión actual
+
                 const response = await fetch('/api/session/current');
                 if (response.ok) {
                     const userData = await response.json();
@@ -118,15 +119,25 @@ const RealTimeVehicle = () => {
                     <div className="name-desc">
                         <div className="name-product">
                             <p>Establecimiento (Título de la Tarjeta)</p>
-                            <input
+                            <select
                                 className="controls"
-                                type="text"
                                 name="title"
                                 value={formData.title}
-                                onChange={handleChange} /* Permite que el usuario edite el campo */
-                                placeholder="Ej: Unidad Penal N°1, Infantería"
-                                required /* Hace que el campo sea obligatorio */
-                            />
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="Direccion General">Dirección General</option>
+                                <option value="Unidad Penal 1">Unidad Penal 1</option>
+                                <option value="Unidad Penal 3">Unidad Penal 3</option>
+                                <option value="Unidad Penal 4">Unidad Penal 4</option>
+                                <option value="Unidad Penal 5">Unidad Penal 5</option>
+                                <option value="Unidad Penal 6">Unidad Penal 6</option>
+                                <option value="Unidad Penal 7">Unidad Penal 7</option>
+                                <option value="Unidad Penal 8">Unidad Penal 8</option>
+                                <option value="Unidad Penal 9">Unidad Penal 9</option>
+                                <option value="Instituto">Instituto</option>
+                                <option value="Tratamiento">Tratamiento</option>
+                            </select>
                         </div>
                         <div className="desc-product">
                             <p>Descripción de estado de Vehículo</p>
