@@ -69,24 +69,72 @@
 /* --- ESTILOS RESPONSIVE ESPECÍFICOS --- */
 
 @media (max-width: 768px) {
+
+    /* Contenedor principal */
     #formEditVehicle {
-        padding: 20px;
+        padding: 50px;
     }
 
+    /* Título centrado */
     #formEditVehicle h2 {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .title-add-product {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    .title-add-product .title-add {
+        text-align: center;
+        width: 100%;
         font-size: 28px;
     }
 
+    /* Contenedor de campos: flex wrap */
     .stock-code-price {
-        flex-direction: column;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        /* espacio entre columnas */
+        justify-content: space-between;
     }
 
-    .desc-product,
-    .name-product,
+    /* Campos pequeños: ocupan 50% cada uno */
     .stock-product,
     .code-product,
-    .price-product {
+    .price-product,
+    .name-product {
+        flex: 1 1 calc(50% - 10px);
+        /* cada uno ocupa la mitad menos el gap */
+        margin: 5px 0;
+        width: auto;
+        /* eliminar ancho fijo heredado */
+    }
+
+    /* Campos grandes: descripción, imágenes u otros */
+    .desc-product,
+    .url-product {
+        flex: 1 1 100%;
+        /* ocupan toda la fila */
+        width: auto;
+        margin: 5px 0;
+    }
+
+    /* Botón centrado */
+    .button-reg {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 100%;
-        margin: 10px 0;
+        margin-top: 15px;
+    }
+
+    .button-reg .botons {
+        width: 80%;
+        max-width: 300px;
     }
 }

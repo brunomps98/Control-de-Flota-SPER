@@ -1,81 +1,103 @@
-/* --- ESTILOS DEL HEADER DE SOPORTE --- */
+    /* --- ESTILOS DEL HEADER DE SOPORTE --- */
 
-.top-bar-support {
-    background-color: #24303c;
-    color: white;
-    width: 100%;
-    padding: 20px 30px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+    .top-bar-support {
+        background-color: #24303c;
+        color: white;
+        width: 100%;
+        padding: 20px 30px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.top-bar-support .top-bar-left-support {
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-}
+    .top-bar-support .top-bar-left-support {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
 
-.logo-support {
-    margin-right: 15px;
-}
+    .logo-support {
+        margin-right: 15px;
+    }
 
-.title-support {
-    display: flex;
-    align-items: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #ffffff;
-}
+    .title-support {
+        display: flex;
+        align-items: center;
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #ffffff;
+    }
 
-/* --- TÍTULO PRINCIPAL "SOPORTE" --- */
+    /* --- TÍTULO PRINCIPAL "SOPORTE" --- */
 
-.support-title {
-    text-align: center;
-    margin-top: 30px;
-}
+    .support-title {
+        text-align: center;
+        margin-top: 30px;
+    }
 
-/* --- CLASES DEL FORMULARIO --- */
+    /* --- CLASES DEL FORMULARIO --- */
 
-.mb-32 {
-    margin-bottom: 24px;
-}
+    .mb-32 {
+        margin-bottom: 24px;
+    }
 
-.form-support {
-    display: block;
-    text-align: center;
-    margin-bottom: 8px;
-    width: 80%;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-}
+    .form-support {
+        display: block;
+        text-align: center;
+        margin-bottom: 8px;
+        width: 80%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+    }
 
-.form-buttons-container {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 50px;
-}
+    .form-buttons-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 50px;
+    }
 
-/* --- ESTILOS DE LOS BOTONES --- */
+    /* --- ESTILOS DE LOS BOTONES --- */
 
-.btn-submit {
-    width: 250px;
-    padding: 18px 0;
-    font-size: 1.1rem;
-    font-weight: bold;
-    color: white;
-    background-color: #000000;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-}
+    .btn-submit {
+        width: 250px;
+        padding: 18px 0;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: white;
+        background-color: #000000;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.3s ease;
+    }
 
-.btn-submit:hover {
-    background-color: #007a6e;
-}
+    .btn-submit:hover {
+        background-color: #007a6e;
+    }
+
+    @media (max-width: 768px) {
+
+        .mb-32 input,
+        .mb-32 textarea {
+            width: 90%;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn-submit {
+            width: 70%;
+            /* Más estrecho que antes */
+            max-width: 200px;
+            /* Limita su tamaño máximo */
+            padding: 12px 0;
+            /* Reduce la altura */
+            font-size: 1rem;
+            /* Fuente un poco más pequeña */
+        }
+    }

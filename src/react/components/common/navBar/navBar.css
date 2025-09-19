@@ -171,3 +171,37 @@
         display: none !important;
     }
 }
+
+@media (max-width: 992px) {
+  /* Items del menú apilados y centrados */
+  .navbar-nav {
+    text-align: center;
+    width: 100%;
+  }
+
+  .navbar-nav .nav-item {
+    margin: 10px 0;
+  }
+
+  /* Botón LogOut centrado */
+  .navbar-nav .nav-item button.nav-link {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Texto de usuario conectado a la derecha y más pequeño */
+  .navbar-text {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  /* Ajuste del logo */
+  .navbar-brand img {
+    width: 40px;
+    height: 40px;
+  }
+}

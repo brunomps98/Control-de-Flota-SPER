@@ -42,10 +42,16 @@ const Vehicle = () => {
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [name]: value
-        }));
+        setFilters(prev => ({ ...prev, [name]: value }));
+
+        // Debounce: espera 400ms antes de actualizar los searchParams
+        clearTimeout(window.filterTimeout);
+        window.filterTimeout = setTimeout(() => {
+            const newFilters = { ...filters, [name]: value };
+            const query = {};
+            for (const key in newFilters) if (newFilters[key]) query[key] = newFilters[key];
+            setSearchParams(query);
+        }, 400);
     };
 
     const handleFilterSubmit = (e) => {
@@ -58,7 +64,7 @@ const Vehicle = () => {
         }
         setSearchParams(newFilters);
     };
-    
+
     const handleClearFilters = () => {
         setFilters({
             dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
@@ -105,14 +111,17 @@ const Vehicle = () => {
                     <button type="button" className="btn btn-secondary" onClick={handleClearFilters}>Limpiar</button>
                 </div>
             </form>
-            
-            <div className={`vehicle-grid ${loading ? 'loading' : ''}`}>
-                {vehicles.length > 0 ? (
-                    vehicles.map(vehicle => (
-                        <VehicleCard key={vehicle._id} vehicle={vehicle} />
+
+            <div className="vehicle-grid">
+                {loading ? (
+                    // Skeleton loader: 6 tarjetas grises animadas
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <div key={i} className="vehicle-card-skeleton"></div>
                     ))
+                ) : vehicles.length > 0 ? (
+                    vehicles.map(vehicle => <VehicleCard key={vehicle._id} vehicle={vehicle} />)
                 ) : (
-                    !loading && <p style={{ textAlign: 'center' }}>No se encontraron vehículos.</p>
+                    <p style={{ textAlign: 'center' }}>No se encontraron vehículos.</p>
                 )}
             </div>
         </>

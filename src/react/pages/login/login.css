@@ -117,24 +117,20 @@
 }
 
 
-/* Media Query para la vista móvil */
+
+/* Estilos para vista mobile */
+
 @media (max-width: 768px) {
     .main-container {
-        flex-direction: column;
-    }
-
-    .left-side {
-        width: 100%;
-        flex: none;
+        flex-direction: column; /* Apila los elementos verticalmente */
     }
 
     .right-side {
-        display: none;
+        display: none; /* Oculta la imagen del logo en celulares */
     }
 
-    .container.login {
-        max-width: 100%;
-        padding: 20px;
-        margin-right: auto;
+    .left-side {
+        /* Centra el formulario verticalmente en la pantalla */
+        justify-content: center; 
     }
 }
