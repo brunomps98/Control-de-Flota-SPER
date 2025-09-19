@@ -9,7 +9,6 @@ const Vehicle = () => {
     const [error, setError] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // El estado de los filtros se inicializa a partir de la URL
     const [filters, setFilters] = useState({
         dominio: searchParams.get('dominio') || '',
         modelo: searchParams.get('modelo') || '',
@@ -80,7 +79,6 @@ const Vehicle = () => {
                 <h1>Flota de Vehículos</h1>
             </div>
 
-            {/* --- FORMULARIO DE FILTROS COMPLETO --- */}
             <form className="filter-container" onSubmit={handleFilterSubmit}>
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
@@ -114,7 +112,6 @@ const Vehicle = () => {
 
             <div className="vehicle-grid">
                 {loading ? (
-                    // Skeleton loader: 6 tarjetas grises animadas
                     Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="vehicle-card-skeleton"></div>
                     ))

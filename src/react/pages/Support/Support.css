@@ -92,12 +92,8 @@
 
         .btn-submit {
             width: 70%;
-            /* Más estrecho que antes */
             max-width: 200px;
-            /* Limita su tamaño máximo */
             padding: 12px 0;
-            /* Reduce la altura */
             font-size: 1rem;
-            /* Fuente un poco más pequeña */
         }
     }

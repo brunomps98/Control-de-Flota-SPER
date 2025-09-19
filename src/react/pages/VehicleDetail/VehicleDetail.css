@@ -1,15 +1,10 @@
 /* --- ESTILO PARA LA BARRA DE BOTONES EXTERNA --- */
 
 .action-footer {
-    /* Alineación de la barra completa */
-    /* Usa el mismo max-width que tenga tu ficha (.card-p) para que coincidan */
     max-width: 960px;
-    /* Centra la barra en la página y le da espacio superior */
     margin: 20px auto;
-
-    /* Alineación de los botones dentro de la barra */
     display: flex;
-    justify-content: flex-end; /* Empuja los botones a la derecha */
+    justify-content: flex-end; 
     gap: 10px;
 }
 
@@ -62,9 +57,9 @@
 
 @media (max-width: 768px) {
     .action-footer {
-        flex-direction: column;   /* Apila los botones en una columna */
-        align-items: stretch;   /* Los estira a lo ancho para que sean fáciles de tocar */
-        margin-left: 15px;      /* Añade un margen en móvil para que no pegue a los bordes */
+        flex-direction: column;   
+        align-items: stretch;  
+        margin-left: 15px;    
         margin-right: 15px;
     }
 }
@@ -73,31 +68,29 @@
 
 @media print {
 
-    /* 1. Ocultamos todo lo que no queremos en el papel */
+    /* Oculta elementos innecesarios para impresión */
     .action-footer,
     .h6-imp,
-    .navbar-container /* Asumo que tu barra de navegación tiene una clase así, ajústala si es necesario */ {
+    .navbar-container {
         display: none !important;
     }
 
-    /* 2. Reseteamos el layout para que el contenido fluya */
+
     body, html, .body-p {
-        overflow-y: visible !important; /* ¡La clave! Quitamos el scroll */
-        height: auto !important;        /* Dejamos que el contenido determine la altura */
-        background: none !important;    /* Fondo blanco por si acaso */
+        overflow-y: visible !important; 
+        height: auto !important;      
+        background: none !important;   
     }
 
-    /* 3. Nos aseguramos de que la ficha ocupe todo el ancho y se vea bien */
     .card-p {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
-        box-shadow: none !important; /* Quitamos sombras que gastan tinta */
+        box-shadow: none !important; 
     }
 
-    /* Opcional: Evitar que la imagen del vehículo se corte entre páginas */
     .vehicle-image-p {
         page-break-inside: avoid;
     }

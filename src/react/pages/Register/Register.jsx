@@ -38,8 +38,7 @@ const Register = () => {
         // Si todo está bien, mostramos los datos y los preparamos para el envío
         console.log('Datos a enviar al backend:', formData);
         
-        // Aquí iría la lógica para enviar los datos a tu API
-        // fetch('/api/register', { method: 'POST', ... });
+
     };
 
     return (

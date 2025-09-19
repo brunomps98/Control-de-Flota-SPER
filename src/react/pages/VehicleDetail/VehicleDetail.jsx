@@ -78,7 +78,6 @@ const VehicleDetail = () => {
                             <p>KILOMETRAJE: {getLastEntry(vehicle.kilometros)}</p>
                         </div>
                     </div>
-                    {/* --- CONTENIDO RESTAURADO --- */}
                     <div className="vehicle-description-p">
                         <h3>DESCRIPCIÓN DEL VEHÍCULO:</h3>
                         <input className="controls-p" type="text" value={getLastEntry(vehicle.description)} readOnly />
@@ -126,7 +125,6 @@ const VehicleDetail = () => {
                     </div>
                 </div>
 
-                {/* --- PANEL DE ACCIONES --- */}
                 <div className="action-footer">
                     <Link to="/vehicle" className="action-btn btn-secondary">Volver</Link>
                     <button className="action-btn btn-secondary" onClick={() => window.print()}>Imprimir</button>

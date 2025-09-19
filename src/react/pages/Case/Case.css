@@ -47,11 +47,10 @@
 
 .page-container {
   display: flex;
-  flex-direction: column; /* Apila los hijos (header, main, footer) verticalmente */
-  min-height: 100vh;      /* Ocupa al menos el 100% de la altura de la pantalla */
+  flex-direction: column; 
+  min-height: 100vh;     
 }
 
 /* 2. Estilos para que la sección de contenido principal crezca */
 .page-container .main-case-view {
-  flex-grow: 1; /* ¡Esta es la línea clave! Hace que <main> se estire y empuje el footer hacia abajo */
-}
+  flex-grow: 1; }

@@ -31,7 +31,6 @@ const Navbar = ({ user }) => {
           SPER
         </Link>
 
-        {/* Botón hamburguesa */}
         <button
           className="navbar-toggler"
           type="button"

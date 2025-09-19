@@ -9,12 +9,10 @@ class SupportDao {
         return await supportModel.findByIdAndDelete(id);
     }
 
-    // MÉTODO NUEVO: Para la página /information
     async getAllTickets() {
         return await supportModel.find().lean();
     }
 
-    // MÉTODO NUEVO: Para la página /case/:id
     async getTicketById(id) {
         return await supportModel.findById(id).lean();
     }

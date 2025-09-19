@@ -22,7 +22,7 @@
 }
 
 .title h1 {
-    font-size: 1.5em; /* Se unificaron las dos propiedades font-size */
+    font-size: 1.5em; 
     font-weight: bold;
     margin: 0;
     margin-left: 60px;

@@ -1,6 +1,6 @@
 import { userModel } from "../models/user.model.js";
 
-// asdasdasd
+
 export default class userManager {
     regUser = async (username, unidad, email, password) => {
         const existingUser = await userModel.findOne({ email });

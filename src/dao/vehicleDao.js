@@ -7,7 +7,6 @@ class VehicleDao {
 
     static addVehicleWithImage = async (req, res) => {
         try {
-            // --- CORRECCIÓN: Se añade 'description' a la lista de variables ---
             const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, usuario } = req.body;
             const thumbnail = req.files.map(file => file.filename);
 

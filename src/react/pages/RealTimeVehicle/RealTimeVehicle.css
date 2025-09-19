@@ -1,4 +1,4 @@
-/* --- LAYOUT DE LA PÁGINA --- */
+
 .page-container {
     display: flex;
     flex-direction: column;
@@ -12,14 +12,13 @@
     justify-content: center;
     align-items: center;
     padding: 40px 20px;
-    /* Espacio por si la pantalla es muy pequeña */
+
 }
 
-/* --- ESTILOS DEL CONTENIDO DEL FORMULARIO --- */
+
 #formProduct main {
     width: 100%;
     max-width: 900px;
-    /* Ancho máximo del formulario */
     background: #24303c;
     padding: 40px;
     border-radius: 8px;
@@ -41,7 +40,7 @@
     margin-bottom: 20px;
 }
 
-/* --- Estructura de los campos del formulario --- */
+
 .name-desc {
     display: flex;
     flex-direction: row;
@@ -66,7 +65,7 @@
 .code-product,
 .price-product {
     flex: 1;
-    /* Ocupan el mismo espacio */
+
     margin-top: 15px;
 }
 
@@ -74,7 +73,7 @@
     margin-top: 15px;
 }
 
-/* Botón específico de este formulario */
+
 .botons {
     width: 100%;
     background: #1f53c5;
@@ -87,7 +86,7 @@
     cursor: pointer;
 }
 
-/* --- ESTILOS RESPONSIVE ESPECÍFICOS --- */
+
 @media (max-width: 768px) {
     #formProduct main {
         padding: 20px;
@@ -123,6 +122,6 @@
     .title-add-product .title-add {
         text-align: center;
         width: 100%;
-        font-size: 28px; /* Ajusta tamaño en mobile si quieres */
+        font-size: 28px; 
     }
 }

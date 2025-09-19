@@ -3,7 +3,6 @@ import { supportRepository } from "../repository/index.js";
 class SupportController {
 
     // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
-    // (Estos se pueden borrar si ya no usás Handlebars para estas páginas)
 
     static renderSupportForm = (req, res) => {
         res.render('support');

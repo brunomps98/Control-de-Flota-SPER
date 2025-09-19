@@ -4,7 +4,6 @@ import './Support.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Support = () => {
-    // Estado para los datos del formulario
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -14,11 +13,9 @@ const Support = () => {
         file: null
     });
 
-    // --- NUEVOS ESTADOS PARA MANEJAR EL ENVÍO Y LA RESPUESTA ---
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
-    // Función para actualizar el estado con cada cambio en los inputs
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -27,7 +24,6 @@ const Support = () => {
         }));
     };
 
-    // --- FUNCIÓN DE ENVÍO ACTUALIZADA CON LA LÓGICA DE API ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -51,12 +47,10 @@ const Support = () => {
             }
 
             setSubmitStatus({ message: result.message, type: 'success' });
-            // Limpiar el formulario
             setFormData({
                 name: '', surname: '', email: '', phone: '',
                 problem_description: '', file: null
             });
-            // También es necesario limpiar el input de archivo manualmente
             document.getElementById('exampleFile').value = '';
 
         } catch (error) {
@@ -67,7 +61,6 @@ const Support = () => {
     };
 
     const handleReset = () => {
-    // Resetea el estado del formulario a sus valores iniciales
     setFormData({
         name: '',
         surname: '',
@@ -77,10 +70,8 @@ const Support = () => {
         file: null
     });
 
-    // También es necesario limpiar el input de archivo manualmente
     document.getElementById('exampleFile').value = '';
 
-    // Opcional: Limpiar los mensajes de estado del envío anterior
     setSubmitStatus({ message: '', type: '' });
 };
 
@@ -107,7 +98,6 @@ const Support = () => {
 
                 <section>
                     <form onSubmit={handleSubmit}>
-                        {/* ... todos tus inputs no cambian ... */}
                         <div className="mb-32">
                             <label htmlFor="exampleName" className="form-support">Nombre</label>
                             <input 
@@ -191,7 +181,6 @@ const Support = () => {
                         </div>
 
                         <div className="form-buttons-container">
-                            {/* --- BOTÓN DE ENVÍO ACTUALIZADO --- */}
                             <button className="btn-submit" type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Enviando...' : 'Enviar datos'}
                             </button>
@@ -199,7 +188,6 @@ const Support = () => {
                         </div>
                     </form>
 
-                    {/* --- NUEVO: MENSAJE DE ESTADO DEL ENVÍO --- */}
                     {submitStatus.message && (
                         <div style={{ textAlign: 'center', marginTop: '20px', padding: '15px', borderRadius: '5px', color: submitStatus.type === 'success' ? '#155724' : '#721c24', backgroundColor: submitStatus.type === 'success' ? '#d4edda' : '#f8d7da' }}>
                             {submitStatus.message}

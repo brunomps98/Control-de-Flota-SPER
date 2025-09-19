@@ -34,7 +34,6 @@ export default class VehicleManager {
     addVehicle = async (product) => {
 
         console.log("Adding vehicle with product data:", product);
-        // correccion para manejar todos los datos solicitados
         try {
             const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
             const newProduct = await productsModel.create({
@@ -98,7 +97,6 @@ export default class VehicleManager {
             const filteredProducts = await productsModel.find({ dominio: domain }).lean();
             const productsWithFirstThumbnail = filteredProducts.map(product => {
                 if (typeof product.thumbnail === 'string' && product.thumbnail.length > 0) {
-                    // Verificar si la ruta de la imagen ya es completa o solo el nombre del archivo
                     if (!product.thumbnail.startsWith('/uploads/')) {
                         product.thumbnail = '/uploads/' + product.thumbnail;
                     }

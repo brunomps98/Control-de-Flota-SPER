@@ -55,7 +55,7 @@ router.get("/realtimevehicle", requireAuth, VehicleDao.realtimeVehicle);
 
 
 router.get('/', (req, res) => {
-    res.render('home'); // Renderiza el caparazón
+    res.render('home'); 
 });
 
 

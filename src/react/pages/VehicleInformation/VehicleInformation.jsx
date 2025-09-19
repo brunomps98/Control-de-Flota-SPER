@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import './VehicleInformation.css'; // Asegúrate de crear y enlazar este archivo
-import logoSper from '../../assets/images/logo.png'; // Asegúrate de que esta ruta sea correcta
+import './VehicleInformation.css'; 
+import logoSper from '../../assets/images/logo.png'; 
 
 const VehicleInformation = () => {
     const { cid } = useParams(); // Obtiene el ID del vehículo desde la URL
@@ -81,7 +81,6 @@ const VehicleInformation = () => {
                         </div>
 
                         {/* --- Renderizado de Historiales --- */}
-                        {/* Se puede crear un componente reutilizable para esto, pero por ahora lo dejamos así */}
 
                         <div className="history-card">
                             <h4>Historial de Kilometraje</h4>

@@ -9,25 +9,23 @@ const supportSchema = new mongoose.Schema({
         required: false
     },
     surname: {
-        type: String, // Corregido: Un apellido es un solo texto, no un array.
+        type: String, 
         required: false
     },
     email: {
         type: String,
-        // Resuelto: Se quita 'unique: true' para permitir tickets duplicados por email.
-        // 'sparse' ya no es necesario si no es único.
         required: false 
     },
     phone: {
-        type: String, // Corregido: Es mejor guardarlo como String para incluir caracteres como '+' o '-'.
+        type: String, 
         required: false
     },
     problem_description: {
-        type: String, // Corregido: La descripción es un solo texto.
+        type: String, 
         required: false
     },
     files: {
-        type: [String], // Esto está bien, pueden ser varios archivos.
+        type: [String], 
         required: false,
     }
 });
@@ -37,4 +35,3 @@ supportSchema.plugin(mongoosePaginate);
 
 export const supportModel = mongoose.model(supportCollection, supportSchema);
 
-// Se eliminó la llave '}' extra que causaba un error de sintaxis.

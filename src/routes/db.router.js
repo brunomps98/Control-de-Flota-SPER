@@ -50,7 +50,6 @@ router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), Vehi
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
 
-// --- CONFLICTO RESUELTO: Se conservan las rutas para la API de React ---
 router.get('/support-tickets', SupportController.getTicketsAPI);
 
 router.get('/support/:ticketId', SupportController.getTicketByIdAPI);
@@ -59,7 +58,6 @@ router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
 
 router.delete('/support/:pid', SupportController.deleteTicket);
 
-/* Ruta para eliminar registros en la pagina de Information */
 router.delete('/vehicle/:vid/history/:fieldName', requireAuth, VehicleDao.deleteLastHistoryEntry);
 
 router.get('/vehicles', requireAuth, VehicleDao.getVehiclesForUser);

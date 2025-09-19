@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './RealTimeVehicle.css'; // Asegúrate de tener los estilos específicos aquí
+import './RealTimeVehicle.css'; 
 import NavBar from '../../components/common/NavBar/NavBar';
 
 const RealTimeVehicle = () => {
@@ -40,7 +40,7 @@ const RealTimeVehicle = () => {
                     const userData = await response.json();
                     setFormData(prevState => ({
                         ...prevState,
-                        title: userData.unidad || '' // Pre-llena el campo 'Establecimiento'
+                        title: userData.unidad || '' 
                     }));
                 }
             } catch (error) {
@@ -48,9 +48,8 @@ const RealTimeVehicle = () => {
             }
         };
         fetchUserData();
-    }, []); // El array vacío asegura que se ejecute solo una vez
+    }, []); 
 
-    // Manejador para los cambios en los inputs
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -59,17 +58,14 @@ const RealTimeVehicle = () => {
         }));
     };
 
-    // Manejador para el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitStatus({ message: '', type: '' });
 
         const dataToSend = new FormData();
-        // Agregamos todos los campos al FormData
         for (const key in formData) {
             if (key === 'thumbnail') {
-                // Agregamos los archivos uno por uno
                 if (formData.thumbnail.length > 0) {
                     for (let i = 0; i < formData.thumbnail.length; i++) {
                         dataToSend.append('thumbnail', formData.thumbnail[i]);
@@ -89,7 +85,6 @@ const RealTimeVehicle = () => {
             if (!response.ok) throw new Error(result.error || 'Error al agregar vehículo.');
 
             setSubmitStatus({ message: 'Vehículo cargado con éxito.', type: 'success' });
-            // Aquí podrías resetear el formulario si lo deseas
         } catch (err) {
             setSubmitStatus({ message: err.message, type: 'error' });
         } finally {
@@ -102,7 +97,6 @@ const RealTimeVehicle = () => {
 
 
             <div id="message-container">
-                {/* Mostramos mensajes de éxito o error aquí */}
                 {submitStatus.message && (
                     <div className={submitStatus.type === 'success' ? 'alert alert-success' : 'alert alert-danger'} role="alert">
                         {submitStatus.message}

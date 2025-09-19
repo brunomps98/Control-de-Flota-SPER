@@ -22,7 +22,7 @@ const Case = () => {
                     throw new Error('No se pudo encontrar el caso de soporte.');
                 }
                 const data = await response.json();
-                setTicket(data.ticket); // Asumiendo que la API devuelve { ticket: {...} }
+                setTicket(data.ticket); 
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -31,7 +31,7 @@ const Case = () => {
         };
 
         fetchTicket();
-    }, [ticketId]); // Se ejecuta cada vez que el ID del ticket en la URL cambia
+    }, [ticketId]); 
 
     // 3. FUNCIONALIDAD DE BOTONES
     const handleDelete = async () => {

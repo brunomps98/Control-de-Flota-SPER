@@ -32,11 +32,9 @@
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    /* Oculta la cara que está detrás al girar */
     border-radius: 10px;
     overflow: hidden;
     transition: transform 0.8s ease;
-    /* Velocidad y suavidad del giro */
     align-items: center;
 }
 
@@ -49,24 +47,17 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Ajusta la imagen para cubrir el área */
     position: absolute;
-    /* Para que el h3 se posicione encima */
     top: 0;
     left: 0;
 }
 
 .card-s .front h3 {
     position: absolute;
-    /* <-- CLAVE: Posicionamiento absoluto */
     bottom: 0;
-    /* <-- CLAVE: Lo pega a la parte inferior */
     left: 0;
-    /* Lo alinea a la izquierda */
     width: 100%;
-    /* Ocupa todo el ancho de la tarjeta */
 
-    /* El resto de tus estilos para darle apariencia */
     z-index: 1;
     height: 45px;
     line-height: 45px;
@@ -80,15 +71,12 @@
 
 .card-s .back {
     transform: rotateY(180deg);
-    /* La cara trasera está girada 180deg inicialmente */
     background: #24303c;
-    /* Fondo oscuro para la parte trasera */
     padding: 15px;
     color: #f3f3f3;
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    /* Distribuye el contenido uniformemente */
     align-items: center;
     text-align: center;
 }
@@ -97,7 +85,6 @@
     margin-bottom: 10px;
     font-size: 1.2em;
     color: #00bcd4;
-    /* Color para el título de la cara trasera */
 }
 
 .card-s .back p {
@@ -110,7 +97,6 @@
     padding: 8px 15px;
     margin-top: 10px;
     background: #1f53c5;
-    /* Color del botón */
     color: #fff;
     text-decoration: none;
     border-radius: 5px;
@@ -119,10 +105,8 @@
 
 .card-s .back .link a:hover {
     background: #153c8f;
-    /* Color del botón al pasar el mouse */
 }
 
-/* --- Animación de Giro al Pasar el Mouse --- */
 .card-s:hover .front {
     transform: rotateY(180deg);
 }
@@ -131,13 +115,10 @@
     transform: rotateY(360deg);
 }
 
-/* --- Responsive para dispositivos más pequeños --- */
 @media (max-width: 768px) {
     .card-s {
         width: 100%;
-        /* Ocupa todo el ancho disponible */
         max-width: 300px;
-        /* Máximo ancho en pantallas pequeñas */
         height: 200px;
     }
 }

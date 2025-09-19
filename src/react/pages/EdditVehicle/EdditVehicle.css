@@ -94,37 +94,30 @@
         font-size: 28px;
     }
 
-    /* Contenedor de campos: flex wrap */
     .stock-code-price {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        /* espacio entre columnas */
         justify-content: space-between;
     }
 
-    /* Campos pequeños: ocupan 50% cada uno */
+ 
     .stock-product,
     .code-product,
     .price-product,
     .name-product {
         flex: 1 1 calc(50% - 10px);
-        /* cada uno ocupa la mitad menos el gap */
         margin: 5px 0;
         width: auto;
-        /* eliminar ancho fijo heredado */
     }
 
-    /* Campos grandes: descripción, imágenes u otros */
     .desc-product,
     .url-product {
         flex: 1 1 100%;
-        /* ocupan toda la fila */
         width: auto;
         margin: 5px 0;
     }
 
-    /* Botón centrado */
     .button-reg {
         display: flex;
         justify-content: center;
