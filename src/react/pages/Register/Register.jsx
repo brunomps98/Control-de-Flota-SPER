@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom'; // Se mantiene comentado ya que no se usa en este formulario
 import './Register.css';
 import logoSper from '../../assets/images/logo.png';
 

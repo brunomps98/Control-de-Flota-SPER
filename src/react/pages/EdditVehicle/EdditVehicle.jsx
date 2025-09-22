@@ -26,7 +26,7 @@ const EdditVehicle = () => {
         const fetchVehicleData = async () => {
             try {
                 // Pedimos los datos actuales del vehículo para pre-llenar el formulario
-                const response = await fetch(`/api/vehicle/${productId}`); // Necesitas una ruta GET para esto
+                const response = await fetch(`/api/vehicle/${productId}`); 
                 if (!response.ok) throw new Error('No se pudieron cargar los datos del vehículo.');
                 
                 const data = await response.json();
@@ -98,7 +98,6 @@ const EdditVehicle = () => {
                         <h2 className="title-add">Editar Vehículo</h2>
                     </div>
                     
-                    {/* El ID del vehículo se obtiene de la URL, no es un campo del form */}
                     
                     <div className="desc-product">
                         <p>Descripción de estado de Vehículo</p>

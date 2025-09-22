@@ -10,3 +10,6 @@ node_modules
 
 # Carpeta de build de producción
 dist/
+
+# Archivos de configuración local de Capacitor
+capacitor.config.json

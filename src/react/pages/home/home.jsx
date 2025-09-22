@@ -10,7 +10,7 @@ const Home = () => {
           <div className="logoHome">
             <img src={logoSper} alt="Logo Sper" width="60" height="60" />
           </div>
-          <div className="title">
+          <div className="title h1">
             <h1>SISTEMA DE GESTION Y CONTROL DE FLOTA S.P.E.R</h1>
           </div>
         </div>

@@ -19,7 +19,7 @@ const VehicleInformation = () => {
             if (!response.ok) throw new Error('No se pudo encontrar el vehículo.');
             const data = await response.json();
             setVehicle(data.vehicle);
-        } catch (err) {
+        } catch (err) { 
             setError(err.message);
         } finally {
             setLoading(false);
