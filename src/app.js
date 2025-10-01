@@ -22,16 +22,10 @@ app.use((req, res, next) => {
 
 app.use(express.static("public"));
 
-// --- INICIO DE LA CORRECCIÓN CLAVE ---
-// Lista de orígenes permitidos
-const allowedOrigins = [
-    'http://localhost:5173',      // Para el desarrollo en desktop
-    'http://10.175.41.247:5173', // Para desarrollo en desktop usando la IP
-    'capacitor://localhost',      // Origen para apps de Capacitor en Android/iOS
-    'http://localhost'            // Origen que a veces usa el WebView de Android
-];
 
-// Configuración de CORS robusta
+// Lista de orígenes permitidos
+const allowedOrigins = process.env.FRONT_URL ? process.env.FRONT_URL.split(',') : [];
+
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
@@ -43,12 +37,10 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
-// --- FIN DE LA CORRECCIÓN CLAVE ---
 
 
 app.use(cookieParser("CoderCookie"));
 
-// --- INICIO DE LA CORRECCIÓN DE SESIÓN ---
 app.use(session({
     store: MongoStore.create({
         mongoUrl: process.env.URL_MONGO,
@@ -58,11 +50,11 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     cookie: {
-        sameSite: 'lax', // Permite cookies entre sitios en la mayoría de los casos
-        secure: false    // Poner en 'true' solo cuando se usa HTTPS
+        sameSite: 'lax', 
+        secure: false   
     }
 }));
-// --- FIN DE LA CORRECCIÓN DE SESIÓN ---
+
 
 const PORT = process.env.PORT || 8080;
 
@@ -73,11 +65,9 @@ app.engine("handlebars", handlebars.engine());
 app.set('view engine', 'handlebars');
 app.set("views", __dirname + "/views");
 
-// ... (El resto de tu archivo app.js no necesita cambios) ...
 app.use("/api", dbRouter);
 app.use("/", viewRouter);
 
-// Función para obtener IP (esto ya estaba bien)
 const getLocalIpAddress = () => {
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
