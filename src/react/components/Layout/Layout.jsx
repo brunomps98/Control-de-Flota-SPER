@@ -10,10 +10,12 @@ const Layout = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-
         const fetchUserSession = async () => {
             try {
-                const response = await fetch('/api/session/current', { credentials: 'include' });
+                // --- INICIO DE LA CORRECCIÓN ---
+                const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/session/current`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
+                // --- FIN DE LA CORRECCIÓN ---
                 const data = await response.json();
 
                 if (response.ok) {
@@ -36,7 +38,8 @@ const Layout = () => {
     }
 
     if (!user) {
-        return null;
+        // Redirige si no hay usuario después de cargar
+        return null; 
     }
 
     return (

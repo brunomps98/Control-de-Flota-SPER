@@ -14,7 +14,8 @@ const Login = () => {
         setError(null);
 
         try {
-            const response = await fetch('/api/login', {
+            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/login`;
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -24,18 +25,10 @@ const Login = () => {
             });
 
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.message || 'Error al iniciar sesión');
             }
-
-         
-
-            if (data.user && data.user.isAdmin) {
-                navigate('/vehicle-general');
-            } else {
-                navigate('/vehicle');
-            }
+            navigate('/vehicle');
 
         } catch (err) {
             console.error(err);
@@ -47,11 +40,10 @@ const Login = () => {
         <div className="main-container">
             <div className="left-side">
                 <div className="container login">
-                    <h2 className="form-title">Iniciar sesión</h2>
-                    <p className="form-subtitle">Bienvenido, por favor ingresa tus datos.</p>
-                    <form onSubmit={handleSubmit} className="login-form">
+                    <h2 className="text-center">Iniciar Sesión</h2>
+                    <form onSubmit={handleSubmit}>
                         <div className="mb-3">
-                            <label htmlFor="usernameInput" className="form-label">Usuario</label>
+                            <label htmlFor="usernameInput" className="form-label">Nombre de usuario</label>
                             <input
                                 type="text"
                                 className="form-control"

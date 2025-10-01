@@ -3,6 +3,8 @@ node_modules
 
 # Archivos de entorno
 .env
+.env.production
+.env.development
 
 # Archivos comprimidos 
 *.rar
@@ -11,5 +13,3 @@ node_modules
 # Carpeta de build de producción
 dist/
 
-# Archivos de configuración local de Capacitor
-capacitor.config.json
