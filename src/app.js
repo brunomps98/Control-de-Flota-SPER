@@ -30,7 +30,11 @@ app.use(session({
     }),
     secret: process.env.SECRET_KEY,
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        sameSite: 'lax', 
+        secure: false    
+    }
 }))
 
 const PORT = process.env.PORT || 8080;

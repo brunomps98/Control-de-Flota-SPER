@@ -14,10 +14,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: 'public/dist',
+    outDir: 'dist',
     manifest: true,
-    rollupOptions: {
-      input: 'src/react/main.jsx',
-    },
   },
 });
