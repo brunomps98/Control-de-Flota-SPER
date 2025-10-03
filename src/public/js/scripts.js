@@ -50,7 +50,7 @@ document.addEventListener('click', async (event) => {
 
         if (confirmed) {
             try {
-                const response = await fetch(`/api/vehicle/${vehicleId}/history/${fieldName}`, {
+                const response = await fetch(`/vehicle/${vehicleId}/history/${fieldName}`, {
                     method: 'DELETE',
                 });
 

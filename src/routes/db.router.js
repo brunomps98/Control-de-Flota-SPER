@@ -38,7 +38,7 @@ router.use(setUserInLocals);
 
 router.post('/register', UserDao.registerUser);
 
-router.get("/vehicle/:cid", requireAuth, VehicleDao.getVehicleByIdAPI);
+router.get("/vehicle/:cid", requireAuth, VehicleDao.getVehicleById);
 
 router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
 
@@ -50,9 +50,9 @@ router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), Vehi
 
 router.post('/support', upload.array('file'), SupportController.createTicket);
 
-router.get('/support-tickets', SupportController.getTicketsAPI);
+router.get('/support-tickets', SupportController.getTickets);
 
-router.get('/support/:ticketId', SupportController.getTicketByIdAPI);
+router.get('/support/:ticketId', SupportController.getTicketById);
 
 router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
 

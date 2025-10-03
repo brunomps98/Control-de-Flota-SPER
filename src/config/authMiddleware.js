@@ -18,7 +18,7 @@ export const isAdmin = (req, res, next) => {
 
 export const limitFailedAttempts = (req, res, next) => {
     const MAX_FAILED_ATTEMPTS = 3;
-    const BLOCK_TIME = 180000; // 3 minute in milliseconds
+    const BLOCK_TIME = 180000; 
 
     if (req.session && req.session.failedAttempts >= MAX_FAILED_ATTEMPTS) {
         const blockEndTime = req.session.blockEndTime || 0;

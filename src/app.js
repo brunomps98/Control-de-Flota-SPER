@@ -21,9 +21,6 @@ app.use((req, res, next) => {
 
 app.use(express.static("public"))
 
-// --- CONFIGURACIÓN DINÁMICA DE CORS ---
-// 1. Leemos la variable de entorno y creamos el array de orígenes permitidos.
-// Con tu .env, allowedOrigins será: ['http://localhost:5173', 'http://localhost']
 const allowedOrigins = process.env.FRONT_URL ? process.env.FRONT_URL.split(',') : [];
 
 // 2. Usamos una función en la configuración de CORS para validar el origen dinámicamente.
@@ -39,7 +36,6 @@ app.use(cors({
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
 }));
-// --- FIN DE LA CONFIGURACIÓN DE CORS ---
 
 
 app.use(cookieParser("CoderCookie"))

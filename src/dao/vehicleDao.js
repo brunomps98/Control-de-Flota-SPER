@@ -272,7 +272,7 @@ class VehicleDao {
     }
 
 
-    static getVehicleByIdAPI = async (req, res) => {
+    static getVehicleById = async (req, res) => {
         try {
             const { cid } = req.params; // Obtenemos el ID de la URL
             const vehicle = await productsModel.findById(cid).lean();
@@ -286,7 +286,7 @@ class VehicleDao {
             res.status(200).json({ vehicle: vehicle });
 
         } catch (error) {
-            console.error("Error al obtener vehículo por ID para la API:", error);
+            console.error("Error al obtener vehículo por ID:", error);
             res.status(500).json({ message: 'Error interno del servidor' });
         }
     };

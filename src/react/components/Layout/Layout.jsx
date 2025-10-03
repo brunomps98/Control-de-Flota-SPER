@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
-import Navbar from '../common/NavBar/navBar';
-import Footer from '../common/Footer/footer';
+import Navbar from '../common/NavBar/NavBar';
+import Footer from '../common/Footer/Footer';
 import '../Layout/Layout.css';
 
 const Layout = () => {

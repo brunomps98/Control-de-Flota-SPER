@@ -64,7 +64,7 @@ const EdditVehicle = () => {
         setSuccess('');
 
         try {
-            const response = await fetch(`/api/vehicle/${productId}`, {
+            const response = await fetch(`/vehicle/${productId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

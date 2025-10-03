@@ -11,7 +11,7 @@ $(document).ready(function () {
         const productId = $(this).data('product-id');
         if (confirm('¿Estás seguro de que quieres eliminar este vehículo?')) {
             $.ajax({
-                url: `/api/vehicle/${productId}`,
+                url: `/vehicle/${productId}`,
                 method: 'DELETE',
                 success: function (response) {
                     alert('Vehículo eliminado con éxito.');
@@ -33,9 +33,9 @@ $(document).ready(function () {
         // 2. Pedimos confirmación al usuario
         if (confirm('¿Estás seguro de que quieres eliminar este caso de soporte?')) {
 
-            // 3. Enviamos la petición DELETE a la API usando jQuery.ajax
+            // 3. Enviamos la petición DELETE usando jQuery.ajax
             $.ajax({
-                url: `/api/support/${ticketId}`,
+                url: `/support/${ticketId}`,
                 method: 'DELETE',
                 success: function (response) {
                     // 4. Si la petición es exitosa, mostramos un mensaje y redirigimos
@@ -61,7 +61,7 @@ $(document).ready(function () {
         // Pedimos confirmación al usuario
         if (confirm(`¿Estás seguro de que quieres eliminar el último registro de "${fieldName}"?`)) {
             $.ajax({
-                url: `/api/vehicle/${vehicleId}/history/${fieldName}`,
+                url: `/vehicle/${vehicleId}/history/${fieldName}`,
                 method: 'DELETE',
                 success: function (response) {
                     alert('Registro eliminado con éxito.');

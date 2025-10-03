@@ -31,10 +31,10 @@ class SupportController {
     };
 
 
-    // --- MÉTODOS DE API (PARA REACT) ---
+    // --- MÉTODOS PARA REACT ---
 
-    // Obtiene TODOS los tickets para la API
-    static getTicketsAPI = async (req, res) => {
+    // Obtiene TODOS los tickets
+    static getTickets = async (req, res) => {
         try {
             const tickets = await supportRepository.getAllSupportTickets();
             res.status(200).json({ tickets: tickets });
@@ -43,8 +43,8 @@ class SupportController {
         }
     };
 
-    // Obtiene UN ticket por su ID para la API
-    static getTicketByIdAPI = async (req, res) => {
+    // Obtiene UN ticket por su ID
+    static getTicketById = async (req, res) => {
         try {
             const { ticketId } = req.params;
             const ticket = await supportRepository.getSupportTicketById(ticketId);
@@ -58,7 +58,7 @@ class SupportController {
         }
     };
 
-    // Crea un nuevo ticket desde la API
+    // Crea un nuevo ticket desde la 
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
@@ -73,7 +73,7 @@ class SupportController {
         }
     };
 
-    // Elimina un ticket desde la API
+    // Elimina un ticket
     static deleteTicket = async (req, res) => {
         try {
             const id = req.params.pid;

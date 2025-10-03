@@ -37,7 +37,7 @@ const Case = () => {
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este caso? Esta acción no se puede deshacer.')) {
             try {
-                const response = await fetch(`/api/support/${ticketId}`, {
+                const response = await fetch(`/support/${ticketId}`, {
                     method: 'DELETE',
                 });
                 if (!response.ok) {
