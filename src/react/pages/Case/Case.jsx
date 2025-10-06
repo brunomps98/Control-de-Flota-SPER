@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './Case.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Case = () => {
-    // 1. OBTENCIÓN DE DATOS
+    // --- ESTADOS Y HOOKS 
     const { ticketId } = useParams();
     const navigate = useNavigate();
-
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTicket = async () => {
             try {
-                // 👇 Lógica de fetch corregida
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
-                const response = await fetch(apiUrl, { credentials: 'include' });
-
-                if (!response.ok) {
-                    throw new Error('No se pudo encontrar el caso de soporte.');
-                }
-                const data = await response.json();
-                setTicket(data.ticket);
+                // 2. Usamos apiClient.get para cargar los datos del ticket.
+                const response = await apiClient.get(`/api/support/${ticketId}`);
+                // En Axios, los datos ya vienen en formato JSON dentro de `response.data`
+                setTicket(response.data.ticket);
             } catch (err) {
-                setError(err.message);
+                // 3. Mejoramos el manejo de errores con la información que provee Axios.
+                setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
             } finally {
                 setLoading(false);
             }
@@ -34,29 +31,21 @@ const Case = () => {
         fetchTicket();
     }, [ticketId]);
 
-    // 3. FUNCIONALIDAD DE BOTONES
+    // --- FUNCIÓN DE ELIMINAR CON AXIOS ---
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este caso? Esta acción no se puede deshacer.')) {
             try {
-                // 👇 Lógica de fetch corregida (y se añadió /api a la URL)
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
-                const response = await fetch(apiUrl, {
-                    method: 'DELETE',
-                    credentials: 'include' // Importante para la autorización
-                });
-
-                if (!response.ok) {
-                    throw new Error('No se pudo eliminar el ticket.');
-                }
-
+                // 4. Usamos apiClient.delete para la petición de borrado.
+                await apiClient.delete(`/api/support/${ticketId}`);
+                // Si la petición es exitosa, navegamos a la página de tickets.
                 navigate('/support-tickets');
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || 'No se pudo eliminar el ticket.');
             }
         }
     };
 
-    // --- RENDERIZADO CONDICIONAL ---
+    // --- RENDERIZADO
     if (loading) {
         return <p>Cargando detalles del caso...</p>;
     }
@@ -66,8 +55,6 @@ const Case = () => {
     if (!ticket) {
         return <p>No se encontró el ticket.</p>;
     }
-
-
 
     return (
         <div className="page-container">
@@ -87,33 +74,25 @@ const Case = () => {
             <main className="main-case-view">
                 <div className="case-container">
                     <h1>Detalle del Caso de Soporte</h1>
-
                     <div className="ticket-header">
                         <h2>Reportado por: {ticket.name} {ticket.surname}</h2>
                     </div>
-
                     <div className="case-details">
                         <p><strong>Email de Contacto:</strong> {ticket.email}</p>
                         <p><strong>Teléfono de Contacto:</strong> {ticket.phone}</p>
-
                         <hr style={{ margin: '20px 0' }} />
-
                         <h3>Descripción del Problema Reportado:</h3>
                         <p>{ticket.problem_description}</p>
                     </div>
-
                     <hr style={{ margin: '20px 0' }} />
-
-
                     {ticket.files && ticket.files.length > 0 && (
                         <>
                             <h3>Imágenes Adjuntas:</h3>
                             <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
-
                                 {ticket.files.map((file, index) => (
-                                    <a href={`/uploads/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
+                                    <a href={`${import.meta.env.VITE_API_URL}/uploads/support/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
                                         <img
-                                            src={`/uploads/${file}`}
+                                            src={`${import.meta.env.VITE_API_URL}/uploads/support/${file}`}
                                             alt={`Imagen del caso ${index + 1}`}
                                             style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
                                         />
@@ -122,7 +101,6 @@ const Case = () => {
                             </div>
                         </>
                     )}
-
                     <div className="ticket-actions">
                         <Link to="/support-tickets" className="btn-action btn-view-case">Volver a la Lista</Link>
                         <button className="btn-action btn-delete-case" onClick={handleDelete}>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Usamos Link para la navegación
+import { Link } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './Support.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Support = () => {
+    // --- ESTADOS Y MANEJADORES ---
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -12,18 +14,19 @@ const Support = () => {
         problem_description: '',
         file: null
     });
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
+        const fieldName = name === 'file' ? 'files' : name;
         setFormData(prevState => ({
             ...prevState,
-            [name]: files ? files[0] : value
+            [fieldName]: files ? files : value // Maneja múltiples archivos
         }));
     };
 
+    // --- ENVÍO DE FORMULARIO CON AXIOS ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -31,52 +34,48 @@ const Support = () => {
 
         const dataToSend = new FormData();
         Object.keys(formData).forEach(key => {
-            dataToSend.append(key, formData[key]);
+            if (key === 'files' && formData[key]) {
+                for (let i = 0; i < formData[key].length; i++) {
+                    dataToSend.append('files', formData[key][i]);
+                }
+            } else {
+                dataToSend.append(key, formData[key]);
+            }
         });
 
+
         try {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/support`;
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                body: dataToSend,
-                credentials: 'include'
-            });
+            const response = await apiClient.post('/api/support', dataToSend);
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.message || 'Hubo un error al enviar el caso.');
-            }
-
-            setSubmitStatus({ message: result.message, type: 'success' });
-            setFormData({
-                name: '', surname: '', email: '', phone: '',
-                problem_description: '', file: null
-            });
-            document.getElementById('exampleFile').value = '';
+            // Obtenemos el mensaje de éxito desde la respuesta de Axios
+            setSubmitStatus({ message: response.data.message, type: 'success' });
+            
+            // Limpiamos el formulario
+            handleReset();
 
         } catch (error) {
-            setSubmitStatus({ message: error.message, type: 'error' });
+            // Manejo de errores mejorado con Axios
+            setSubmitStatus({ message: error.response?.data?.message || 'Hubo un error al enviar el caso.', type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
     };
-
+    
+    // --- FUNCIÓN DE LIMPIEZA ---
     const handleReset = () => {
-        setFormData({
-            name: '',
-            surname: '',
-            email: '',
-            phone: '',
-            problem_description: '',
-            file: null
-        });
+        const initialFormData = {
+            name: '', surname: '', email: '', phone: '',
+            problem_description: '', files: null
+        };
+        setFormData(initialFormData);
 
-        document.getElementById('exampleFile').value = '';
+        const fileInput = document.getElementById('exampleFile');
+        if(fileInput) fileInput.value = '';
 
         setSubmitStatus({ message: '', type: '' });
     };
 
+    // --- RENDERIZADO  ---
     return (
         <>
             <header className="top-bar-support">
@@ -91,13 +90,11 @@ const Support = () => {
                     </div>
                 </div>
             </header>
-
             <main>
                 <div className="support-title">
                     <h1>Soporte</h1>
                     <p>Complete el siguiente formulario para recibir ayuda</p>
                 </div>
-
                 <section>
                     <form onSubmit={handleSubmit}>
                         <div className="mb-32">
@@ -173,7 +170,7 @@ const Support = () => {
                                 type="file"
                                 className="form-control"
                                 id="exampleFile"
-                                name="file"
+                                name="file" 
                                 multiple
                                 placeholder="Inserte sus archivos mostrando el problema acá"
                                 accept="image/*"
@@ -181,7 +178,6 @@ const Support = () => {
                             />
                             <br />
                         </div>
-
                         <div className="form-buttons-container">
                             <button className="btn-submit" type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Enviando...' : 'Enviar datos'}
@@ -189,7 +185,6 @@ const Support = () => {
                             <button className="btn-submit" type="button" onClick={handleReset}>Limpiar campos</button>
                         </div>
                     </form>
-
                     {submitStatus.message && (
                         <div style={{ textAlign: 'center', marginTop: '20px', padding: '15px', borderRadius: '5px', color: submitStatus.type === 'success' ? '#155724' : '#721c24', backgroundColor: submitStatus.type === 'success' ? '#d4edda' : '#f8d7da' }}>
                             {submitStatus.message}
@@ -197,7 +192,6 @@ const Support = () => {
                     )}
                 </section>
             </main>
-
             <footer className="footer-bar">
                 <p>© 2025 SPER - Departamento de Seguridad Informática</p>
             </footer>

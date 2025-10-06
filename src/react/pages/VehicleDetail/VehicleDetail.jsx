@@ -1,28 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './VehicleDetail.css';
 
 const VehicleDetail = () => {
+    // --- HOOKS ---
     const { cid } = useParams();
     const navigate = useNavigate();
 
+    // --- ESTADOS ---
     const [vehicle, setVehicle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchVehicleData = async () => {
             try {
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
-                const response = await fetch(apiUrl, { credentials: 'include' });
-
-                if (!response.ok) {
-                    throw new Error('No se pudo cargar la información del vehículo.');
-                }
-                const data = await response.json();
-                setVehicle(data.vehicle);
+                const response = await apiClient.get(`/api/vehicle/${cid}`);
+                setVehicle(response.data.vehicle);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || 'No se pudo cargar la información del vehículo.');
             } finally {
                 setLoading(false);
             }
@@ -30,6 +28,7 @@ const VehicleDetail = () => {
         fetchVehicleData();
     }, [cid]);
 
+    // --- LÓGICA DE NAVEGACIÓN Y ELIMINACIÓN CON AXIOS ---
     const handleEdit = () => {
         navigate(`/eddit-vehicle/${cid}`);
     };
@@ -37,23 +36,16 @@ const VehicleDetail = () => {
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este vehículo?')) {
             try {
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
-                const response = await fetch(apiUrl, {
-                    method: 'DELETE',
-                    credentials: 'include' 
-                });
-
-                if (!response.ok) {
-                    throw new Error('No se pudo eliminar el vehículo.');
-                }
-
-                navigate('/vehicle');
+                // 3. Usamos apiClient.delete para la petición de borrado.
+                await apiClient.delete(`/api/vehicle/${cid}`);
+                navigate('/vehicle'); // Redirigimos si la eliminación fue exitosa
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || 'No se pudo eliminar el vehículo.');
             }
         }
     };
 
+    // --- RENDERIZADO ---
     if (loading) return <p>Cargando información del vehículo...</p>;
     if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
@@ -69,10 +61,10 @@ const VehicleDetail = () => {
                     </div>
                     <div className="content-p">
                         <div className="vehicle-image-p">
-                            <img src={`/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                            <img src={`${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                         </div>
                         <div className="vehicle-info-p">
-                            <p>DESTINO: {vehicle.destino}</p>
+                            <p>DESTINO: {getLastEntry(vehicle.destino)}</p>
                             <p>AÑO: {vehicle.anio}</p>
                             <p>MARCA: {vehicle.marca}</p>
                             <p>MODELO: {vehicle.modelo}</p>
@@ -107,7 +99,7 @@ const VehicleDetail = () => {
                             </thead>
                             <tbody>
                                 {vehicle.reparaciones && vehicle.reparaciones.length > 0 ? (
-                                    vehicle.reparaciones.map((reparacion, index) => (
+                                    vehicle.reparaciones.slice(-5).reverse().map((reparacion, index) => (
                                         <tr key={index}>
                                             <td>{reparacion}</td>
                                         </tr>
@@ -124,7 +116,7 @@ const VehicleDetail = () => {
                         <h4 className="h4-p">IMÁGENES:</h4>
                         <div className="img-div">
                             {vehicle.thumbnail && vehicle.thumbnail.slice(1).map((img, index) => (
-                                <img className="img-p" src={`/uploads/${img}`} alt={`Imagen ${index + 2}`} key={index} />
+                                <img className="img-p" src={`${import.meta.env.VITE_API_URL}/uploads/${img}`} alt={`Imagen ${index + 2}`} key={index} />
                             ))}
                         </div>
                     </div>

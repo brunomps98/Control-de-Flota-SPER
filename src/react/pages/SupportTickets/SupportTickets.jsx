@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './SupportTickets.css';
 import logoSper from '../../assets/images/logo.png';
 
 const SupportTickets = () => {
+    // --- ESTADOS ---
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTickets = async () => {
             try {
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support-tickets`;
-                const response = await fetch(apiUrl, { credentials: 'include' });
-
-                if (!response.ok) {
-                    throw new Error('La respuesta de la red no fue exitosa');
-                }
-                const data = await response.json();
-                setTickets(data.tickets || []);
+                const response = await apiClient.get('/api/support-tickets');
+                setTickets(response.data.tickets || []);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || 'No se pudieron cargar los tickets.');
             } finally {
                 setLoading(false);
             }
@@ -28,38 +25,27 @@ const SupportTickets = () => {
         fetchTickets();
     }, []);
 
+    // --- FUNCIÓN DE ELIMINAR CON AXIOS ---
     const handleDelete = async (ticketId) => {
         if (!window.confirm('¿Estás seguro de que querés eliminar este caso?')) {
             return;
         }
         try {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
-            const response = await fetch(apiUrl, {
-                method: 'DELETE',
-                credentials: 'include' 
-            });
-
-            if (!response.ok) {
-                throw new Error('No se pudo eliminar el ticket.');
-            }
-
+            await apiClient.delete(`/api/support/${ticketId}`);
+            
             setTickets(prevTickets => prevTickets.filter(ticket => ticket._id !== ticketId));
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.message || 'No se pudo eliminar el ticket.');
         }
     };
-
-
+    
+    // --- RENDERIZADO ---
     return (
-
         <div className="page-container">
-
             <header className="top-bar-support">
                 <div className="top-bar-left-support">
                     <div className="logo-support">
-
                         <Link to="/">
-
                             <img src={logoSper} alt="Logo Sper" width="60" height="60" />
                         </Link>
                     </div>
@@ -114,7 +100,6 @@ const SupportTickets = () => {
             <footer className="footer-bar">
                 <p>© 2025 SPER - Departamento de Seguridad Informática</p>
             </footer>
-
         </div>
     );
 }

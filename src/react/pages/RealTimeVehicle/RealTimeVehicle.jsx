@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import apiClient from '../../../api/axiosConfig';
 import './RealTimeVehicle.css';
 import NavBar from '../../components/common/NavBar/NavBar';
 
 const RealTimeVehicle = () => {
 
-    // Estado para guardar todos los datos del formulario
+    // --- ESTADOS ---
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -22,29 +23,24 @@ const RealTimeVehicle = () => {
         marca: '',
         reparaciones: '',
         usuario: '',
-        thumbnail: [] // Para guardar los archivos de imagen
+        thumbnail: []
     });
-
-
-    // Estados para la retroalimentación al usuario
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
-    // useEffect para obtener datos iniciales del usuario (ej: su unidad)
+    // --- CARGA DE DATOS DE SESIÓN CON AXIOS ---
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/session/current`;
-                const response = await fetch(apiUrl, { credentials: 'include' });
+                // 2. Usamos apiClient.get para obtener la sesión del usuario.
+                const response = await apiClient.get('/api/session/current');
+                const userData = response.data; 
 
-                if (response.ok) {
-                    const userData = await response.json();
-                    if (userData && userData.user) {
-                        setFormData(prevState => ({
-                            ...prevState,
-                            title: userData.user.unidad || ''
-                        }));
-                    }
+                if (userData && userData.user) {
+                    setFormData(prevState => ({
+                        ...prevState,
+                        title: userData.user.unidad || ''
+                    }));
                 }
             } catch (error) {
                 console.error("No se pudo obtener la sesión del usuario:", error);
@@ -53,6 +49,7 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []);
 
+    // --- MANEJADORES DE FORMULARIO ---
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -61,11 +58,13 @@ const RealTimeVehicle = () => {
         }));
     };
 
+    // --- ENVÍO DE FORMULARIO CON AXIOS Y FORMDATA ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitStatus({ message: '', type: '' });
 
+        // La construcción de FormData sigue siendo la misma
         const dataToSend = new FormData();
         for (const key in formData) {
             if (key === 'thumbnail') {
@@ -80,28 +79,21 @@ const RealTimeVehicle = () => {
         }
 
         try {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/addVehicleWithImage`;
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                body: dataToSend,
-                credentials: 'include'
-            });
-
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Error al agregar vehículo.');
+            // 3. Usamos apiClient.post para enviar el formulario.
+            // Axios detecta que el cuerpo es FormData y establece las cabeceras 'multipart/form-data' automáticamente.
+            await apiClient.post('/api/addVehicleWithImage', dataToSend);
 
             setSubmitStatus({ message: 'Vehículo cargado con éxito.', type: 'success' });
         } catch (err) {
-            setSubmitStatus({ message: err.message, type: 'error' });
+            setSubmitStatus({ message: err.response?.data?.message || 'Error al agregar vehículo.', type: 'error' });
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    // --- RENDERIZADO ---
     return (
         <>
-
-
             <div id="message-container">
                 {submitStatus.message && (
                     <div className={submitStatus.type === 'success' ? 'alert alert-success' : 'alert alert-danger'} role="alert">
@@ -115,7 +107,6 @@ const RealTimeVehicle = () => {
                     <div className="title-add-product">
                         <h2 className="title-add">Cargar Vehículo</h2>
                     </div>
-
                     <div className="name-desc">
                         <div className="name-product">
                             <p>Establecimiento (Título de la Tarjeta)</p>

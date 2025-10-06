@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 
 const Vehicle = () => {
+    // --- ESTADOS Y HOOKS ---
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -19,19 +21,18 @@ const Vehicle = () => {
         title: searchParams.get('title') || ''
     });
 
+    // --- CARGA DE DATOS CON AXIOS Y PARÁMETROS ---
     useEffect(() => {
         const fetchVehicles = async () => {
             setLoading(true);
             try {
-                const queryParams = searchParams.toString();
-                const response = await fetch(`/api/vehicles?${queryParams}`, {
-                    credentials: 'include'
+                // 2. Usamos apiClient.get para cargar los vehículos.
+                const response = await apiClient.get('/api/vehicles', {
+                    params: Object.fromEntries(searchParams)
                 });
-                if (!response.ok) throw new Error('La respuesta de la red no fue exitosa');
-                const data = await response.json();
-                setVehicles(data.docs || []);
+                setVehicles(response.data.docs || []);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || 'No se pudieron cargar los vehículos.');
             } finally {
                 setLoading(false);
             }
@@ -39,11 +40,11 @@ const Vehicle = () => {
         fetchVehicles();
     }, [searchParams]);
 
+    // --- LÓGICA DE FILTROS ---
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-
-        // Debounce: espera 400ms antes de actualizar los searchParams
+        
         clearTimeout(window.filterTimeout);
         window.filterTimeout = setTimeout(() => {
             const newFilters = { ...filters, [name]: value };
@@ -71,6 +72,7 @@ const Vehicle = () => {
         setSearchParams({});
     };
 
+    // --- RENDERIZADO  ---
     if (error) return <div>Error al cargar los datos: {error}</div>;
 
     return (

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig.js';
 import './Login.css';
 import blackLogo from '../../assets/images/black-logo.png';
 
@@ -14,22 +15,9 @@ const Login = () => {
         setError(null);
 
         try {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/login`;
+            const response = await apiClient.post('/api/login', { username, password });
 
-            const response = await fetch(apiUrl, { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-                credentials: 'include',
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al iniciar sesión');
-            }
+            const data = response.data;
 
             if (data.user && data.user.isAdmin) {
                 navigate('/vehicle-general');
@@ -39,7 +27,7 @@ const Login = () => {
 
         } catch (err) {
             console.error(err);
-            setError(err.message);
+            setError(err.response?.data?.message || 'Error al iniciar sesión');
         }
     };
 

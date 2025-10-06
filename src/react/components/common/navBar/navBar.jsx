@@ -1,27 +1,20 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import apiClient from '../../../../api/axiosConfig'; 
 import logo from '../../../assets/images/logo.png';
 import './Navbar.css';
 
 const Navbar = ({ user }) => {
   const navigate = useNavigate();
 
-  // Si el usuario no está logueado, no renderizamos nada.
   if (!user) {
     return null;
   }
 
-  // Función para manejar el cierre de sesión
+  // --- FUNCIÓN DE LOGOUT CON AXIOS ---
   const handleLogout = async () => {
     try {
-      // 👇 1. Construimos la URL completa de la API
-      const apiUrl = `${import.meta.env.VITE_API_URL}/api/logout`;
-
-      // 👇 2. Añadimos 'credentials: include' a la petición
-      await fetch(apiUrl, {
-        method: 'POST',
-        credentials: 'include'
-      });
+      await apiClient.post('/api/logout');
 
       // Redirige al usuario a la página de login
       navigate('/login');
@@ -30,6 +23,7 @@ const Navbar = ({ user }) => {
     }
   };
 
+  // --- RENDERIZADO ---
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">

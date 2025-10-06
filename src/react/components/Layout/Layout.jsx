@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig.js';
 import Navbar from '../common/NavBar/NavBar';
 import Footer from '../common/Footer/Footer';
 import '../Layout/Layout.css';
@@ -12,20 +13,16 @@ const Layout = () => {
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
-                // Usamos la variable de entorno para la URL completa.
-                const apiUrl = `${import.meta.env.VITE_API_URL}/api/session/current`;
+                // 2. Usamos apiClient para la petición GET a la sesión del usuario
+                const response = await apiClient.get('/api/session/current');
 
-                const response = await fetch(apiUrl, { credentials: 'include' });
-                const data = await response.json();
+                // Si la petición es exitosa (código 2xx), establecemos el usuario
+                setUser(response.data.user);
 
-                if (response.ok) {
-                    setUser(data.user);
-                } else {
-                    navigate('/login');
-                }
             } catch (error) {
-                console.error("Error fetching user session:", error);
-                navigate('/login');
+                // 3. Si hay un error (ej: 401 No Autorizado), Axios lo captura aquí
+                console.error("No hay sesión de usuario activa:", error.response?.data?.message || error.message);
+                navigate('/login'); // Redirigimos al login
             } finally {
                 setLoading(false);
             }

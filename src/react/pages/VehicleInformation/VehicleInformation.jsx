@@ -1,71 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import apiClient from '../../../api/axiosConfig';
 import './VehicleInformation.css';
 import logoSper from '../../assets/images/logo.png';
 
 const VehicleInformation = () => {
-    const { cid } = useParams(); // Obtiene el ID del vehículo desde la URL
+    // --- HOOKS Y ESTADOS ---
+    const { cid } = useParams();
     const navigate = useNavigate();
-
     const [vehicle, setVehicle] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Función para buscar los datos del vehículo
+    // --- CARGA DE DATOS CON AXIOS ---
     const fetchVehicle = async () => {
         try {
             setLoading(true);
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
-            const response = await fetch(apiUrl, { credentials: 'include' });
-
-            if (!response.ok) throw new Error('No se pudo encontrar el vehículo.');
-
-            const data = await response.json();
-            setVehicle(data.vehicle);
+            // 2. Usamos apiClient.get para cargar los datos del vehículo.
+            const response = await apiClient.get(`/api/vehicle/${cid}`);
+            setVehicle(response.data.vehicle);
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.message || 'No se pudo encontrar el vehículo.');
         } finally {
             setLoading(false);
         }
     };
 
-    // useEffect para cargar los datos del vehículo cuando el componente se monta
     useEffect(() => {
         fetchVehicle();
-    }, [cid]); // Se ejecuta si el ID del vehículo en la URL cambia
+    }, [cid]);
 
-    // Función para eliminar el último registro de un historial
+    // --- ELIMINAR REGISTRO CON AXIOS ---
     const handleDeleteLastEntry = async (fieldName) => {
         if (!window.confirm(`¿Estás seguro de que querés eliminar el último registro de "${fieldName}"?`)) {
             return;
         }
         try {
-            const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}/history/${fieldName}`;
-            const response = await fetch(apiUrl, {
-                method: 'DELETE',
-                credentials: 'include' 
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'No se pudo eliminar el registro.');
-            }
-
-            fetchVehicle();
+            // 3. Usamos apiClient.delete para eliminar el último registro del historial.
+            await apiClient.delete(`/api/vehicle/${cid}/history/${fieldName}`);
+            // Recargamos los datos del vehículo para reflejar el cambio.
+            fetchVehicle(); 
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.message || 'No se pudo eliminar el registro.');
         }
     };
 
-    // Renderizado condicional mientras carga o si hay un error
+    // --- RENDERIZADO  ---
     if (loading) return <p>Cargando historial del vehículo...</p>;
     if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
 
     return (
         <>
-
-
             <main>
                 <div className="body-p">
                     <div className="card-p">
@@ -75,7 +61,7 @@ const VehicleInformation = () => {
                         </div>
                         <div className="content-p">
                             <div className="vehicle-image-p">
-                                <img src={`/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                                <img src={`${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                             </div>
                             <div className="vehicle-info-p">
                                 <p>UNIDAD: {vehicle.title}</p>
@@ -87,7 +73,6 @@ const VehicleInformation = () => {
                         </div>
 
                         {/* --- Renderizado de Historiales --- */}
-
                         <div className="history-card">
                             <h4>Historial de Kilometraje</h4>
                             <ul className="history-list">
@@ -105,7 +90,6 @@ const VehicleInformation = () => {
                                 )}
                             </ul>
                         </div>
-
                         <div className="history-card">
                             <h4>Historial de Services</h4>
                             <ul className="history-list">
@@ -123,7 +107,6 @@ const VehicleInformation = () => {
                                 )}
                             </ul>
                         </div>
-
                         <div className="history-card">
                             <h4>Historial de Cambio de Rodado</h4>
                             <ul className="history-list">
@@ -141,7 +124,6 @@ const VehicleInformation = () => {
                                 )}
                             </ul>
                         </div>
-
                         <div className="history-card">
                             <h4>Historial de Reparaciones</h4>
                             <ul className="history-list">
@@ -159,7 +141,6 @@ const VehicleInformation = () => {
                                 )}
                             </ul>
                         </div>
-
                         <div className="history-card">
                             <h4>Historial de Descripciones del Vehículo</h4>
                             <ul className="history-list">
@@ -185,8 +166,6 @@ const VehicleInformation = () => {
                     </div>
                 </div>
             </main>
-
-
         </>
     );
 }
