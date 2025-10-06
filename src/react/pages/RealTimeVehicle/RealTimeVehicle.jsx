@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './RealTimeVehicle.css'; 
+import './RealTimeVehicle.css';
 import NavBar from '../../components/common/NavBar/NavBar';
 
 const RealTimeVehicle = () => {
@@ -34,21 +34,24 @@ const RealTimeVehicle = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/session/current`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
 
-                const response = await fetch('/api/session/current');
                 if (response.ok) {
                     const userData = await response.json();
-                    setFormData(prevState => ({
-                        ...prevState,
-                        title: userData.unidad || '' 
-                    }));
+                    if (userData && userData.user) {
+                        setFormData(prevState => ({
+                            ...prevState,
+                            title: userData.user.unidad || ''
+                        }));
+                    }
                 }
             } catch (error) {
                 console.error("No se pudo obtener la sesión del usuario:", error);
             }
         };
         fetchUserData();
-    }, []); 
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -77,10 +80,13 @@ const RealTimeVehicle = () => {
         }
 
         try {
-            const response = await fetch('/api/addVehicleWithImage', {
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/addVehicleWithImage`;
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 body: dataToSend,
+                credentials: 'include'
             });
+
             const result = await response.json();
             if (!response.ok) throw new Error(result.error || 'Error al agregar vehículo.');
 

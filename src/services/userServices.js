@@ -13,6 +13,7 @@ export default class userManager {
 
     logInUser = async (username, password)=> {
         const user = await userModel.findOne({ username, password })
+        
         if(!user){
             throw new Error("Invalid credentials");
         }

@@ -11,7 +11,9 @@ const SupportTickets = () => {
     useEffect(() => {
         const fetchTickets = async () => {
             try {
-                const response = await fetch('/api/support-tickets');
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support-tickets`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
+
                 if (!response.ok) {
                     throw new Error('La respuesta de la red no fue exitosa');
                 }
@@ -31,12 +33,16 @@ const SupportTickets = () => {
             return;
         }
         try {
-            const response = await fetch(`/api/support/${ticketId}`, {
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
+            const response = await fetch(apiUrl, {
                 method: 'DELETE',
+                credentials: 'include' 
             });
+
             if (!response.ok) {
                 throw new Error('No se pudo eliminar el ticket.');
             }
+
             setTickets(prevTickets => prevTickets.filter(ticket => ticket._id !== ticketId));
         } catch (err) {
             setError(err.message);
@@ -47,13 +53,13 @@ const SupportTickets = () => {
     return (
 
         <div className="page-container">
-        
+
             <header className="top-bar-support">
                 <div className="top-bar-left-support">
                     <div className="logo-support">
-                       
+
                         <Link to="/">
-                            
+
                             <img src={logoSper} alt="Logo Sper" width="60" height="60" />
                         </Link>
                     </div>
@@ -66,10 +72,10 @@ const SupportTickets = () => {
             <main>
                 <div className="tickets-container">
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
-                    
+
                     {loading && <p>Cargando tickets...</p>}
                     {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-                    
+
                     {!loading && !error && (
                         <>
                             {tickets.length === 0 ? (
@@ -108,7 +114,7 @@ const SupportTickets = () => {
             <footer className="footer-bar">
                 <p>© 2025 SPER - Departamento de Seguridad Informática</p>
             </footer>
-        
+
         </div>
     );
 }

@@ -40,7 +40,7 @@ router.post('/register', UserDao.registerUser);
 
 router.get("/vehicle/:cid", requireAuth, VehicleDao.getVehicleById);
 
-router.put("/vehicle/:pid", requireAuth, VehicleDao.updateVehicle);
+router.put("/vehicle/:productId", requireAuth, VehicleDao.updateVehicle);
 
 router.post('/login', limitFailedAttempts, UserDao.loginUser);
 

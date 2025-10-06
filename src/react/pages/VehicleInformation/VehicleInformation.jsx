@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import './VehicleInformation.css'; 
-import logoSper from '../../assets/images/logo.png'; 
+import './VehicleInformation.css';
+import logoSper from '../../assets/images/logo.png';
 
 const VehicleInformation = () => {
     const { cid } = useParams(); // Obtiene el ID del vehículo desde la URL
@@ -15,11 +15,14 @@ const VehicleInformation = () => {
     const fetchVehicle = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`/api/vehicle/${cid}`);
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
+            const response = await fetch(apiUrl, { credentials: 'include' });
+
             if (!response.ok) throw new Error('No se pudo encontrar el vehículo.');
+
             const data = await response.json();
             setVehicle(data.vehicle);
-        } catch (err) { 
+        } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
@@ -37,14 +40,17 @@ const VehicleInformation = () => {
             return;
         }
         try {
-            const response = await fetch(`/api/vehicle/${cid}/history/${fieldName}`, {
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}/history/${fieldName}`;
+            const response = await fetch(apiUrl, {
                 method: 'DELETE',
+                credentials: 'include' 
             });
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'No se pudo eliminar el registro.');
             }
-            // Si la eliminación fue exitosa, volvemos a cargar los datos del vehículo para ver el cambio
+
             fetchVehicle();
         } catch (err) {
             setError(err.message);

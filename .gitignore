@@ -13,3 +13,5 @@ node_modules
 # Carpeta de build de producción
 dist/
 
+# Carpeta de archivos subidos
+/public/uploads

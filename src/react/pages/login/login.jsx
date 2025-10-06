@@ -14,7 +14,9 @@ const Login = () => {
         setError(null);
 
         try {
-            const response = await fetch('/api/login', {
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/login`;
+
+            const response = await fetch(apiUrl, { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -28,8 +30,6 @@ const Login = () => {
             if (!response.ok) {
                 throw new Error(data.message || 'Error al iniciar sesión');
             }
-
-         
 
             if (data.user && data.user.isAdmin) {
                 navigate('/vehicle-general');

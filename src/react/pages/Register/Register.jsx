@@ -34,7 +34,6 @@ const Register = () => {
             return; // Detiene la ejecución si hay un error
         }
 
-        // Si todo está bien, mostramos los datos y los preparamos para el envío
         console.log('Datos a enviar al backend:', formData);
         
 

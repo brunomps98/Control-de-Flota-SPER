@@ -14,8 +14,15 @@ const Navbar = ({ user }) => {
   // Función para manejar el cierre de sesión
   const handleLogout = async () => {
     try {
-      // Llama a la ruta de la API para destruir la sesión en el backend
-      await fetch('/api/logout', { method: 'POST' });
+      // 👇 1. Construimos la URL completa de la API
+      const apiUrl = `${import.meta.env.VITE_API_URL}/api/logout`;
+
+      // 👇 2. Añadimos 'credentials: include' a la petición
+      await fetch(apiUrl, {
+        method: 'POST',
+        credentials: 'include'
+      });
+
       // Redirige al usuario a la página de login
       navigate('/login');
     } catch (error) {

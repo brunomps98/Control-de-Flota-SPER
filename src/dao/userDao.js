@@ -8,6 +8,7 @@ class UserDao {
     static loginUser = async (req, res) => {
         try {
             const { username, password } = req.body;
+            console.log(username, password);
             const user = await userDao.getUserByUsername(username);
 
             if (!user) {
@@ -22,6 +23,7 @@ class UserDao {
                 req.session.failedAttempts = 0;
                 // Envía una respuesta 200 (OK) con un mensaje y los datos del usuario
                 return res.status(200).json({ message: 'Login exitoso', user: user });
+                console.log("legó hasta aquí");
             } else {
                 req.session.failedAttempts = (req.session.failedAttempts || 0) + 1;
                 // Envía un error 401 (No autorizado) con un mensaje JSON

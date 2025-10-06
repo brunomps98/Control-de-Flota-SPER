@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import './Case.css';
-import logoSper from '../../assets/images/logo.png'; 
+import logoSper from '../../assets/images/logo.png';
 
 const Case = () => {
     // 1. OBTENCIÓN DE DATOS
-    const { ticketId } = useParams(); // Obtiene el ID del ticket desde la URL (ej: /case/12345)
-    const navigate = useNavigate(); // Hook para redirigir al usuario
+    const { ticketId } = useParams();
+    const navigate = useNavigate();
 
-    // Estados para guardar el ticket, el estado de carga y errores
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -16,13 +15,15 @@ const Case = () => {
     useEffect(() => {
         const fetchTicket = async () => {
             try {
-                
-                const response = await fetch(`/api/support/${ticketId}`); 
+                // 👇 Lógica de fetch corregida
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
+
                 if (!response.ok) {
                     throw new Error('No se pudo encontrar el caso de soporte.');
                 }
                 const data = await response.json();
-                setTicket(data.ticket); 
+                setTicket(data.ticket);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -31,19 +32,23 @@ const Case = () => {
         };
 
         fetchTicket();
-    }, [ticketId]); 
+    }, [ticketId]);
 
     // 3. FUNCIONALIDAD DE BOTONES
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este caso? Esta acción no se puede deshacer.')) {
             try {
-                const response = await fetch(`/support/${ticketId}`, {
+                // 👇 Lógica de fetch corregida (y se añadió /api a la URL)
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/support/${ticketId}`;
+                const response = await fetch(apiUrl, {
                     method: 'DELETE',
+                    credentials: 'include' // Importante para la autorización
                 });
+
                 if (!response.ok) {
                     throw new Error('No se pudo eliminar el ticket.');
                 }
-                // Si se elimina con éxito, redirige a la lista de tickets
+
                 navigate('/support-tickets');
             } catch (err) {
                 setError(err.message);
@@ -65,12 +70,12 @@ const Case = () => {
 
 
     return (
-        <div className="page-container"> 
+        <div className="page-container">
             <header className="top-bar-support">
                 <Link to="/">
                     <div className="top-bar-left-support">
                         <div className="logo-support">
-                            <img src={logoSper} alt="Logo Sper" width="60" height="60"/>
+                            <img src={logoSper} alt="Logo Sper" width="60" height="60" />
                         </div>
                         <div className="title-support">
                             <h1>SPER</h1>
@@ -91,15 +96,15 @@ const Case = () => {
                         <p><strong>Email de Contacto:</strong> {ticket.email}</p>
                         <p><strong>Teléfono de Contacto:</strong> {ticket.phone}</p>
 
-                        <hr style={{ margin: '20px 0' }}/>
+                        <hr style={{ margin: '20px 0' }} />
 
                         <h3>Descripción del Problema Reportado:</h3>
                         <p>{ticket.problem_description}</p>
                     </div>
 
-                    <hr style={{ margin: '20px 0' }}/>
+                    <hr style={{ margin: '20px 0' }} />
 
-                 
+
                     {ticket.files && ticket.files.length > 0 && (
                         <>
                             <h3>Imágenes Adjuntas:</h3>
@@ -107,10 +112,10 @@ const Case = () => {
 
                                 {ticket.files.map((file, index) => (
                                     <a href={`/uploads/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
-                                        <img 
-                                            src={`/uploads/${file}`} 
+                                        <img
+                                            src={`/uploads/${file}`}
                                             alt={`Imagen del caso ${index + 1}`}
-                                            style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }} 
+                                            style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
                                         />
                                     </a>
                                 ))}

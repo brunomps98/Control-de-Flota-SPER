@@ -3,7 +3,7 @@
   "appName": "Control de Flota SPER",
   "webDir": "dist",
   "server": {
-    "hostname": "app.localhost",
-    "androidScheme": "http"
+    "url": "http://10.175.41.247:5173",
+    "cleartext": true
   }
 }

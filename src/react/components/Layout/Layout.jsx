@@ -10,10 +10,12 @@ const Layout = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-
         const fetchUserSession = async () => {
             try {
-                const response = await fetch('/api/session/current', { credentials: 'include' });
+                // Usamos la variable de entorno para la URL completa.
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/session/current`;
+
+                const response = await fetch(apiUrl, { credentials: 'include' });
                 const data = await response.json();
 
                 if (response.ok) {

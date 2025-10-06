@@ -16,7 +16,7 @@ const EdditVehicle = () => {
         service: '',
         rodado: '',
         reparaciones: '',
-        usuario: '' 
+        usuario: ''
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -25,16 +25,16 @@ const EdditVehicle = () => {
     useEffect(() => {
         const fetchVehicleData = async () => {
             try {
-                // Pedimos los datos actuales del vehículo para pre-llenar el formulario
-                const response = await fetch(`/api/vehicle/${productId}`); 
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${productId}`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
+
                 if (!response.ok) throw new Error('No se pudieron cargar los datos del vehículo.');
-                
+
                 const data = await response.json();
-                // Pre-llenamos el formulario con los datos existentes
                 setFormData({
                     description: data.vehicle.description.slice(-1)[0] || '',
                     kilometros: data.vehicle.kilometros.slice(-1)[0] || '',
-                    destino: data.vehicle.destino || '',
+                    destino: data.vehicle.destino.slice(-1)[0] || '',
                     service: data.vehicle.service.slice(-1)[0] || '',
                     rodado: data.vehicle.rodado.slice(-1)[0] || '',
                     reparaciones: data.vehicle.reparaciones.slice(-1)[0] || '',
@@ -46,7 +46,7 @@ const EdditVehicle = () => {
         };
 
         fetchVehicleData();
-    }, [productId]); // Se ejecuta cada vez que el ID del producto cambia
+    }, [productId]);
 
     // Manejador para los cambios en los inputs
     const handleChange = (e) => {
@@ -64,12 +64,14 @@ const EdditVehicle = () => {
         setSuccess('');
 
         try {
-            const response = await fetch(`/vehicle/${productId}`, {
+            const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${productId}`;
+            const response = await fetch(apiUrl, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(formData),
+                credentials: 'include' 
             });
 
             if (!response.ok) {
@@ -78,7 +80,6 @@ const EdditVehicle = () => {
             }
 
             setSuccess('Vehículo modificado con éxito.');
-            // Navegamos a la página de información del vehículo después de 1.5 segundos
             setTimeout(() => {
                 navigate(`/vehicle-information/${productId}`);
             }, 1500);
@@ -90,15 +91,15 @@ const EdditVehicle = () => {
 
     return (
         <>
-           
+
 
             <main>
                 <form id="formEditVehicle" onSubmit={handleSubmit}>
                     <div className="title-add-product">
                         <h2 className="title-add">Editar Vehículo</h2>
                     </div>
-                    
-                    
+
+
                     <div className="desc-product">
                         <p>Descripción de estado de Vehículo</p>
                         <input className="controls" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción del vehículo" />
@@ -125,7 +126,7 @@ const EdditVehicle = () => {
                             <input className="controls" type="text" name="rodado" value={formData.rodado} onChange={handleChange} placeholder="Fecha de cambio de rodado" />
                         </div>
                     </div>
-                    
+
                     <div className="price-product">
                         <p>Reparaciones</p>
                         <input type="text" className="controls" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="Reparaciones realizadas" />

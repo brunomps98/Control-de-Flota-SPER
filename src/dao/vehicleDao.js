@@ -7,9 +7,15 @@ class VehicleDao {
 
     static addVehicleWithImage = async (req, res) => {
         try {
+            // Obtenemos los campos de texto del formulario desde req.body
             const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, usuario } = req.body;
-            const thumbnail = req.files.map(file => file.filename);
 
+            // Obtenemos los archivos de imagen desde req.files, que es donde Multer los coloca.
+            // Verificamos que req.files exista para evitar errores.
+            const thumbnail = req.files ? req.files.map(file => file.filename) : [];
+
+            // Creamos el objeto del vehículo con la estructura correcta.
+            // Los campos de historial deben ser inicializados como arrays que contienen el primer valor.
             const product = {
                 title,
                 dominio,
@@ -22,7 +28,8 @@ class VehicleDao {
                 cedula,
                 marca,
                 usuario,
-                thumbnail,
+                thumbnail, // Guardamos el array de nombres de archivo
+                // Correctamente inicializamos los historiales como arrays
                 description: [description],
                 kilometros: [kilometros],
                 service: [service],
@@ -32,7 +39,8 @@ class VehicleDao {
 
             const newProduct = await productsModel.create(product);
 
-            res.status(201).json(newProduct);
+            res.status(201).json({ message: "Vehículo creado con éxito", newProduct });
+
         } catch (error) {
             console.error("Error al crear vehículo:", error);
             res.status(500).json({ message: "Error interno del servidor", error: error.message });
@@ -136,7 +144,7 @@ class VehicleDao {
             // Usamos el operador $pop de MongoDB. { $pop: { campo: 1 } } elimina el último elemento.
             const update = { $pop: { [fieldName]: 1 } };
 
-            await productsModel.findByIdAndUpdate(vid, update);
+            await productsModel.findByIdAndv(vid, update);
 
             res.status(200).json({ status: "success", message: `Último registro de ${fieldName} eliminado.` });
         } catch (error) {
@@ -228,49 +236,59 @@ class VehicleDao {
 
     static updateVehicle = async (req, res) => {
         try {
-            const id = req.params.pid;
+            const id = req.params.productId;
             const body = req.body;
 
             const updateData = {
-                $push: {}, // Objeto para los campos que son arrays (historial)
-                $set: {}   // Objeto para los campos que se actualizan directamente
+                $push: {}, // Objeto para los campos de historial
+                $set: {}   // Objeto para campos que se actualizan directamente
             };
 
-            // Lista COMPLETA de campos que deben tratarse como un historial
-            const arrayFields = ['kilometros', 'service', 'rodado', 'reparaciones', 'description'];
+            // Lista de los campos que deben tratarse como un historial (arrays)
+            const arrayFields = ['kilometros', 'service', 'rodado', 'reparaciones', 'description', 'destino'];
 
             // Recorremos los datos que llegan del formulario
             for (const key in body) {
-                // Solo procesamos si el campo tiene un valor y no está vacío
+                // MUY IMPORTANTE: Solo procesamos el campo si tiene un valor y no es un string vacío.
                 if (body[key] && body[key] !== '') {
                     if (arrayFields.includes(key)) {
-                        // Si es un campo de historial, lo añadimos a $push
+                        // Si es un campo de historial, lo añadimos con $push
                         updateData.$push[key] = body[key];
                     } else {
-                        // Si no, es un campo normal que se debe reemplazar (ej: destino)
+                        // Si no, es un campo normal que se debe reemplazar con $set
                         updateData.$set[key] = body[key];
                     }
                 }
             }
 
-            // Limpiamos los objetos si quedaron vacíos para no enviar operadores innecesarios
-            if (Object.keys(updateData.$push).length === 0) delete updateData.$push;
-            if (Object.keys(updateData.$set).length === 0) delete updateData.$set;
-
-            // Si no hay nada que actualizar, simplemente retornamos éxito.
-            if (!updateData.$push && !updateData.$set) {
-                return res.status(200).json({ status: "success", message: "No fields to update" });
+            // Si después de filtrar no quedó nada en $push, lo eliminamos
+            if (Object.keys(updateData.$push).length === 0) {
+                delete updateData.$push;
+            }
+            // Si no quedó nada en $set, lo eliminamos
+            if (Object.keys(updateData.$set).length === 0) {
+                delete updateData.$set;
             }
 
-            // Ejecutamos la actualización con la estructura correcta
-            const updatedProduct = await productsModel.findByIdAndUpdate(id, updateData, { new: true });
+            // Si no hay ningún dato para actualizar, simplemente retornamos éxito sin hacer nada en la DB.
+            if (!updateData.$push && !updateData.$set) {
+                return res.status(200).json({ status: "success", message: "No se enviaron campos para actualizar." });
+            }
 
-            res.status(200).json({ status: "success", updatedProduct });
+            // Ejecutamos la actualización en la base de datos
+            const updatedVehicle = await productsModel.findByIdAndUpdate(id, updateData, { new: true });
+
+            if (!updatedVehicle) {
+                return res.status(404).json({ status: "error", message: "Vehículo no encontrado." });
+            }
+
+            res.status(200).json({ status: "success", updatedVehicle });
+
         } catch (error) {
-            res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
+            console.error("Error al actualizar vehículo:", error);
+            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
         }
     }
-
 
     static getVehicleById = async (req, res) => {
         try {

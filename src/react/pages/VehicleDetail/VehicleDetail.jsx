@@ -13,7 +13,9 @@ const VehicleDetail = () => {
     useEffect(() => {
         const fetchVehicleData = async () => {
             try {
-                const response = await fetch(`/api/vehicle/${cid}`);
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
+                const response = await fetch(apiUrl, { credentials: 'include' });
+
                 if (!response.ok) {
                     throw new Error('No se pudo cargar la información del vehículo.');
                 }
@@ -35,14 +37,17 @@ const VehicleDetail = () => {
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este vehículo?')) {
             try {
-                const response = await fetch(`/api/vehicle/${cid}`, {
+                const apiUrl = `${import.meta.env.VITE_API_URL}/api/vehicle/${cid}`;
+                const response = await fetch(apiUrl, {
                     method: 'DELETE',
+                    credentials: 'include' 
                 });
+
                 if (!response.ok) {
                     throw new Error('No se pudo eliminar el vehículo.');
                 }
-                navigate('/vehicle');
 
+                navigate('/vehicle');
             } catch (err) {
                 setError(err.message);
             }
