@@ -3,7 +3,7 @@
   "appName": "Control de Flota SPER",
   "webDir": "dist",
   "server": {
-    "url": "http://10.175.41.247:5173",
+    "url": "http://localhost",
     "cleartext": true
   }
 }

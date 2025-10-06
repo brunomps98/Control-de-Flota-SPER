@@ -23,10 +23,8 @@ app.use(express.static("public"))
 
 const allowedOrigins = process.env.FRONT_URL ? process.env.FRONT_URL.split(',') : [];
 
-// 2. Usamos una función en la configuración de CORS para validar el origen dinámicamente.
 app.use(cors({
     origin: function (origin, callback) {
-        // Permitimos peticiones sin origen (ej: Postman, apps móviles) y orígenes en nuestra lista blanca.
          console.log('--> Origen de la petición CORS:', origin); 
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
