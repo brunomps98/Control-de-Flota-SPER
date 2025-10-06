@@ -1,9 +1,5 @@
 {
   "appId": "com.sper.controldeflota",
   "appName": "Control de Flota SPER",
-  "webDir": "dist",
-  "server": {
-    "url": "http://localhost",
-    "cleartext": true
+  "webDir": "dist"
   }
-}
