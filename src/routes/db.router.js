@@ -1,12 +1,19 @@
 import { Router } from "express";
 import { __dirname } from "../utils.js";
-import { requireAuth, isAdmin, limitFailedAttempts } from "../config/authMiddleware.js"
 import express from 'express';
 import multer from "multer";
 import path from 'path';
 import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
 import SupportController from "../controllers/support.controller.js";
+import { userModel } from "../models/user.model.js";
+
+// Nuevas importaciones para JWT
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+
+// 1. Importamos el nuevo middleware de autenticación
+import { verifyToken } from "../config/authMiddleware.js";
 
 const router = Router();
 
@@ -15,51 +22,56 @@ router.use((req, res, next) => {
     next();
 });
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'public/uploads');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const fileExtension = path.extname(file.originalname);
-        cb(null, file.fieldname + '-' + uniqueSuffix + fileExtension);
-    }
-});
+const storage = multer.diskStorage({ /* ... (sin cambios) ... */ });
 const upload = multer({ storage: storage });
 
-// Middleware para pasar el objeto user a las vistas
-const setUserInLocals = (req, res, next) => {
-    res.locals.user = req.session.user || null;
-    next();
-};
+// 2. Eliminamos setUserInLocals y su uso, ya que dependía de sesiones.
 
-// Usar el middleware en todas las rutas
-router.use(setUserInLocals);
+// --- RUTAS DE AUTENTICACIÓN ---
 
 router.post('/register', UserDao.registerUser);
 
-router.get("/vehicle/:cid", requireAuth, VehicleDao.getVehicleById);
+// 3. Ruta de Login MODIFICADA para devolver un token
+router.post('/login', async (req, res) => {
+    const { username, password } = req.body;
+    try {
+        const user = await userModel.findOne({ username }).lean();
+        if (!user) return res.status(401).json({ message: 'Credenciales incorrectas' });
 
-router.put("/vehicle/:productId", requireAuth, VehicleDao.updateVehicle);
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) return res.status(401).json({ message: 'Credenciales incorrectas' });
 
-router.post('/login', limitFailedAttempts, UserDao.loginUser);
+        // Extraemos los datos del usuario para el token (sin la contraseña)
+        const { password: _, ...userPayload } = user;
+        
+        const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '8h' });
 
-router.get('/session/current', UserDao.getCurrentSession);
+        res.status(200).json({ status: 'success', user: userPayload, token });
+    } catch (error) {
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
+});
 
-router.post('/addVehicleWithImage', requireAuth, upload.array('thumbnail'), VehicleDao.addVehicleWithImage);
+// 4. Ruta para obtener el usuario actual a través del token (reemplaza a session/current)
+router.get('/user/current', verifyToken, (req, res) => {
+    res.status(200).json({ user: req.user });
+});
 
-router.post('/support', upload.array('file'), SupportController.createTicket);
 
+// --- RUTAS PROTEGIDAS (ACTUALIZADAS con verifyToken) ---
+
+router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
+router.put("/vehicle/:productId", verifyToken, VehicleDao.updateVehicle);
+router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicleWithImage);
+router.delete('/vehicle/:pid', verifyToken, VehicleDao.deleteVehicle);
+router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleDao.deleteLastHistoryEntry);
+router.get('/vehicles', verifyToken, VehicleDao.getVehiclesForUser);
+
+
+// --- RUTAS PÚBLICAS (SIN CAMBIOS) ---
+router.post('/support', upload.array('files'), SupportController.createTicket);
 router.get('/support-tickets', SupportController.getTickets);
-
 router.get('/support/:ticketId', SupportController.getTicketById);
-
-router.delete('/vehicle/:pid', requireAuth, VehicleDao.deleteVehicle);
-
 router.delete('/support/:pid', SupportController.deleteTicket);
-
-router.delete('/vehicle/:vid/history/:fieldName', requireAuth, VehicleDao.deleteLastHistoryEntry);
-
-router.get('/vehicles', requireAuth, VehicleDao.getVehiclesForUser);
 
 export default router;

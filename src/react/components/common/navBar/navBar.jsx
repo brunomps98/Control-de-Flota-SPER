@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import apiClient from '../../../../api/axiosConfig'; 
 import logo from '../../../assets/images/logo.png';
 import './Navbar.css';
 
@@ -11,19 +10,16 @@ const Navbar = ({ user }) => {
     return null;
   }
 
-  // --- FUNCIÓN DE LOGOUT CON AXIOS ---
-  const handleLogout = async () => {
-    try {
-      await apiClient.post('/api/logout');
-
-      // Redirige al usuario a la página de login
-      navigate('/login');
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    }
+  // --- FUNCIÓN DE LOGOUT PARA TOKENS ---
+  const handleLogout = () => {
+    // 1. ¡Paso clave! Limpiamos el token del almacenamiento local
+    localStorage.removeItem('token');
+    
+    // 2. Redirigimos al usuario a la página de login
+    navigate('/login');
   };
 
-  // --- RENDERIZADO ---
+  // --- RENDERIZADO (Sin cambios) ---
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
@@ -31,7 +27,6 @@ const Navbar = ({ user }) => {
           <img src={logo} alt="Logo SPER" width="50" height="50" />
           SPER
         </Link>
-
         <button
           className="navbar-toggler"
           type="button"
@@ -43,13 +38,11 @@ const Navbar = ({ user }) => {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
-
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link active" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
             </li>
-
             {user.admin ? (
               <li className="nav-item">
                 <Link className="nav-link" to="/vehicle">Flota General</Link>
@@ -59,7 +52,6 @@ const Navbar = ({ user }) => {
                 <Link className="nav-link" to="/vehicle">Flota</Link>
               </li>
             )}
-
             <li className="nav-item dropdown">
               <a
                 className="nav-link dropdown-toggle"
@@ -85,12 +77,10 @@ const Navbar = ({ user }) => {
                 {user.trat && <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento">Tratamiento</Link></li>}
               </ul>
             </li>
-
             <li className="nav-item">
               <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
             </li>
           </ul>
-
           <span className="navbar-text text-white">
             Usuario conectado: {user.username}
           </span>

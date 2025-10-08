@@ -96,7 +96,7 @@ class VehicleDao {
 
 
 
-            const user = req.session.user;
+            const user = req.user;
             if (user && !user.admin) {
                 filter.title = user.unidad;
             }
@@ -161,7 +161,7 @@ class VehicleDao {
             const query = {};
 
             // Obtener el usuario logueado
-            const user = req.session.user;
+            const user = req.user;
 
             // Filtrar los productos por el campo 'title' igual al valor de la propiedad 'unidad' del usuario
             if (req.query.unidad) {
@@ -312,7 +312,7 @@ class VehicleDao {
 
     static getVehiclesForUser = async (req, res) => {
         try {
-            const user = req.session.user;
+            const user = req.user;
             if (!user) {
                 return res.status(401).json({ message: 'Usuario no autenticado' });
             }

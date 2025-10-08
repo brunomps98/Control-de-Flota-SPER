@@ -17,9 +17,14 @@ const Login = () => {
         try {
             const response = await apiClient.post('/api/login', { username, password });
 
-            const data = response.data;
+            // 1. Obtenemos el usuario y el token de la respuesta
+            const { user, token } = response.data;
 
-            if (data.user && data.user.isAdmin) {
+            // 2. ¡Paso clave! Guardamos el token en el almacenamiento local del navegador
+            localStorage.setItem('token', token);
+
+            // 3. Redirigimos según el rol del usuario
+            if (user && user.isAdmin) {
                 navigate('/vehicle-general');
             } else {
                 navigate('/vehicle');

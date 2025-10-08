@@ -4,36 +4,19 @@ import './RealTimeVehicle.css';
 import NavBar from '../../components/common/NavBar/NavBar';
 
 const RealTimeVehicle = () => {
-
-    // --- ESTADOS ---
     const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        dominio: '',
-        kilometros: '',
-        destino: '',
-        anio: '',
-        modelo: '',
-        tipo: '',
-        chasis: '',
-        motor: '',
-        cedula: '',
-        service: '',
-        rodado: '',
-        marca: '',
-        reparaciones: '',
-        usuario: '',
+        title: '', description: '', dominio: '', kilometros: '', destino: '',
+        anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
+        service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
         thumbnail: []
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
-    // --- CARGA DE DATOS DE SESIÓN CON AXIOS ---
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                // 2. Usamos apiClient.get para obtener la sesión del usuario.
-                const response = await apiClient.get('/api/session/current');
+                const response = await apiClient.get('/api/user/current');
                 const userData = response.data; 
 
                 if (userData && userData.user) {
@@ -49,7 +32,6 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []);
 
-    // --- MANEJADORES DE FORMULARIO ---
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -58,20 +40,16 @@ const RealTimeVehicle = () => {
         }));
     };
 
-    // --- ENVÍO DE FORMULARIO CON AXIOS Y FORMDATA ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitStatus({ message: '', type: '' });
 
-        // La construcción de FormData sigue siendo la misma
         const dataToSend = new FormData();
         for (const key in formData) {
-            if (key === 'thumbnail') {
-                if (formData.thumbnail.length > 0) {
-                    for (let i = 0; i < formData.thumbnail.length; i++) {
-                        dataToSend.append('thumbnail', formData.thumbnail[i]);
-                    }
+            if (key === 'thumbnail' && formData[key]) {
+                for (let i = 0; i < formData[key].length; i++) {
+                    dataToSend.append('thumbnail', formData[key][i]);
                 }
             } else {
                 dataToSend.append(key, formData[key]);
@@ -79,11 +57,9 @@ const RealTimeVehicle = () => {
         }
 
         try {
-            // 3. Usamos apiClient.post para enviar el formulario.
-            // Axios detecta que el cuerpo es FormData y establece las cabeceras 'multipart/form-data' automáticamente.
             await apiClient.post('/api/addVehicleWithImage', dataToSend);
-
             setSubmitStatus({ message: 'Vehículo cargado con éxito.', type: 'success' });
+            e.target.reset();
         } catch (err) {
             setSubmitStatus({ message: err.response?.data?.message || 'Error al agregar vehículo.', type: 'error' });
         } finally {
@@ -91,7 +67,6 @@ const RealTimeVehicle = () => {
         }
     };
 
-    // --- RENDERIZADO ---
     return (
         <>
             <div id="message-container">
@@ -101,8 +76,8 @@ const RealTimeVehicle = () => {
                     </div>
                 )}
             </div>
-
             <form id="formProduct" onSubmit={handleSubmit}>
+                {/* El resto de tu JSX no necesita cambios */}
                 <main>
                     <div className="title-add-product">
                         <h2 className="title-add">Cargar Vehículo</h2>
@@ -132,78 +107,78 @@ const RealTimeVehicle = () => {
                         </div>
                         <div className="desc-product">
                             <p>Descripción de estado de Vehículo</p>
-                            <input className="controls" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
+                            <input className="controls" type="text" name="description" placeholder="Descripción y utilización específica" required />
                         </div>
                     </div>
-
-                    <div className="stock-code-price">
+                    {/* ... más inputs ... */}
+                     <div className="stock-code-price">
                         <div className="code-product">
                             <p>Patente</p>
-                            <input className="controls" type="text" name="dominio" value={formData.dominio} onChange={handleChange} placeholder="Ingrese el dominio" required />
+                            <input className="controls" type="text" name="dominio"  onChange={handleChange} placeholder="Ingrese el dominio" required />
                         </div>
                         <div className="stock-product">
                             <p>Kilómetros</p>
-                            <input className="controls" type="number" min="0" name="kilometros" value={formData.kilometros} onChange={handleChange} placeholder="Kilometraje actual" required />
+                            <input className="controls" type="number" min="0" name="kilometros"  onChange={handleChange} placeholder="Kilometraje actual" required />
                         </div>
                         <div className="code-product">
                             <p>Destino</p>
-                            <input className="controls" type="text" name="destino" value={formData.destino} onChange={handleChange} placeholder="Unidad asignada" required />
+                            <input className="controls" type="text" name="destino"  onChange={handleChange} placeholder="Unidad asignada" required />
                         </div>
                     </div>
 
                     <div className="stock-code-price">
                         <div className="code-product">
                             <p>Año</p>
-                            <input className="controls" type="text" name="anio" value={formData.anio} onChange={handleChange} placeholder="año del vehiculo" required />
+                            <input className="controls" type="text" name="anio" onChange={handleChange} placeholder="año del vehiculo" required />
                         </div>
                         <div className="code-product">
                             <p>Modelo</p>
-                            <input className="controls" type="text" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej:s10, berlingo" required />
+                            <input className="controls" type="text" name="modelo" onChange={handleChange} placeholder="Ej:s10, berlingo" required />
                         </div>
                         <div className="code-product">
                             <p>Tipo</p>
-                            <input className="controls" type="text" name="tipo" value={formData.tipo} onChange={handleChange} placeholder="Ingrese tipo de vehiculo" required />
+                            <input className="controls" type="text" name="tipo" onChange={handleChange} placeholder="Ingrese tipo de vehiculo" required />
                         </div>
                     </div>
 
                     <div className="stock-code-price">
                         <div className="price-product">
                             <p>N° Chasis</p>
-                            <input className="controls" type="text" name="chasis" value={formData.chasis} onChange={handleChange} placeholder="Ingrese n° de chasis" required />
+                            <input className="controls" type="text" name="chasis"  onChange={handleChange} placeholder="Ingrese n° de chasis" required />
                         </div>
                         <div className="price-product">
                             <p>N° Motor</p>
-                            <input className="controls" type="text" name="motor" value={formData.motor} onChange={handleChange} placeholder="Ingrese n° de motor" required />
+                            <input className="controls" type="text" name="motor"  onChange={handleChange} placeholder="Ingrese n° de motor" required />
                         </div>
                         <div className="price-product">
                             <p>N° Cedula</p>
-                            <input className="controls" type="text" name="cedula" value={formData.cedula} onChange={handleChange} placeholder="Ingrese n° de cedula" required />
+                            <input className="controls" type="text" name="cedula"  onChange={handleChange} placeholder="Ingrese n° de cedula" required />
                         </div>
                     </div>
 
                     <div className="stock-code-price">
                         <div className="price-product">
                             <p>Service</p>
-                            <input className="controls" type="date" name="service" value={formData.service} onChange={handleChange} placeholder="fecha de ultimo service" required />
+                            <input className="controls" type="date" name="service" onChange={handleChange} placeholder="fecha de ultimo service" required />
                         </div>
                         <div className="price-product">
                             <p>Rodado</p>
-                            <input className="controls" type="date" name="rodado" value={formData.rodado} onChange={handleChange} placeholder="fecha de cambio de rodado" required />
+                            <input className="controls" type="date" name="rodado" onChange={handleChange} placeholder="fecha de cambio de rodado" required />
                         </div>
                         <div className="price-product">
                             <p>Marca</p>
-                            <input className="controls" type="text" name="marca" value={formData.marca} onChange={handleChange} placeholder="ingrese marca del vehiculo" required />
+                            <input className="controls" type="text" name="marca"  onChange={handleChange} placeholder="ingrese marca del vehiculo" required />
                         </div>
                     </div>
 
                     <div className="stock-code-price">
                         <div className="price-product">
                             <p>Reparaciones</p>
-                            <input className="controls" type="text" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="indicar reparaciones realizadas" required />
+                            <input className="controls" type="text" name="reparaciones"  onChange={handleChange} placeholder="indicar reparaciones realizadas" required />
                         </div>
                         <div className="price-product">
                             <p>Chofer</p>
-                            <input className="controls" type="text" name="usuario" value={formData.usuario} onChange={handleChange} placeholder="indicar el chofer actual" required />
+                            <input className="controls" type="text" name="usuario"  onChange={handleChange} placeholder="indicar el chofer actual" required />
                         </div>
                     </div>
 

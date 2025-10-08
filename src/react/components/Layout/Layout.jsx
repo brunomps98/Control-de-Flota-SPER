@@ -13,16 +13,15 @@ const Layout = () => {
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
-                // 2. Usamos apiClient para la petición GET a la sesión del usuario
-                const response = await apiClient.get('/api/session/current');
+                // 1. Cambiamos la ruta a la nueva que verifica el token
+                const response = await apiClient.get('/api/user/current');
 
-                // Si la petición es exitosa (código 2xx), establecemos el usuario
+                // El interceptor de Axios ya se encargó de enviar el token por nosotros
                 setUser(response.data.user);
 
             } catch (error) {
-                // 3. Si hay un error (ej: 401 No Autorizado), Axios lo captura aquí
                 console.error("No hay sesión de usuario activa:", error.response?.data?.message || error.message);
-                navigate('/login'); // Redirigimos al login
+                navigate('/login'); // Si el token no es válido o no existe, redirigimos al login
             } finally {
                 setLoading(false);
             }

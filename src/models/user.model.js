@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs'; // Cambiamos a bcryptjs
 
 const userCollection = 'user';
 
@@ -18,6 +19,15 @@ const userSchema = new mongoose.Schema({
     up9: {  type: Boolean , default: false},
     dg: {  type: Boolean , default: false},
     inst: {  type: Boolean , default: false}
+});
+
+// Middleware para hashear la contraseña antes de guardar
+userSchema.pre('save', function(next) {
+    if (!this.isModified('password')) {
+        return next();
+    }
+    this.password = bcrypt.hashSync(this.password, 10);
+    next();
 });
 
 export const userModel = mongoose.model('User', userSchema, userCollection);

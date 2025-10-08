@@ -90,7 +90,7 @@ const Case = () => {
                             <h3>Imágenes Adjuntas:</h3>
                             <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
                                 {ticket.files.map((file, index) => (
-                                    <a href={`${import.meta.env.VITE_API_URL}/uploads/support/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
+                                    <a href={`${import.meta.env.VITE_API_URL}/uploads${file}`} target="_blank" rel="noopener noreferrer" key={index}>
                                         <img
                                             src={`${import.meta.env.VITE_API_URL}/uploads/support/${file}`}
                                             alt={`Imagen del caso ${index + 1}`}

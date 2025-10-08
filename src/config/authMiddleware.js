@@ -1,38 +1,32 @@
-export const requireAuth = (req, res, next) => {
-    if (req.session && req.session.user) {
-        // Si el usuario está autenticado en la sesión, permite continuar.
-        next();
-    } else {
-        // Si no está autenticado, devuelve un error 401 en formato JSON.
-        res.status(401).json({ message: 'Acceso no autorizado. Por favor, inicie sesión.' });
+import jwt from 'jsonwebtoken';
+
+// Nuevo middleware para verificar el token JWT. Reemplaza a 'requireAuth'.
+export const verifyToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer <TOKEN>"
+
+    if (token == null) {
+        return res.status(401).json({ message: 'Acceso no autorizado. Se requiere un token.' });
     }
-};
 
-export const isAdmin = (req, res, next) => {
-    if (req.session && req.session.user && req.session.user.admin === true) {
-        next();
-    } else {
-        res.status(403).send('Acceso denegado. Debes ser administrador para acceder a esta página.');
-    }
-};
-
-export const limitFailedAttempts = (req, res, next) => {
-    const MAX_FAILED_ATTEMPTS = 3;
-    const BLOCK_TIME = 180000; 
-
-    if (req.session && req.session.failedAttempts >= MAX_FAILED_ATTEMPTS) {
-        const blockEndTime = req.session.blockEndTime || 0;
-        const currentTime = Date.now();
-
-        if (currentTime < blockEndTime) {
-            const remainingTime = Math.ceil((blockEndTime - currentTime) / 1000);
-            res.status(403).send(`Demasiados intentos fallidos. Por favor, inténtelo de nuevo después de ${remainingTime} segundos.`);
-        } else {
-            req.session.failedAttempts = 0;
-            req.session.blockEndTime = currentTime + BLOCK_TIME; 
-            next();
+    jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token no válido o expirado.' });
         }
-    } else {
+        // Si el token es válido, guardamos los datos del usuario en req.user
+        req.user = user;
         next();
+    });
+};
+
+// Middleware adaptado para verificar si el usuario es administrador.
+export const isAdmin = (req, res, next) => {
+    // Ahora usa 'req.user' que viene del token.
+    if (req.user && req.user.isAdmin === true) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Acceso denegado. Se requieren permisos de administrador.' });
     }
 };
+
+// La función limitFailedAttempts se elimina porque es incompatible con JWT.
