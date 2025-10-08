@@ -25,7 +25,7 @@ const allowedOrigins = process.env.FRONT_URL ? process.env.FRONT_URL.split(',') 
 
 app.use(cors({
     origin: function (origin, callback) {
-         console.log('--> Origen de la petición CORS:', origin); 
+        console.log('--> Origen de la petición CORS:', origin);
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -45,7 +45,11 @@ app.use(session({
     }),
     secret: process.env.SECRET_KEY,
     resave: true,
-    saveUninitialized: true
+    saveUninitialized: true,
+    cookie: {
+        secure: false, 
+        sameSite: 'lax' 
+    }
 }))
 
 const PORT = process.env.PORT || 8080;
@@ -59,7 +63,7 @@ app.set("views", __dirname + "/views")
 
 app.get('/setSession', (req, res) => {
     req.session.user = 'userName',
-    req.session.admin = true
+        req.session.admin = true
     res.send('Usuario Logueado')
 })
 
