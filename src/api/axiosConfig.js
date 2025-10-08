@@ -3,10 +3,10 @@ import { Capacitor } from '@capacitor/core';
 
 const isAndroid = Capacitor.getPlatform() === 'android';
 const baseURL = isAndroid 
-    ? 'http://localhost:8080' 
+    ? 'http://10.0.2.2:8080'
     : import.meta.env.VITE_API_URL;
 
-    console.log('API baseURL selected:', baseURL);
+console.log('API baseURL selected:', baseURL);
 
 const apiClient = Axios.create({
     baseURL: baseURL,
