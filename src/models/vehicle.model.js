@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema({
     },
     dominio: {
         type: String,
-        unique: true, 
+        unique: true,
         required: false
     },
     kilometros: {
@@ -23,10 +23,10 @@ const productSchema = new mongoose.Schema({
     },
     thumbnail: {
         type: [String],
-        required: false 
+        required: false
     },
     destino: {
-        type: String,
+        type: [String],
         required: false
     },
     anio: {
@@ -67,11 +67,11 @@ const productSchema = new mongoose.Schema({
     },
     marca: {
         type: String,
-        required: false 
+        required: false
     },
     usuario: {
         type: String,
-        required: false 
+        required: false
     },
 })
 

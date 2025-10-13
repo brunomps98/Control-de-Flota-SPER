@@ -1,24 +1,24 @@
 // En tu archivo VehicleCard.jsx
 
 import { Link } from 'react-router-dom';
-import './VehicleCard.css'; 
+import './VehicleCard.css';
 
 const VehicleCard = ({ vehicle }) => {
-    const imageUrl = vehicle.thumbnail && vehicle.thumbnail.length > 0 
-        ? `/uploads/${vehicle.thumbnail[0]}` 
-        : '/images/default-vehicle.png'; 
+    const imageUrl = vehicle.thumbnail && vehicle.thumbnail.length > 0
+        ? `${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`
+        : '/images/default-vehicle.png';
     return (
         <div className="card-s">
             <div className="face front">
                 <img src={imageUrl} alt={`${vehicle.marca} ${vehicle.modelo}`} />
-                <h3>{vehicle.title}</h3> 
+                <h3>{vehicle.title}</h3>
             </div>
 
             <div className="face back">
                 <h3>{vehicle.marca} {vehicle.modelo}</h3>
                 <p>Dominio: {vehicle.dominio}</p>
                 <p>Año: {vehicle.anio}</p>
-                <p>Destino: {vehicle.destino}</p> 
+                <p>Destino: {vehicle.destino}</p>
                 <div className="link">
                     <Link to={`/vehicle-detail/${vehicle._id}`}>Ver Ficha</Link>
                 </div>

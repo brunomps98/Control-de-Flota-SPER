@@ -19,7 +19,7 @@ class VehicleDao {
             const product = {
                 title,
                 dominio,
-                destino,
+                destino: [destino],
                 anio,
                 modelo,
                 tipo,
@@ -28,8 +28,7 @@ class VehicleDao {
                 cedula,
                 marca,
                 usuario,
-                thumbnail, // Guardamos el array de nombres de archivo
-                // Correctamente inicializamos los historiales como arrays
+                thumbnail,
                 description: [description],
                 kilometros: [kilometros],
                 service: [service],
@@ -144,7 +143,7 @@ class VehicleDao {
             // Usamos el operador $pop de MongoDB. { $pop: { campo: 1 } } elimina el último elemento.
             const update = { $pop: { [fieldName]: 1 } };
 
-            await productsModel.findByIdAndv(vid, update);
+            await productsModel.findByIdAndUpdate(vid, update);
 
             res.status(200).json({ status: "success", message: `Último registro de ${fieldName} eliminado.` });
         } catch (error) {
@@ -166,7 +165,7 @@ class VehicleDao {
             // Filtrar los productos por el campo 'title' igual al valor de la propiedad 'unidad' del usuario
             if (req.query.unidad) {
                 category.title = req.query.unidad;
-            } else {
+            } else if (user && !user.admin) {
                 category.title = user.unidad;
             }
 

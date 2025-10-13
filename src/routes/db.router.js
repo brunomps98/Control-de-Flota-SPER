@@ -22,7 +22,20 @@ router.use((req, res, next) => {
     next();
 });
 
-const storage = multer.diskStorage({ /* ... (sin cambios) ... */ });
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads');
+    },
+    filename: function (req, file, cb) {
+        // Generamos un nombre único y seguro
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        // Extraemos la extensión del archivo original de forma segura
+        const extension = path.extname(file.originalname);
+        // Construimos el nombre final asegurando que la extensión esté presente
+        cb(null, file.fieldname + '-' + uniqueSuffix + extension);
+    }
+});
+
 const upload = multer({ storage: storage });
 
 // 2. Eliminamos setUserInLocals y su uso, ya que dependía de sesiones.
