@@ -1,5 +1,7 @@
+// axiosConfig.js
+
 import axios from 'axios';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, CapacitorHttp } from '@capacitor/core'; 
 
 const platform = Capacitor.getPlatform();
 const baseURL = platform === 'android' 
@@ -10,8 +12,7 @@ console.log('API baseURL selected:', baseURL);
 
 const capacitorAdapter = async (config) => {
   try {
-    const { Http } = await import(/* @vite-ignore */ '@capacitor/http');
-
+    // Ya no se usa el import dinámico. Se usa el que importamos arriba.
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -20,7 +21,7 @@ const capacitorAdapter = async (config) => {
       data: config.data,
     };
 
-    const response = await Http.request(options);
+    const response = await CapacitorHttp.request(options);
 
     return {
       data: response.data,
@@ -40,6 +41,7 @@ const apiClient = axios.create({
     adapter: platform === 'web' ? undefined : capacitorAdapter,
 });
 
+// Tu interceptor está perfecto
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

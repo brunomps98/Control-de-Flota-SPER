@@ -1,79 +1,29 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 buildscript {
-    ext {
-        // Versiones globales que pueden usar los submódulos (app, plugins, etc.)
-        compileSdkVersion = 35
-        minSdkVersion = 22 // Subido de 21 → 22 (Cordova 10.1.1 lo requiere)
-        targetSdkVersion = 35
-
-        // Dependencias comunes de AndroidX
-        androidxAppCompatVersion = "1.6.1"
-        androidxCoordinatorLayoutVersion = "1.2.0"
-        coreSplashScreenVersion = "1.0.0"
-        junitVersion = "4.13.2"
-        androidxJunitVersion = "1.1.5"
-        androidxEspressoCoreVersion = "3.5.1"
-
-        // Kotlin versión (debe coincidir con la que usa tu plugin de Gradle)
-        kotlin_version = "1.8.22"
-    }
-
+    
     repositories {
         google()
         mavenCentral()
     }
-
     dependencies {
         classpath 'com.android.tools.build:gradle:8.13.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.google.gms:google-services:4.3.15" 
+        classpath 'com.google.gms:google-services:4.4.2'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
     }
 }
+
+apply from: "variables.gradle"
 
 allprojects {
     repositories {
         google()
         mavenCentral()
-        // si tenés librerías locales:
-        flatDir {
-            dirs 'libs'
-        }
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-// 🔧 Configuración global aplicada a todos los submódulos (app, capacitor, cordova, etc.)
-subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty('android')) {
-            project.android {
-                compileSdkVersion 35
-
-                defaultConfig {
-                    minSdkVersion 22 //  Forzamos minSdk 22 en todos los módulos
-                    targetSdkVersion 35
-                }
-
-                compileOptions {
-                    sourceCompatibility JavaVersion.VERSION_17
-                    targetCompatibility JavaVersion.VERSION_17
-                }
-            }
-        }
-
-        //  Asegura que todos los módulos Kotlin usen JVM 17
-        tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
-            kotlinOptions {
-                jvmTarget = "17"
-            }
-        }
-    }
-}
-
-subprojects {
-    tasks.matching { it.name.toLowerCase().contains("test") }.configureEach {
-        enabled = false
-    }
 }

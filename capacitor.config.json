@@ -3,7 +3,7 @@
   "appName": "Control-de-Flota-S.P.E.R",
   "webDir": "dist",
   "plugins": {
-    "Http": {
+    "CapacitorHttp": {
       "enabled": true
     }
   },
