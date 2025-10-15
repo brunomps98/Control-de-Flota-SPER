@@ -25,7 +25,6 @@ $(document).ready(function () {
         }
     });
 
-    // --- LÓGICA NUEVA PARA ELIMINAR CASOS DE SOPORTE ---
     $('.delete-case-btn').on('click', function () {
         // 1. Obtenemos el ID del ticket del atributo data-ticket-id
         const ticketId = $(this).data('ticket-id');
@@ -51,7 +50,6 @@ $(document).ready(function () {
         }
     });
 
-    /*Logica Para el boton de eliminar registro de vehiculo */
 
     $(document).on('click', '.delete-history-btn', function () {
         const button = $(this);
@@ -65,7 +63,6 @@ $(document).ready(function () {
                 method: 'DELETE',
                 success: function (response) {
                     alert('Registro eliminado con éxito.');
-                    // Recargamos la página para ver los cambios
                     window.location.reload();
                 },
                 error: function (xhr, status, error) {

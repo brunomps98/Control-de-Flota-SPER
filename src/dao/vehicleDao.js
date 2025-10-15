@@ -14,8 +14,6 @@ class VehicleDao {
             // Verificamos que req.files exista para evitar errores.
             const thumbnail = req.files ? req.files.map(file => file.filename) : [];
 
-            // Creamos el objeto del vehículo con la estructura correcta.
-            // Los campos de historial deben ser inicializados como arrays que contienen el primer valor.
             const product = {
                 title,
                 dominio,
@@ -248,7 +246,6 @@ class VehicleDao {
 
             // Recorremos los datos que llegan del formulario
             for (const key in body) {
-                // MUY IMPORTANTE: Solo procesamos el campo si tiene un valor y no es un string vacío.
                 if (body[key] && body[key] !== '') {
                     if (arrayFields.includes(key)) {
                         // Si es un campo de historial, lo añadimos con $push
@@ -328,16 +325,12 @@ class VehicleDao {
             if (año) filter.año = new RegExp(año, 'i');
             if (tipo) filter.tipo = new RegExp(tipo, 'i');
 
-            // --- LÓGICA MEJORADA PARA EL FILTRO DE UNIDAD ---
             if (title) {
-                // Si la URL pide un 'title' (ej: desde la NavBar), ese es el filtro que usamos.
                 filter.title = new RegExp(title, 'i');
             } else if (!user.admin) {
-                // Si la URL NO pide un 'title', y el usuario NO es admin,
-                // entonces filtramos por la unidad del usuario logueado.
                 filter.title = user.unidad;
             }
-            // Si el usuario es admin y no se especifica un 'title', no se aplica ningún filtro de unidad.
+
 
             const vehicles = await productsModel.find(filter).lean();
             res.status(200).json({ docs: vehicles });

@@ -1,4 +1,4 @@
-// --- Primera Parte: Lógica para el formulario de agregar nuevos vehículos ---
+// --- Lógica para el formulario de agregar nuevos vehículos ---
 const form = document.getElementById('formProduct');
 const messageContainer = document.getElementById('message-container'); // Obtener el contenedor
 

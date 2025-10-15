@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { __dirname } from "../utils.js";
-// 1. Cambiamos 'requireAuth' por 'verifyToken'
 import { verifyToken, isAdmin } from "../config/authMiddleware.js";
 import express from 'express';
 import multer from "multer";
@@ -10,17 +9,16 @@ import VehicleDao from "../dao/vehicleDao.js";
 import SupportController from "../controllers/support.controller.js";
 
 const router = Router();
-const upload = multer({ /* ... (sin cambios) ... */ });
+const upload = multer({ });
 
-// 2. Eliminamos setUserInLocals y su uso
 
-// ... (rutas estáticas sin cambios)
+// ... (rutas estáticas)
 router.use('/support', express.static(path.join(__dirname, 'public')));
 // ...
 
 router.get('/eddit/:productId', VehicleDao.edditVehicle);
 
-// 3. Reemplazamos 'requireAuth' por 'verifyToken'
+
 router.get("/realtimevehicle", verifyToken, VehicleDao.realtimeVehicle);
 router.get('/', (req, res) => res.render('home'));
 router.get('/login', UserDao.login);

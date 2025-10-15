@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-// Nuevo middleware para verificar el token JWT. Reemplaza a 'requireAuth'.
 export const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer <TOKEN>"
@@ -21,7 +20,6 @@ export const verifyToken = (req, res, next) => {
 
 // Middleware adaptado para verificar si el usuario es administrador.
 export const isAdmin = (req, res, next) => {
-    // Ahora usa 'req.user' que viene del token.
     if (req.user && req.user.isAdmin === true) {
         next();
     } else {
@@ -29,4 +27,3 @@ export const isAdmin = (req, res, next) => {
     }
 };
 
-// La función limitFailedAttempts se elimina porque es incompatible con JWT.

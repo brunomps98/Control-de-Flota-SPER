@@ -1,6 +1,6 @@
 $(document).ready(function() {
     $('#formEditVehicle').on('submit', function(event) {
-        event.preventDefault(); // Evitar el envío del formulario por defecto
+        event.preventDefault(); 
 
         const productId = $('#_id').val();
         const description = $('#description').val();
@@ -26,13 +26,9 @@ $(document).ready(function() {
                 
             },
             success: function(response) {
-                // Manejar la respuesta de la actualización exitosa
-                // Mostrar mensaje de éxito en la página
             },
             error: function(error) {
-                // Manejar cualquier error que ocurra durante la actualización
                 console.error(error);
-                // Mostrar mensaje de error en la página
             }
         });
     });

@@ -77,7 +77,6 @@ const RealTimeVehicle = () => {
                 )}
             </div>
             <form id="formProduct" onSubmit={handleSubmit}>
-                {/* El resto de tu JSX no necesita cambios */}
                 <main>
                     <div className="title-add-product">
                         <h2 className="title-add">Cargar Vehículo</h2>
@@ -110,7 +109,6 @@ const RealTimeVehicle = () => {
                             <input className="controls" type="text" name="description" placeholder="Descripción y utilización específica" required />
                         </div>
                     </div>
-                    {/* ... más inputs ... */}
                      <div className="stock-code-price">
                         <div className="code-product">
                             <p>Patente</p>

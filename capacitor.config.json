@@ -2,6 +2,11 @@
   "appId": "com.sper.controldeflota",
   "appName": "Control-de-Flota-S.P.E.R",
   "webDir": "dist",
+  "plugins": {
+    "Http": {
+      "enabled": true
+    }
+  },
   "server": {
     "androidScheme": "http",
     "hostname": "10.0.2.2",
