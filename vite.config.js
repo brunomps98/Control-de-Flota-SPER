@@ -16,8 +16,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     manifest: true,
-    rollupOptions: {
-      external: ['@capacitor/http'],
-    },
   },
 });

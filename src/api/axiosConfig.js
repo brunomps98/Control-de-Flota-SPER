@@ -1,4 +1,4 @@
-// axiosConfig.js
+// adb install -r C:\Users\Usuario\Desktop\proyectoVehiculosSper\android\app\build\outputs\apk\debug\app-debug.apk
 
 import axios from 'axios';
 import { Capacitor, CapacitorHttp } from '@capacitor/core'; 
@@ -12,7 +12,6 @@ console.log('API baseURL selected:', baseURL);
 
 const capacitorAdapter = async (config) => {
   try {
-    // Ya no se usa el import dinámico. Se usa el que importamos arriba.
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,

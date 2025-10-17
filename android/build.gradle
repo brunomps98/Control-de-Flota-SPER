@@ -1,29 +1,49 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    
+    ext.kotlin_version = '1.9.25' // <--- Definimos la versión de Kotlin aquí
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.13.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:8.4.1'
         classpath 'com.google.gms:google-services:4.4.2'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
 apply from: "variables.gradle"
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+// Forzar la misma versión de Kotlin en todos los subproyectos
+subprojects {
+    project.configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin' && details.requested.name.startsWith("kotlin-stdlib")) {
+                details.useVersion "$kotlin_version"
+            }
+        }
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+// Forzar Java 17 para todos los subproyectos Android, incluyendo capacitor-android
+subprojects { subproject ->
+    subproject.plugins.withType(com.android.build.gradle.BasePlugin) {
+        subproject.android {
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            // Kotlin
+            if (subproject.hasProperty("kotlinOptions")) {
+                subproject.kotlinOptions {
+                    jvmTarget = "17"
+                }
+            }
+        }
+    }
 }
