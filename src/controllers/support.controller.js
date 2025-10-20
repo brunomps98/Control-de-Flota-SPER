@@ -3,7 +3,6 @@ import { supportRepository } from "../repository/index.js";
 class SupportController {
 
     // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
-
     static renderSupportForm = (req, res) => {
         res.render('support');
     };
@@ -45,6 +44,7 @@ class SupportController {
 
     // Obtiene UN ticket por su ID
     static getTicketById = async (req, res) => {
+        // ... (sin cambios)
         try {
             const { ticketId } = req.params;
             const ticket = await supportRepository.getSupportTicketById(ticketId);
@@ -58,17 +58,34 @@ class SupportController {
         }
     };
 
-    // Crea un nuevo ticket desde la 
+    // Crea un nuevo ticket (CON ARCHIVOS, desde FormData)
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
+            // Esta ruta SIEMPRE tiene multer, así que req.files existe
             if (req.files && req.files.length > 0) {
                 ticketData.files = req.files.map(file => file.filename);
             }
             await supportRepository.addSupportTicket(ticketData);
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
-            console.error("ERROR AL CREAR TICKET:", error);
+            console.error("ERROR AL CREAR TICKET (con archivos):", error);
+            res.status(500).json({ message: 'No se pudo crear el ticket.' });
+        }
+    };
+
+    // Crea un nuevo ticket (SIN ARCHIVOS, desde JSON)
+    static createTicketNoFiles = async (req, res) => {
+        try {
+            // No hay 'req.files' aquí, solo 'req.body' (JSON)
+            const ticketData = req.body;
+            
+            ticketData.files = []; 
+            
+            await supportRepository.addSupportTicket(ticketData);
+            res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
+        } catch (error) {
+            console.error("ERROR AL CREAR TICKET (sin archivos):", error);
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };

@@ -5,6 +5,10 @@ import './Case.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const Case = () => {
     const { ticketId } = useParams();
@@ -22,7 +26,10 @@ const Case = () => {
                 const response = await apiClient.get(`/api/support/${ticketId}`);
                 setTicket(response.data.ticket);
             } catch (err) {
-                setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
+                // Solo ponemos error si falla la carga inicial
+                if (!ticket) {
+                     setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -31,11 +38,10 @@ const Case = () => {
         fetchTicket();
     }, [ticketId]);
 
-    // --- 2. LÓGICA DEL BOTÓN ATRÁS ---
+    // --- LÓGICA DEL BOTÓN ATRÁS ---
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
 
-        // Regla: En Case, volver a SupportTickets ('/support-tickets')
         const handleBackButton = () => {
             navigate('/support-tickets');
         };
@@ -47,23 +53,51 @@ const Case = () => {
         };
     }, [navigate]); 
 
-    // --- FUNCIÓN DE ELIMINAR CON AXIOS ---
-    const handleDelete = async () => {
-        if (window.confirm('¿Estás seguro de que querés eliminar este caso? Esta acción no se puede deshacer.')) {
-            try {
-                await apiClient.delete(`/api/support/${ticketId}`);
-                navigate('/support-tickets');
-            } catch (err) {
-                setError(err.response?.data?.message || 'No se pudo eliminar el ticket.');
+    // --- FUNCIÓN DE ELIMINAR CON SWEETALERT Y AXIOS ---
+    const handleDelete = () => {
+        MySwal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Vas a eliminar este caso de soporte!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // Limpiamos errores previos
+                setError(null);
+                try {
+                    await apiClient.delete(`/api/support/${ticketId}`);
+                    // Mostramos éxito y redirigimos
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        'El caso de soporte ha sido eliminado.',
+                        'success'
+                    ).then(() => {
+                         navigate('/support-tickets'); // Redirigir DESPUÉS de cerrar el popup de éxito
+                    });
+                } catch (err) {
+                    // Guardamos el error para mostrarlo
+                    const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
+                    setError(errorMessage);
+                    MySwal.fire(
+                        'Error',
+                        `No se pudo eliminar el ticket: ${errorMessage}`,
+                        'error'
+                    );
+                }
             }
-        }
+        });
     };
 
     // --- RENDERIZADO
     if (loading) {
         return <p>Cargando detalles del caso...</p>;
     }
-    if (error) {
+    // Muestra error si hubo problema al cargar O al eliminar
+    if (error && !ticket) { // Solo muestra el error de carga si el ticket no existe
         return <p style={{ color: 'red' }}>Error: {error}</p>;
     }
     if (!ticket) {
@@ -87,6 +121,9 @@ const Case = () => {
 
             <main className="main-case-view">
                 <div className="case-container">
+                    {/* Mostramos error de eliminación si ocurrió */}
+                    {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error al eliminar: {error}</p>}
+
                     <h1>Detalle del Caso de Soporte</h1>
                     <div className="ticket-header">
                         <h2>Reportado por: {ticket.name} {ticket.surname}</h2>

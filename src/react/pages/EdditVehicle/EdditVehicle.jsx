@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './EdditVehicle.css';
-import NavBar from '../../components/common/NavBar/NavBar';
+import NavBar from '../../components/common/NavBar/NavBar'; 
+import { toast } from 'react-toastify';
 
 const EdditVehicle = () => {
-    // --- HOOKS 
+    // --- HOOKS
     const { productId } = useParams();
     const navigate = useNavigate();
 
-    // --- ESTADOS 
+    // --- ESTADOS
     const [formData, setFormData] = useState({
         description: '',
         kilometros: '',
@@ -19,17 +20,14 @@ const EdditVehicle = () => {
         reparaciones: '',
         usuario: ''
     });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
-    // --- CARGA DE DATOS CON AXIOS ---
+
+    // --- CARGA DE DATOS ---
     useEffect(() => {
         const fetchVehicleData = async () => {
             try {
-                // 2. Usamos apiClient.get para cargar los datos iniciales.
                 const response = await apiClient.get(`/api/vehicle/${productId}`);
-                const vehicleData = response.data.vehicle; 
-
+                const vehicleData = response.data.vehicle;
                 setFormData({
                     description: vehicleData.description.slice(-1)[0] || '',
                     kilometros: vehicleData.kilometros.slice(-1)[0] || '',
@@ -37,17 +35,18 @@ const EdditVehicle = () => {
                     service: vehicleData.service.slice(-1)[0] || '',
                     rodado: vehicleData.rodado.slice(-1)[0] || '',
                     reparaciones: vehicleData.reparaciones.slice(-1)[0] || '',
-                    usuario: vehicleData.usuario || ''
+                    usuario: vehicleData.usuario || '' 
                 });
             } catch (err) {
-                setError(err.response?.data?.message || 'No se pudieron cargar los datos del vehículo.');
+                // --- 3. MOSTRAR ERROR DE CARGA CON TOAST ---
+                toast.error(err.response?.data?.message || 'No se pudieron cargar los datos del vehículo.');
             }
         };
 
         fetchVehicleData();
     }, [productId]);
 
-    // --- MANEJADOR DE CAMBIOS EN EL FORMULARIO ---
+    // --- MANEJADOR DE CAMBIOS (Sin cambios) ---
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -56,28 +55,32 @@ const EdditVehicle = () => {
         }));
     };
 
-    // --- ENVÍO DE FORMULARIO CON AXIOS ---
+    // --- ENVÍO DE FORMULARIO CON TOAST ---
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
 
         try {
+            // Usamos apiClient.put como antes
             await apiClient.put(`/api/vehicle/${productId}`, formData);
 
-            setSuccess('Vehículo modificado con éxito.');
+            // --- 4. MOSTRAR ÉXITO CON TOAST ---
+            toast.success('Vehículo modificado con éxito.');
+
+            // Mantenemos la redirección después de un tiempo
             setTimeout(() => {
-                navigate(`/vehicle-information/${productId}`);
-            }, 1500);
+                navigate(`/vehicle-detail/${productId}`); 
+            }, 1500); // 1.5 segundos
 
         } catch (err) {
-            setError(err.response?.data?.message || 'Error al actualizar el vehículo.');
+            // --- 5. MOSTRAR ERROR DE ACTUALIZACIÓN CON TOAST ---
+            toast.error(err.response?.data?.message || 'Error al actualizar el vehículo.');
         }
     };
-    
+
     // --- RENDERIZADO ---
     return (
         <>
+            {/* <NavBar /> */}
             <main>
                 <form id="formEditVehicle" onSubmit={handleSubmit}>
                     <div className="title-add-product">
@@ -100,26 +103,26 @@ const EdditVehicle = () => {
                     <div className="stock-code-price">
                         <div className="price-product">
                             <p>Service</p>
-                            <input className="controls" type="text" name="service" value={formData.service} onChange={handleChange} placeholder="Fecha de último service" />
+                            <input className="controls" type="date" name="service" value={formData.service} onChange={handleChange} placeholder="Fecha de último service" />
                         </div>
                         <div className="price-product">
                             <p>Rodado</p>
-                            <input className="controls" type="text" name="rodado" value={formData.rodado} onChange={handleChange} placeholder="Fecha de cambio de rodado" />
+                            <input className="controls" type="date" name="rodado" value={formData.rodado} onChange={handleChange} placeholder="Fecha de cambio de rodado" />
                         </div>
                     </div>
                     <div className="price-product">
                         <p>Reparaciones</p>
                         <input type="text" className="controls" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="Reparaciones realizadas" />
                     </div>
+                     <div className="price-product">
+                        <p>Chofer</p>
+                        <input type="text" className="controls" name="usuario" value={formData.usuario} onChange={handleChange} placeholder="Chofer asignado" />
+                    </div>
                     <div className="button-reg">
                         <button className="botons" type="submit">Registrar Cambios</button>
                     </div>
                 </form>
-
-                {success && <div className="alert alert-success" role="alert">{success}</div>}
-                {error && <div className="alert alert-danger" role="alert">{error}</div>}
             </main>
-            <NavBar />
         </>
     );
 }

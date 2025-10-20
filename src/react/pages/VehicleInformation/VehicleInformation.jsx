@@ -3,6 +3,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './VehicleInformation.css';
 import logoSper from '../../assets/images/logo.png';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+// Initialize SweetAlert for React
+const MySwal = withReactContent(Swal);
 
 const VehicleInformation = () => {
     // --- HOOKS Y ESTADOS ---
@@ -19,7 +24,6 @@ const VehicleInformation = () => {
     const fetchVehicle = async () => {
         try {
             setLoading(true);
-            // 2. Usamos apiClient.get para cargar los datos del vehículo.
             const response = await apiClient.get(`/api/vehicle/${cid}`);
             setVehicle(response.data.vehicle);
         } catch (err) {
@@ -33,30 +37,57 @@ const VehicleInformation = () => {
         fetchVehicle();
     }, [cid]);
 
-    // --- ELIMINAR REGISTRO CON AXIOS ---
-    const handleDeleteLastEntry = async (fieldName) => {
-        if (!window.confirm(`¿Estás seguro de que querés eliminar el último registro de "${fieldName}"?`)) {
-            return;
-        }
-        try {
-            // 3. Usamos apiClient.delete para eliminar el último registro del historial.
-            await apiClient.delete(`/api/vehicle/${cid}/history/${fieldName}`);
-            // Recargamos los datos del vehículo para reflejar el cambio.
-            fetchVehicle(); 
-        } catch (err) {
-            setError(err.response?.data?.message || 'No se pudo eliminar el registro.');
-        }
+    // --- ELIMINAR REGISTRO CON SWEETALERT Y AXIOS ---
+    const handleDeleteLastEntry = (fieldName) => {
+        MySwal.fire({
+            title: '¿Estás seguro?',
+            text: `Vas a eliminar el último registro de "${fieldName}". ¡No podrás revertir esto!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // Limpiamos errores previos antes de intentar
+                setError(null);
+                try {
+                    await apiClient.delete(`/api/vehicle/${cid}/history/${fieldName}`);
+                    // Mostramos éxito y recargamos datos
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        `El último registro de ${fieldName} ha sido eliminado.`,
+                        'success'
+                    );
+                    fetchVehicle(); // Recargamos para ver el cambio
+                } catch (err) {
+                    // Guardamos el error para mostrarlo
+                    const errorMessage = err.response?.data?.message || 'No se pudo eliminar el registro.';
+                    setError(errorMessage);
+                    MySwal.fire(
+                        'Error',
+                        `No se pudo eliminar el registro: ${errorMessage}`,
+                        'error'
+                    );
+                }
+            }
+        });
     };
 
     // --- RENDERIZADO  ---
     if (loading) return <p>Cargando historial del vehículo...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    // Mostramos error si hubo un problema al cargar O al eliminar
+    if (error && !vehicle) return <p style={{ color: 'red' }}>Error al cargar: {error}</p>; // Error principal si no carga
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
 
     return (
         <>
             <main>
                 <div className="body-p">
+                    {/* Mostramos error de eliminación si ocurrió */}
+                    {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error al eliminar: {error}</p>}
+
                     <div className="card-p">
                         <div className="header-p">
                             <h1>Ficha de Mantenimiento</h1>
@@ -64,7 +95,12 @@ const VehicleInformation = () => {
                         </div>
                         <div className="content-p">
                             <div className="vehicle-image-p">
-                                <img src={`${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                                <img
+                                    src={vehicle.thumbnail && vehicle.thumbnail.length > 0
+                                        ? `${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`
+                                        : '/images/default-vehicle.png'}
+                                    alt={`${vehicle.marca} ${vehicle.modelo}`}
+                                />
                             </div>
                             <div className="vehicle-info-p">
                                 <p>UNIDAD: {vehicle.title}</p>

@@ -1,83 +1,87 @@
-import React, { useState, useEffect } from 'react'; 
-import { Link, useNavigate } from 'react-router-dom'; 
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './Support.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { toast } from 'react-toastify';
 
 const Support = () => {
-    // 4. Inicializa useNavigate
     const navigate = useNavigate();
-
-    // --- ESTADOS Y MANEJADORES ---
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
         email: '',
         phone: '',
         problem_description: '',
-        file: null
+        files: null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
-    // --- 5. LÓGICA DEL BOTÓN ATRÁS ---
+
+
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
+        const handleBackButton = () => navigate('/');
 
-        // Regla: En Support, volver a Home ('/')
-        const handleBackButton = () => {
-            navigate('/');
+        const addListenerAsync = async () => {
+            await App.addListener('backButton', handleBackButton);
         };
-
-        const listener = App.addListener('backButton', handleBackButton);
+        addListenerAsync();
 
         return () => {
-            listener.remove();
         };
-    }, [navigate]); 
+    }, [navigate]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        const fieldName = name === 'file' ? 'files' : name;
         setFormData(prevState => ({
             ...prevState,
-            [fieldName]: files ? files : value
+            [name]: files ? files : value
         }));
     };
 
-    // --- ENVÍO DE FORMULARIO CON AXIOS ---
+    // --- handleSubmit CON TOAST ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        setSubmitStatus({ message: '', type: '' });
 
-        const dataToSend = new FormData();
-        Object.keys(formData).forEach(key => {
-            if (key === 'files' && formData[key]) {
-                for (let i = 0; i < formData[key].length; i++) {
-                    dataToSend.append('files', formData[key][i]);
-                }
-            } else {
-                dataToSend.append(key, formData[key]);
-            }
-        });
-
+        const hasFiles = formData.files && formData.files.length > 0;
 
         try {
-            const response = await apiClient.post('/api/support', dataToSend);
-            setSubmitStatus({ message: response.data.message, type: 'success' });
-            handleReset();
+            let response;
+            if (hasFiles) {
+                const dataToSend = new FormData();
+                Object.keys(formData).forEach(key => {
+                    if (key === 'files') {
+                        for (let i = 0; i < formData.files.length; i++) {
+                            dataToSend.append('files', formData.files[i]);
+                        }
+                    } else {
+                        dataToSend.append(key, formData[key]);
+                    }
+                });
+                response = await apiClient.post('/api/support', dataToSend);
+
+            } else {
+                const { files, ...textData } = formData;
+                response = await apiClient.post('/api/support-no-files', textData);
+            }
+
+            // --- 3. MOSTRAR ÉXITO CON TOAST ---
+            toast.success(response.data.message);
+            handleReset(); // Limpia el formulario
 
         } catch (error) {
-            setSubmitStatus({ message: error.response?.data?.message || 'Hubo un error al enviar el caso.', type: 'error' });
+            // --- 4. MOSTRAR ERROR CON TOAST ---
+            toast.error(error.response?.data?.message || 'Hubo un error al enviar el caso.');
         } finally {
             setIsSubmitting(false);
         }
     };
-    
-    // --- FUNCIÓN DE LIMPIEZA ---
+
+    // --- handleReset ---
     const handleReset = () => {
         const initialFormData = {
             name: '', surname: '', email: '', phone: '',
@@ -86,16 +90,13 @@ const Support = () => {
         setFormData(initialFormData);
 
         const fileInput = document.getElementById('exampleFile');
-        if(fileInput) fileInput.value = '';
-
-        setSubmitStatus({ message: '', type: '' });
+        if (fileInput) fileInput.value = '';
     };
 
-    // --- RENDERIZADO  ---
     return (
         <>
             <header className="top-bar-support">
-                <div className="top-bar-left-support">
+                 <div className="top-bar-left-support">
                     <div className="logo-support">
                         <Link to="/">
                             <img src={logoSper} alt="Logo Sper" width="60" height="60" />
@@ -106,14 +107,22 @@ const Support = () => {
                     </div>
                 </div>
             </header>
+
             <main>
+                 <div className="support-actions-container">
+                    <Link to="/support-tickets" className="btn-view-tickets-alt">
+                        Ver Lista de Casos de Soporte
+                    </Link>
+                </div>
+
                 <div className="support-title">
                     <h1>Soporte</h1>
                     <p>Complete el siguiente formulario para recibir ayuda</p>
                 </div>
+
                 <section>
                     <form onSubmit={handleSubmit}>
-                        <div className="mb-32">
+                         <div className="mb-32">
                             <label htmlFor="exampleName" className="form-support">Nombre</label>
                             <input
                                 type="text"
@@ -186,7 +195,7 @@ const Support = () => {
                                 type="file"
                                 className="form-control"
                                 id="exampleFile"
-                                name="file" 
+                                name="files"
                                 multiple
                                 placeholder="Inserte sus archivos mostrando el problema acá"
                                 accept="image/*"
@@ -201,11 +210,6 @@ const Support = () => {
                             <button className="btn-submit" type="button" onClick={handleReset}>Limpiar campos</button>
                         </div>
                     </form>
-                    {submitStatus.message && (
-                        <div style={{ textAlign: 'center', marginTop: '20px', padding: '15px', borderRadius: '5px', color: submitStatus.type === 'success' ? '#155724' : '#721c24', backgroundColor: submitStatus.type === 'success' ? '#d4edda' : '#f8d7da' }}>
-                            {submitStatus.message}
-                        </div>
-                    )}
                 </section>
             </main>
             <footer className="footer-bar">

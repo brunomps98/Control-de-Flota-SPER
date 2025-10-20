@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // 1. Importa useNavigate
+import { Link, useNavigate } from 'react-router-dom'; 
 import apiClient from '../../../api/axiosConfig';
 import './SupportTickets.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+// Initialize SweetAlert for React
+const MySwal = withReactContent(Swal);
 
 const SupportTickets = () => {
-    // 3. Inicializa useNavigate
     const navigate = useNavigate();
-
-    // --- ESTADOS ---
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(null); // Estado para errores de carga o eliminación
 
-    // --- 4. LÓGICA DEL BOTÓN ATRÁS ---
+    // --- LÓGICA DEL BOTÓN ATRÁS ---
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
 
-        // Regla: En SupportTickets, volver a Support ('/support')
         const handleBackButton = () => {
             navigate('/support');
         };
@@ -35,6 +36,8 @@ const SupportTickets = () => {
     // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTickets = async () => {
+            // Limpiamos errores previos al cargar
+            setError(null);
             try {
                 const response = await apiClient.get('/api/support-tickets');
                 setTickets(response.data.tickets || []);
@@ -47,18 +50,43 @@ const SupportTickets = () => {
         fetchTickets();
     }, []);
 
-    // --- FUNCIÓN DE ELIMINAR CON AXIOS ---
-    const handleDelete = async (ticketId) => {
-        if (!window.confirm('¿Estás seguro de que querés eliminar este caso?')) {
-            return;
-        }
-        try {
-            await apiClient.delete(`/api/support/${ticketId}`);
-            
-            setTickets(prevTickets => prevTickets.filter(ticket => ticket._id !== ticketId));
-        } catch (err) {
-            setError(err.response?.data?.message || 'No se pudo eliminar el ticket.');
-        }
+    // --- FUNCIÓN DE ELIMINAR CON SWEETALERT Y AXIOS ---
+    const handleDelete = (ticketId) => {
+        MySwal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Vas a eliminar este caso de soporte!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // Limpiamos errores previos
+                setError(null);
+                try {
+                    await apiClient.delete(`/api/support/${ticketId}`);
+                    // Actualizamos el estado local para quitar el ticket
+                    setTickets(prevTickets => prevTickets.filter(ticket => ticket._id !== ticketId));
+                    // Mostramos éxito
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        'El caso de soporte ha sido eliminado.',
+                        'success'
+                    );
+                } catch (err) {
+                    // Guardamos el error para mostrarlo
+                    const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
+                    setError(errorMessage);
+                    MySwal.fire(
+                        'Error',
+                        `No se pudo eliminar el ticket: ${errorMessage}`,
+                        'error'
+                    );
+                }
+            }
+        });
     };
     
     // --- RENDERIZADO ---
@@ -82,9 +110,10 @@ const SupportTickets = () => {
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
 
                     {loading && <p>Cargando tickets...</p>}
-                    {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                    {/* Mostramos el error si existe */}
+                    {error && <p style={{ color: 'red', textAlign: 'center' }}>Error: {error}</p>}
 
-                    {!loading && !error && (
+                    {!loading && !error && ( // Solo renderiza si no hay loading NI error de carga inicial
                         <>
                             {tickets.length === 0 ? (
                                 <div className="no-tickets-message">

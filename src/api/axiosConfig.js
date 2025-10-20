@@ -12,6 +12,8 @@ console.log('API baseURL selected:', baseURL);
 
 const capacitorAdapter = async (config) => {
   try {
+    
+
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -22,16 +24,31 @@ const capacitorAdapter = async (config) => {
 
     const response = await CapacitorHttp.request(options);
 
-    return {
-      data: response.data,
-      status: response.status,
-      statusText: 'OK',
-      headers: response.headers,
-      config: config,
-    };
+    // Chequeamos el status manualmente para errores 4xx/5xx
+    if (response.status >= 200 && response.status < 300) {
+      // Es un éxito real (2xx), devolvemos la respuesta.
+      return {
+        data: response.data,
+        status: response.status,
+        statusText: 'OK',
+        headers: response.headers,
+        config: config,
+      };
+    } else {
+      const error = new Error(response.data.message || `Error con status ${response.status}`);
+      error.response = response; // Adjuntamos la respuesta completa al error
+      return Promise.reject(error);
+    }
+
   } catch (error) {
     console.error('Error en el adaptador de Capacitor:', error);
-    return Promise.reject(error);
+    
+    const axiosError = new Error(error.message || 'Error de red o del plugin');
+    axiosError.response = {
+        data: { message: error.message || 'Error de Red' },
+        status: 503 
+    };
+    return Promise.reject(axiosError);
   }
 };
 
@@ -49,6 +66,15 @@ apiClient.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
+);
+
+apiClient.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;

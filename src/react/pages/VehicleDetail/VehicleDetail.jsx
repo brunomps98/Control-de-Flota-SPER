@@ -2,28 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './VehicleDetail.css';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+// Initialize SweetAlert for React
+const MySwal = withReactContent(Swal);
 
 const VehicleDetail = () => {
-    // --- HOOKS ---
+    // --- (Hooks, Estados, apiBaseURL ) ---
     const { cid } = useParams();
     const navigate = useNavigate();
-
-    // --- ESTADOS ---
     const [vehicle, setVehicle] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // 1. OBTENIENDO LA URL BASE DINÁMICA
+    const [error, setError] = useState(null); // Estado para errores de carga o eliminación
     const apiBaseURL = apiClient.defaults.baseURL;
 
-    // --- CARGA DE DATOS CON AXIOS ---
+    // --- (useEffect de carga) ---
     useEffect(() => {
         const fetchVehicleData = async () => {
+            // Limpiamos errores previos al cargar
+            setError(null);
             try {
                 const response = await apiClient.get(`/api/vehicle/${cid}`);
                 setVehicle(response.data.vehicle);
             } catch (err) {
-                setError(err.response?.data?.message || 'No se pudo cargar la información del vehículo.');
+                 // Solo ponemos error si falla la carga inicial
+                if (!vehicle) {
+                    setError(err.response?.data?.message || 'No se pudo cargar la información del vehículo.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -31,26 +37,57 @@ const VehicleDetail = () => {
         fetchVehicleData();
     }, [cid]);
 
-    // --- LÓGICA DE NAVEGACIÓN Y ELIMINACIÓN CON AXIOS ---
+    // --- (handleEdit ) ---
     const handleEdit = () => {
         navigate(`/eddit-vehicle/${cid}`);
     };
 
-    const handleDelete = async () => {
-        if (window.confirm('¿Estás seguro de que querés eliminar este vehículo?')) {
-            try {
-                // 3. Usamos apiClient.delete para la petición de borrado.
-                await apiClient.delete(`/api/vehicle/${cid}`);
-                navigate('/vehicle'); // Redirigimos si la eliminación fue exitosa
-            } catch (err) {
-                setError(err.response?.data?.message || 'No se pudo eliminar el vehículo.');
+    // --- 2. MODIFICAR handleDelete CON SWEETALERT ---
+    const handleDelete = () => {
+        MySwal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Vas a eliminar este vehículo! No podrás revertir esto.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                // Limpiamos errores previos
+                setError(null);
+                try {
+                    await apiClient.delete(`/api/vehicle/${cid}`);
+                    // Mostramos éxito y redirigimos
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        'El vehículo ha sido eliminado.',
+                        'success'
+                    ).then(() => {
+                         navigate('/vehicle'); // Redirigir DESPUÉS de cerrar el popup de éxito
+                    });
+                } catch (err) {
+                    // Guardamos el error para mostrarlo
+                    const errorMessage = err.response?.data?.message || 'No se pudo eliminar el vehículo.';
+                    setError(errorMessage);
+                    MySwal.fire(
+                        'Error',
+                        `No se pudo eliminar el vehículo: ${errorMessage}`,
+                        'error'
+                    );
+                }
             }
-        }
+        });
     };
 
-    // --- RENDERIZADO ---
+
+    // --- (Renderizado ) ---
     if (loading) return <p>Cargando información del vehículo...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    // Muestra error si hubo problema al cargar O al eliminar
+    if (error && !vehicle) { // Solo muestra el error de carga si el vehículo no existe
+        return <p style={{ color: 'red' }}>Error al cargar: {error}</p>;
+    }
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
 
     const getLastEntry = (arr) => arr && arr.length > 0 ? arr[arr.length - 1] : 'Sin registro';
@@ -58,13 +95,22 @@ const VehicleDetail = () => {
     return (
         <>
             <div className="body-p">
+                {/* Mostramos error de eliminación si ocurrió */}
+                {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error al eliminar: {error}</p>}
+
                 <div className="card-p">
                     <div className="header-p">
                         <h1>Móvil Oficial</h1>
                     </div>
                     <div className="content-p">
                         <div className="vehicle-image-p">
-                            <img src={`${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                            {/* Fallback para imagen */}
+                            <img
+                                src={vehicle.thumbnail && vehicle.thumbnail.length > 0
+                                    ? `${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`
+                                    : '/images/default-vehicle.png'}
+                                alt={`${vehicle.marca} ${vehicle.modelo}`}
+                            />
                         </div>
                         <div className="vehicle-info-p">
                             <p>DESTINO: {getLastEntry(vehicle.destino)}</p>
@@ -118,6 +164,7 @@ const VehicleDetail = () => {
                     <div className="image-description-p">
                         <h4 className="h4-p">IMÁGENES:</h4>
                         <div className="img-div">
+                            {/* Galería de imágenes */}
                             {vehicle.thumbnail && vehicle.thumbnail.slice(1).map((img, index) => (
                                 <img className="img-p" src={`${apiBaseURL}/uploads/${img}`} alt={`Imagen ${index + 2}`} key={index} />
                             ))}
@@ -130,7 +177,8 @@ const VehicleDetail = () => {
                     <button className="action-btn btn-secondary" onClick={() => window.print()}>Imprimir</button>
                     <Link to={`/vehicle-information/${vehicle._id}`} className="action-btn btn-primary">Ver Historial</Link>
                     <button className="action-btn btn-primary" onClick={handleEdit}>Editar</button>
-                    <button className="action-btn destructive-btn" onClick={handleDelete}>Eliminar</button>
+                    {/* Botón llama a la nueva función handleDelete */}
+                    <button className="action-btn destructive-btn" onClick={handleDelete}>Eliminar</button> 
                 </div>
             </div>
         </>

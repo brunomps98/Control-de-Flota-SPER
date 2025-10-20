@@ -1,5 +1,4 @@
-    /* --- ESTILOS DEL HEADER DE SOPORTE --- */
-
+/* --- ESTILOS DEL HEADER DE SOPORTE (Tu CSS Original) --- */
     .top-bar-support {
         background-color: #24303c;
         color: white;
@@ -30,15 +29,43 @@
         color: #ffffff;
     }
 
-    /* --- TÍTULO PRINCIPAL "SOPORTE" --- */
+    /* --- ESTILOS DEL BOTÓN (NUEVO) --- */
+    .support-actions-container {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end; /* Lo alinea a la derecha */
+        padding: 0 30px; /* Padding para que coincida con el header */
+        box-sizing: border-box;
+        margin-top: 20px; /* Espacio desde el header */
+    }
 
+    .btn-view-tickets-alt {
+        display: inline-block;
+        padding: 12px 24px;
+        font-size: 1rem; /* Un poco más chico que el del form */
+        font-weight: bold;
+        color: white;
+        background-color: #009688; /* Color verde de tu home.css */
+        border: none;
+        border-radius: 25px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-view-tickets-alt:hover {
+        background-color: #007a6e;
+    }
+    /* --- FIN DE ESTILOS DEL BOTÓN --- */
+
+
+    /* --- TÍTULO PRINCIPAL "SOPORTE" --- */
     .support-title {
         text-align: center;
-        margin-top: 30px;
+        margin-top: 10px; /* Reducido para estar más cerca del botón */
     }
 
     /* --- CLASES DEL FORMULARIO --- */
-
     .mb-32 {
         margin-bottom: 24px;
     }
@@ -60,8 +87,7 @@
         margin-bottom: 50px;
     }
 
-    /* --- ESTILOS DE LOS BOTONES --- */
-
+    /* --- ESTILOS DE LOS BOTONES (Del formulario) --- */
     .btn-submit {
         width: 250px;
         padding: 18px 0;
@@ -95,5 +121,15 @@
             max-width: 200px;
             padding: 12px 0;
             font-size: 1rem;
+        }
+
+        /* Responsive para el botón "Ver Casos" */
+        .support-actions-container {
+            padding: 0 20px; /* Menos padding en mobile */
+        }
+
+        .btn-view-tickets-alt {
+            padding: 10px 16px;
+            font-size: 0.9rem;
         }
     }

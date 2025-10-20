@@ -5,35 +5,27 @@ import './Login.css';
 import blackLogo from '../../assets/images/black-logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { toast } from 'react-toastify';
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
-    // 3. Agrega el listener para el botón "Atrás"
     useEffect(() => {
-        // No ejecutar esta lógica en la web
         if (Capacitor.getPlatform() === 'web') return;
-  
-        // Regla: En Login, volver a Home ('/')
-        const handleBackButton = () => {
-            navigate('/');
+        const handleBackButton = () => navigate('/');
+        const addListenerAsync = async () => {
+            await App.addListener('backButton', handleBackButton);
         };
-  
-        const listener = App.addListener('backButton', handleBackButton);
-  
-        // Función de limpieza
+        addListenerAsync();
         return () => {
-            listener.remove();
         };
-    }, [navigate]); 
+    }, [navigate]);
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
 
         try {
             const response = await apiClient.post('/api/login', { username, password });
@@ -47,8 +39,8 @@ const Login = () => {
             }
 
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.message || 'Error al iniciar sesión');
+            console.error("Login Error:", err);
+            toast.error(err.response?.data?.message || 'Error al iniciar sesión');
         }
     };
 
@@ -82,11 +74,6 @@ const Login = () => {
                             />
                         </div>
 
-                        {error && (
-                            <div className="alert alert-danger mt-3" role="alert">
-                                {error}
-                            </div>
-                        )}
 
                         <button type="submit" className="signup-btn1">Iniciar sesión</button>
                     </form>

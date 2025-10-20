@@ -44,6 +44,29 @@ class VehicleDao {
         }
     }
 
+    static addVehicleNoImage = async (req, res) => {
+        try {
+            // Obtenemos todos los campos de texto desde req.body (JSON)
+            const { title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, usuario } = req.body;
+
+            // No hay req.files aquí, así que thumbnail es un array vacío
+            const thumbnail = []; 
+
+            const product = {
+                title, dominio, destino: [destino], anio, modelo, tipo, chasis, motor, cedula, marca, usuario,
+                thumbnail, // <-- Array vacío
+                description: [description], kilometros: [kilometros], service: [service], rodado: [rodado], reparaciones: [reparaciones]
+            };
+
+            const newProduct = await productsModel.create(product);
+            res.status(201).json({ message: "Vehículo creado con éxito (sin imágenes)", newProduct });
+
+        } catch (error) {
+            console.error("Error al crear vehículo (sin imágenes):", error);
+            res.status(500).json({ message: "Error interno del servidor", error: error.message });
+        }
+    }
+
     static vehicleDetail = async (req, res) => {
         try {
             const id = req.params.cid;
