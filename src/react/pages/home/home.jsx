@@ -1,8 +1,31 @@
 import { Link } from 'react-router-dom';
 import './Home.css';
 import logoSper from '../../assets/images/logo.png';
+import { useEffect } from 'react';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const Home = () => {
+
+  // 2. Agrega el listener para el botón "Atrás"
+  useEffect(() => {
+    // No ejecutar esta lógica en la web
+    if (Capacitor.getPlatform() === 'web') return;
+
+    //En Home, salir de la app
+    const handleBackButton = () => {
+        App.exitApp();
+    };
+
+    const listener = App.addListener('backButton', handleBackButton);
+
+    // Función de limpieza para remover el listener
+    return () => {
+        listener.remove();
+    };
+  }, []); // El array vacío asegura que solo se ejecute una vez
+
+
   return (
     <div className="home-container"> 
       <header className="top-bar">

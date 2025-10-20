@@ -1,14 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // 1. Importa useNavigate
 import apiClient from '../../../api/axiosConfig';
 import './SupportTickets.css';
 import logoSper from '../../assets/images/logo.png';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const SupportTickets = () => {
+    // 3. Inicializa useNavigate
+    const navigate = useNavigate();
+
     // --- ESTADOS ---
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // --- 4. LÓGICA DEL BOTÓN ATRÁS ---
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+
+        // Regla: En SupportTickets, volver a Support ('/support')
+        const handleBackButton = () => {
+            navigate('/support');
+        };
+
+        const listener = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listener.remove();
+        };
+    }, [navigate]); 
+
 
     // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {

@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; 
+import { useNavigate } from 'react-router-dom'; 
 import './Register.css';
 import logoSper from '../../assets/images/logo.png';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const Register = () => {
+    // 4. Inicializa useNavigate
+    const navigate = useNavigate();
+
     // 1. Estado para guardar los datos de todos los inputs
     const [formData, setFormData] = useState({
         username: '',
@@ -13,6 +19,22 @@ const Register = () => {
 
     // Estado para manejar los mensajes de error
     const [error, setError] = useState('');
+
+    // --- 5. LÓGICA DEL BOTÓN ATRÁS ---
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+
+        // Regla: En Register, volver a Home ('/')
+        const handleBackButton = () => {
+            navigate('/');
+        };
+
+        const listener = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listener.remove();
+        };
+    }, [navigate]); 
 
     // 2. Función genérica que actualiza el estado cuando escribís en cualquier input
     const handleChange = (e) => {
@@ -35,7 +57,6 @@ const Register = () => {
         }
 
         console.log('Datos a enviar al backend:', formData);
-        
 
     };
 

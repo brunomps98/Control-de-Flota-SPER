@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react'; 
+import { Link, useNavigate } from 'react-router-dom'; 
 import apiClient from '../../../api/axiosConfig';
 import './Support.css';
 import logoSper from '../../assets/images/logo.png';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const Support = () => {
+    // 4. Inicializa useNavigate
+    const navigate = useNavigate();
+
     // --- ESTADOS Y MANEJADORES ---
     const [formData, setFormData] = useState({
         name: '',
@@ -17,12 +22,28 @@ const Support = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
 
+    // --- 5. LÓGICA DEL BOTÓN ATRÁS ---
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+
+        // Regla: En Support, volver a Home ('/')
+        const handleBackButton = () => {
+            navigate('/');
+        };
+
+        const listener = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listener.remove();
+        };
+    }, [navigate]); 
+
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         const fieldName = name === 'file' ? 'files' : name;
         setFormData(prevState => ({
             ...prevState,
-            [fieldName]: files ? files : value // Maneja múltiples archivos
+            [fieldName]: files ? files : value
         }));
     };
 
@@ -46,15 +67,10 @@ const Support = () => {
 
         try {
             const response = await apiClient.post('/api/support', dataToSend);
-
-            // Obtenemos el mensaje de éxito desde la respuesta de Axios
             setSubmitStatus({ message: response.data.message, type: 'success' });
-            
-            // Limpiamos el formulario
             handleReset();
 
         } catch (error) {
-            // Manejo de errores mejorado con Axios
             setSubmitStatus({ message: error.response?.data?.message || 'Hubo un error al enviar el caso.', type: 'error' });
         } finally {
             setIsSubmitting(false);

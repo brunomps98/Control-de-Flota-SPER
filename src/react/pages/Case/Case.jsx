@@ -3,10 +3,12 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './Case.css';
 import logoSper from '../../assets/images/logo.png';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const Case = () => {
     const { ticketId } = useParams();
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,13 +31,27 @@ const Case = () => {
         fetchTicket();
     }, [ticketId]);
 
+    // --- 2. LÓGICA DEL BOTÓN ATRÁS ---
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+
+        // Regla: En Case, volver a SupportTickets ('/support-tickets')
+        const handleBackButton = () => {
+            navigate('/support-tickets');
+        };
+
+        const listener = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listener.remove();
+        };
+    }, [navigate]); 
+
     // --- FUNCIÓN DE ELIMINAR CON AXIOS ---
     const handleDelete = async () => {
         if (window.confirm('¿Estás seguro de que querés eliminar este caso? Esta acción no se puede deshacer.')) {
             try {
-                // 4. Usamos apiClient.delete para la petición de borrado.
                 await apiClient.delete(`/api/support/${ticketId}`);
-                // Si la petición es exitosa, navegamos a la página de tickets.
                 navigate('/support-tickets');
             } catch (err) {
                 setError(err.response?.data?.message || 'No se pudo eliminar el ticket.');

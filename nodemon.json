@@ -1,0 +1,11 @@
+{
+  "watch": ["src/"],
+  "ext": "js,mjs,json,handlebars",
+  "ignore": [
+    "node_modules/",
+    "dist/",
+    "public/",
+    "android/",
+    "*.log"
+  ]
+}

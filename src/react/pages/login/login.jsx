@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig.js';
 import './Login.css';
 import blackLogo from '../../assets/images/black-logo.png';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -10,20 +12,34 @@ const Login = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate();
 
+    // 3. Agrega el listener para el botón "Atrás"
+    useEffect(() => {
+        // No ejecutar esta lógica en la web
+        if (Capacitor.getPlatform() === 'web') return;
+  
+        // Regla: En Login, volver a Home ('/')
+        const handleBackButton = () => {
+            navigate('/');
+        };
+  
+        const listener = App.addListener('backButton', handleBackButton);
+  
+        // Función de limpieza
+        return () => {
+            listener.remove();
+        };
+    }, [navigate]); 
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
         try {
             const response = await apiClient.post('/api/login', { username, password });
-
-            // 1. Obtenemos el usuario y el token de la respuesta
             const { user, token } = response.data;
-
-            // 2. ¡Paso clave! Guardamos el token en el almacenamiento local del navegador
             localStorage.setItem('token', token);
 
-            // 3. Redirigimos según el rol del usuario
             if (user && user.isAdmin) {
                 navigate('/vehicle-general');
             } else {
