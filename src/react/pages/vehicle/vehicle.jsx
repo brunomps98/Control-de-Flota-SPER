@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import apiClient from '../../../api/axiosConfig';
 import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
+import { toast } from 'react-toastify';
 
 const Vehicle = () => {
-    // --- ESTADOS Y HOOKS ---
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
+    const location = useLocation();
 
     const [filters, setFilters] = useState({
         dominio: searchParams.get('dominio') || '',
@@ -21,30 +22,34 @@ const Vehicle = () => {
         title: searchParams.get('title') || ''
     });
 
-    // --- CARGA DE DATOS CON AXIOS Y PARÁMETROS ---
+    useEffect(() => {
+        if (location.state?.username) {
+            toast.success(`Bienvenido, ${location.state.username}!`);
+        }
+    }, []);
+
     useEffect(() => {
         const fetchVehicles = async () => {
             setLoading(true);
+            setError(null);
             try {
-                // 2. Usamos apiClient.get para cargar los vehículos.
                 const response = await apiClient.get('/api/vehicles', {
                     params: Object.fromEntries(searchParams)
                 });
                 setVehicles(response.data.docs || []);
             } catch (err) {
-                setError(err.response?.data?.message || 'No se pudieron cargar los vehículos.');
+                toast.error(err.response?.data?.message || 'No se pudieron cargar los vehículos.');
+                setError('Error al cargar vehículos.'); 
             } finally {
                 setLoading(false);
             }
         };
         fetchVehicles();
     }, [searchParams]);
-
-    // --- LÓGICA DE FILTROS ---
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-        
+
         clearTimeout(window.filterTimeout);
         window.filterTimeout = setTimeout(() => {
             const newFilters = { ...filters, [name]: value };
@@ -72,8 +77,6 @@ const Vehicle = () => {
         setSearchParams({});
     };
 
-    // --- RENDERIZADO  ---
-    if (error) return <div>Error al cargar los datos: {error}</div>;
 
     return (
         <>
@@ -120,7 +123,7 @@ const Vehicle = () => {
                 ) : vehicles.length > 0 ? (
                     vehicles.map(vehicle => <VehicleCard key={vehicle._id} vehicle={vehicle} />)
                 ) : (
-                    <p style={{ textAlign: 'center' }}>No se encontraron vehículos.</p>
+                    <p style={{ textAlign: 'center' }}>{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}
             </div>
         </>

@@ -5,7 +5,7 @@ import './Login.css';
 import blackLogo from '../../assets/images/black-logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { toast } from 'react-toastify';
+import { toast } from 'react-toastify'; 
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -32,11 +32,8 @@ const Login = () => {
             const { user, token } = response.data;
             localStorage.setItem('token', token);
 
-            if (user && user.isAdmin) {
-                navigate('/vehicle-general');
-            } else {
-                navigate('/vehicle');
-            }
+            const destinationPath = user && user.isAdmin ? '/vehicle-general' : '/vehicle';
+            navigate(destinationPath, { state: { username: user.username } });
 
         } catch (err) {
             console.error("Login Error:", err);
@@ -73,8 +70,6 @@ const Login = () => {
                                 required
                             />
                         </div>
-
-
                         <button type="submit" className="signup-btn1">Iniciar sesión</button>
                     </form>
                 </div>
