@@ -34,6 +34,7 @@ app.use(cors({
 }));
 
 const PORT = process.env.PORT || 8080;
+const HOST = '0.0.0.0'; 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -45,10 +46,9 @@ app.set("views", __dirname + "/views");
 app.use("/api", dbRouter);
 app.use("/", viewRouter);
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
     try {
-        console.log(`Listening to the port ${PORT}\nAcceder a:`);
-        console.log(`\t1). http://localhost:${PORT}/`);
+        console.log(`Acceso local: http://localhost:${PORT}/`);
     }
     catch (err) {
         console.log(err);

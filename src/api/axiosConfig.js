@@ -40,7 +40,6 @@ const apiClient = axios.create({
     adapter: platform === 'web' ? undefined : capacitorAdapter,
 });
 
-// Tu interceptor está perfecto
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

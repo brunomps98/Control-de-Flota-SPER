@@ -13,6 +13,9 @@ const VehicleDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // 1. OBTENIENDO LA URL BASE DINÁMICA
+    const apiBaseURL = apiClient.defaults.baseURL;
+
     // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchVehicleData = async () => {
@@ -61,7 +64,7 @@ const VehicleDetail = () => {
                     </div>
                     <div className="content-p">
                         <div className="vehicle-image-p">
-                            <img src={`${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                            <img src={`${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                         </div>
                         <div className="vehicle-info-p">
                             <p>DESTINO: {getLastEntry(vehicle.destino)}</p>
@@ -116,7 +119,7 @@ const VehicleDetail = () => {
                         <h4 className="h4-p">IMÁGENES:</h4>
                         <div className="img-div">
                             {vehicle.thumbnail && vehicle.thumbnail.slice(1).map((img, index) => (
-                                <img className="img-p" src={`${import.meta.env.VITE_API_URL}/uploads/${img}`} alt={`Imagen ${index + 2}`} key={index} />
+                                <img className="img-p" src={`${apiBaseURL}/uploads/${img}`} alt={`Imagen ${index + 2}`} key={index} />
                             ))}
                         </div>
                     </div>

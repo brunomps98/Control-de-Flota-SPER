@@ -1,12 +1,15 @@
-// En tu archivo VehicleCard.jsx
-
 import { Link } from 'react-router-dom';
 import './VehicleCard.css';
+import apiClient from '../../../../api/axiosConfig.js';
 
 const VehicleCard = ({ vehicle }) => {
+    
+    const apiBaseURL = apiClient.defaults.baseURL;
+
     const imageUrl = vehicle.thumbnail && vehicle.thumbnail.length > 0
-        ? `${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`
+        ? `${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`
         : '/images/default-vehicle.png';
+    
     return (
         <div className="card-s">
             <div className="face front">

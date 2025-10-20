@@ -12,6 +12,9 @@ const VehicleInformation = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // OBTÉNIENDO LA URL BASE DINÁMICA
+    const apiBaseURL = apiClient.defaults.baseURL;
+
     // --- CARGA DE DATOS CON AXIOS ---
     const fetchVehicle = async () => {
         try {
@@ -61,7 +64,7 @@ const VehicleInformation = () => {
                         </div>
                         <div className="content-p">
                             <div className="vehicle-image-p">
-                                <img src={`${import.meta.env.VITE_API_URL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                                <img src={`${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                             </div>
                             <div className="vehicle-info-p">
                                 <p>UNIDAD: {vehicle.title}</p>
@@ -72,7 +75,6 @@ const VehicleInformation = () => {
                             </div>
                         </div>
 
-                        {/* --- Renderizado de Historiales --- */}
                         <div className="history-card">
                             <h4>Historial de Kilometraje</h4>
                             <ul className="history-list">

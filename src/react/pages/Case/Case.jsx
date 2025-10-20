@@ -5,23 +5,21 @@ import './Case.css';
 import logoSper from '../../assets/images/logo.png';
 
 const Case = () => {
-    // --- ESTADOS Y HOOKS 
     const { ticketId } = useParams();
     const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const apiBaseURL = apiClient.defaults.baseURL;
+
     // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTicket = async () => {
             try {
-                // 2. Usamos apiClient.get para cargar los datos del ticket.
                 const response = await apiClient.get(`/api/support/${ticketId}`);
-                // En Axios, los datos ya vienen en formato JSON dentro de `response.data`
                 setTicket(response.data.ticket);
             } catch (err) {
-                // 3. Mejoramos el manejo de errores con la información que provee Axios.
                 setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
             } finally {
                 setLoading(false);
@@ -90,9 +88,9 @@ const Case = () => {
                             <h3>Imágenes Adjuntas:</h3>
                             <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
                                 {ticket.files.map((file, index) => (
-                                    <a href={`${import.meta.env.VITE_API_URL}/uploads/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
+                                    <a href={`${apiBaseURL}/uploads/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
                                         <img
-                                            src={`${import.meta.env.VITE_API_URL}/uploads/${file}`}
+                                            src={`${apiBaseURL}/uploads/${file}`}
                                             alt={`Imagen del caso ${index + 1}`}
                                             style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
                                         />
