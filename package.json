@@ -1,51 +1,25 @@
 {
-  "name": "segundapreentrega",
+  "name": "proyectovehiculossper",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
-  "type": "module",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/app.js",
-    "dev:react": "vite --host",
-    "build:react": "vite build"
+    "dev": "concurrently -k -n \"FRONT,BACK\" -c \"bgBlue.bold,bgYellow.bold\" \"npm:dev --prefix frontend\" \"npm:dev --prefix backend\""
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brunomps98/Control-de-Flota-S.P.E.R..git"
+  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@capacitor/android": "^7.4.3",
-    "@capacitor/app": "^7.1.0",
-    "@capacitor/cli": "^7.4.3",
-    "@capacitor/core": "^7.4.3",
-    "axios": "^1.12.2",
-    "bcrypt": "^5.1.1",
-    "bcryptjs": "^3.0.2",
-    "connect-mongo": "^5.1.0",
-    "cookie-parser": "^1.4.6",
-    "cookies-parser": "^1.2.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.6.1",
-    "express": "^4.18.2",
-    "express-handlebars": "^7.1.2",
-    "express-session": "^1.18.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.3.0",
-    "mongoose": "^8.19.0",
-    "mongoose-paginate-v2": "^1.8.0",
-    "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.0",
-    "passport": "^0.7.0",
-    "passport-local": "^1.0.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2",
-    "react-toastify": "^11.0.5",
-    "socket.io": "^4.7.4",
-    "sweetalert2": "^11.26.3",
-    "sweetalert2-react-content": "^5.1.0"
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/brunomps98/Control-de-Flota-S.P.E.R./issues"
   },
+  "homepage": "https://github.com/brunomps98/Control-de-Flota-S.P.E.R.#readme",
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.0.2",
-    "vite": "^5.3.1"
+    "concurrently": "^9.2.1"
   }
 }
