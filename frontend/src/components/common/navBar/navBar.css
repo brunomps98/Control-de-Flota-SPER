@@ -1,0 +1,206 @@
+/* Estilos generales de la barra de navegación */
+.navbar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#nnavbarNavDropdown {
+    flex-grow: 0 !important;
+}
+
+/* Estilos específicos del navbar en el Home */
+.navbar-home {
+    width: 85%;
+    margin: auto;
+    padding: 35px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-home ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+
+.navbar-home ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-home ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-home ul li:hover::after {
+    width: 100%;
+}
+
+/* Navbar para la sección de Unidades */
+.navbar-uni {
+    padding-top: 20px;
+    height: 100px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-uni ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 20px;
+    position: relative;
+}
+
+.navbar-uni ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-uni ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-uni ul li:hover::after {
+    width: 100%;
+}
+
+/* Variante de Navbar "short" */
+.navbar-short {
+    padding-top: 48px;
+    height: 100px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-short ul li {
+    list-style: none;
+    display: inline-block;
+    margin: 0 20px;
+    position: relative;
+}
+
+.navbar-short ul li a {
+    text-decoration: none;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.navbar-short ul li::after {
+    content: "";
+    height: 3px;
+    width: 0;
+    background: #009688;
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+    transition: 0.5s;
+}
+
+.navbar-short ul li:hover::after {
+    width: 100%;
+}
+
+.logo {
+    position: absolute;
+    top: 15px;
+    left: 105px;
+    width: 100px;
+    z-index: 10;
+}
+
+.title {
+    position: absolute;
+    top: -8px;
+    left: 35px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.user-info {
+    display: flex;
+    justify-content: end;
+    align-items: right;
+    width: 99%;
+    margin-top: 1px;
+}
+
+.user-info h6 {
+    color: #000;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+
+/* Ocultar en impresión */
+@media print {
+    .navbar {
+        display: none !important;
+    }
+}
+
+@media (max-width: 992px) {
+  /* Items del menú apilados y centrados */
+  .navbar-nav {
+    text-align: center;
+    width: 100%;
+  }
+
+  .navbar-nav .nav-item {
+    margin: 10px 0;
+  }
+
+  /* Botón LogOut centrado */
+  .navbar-nav .nav-item button.nav-link {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+  }
+
+  /* Texto de usuario conectado a la derecha y más pequeño */
+  .navbar-text {
+    display: block;
+    text-align: right;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  /* Ajuste del logo */
+  .navbar-brand img {
+    width: 40px;
+    height: 40px;
+  }
+}

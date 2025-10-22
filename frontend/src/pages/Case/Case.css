@@ -1,0 +1,56 @@
+.main-case-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    background-color: #f4f7f6; 
+}
+
+/* --- ESTILOS PARA EL CONTENEDOR DEL TICKET (LA "TARJETA") --- */
+
+.case-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 0;
+    padding: 40px;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.case-container h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2.2rem;
+    color: #2c3e50;
+}
+
+.case-container .ticket-header h2 {
+    font-size: 1.8rem;
+    color: #34495e;
+}
+
+.case-container .case-details h3 {
+    font-size: 1.2rem;
+    color: #009688; 
+    margin-top: 25px;
+}
+
+/*
+
+.title-case {
+
+}
+
+*/
+
+.page-container {
+  display: flex;
+  flex-direction: column; 
+  min-height: 100vh;     
+}
+
+/* 2. Estilos para que la sección de contenido principal crezca */
+.page-container .main-case-view {
+  flex-grow: 1; }

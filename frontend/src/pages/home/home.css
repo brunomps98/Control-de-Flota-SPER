@@ -1,0 +1,154 @@
+.home-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --- Estilos para la barra superior (Header) --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #24303c;
+    height: 90px;
+    padding: 0 30px;
+    color: white;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.title h1 {
+    font-size: 1.1em; 
+    font-weight: bold;
+    margin: 0;
+    margin-left: 60px;
+}
+
+/* --- Estilos del banner principal --- */
+.banner {
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    background: radial-gradient(ellipse at center, #34495e 0%, #24303c 100%);
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.content {
+    margin-bottom: 30px;
+}
+
+/* --- Estilos para los Botones --- */
+.login-btn,
+.support-btn {
+    width: 200px;
+    padding: 15px 0;
+    text-align: center;
+    margin: 0 10px;
+    border-radius: 25px;
+    font-weight: bold;
+    border: 2px solid #009688;
+    background-color: #009688;
+    color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cover {
+    background: #007a6e;
+    height: 100%;
+    width: 0%;
+    border-radius: 25px;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: -1;
+    transition: 0.5s;
+}
+
+.login-btn:hover .cover,
+.support-btn:hover .cover {
+    width: 100%;
+}
+
+/* Posicionamiento del botón de login */
+.button-login {
+    margin-bottom: 20px;
+}
+
+/* Posicionamiento del botón de soporte */
+.button-support {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Posicionamiento del logo del home */
+.logoHome {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 100px;
+    z-index: 10;
+}
+
+.h2-home {
+    font-size: 1.9em;
+    align-items: center;
+}
+
+/* ============================================= */
+/* ---        ESTILOS PARA VISTA MÓVIL       --- */
+/* ============================================= */
+
+@media (max-width: 768px) {
+
+    /* --- Ajustes en la Cabecera (Header) --- */
+    .title h1 {
+        font-size: 1.1rem;
+    }
+
+    .top-bar-left {
+        height: auto;
+        padding: 5px 0;
+    }
+
+    /* --- Ajustes en el Contenido Principal (Banner) --- */
+    .content h1 {
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+
+    .content p {
+        font-size: 1.1rem;
+    }
+
+    /* --- Ajustes en los Botones --- */
+    .button-container {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .login-btn,
+    .support-btn {
+        width: 90%;
+        max-width: 320px;
+        text-align: center;
+        padding: 15px 25px;
+        font-size: 1.05rem;
+    }
+}
