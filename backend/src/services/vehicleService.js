@@ -8,43 +8,38 @@ import { Op } from 'sequelize';
 
 export default class VehicleManager {
 
-    // --- FUNCIÓN DE LECTURA PRINCIPAL  ---
     getVehicles = async (queryParams) => {
         try {
             const {
-                page = 1,
-                limit = 10,
-                dominio,
-                modelo,
-                destino,
-                marca,
-                año,
-                tipo,
-                chofer,
-                unidad, // Este es el 'title'
+                page = 1, limit = 10, dominio, modelo, destino,
+                marca, año, tipo, title, // Leemos 'title'
                 user // Objeto user de la sesión
             } = queryParams;
 
             const offset = (parseInt(page) - 1) * parseInt(limit);
-            
-            const filter = {}; // Filtros para la tabla 'vehiculos'
-            const includeWhere = []; // Filtros para tablas relacionadas
+            const filter = {}; // Filtros para la tabla 'vehiculos' (where principal)
+            const includeWhere = []; // Filtros para tablas relacionadas (include)
 
-            // Filtros de la tabla principal 'vehiculos'
+            // --- LÓGICA DE FILTRADO REVISADA ---
+            if (user && !user.admin) {
+                // 1. Si el usuario NO es admin, SIEMPRE filtramos por su unidad
+                filter.title = user.unidad;
+            } else if (title) {
+                // 2. Si el usuario ES admin Y SE PASÓ un filtro '?title=', lo aplicamos
+                filter.title = { [Op.iLike]: `%${title}%` };
+            }
+            // 3. Si el usuario ES admin Y NO SE PASÓ un filtro '?title=',
+            //    'filter.title' NO se establece, por lo que se muestran TODOS los establecimientos.
+
+            // --- Otros filtros (sin cambios) ---
             if (dominio) filter.dominio = { [Op.iLike]: `%${dominio}%` };
             if (modelo) filter.modelo = { [Op.iLike]: `%${modelo}%` };
             if (marca) filter.marca = { [Op.iLike]: `%${marca}%` };
             if (año) filter.anio = parseInt(año);
             if (tipo) filter.tipo = { [Op.iLike]: `%${tipo}%` };
-            
-            // Filtro por unidad (title) o rol
-            if (unidad) {
-                filter.title = { [Op.iLike]: `%${unidad}%` };
-            } else if (user && !user.admin) {
-                filter.title = user.unidad;
-            }
+            // (Quitamos el filtro por 'chofer' ya que no incluimos Usuario)
 
-            // Filtros en tablas relacionadas
+            // Include para Destino (si se filtra por destino)
             if (destino) {
                 includeWhere.push({
                     model: Destino,
@@ -53,20 +48,11 @@ export default class VehicleManager {
                     required: true // INNER JOIN
                 });
             }
-            if (chofer) {
-                includeWhere.push({
-                    model: Usuario,
-                    as: 'chofer',
-                    where: { username: { [Op.iLike]: `%${chofer}%` } },
-                    required: true // INNER JOIN
-                });
-            } else {
-                // Siempre incluir el chofer (LEFT JOIN)
-                includeWhere.push({ model: Usuario, as: 'chofer', required: false });
-            }
-            
-            // Incluir siempre la primera imagen
-            includeWhere.push({ model: Thumbnail, as: 'thumbnails' });
+            // Incluir siempre la primera imagen (LEFT JOIN)
+            includeWhere.push({ model: Thumbnail, as: 'thumbnails', required: false });
+
+            // --- DEBUGGING ---
+            console.log("Aplicando filtro:", filter); // Para ver qué filtro se usa
 
             // Consulta con paginación y filtros
             const { count, rows } = await Vehiculo.findAndCountAll({
@@ -75,78 +61,75 @@ export default class VehicleManager {
                 limit: parseInt(limit),
                 offset: offset,
                 order: [['dominio', 'ASC']],
-                distinct: true
-            });
-            
-            // Reconstruir el objeto de paginación
-            const totalPages = Math.ceil(count / limit);
-            const docs = rows.map(product => {
-                const plainProduct = product.get({ plain: true });
-                return {
-                    ...plainProduct,
-                    thumbnail: plainProduct.thumbnails && plainProduct.thumbnails.length > 0 ? plainProduct.thumbnails[0].url_imagen : null
-                };
+                // distinct: true // <-- ELIMINADO: Puede causar problemas con includes opcionales
             });
 
-            return {
-                docs,
-                totalDocs: count,
-                limit: parseInt(limit),
-                page: parseInt(page),
-                totalPages,
-                hasPrevPage: page > 1,
-                hasNextPage: page < totalPages,
-                prevPage: page > 1 ? page - 1 : null,
-                nextPage: page < totalPages ? page + 1 : null,
-            };
+            // --- DEBUGGING ---
+            console.log(`Query encontró ${count} vehículos.`);
+
+            // ... (resto de la función para mapear 'docs' y devolver paginación, sin cambios) ...
+             const totalPages = Math.ceil(count / limit);
+             const docs = rows.map(product => {
+                 const plainProduct = product.get({ plain: true });
+                 // Asegúrate de que thumbnails existe antes de acceder a él
+                 const firstThumbnail = plainProduct.thumbnails && plainProduct.thumbnails.length > 0
+                                      ? plainProduct.thumbnails[0].url_imagen
+                                      : null;
+                 return {
+                     ...plainProduct,
+                     thumbnail: firstThumbnail
+                 };
+             });
+
+             return {
+                 docs, totalDocs: count, limit: parseInt(limit), page: parseInt(page),
+                 totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages,
+                 prevPage: page > 1 ? page - 1 : null, nextPage: page < totalPages ? page + 1 : null,
+             };
+
 
         } catch (err) {
             console.error("Error en getVehicles service:", err);
-            return err;
+            throw err;
         }
     }
 
     // --- OBTENER POR ID (YA ESTABA BIEN) ---
-    getVehicleById = async (id) => {
+getVehicleById = async (id) => {
         try {
+            // Ahora SOLO incluimos las miniaturas (thumbnails)
             return await Vehiculo.findByPk(id, {
                 include: [
-                    { model: Usuario, as: 'chofer' },
-                    { model: Kilometraje, as: 'kilometrajes', order: [['fecha_registro', 'DESC']] },
-                    { model: Service, as: 'services', order: [['fecha_service', 'DESC']] },
-                    { model: Reparacion, as: 'reparaciones', order: [['fecha_reparacion', 'DESC']] },
-                    { model: Destino, as: 'destinos', order: [['fecha_destino', 'DESC']] },
-                    { model: Rodado, as: 'rodados', order: [['fecha_rodado', 'DESC']] },
-                    { model: Thumbnail, as: 'thumbnails' },
-                    { model: Descripcion, as: 'descripciones', order: [['id', 'DESC']] }
+                    { model: Thumbnail, as: 'thumbnails' }
                 ]
             });
         } catch (err) {
-            return { error: err.message };
+            // Devolvemos el error para que el controlador lo maneje
+            throw err;
         }
     }
 
-    // --- CREAR VEHÍCULO (YA ESTABA BIEN) ---
-    addVehicle = async (product) => {
+addVehicle = async (product) => {
         const t = await sequelize.transaction();
         try {
+            // El campo 'usuario' del formulario ahora es 'chofer'
             const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
 
-            let choferId = null;
-            if (usuario) {
-                const chofer = await Usuario.findOne({ where: { username: usuario } }, { transaction: t });
-                if (chofer) choferId = chofer.id;
-            }
+            // 1. YA NO buscamos el ID del chofer
+            // let choferId = null; // <-- LÍNEA ELIMINADA
+            // ... (lógica de findOne eliminada) ...
 
+            // 2. Creamos el Vehículo
             const newVehicle = await Vehiculo.create({
                 title, dominio, anio, modelo, tipo, chasis, motor, cedula, marca,
-                usuario_id: choferId
+                chofer: usuario // <-- CAMBIO CLAVE: Guardamos el TEXTO del chofer
             }, { transaction: t });
             
             const vehiculoId = newVehicle.id;
             const createsHijos = [];
 
-            if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion }, { transaction: t }));
+            // 3. Creamos los registros "hijos" (esta lógica no cambia)
+            if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: description }, { transaction: t }));
             if (kilometros) createsHijos.push(Kilometraje.create({ vehiculo_id: vehiculoId, kilometraje: parseInt(kilometros) }, { transaction: t }));
             if (destino) createsHijos.push(Destino.create({ vehiculo_id: vehiculoId, descripcion: destino }, { transaction: t }));
             if (service) createsHijos.push(Service.create({ vehiculo_id: vehiculoId, descripcion: service }, { transaction: t }));
@@ -164,7 +147,8 @@ export default class VehicleManager {
             return newVehicle;
         } catch (err) {
             await t.rollback();
-            return err;
+            // Propagamos el error para que el controlador lo atrape
+            throw err; 
         }
     }
 
@@ -265,5 +249,42 @@ export default class VehicleManager {
         } catch(err) {
             return err;
         }
+    }
+    getHistoryForVehicle = async (vehiculoId, historyModel, orderField) => {
+        try {
+            // Función genérica para buscar historial
+            return await historyModel.findAll({
+                where: { vehiculo_id: vehiculoId },
+                order: [[orderField, 'DESC']] // Ordenamos siempre el más nuevo primero
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    // Funciones específicas que usan la genérica
+    getKilometrajesForVehicle = async (vehiculoId) => {
+        return this.getHistoryForVehicle(vehiculoId, Kilometraje, 'fecha_registro');
+    }
+
+    getServicesForVehicle = async (vehiculoId) => {
+        return this.getHistoryForVehicle(vehiculoId, Service, 'fecha_service');
+    }
+
+    getReparacionesForVehicle = async (vehiculoId) => {
+        return this.getHistoryForVehicle(vehiculoId, Reparacion, 'fecha_reparacion');
+    }
+
+    getDestinosForVehicle = async (vehiculoId) => {
+        return this.getHistoryForVehicle(vehiculoId, Destino, 'fecha_destino');
+    }
+
+    getRodadosForVehicle = async (vehiculoId) => {
+        return this.getHistoryForVehicle(vehiculoId, Rodado, 'fecha_rodado');
+    }
+
+    getDescripcionesForVehicle = async (vehiculoId) => {
+        // Para descripciones, ordenamos por ID ya que no tienen fecha
+        return this.getHistoryForVehicle(vehiculoId, Descripcion, 'id');
     }
 }

@@ -19,7 +19,6 @@ import Case from './pages/Case/Case';
 import RealTimeVehicle from './pages/RealTimeVehicle/RealTimeVehicle';
 import EdditVehicle from './pages/EdditVehicle/EdditVehicle';
 import VehicleDetail from './pages/VehicleDetail/VehicleDetail';
-import VehicleInformation from './pages/VehicleInformation/VehicleInformation';
 
 
 
@@ -56,7 +55,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
           <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
           <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
-          <Route path="/vehicle-information/:cid" element={<VehicleInformation />} />
 
         </Route>
       </Routes>

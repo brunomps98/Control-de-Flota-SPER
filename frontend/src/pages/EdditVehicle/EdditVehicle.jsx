@@ -33,7 +33,7 @@ const EdditVehicle = () => {
                     service: (vehicleData.services && vehicleData.services[0]?.descripcion) || '',
                     rodado: (vehicleData.rodados && vehicleData.rodados[0]?.descripcion) || '',
                     reparaciones: (vehicleData.reparaciones && vehicleData.reparaciones[0]?.descripcion) || '',
-                    usuario: (vehicleData.chofer && vehicleData.chofer.username) || '' 
+                    usuario: vehicleData.chofer || ''
                 });
                 // ---------------------------------
 

@@ -32,7 +32,13 @@ const Login = () => {
             const { user, token } = response.data;
             localStorage.setItem('token', token);
 
-            const destinationPath = user && user.admin ? '/vehicle-general' : '/vehicle';
+            // --- ESTA ES LA LÍNEA CORREGIDA ---
+            // Como 'vehicle-general' ya no existe, ambos (admin y no-admin)
+            // van a '/vehicle'. El componente Vehicle.jsx se encarga
+            // de mostrar la data correcta según el rol del usuario.
+            const destinationPath = '/vehicle';
+            // ---------------------------------
+            
             navigate(destinationPath, { state: { username: user.username } });
 
         } catch (err) {

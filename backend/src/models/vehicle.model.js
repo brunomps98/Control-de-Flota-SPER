@@ -22,14 +22,10 @@ const Vehiculo = sequelize.define('Vehiculo', {
     motor: { type: DataTypes.STRING(100), unique: true },
     cedula: { type: DataTypes.STRING(100) },
     title: { type: DataTypes.STRING(255) },
-    usuario_id: { 
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: Usuario,
-            key: 'id'
-        }
-    }
+    chofer: { 
+    type: DataTypes.STRING(255),
+    allowNull: true
+}
 }, {
     tableName: 'vehiculos',
     timestamps: true,
@@ -86,14 +82,6 @@ const Descripcion = sequelize.define('Descripcion', {
     descripcion: { type: DataTypes.TEXT, allowNull: false }
 }, { tableName: 'descripciones', timestamps: false });
 
-
-// --- 3. Definición de TODAS las Relaciones ---
-
-// A) Relación Vehiculo -> Usuario (Chofer)
-// "Un Vehículo PERTENECE A UN Usuario (como chofer)"
-Vehiculo.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'chofer' });
-// "Un Usuario PUEDE TENER MUCHOS Vehículos asignados"
-Usuario.hasMany(Vehiculo, { foreignKey: 'usuario_id', as: 'vehiculosAsignados' });
 
 
 // B) Relaciones Vehiculo -> Sus "Arrays"

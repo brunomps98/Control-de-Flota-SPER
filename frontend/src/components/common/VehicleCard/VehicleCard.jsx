@@ -3,6 +3,10 @@ import './VehicleCard.css';
 import apiClient from '../../../api/axiosConfig';
 
 const VehicleCard = ({ vehicle }) => {
+
+    // --- AÑADE ESTE CONSOLE.LOG ---
+    console.log("Datos recibidos por VehicleCard:", vehicle); 
+    // -----------------------------
     
     const apiBaseURL = apiClient.defaults.baseURL;
     const imageUrl = vehicle.thumbnail

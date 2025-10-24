@@ -160,6 +160,26 @@ class VehicleDao {
     static realtimeVehicle = async (req, res) => {
         res.render('realtimeVehicle');
     }
+
+    static getVehicleHistory = async (req, res, historyMethodName) => {
+        try {
+            const { cid } = req.params; // Usamos 'cid' como en tus otras rutas
+            // Llamamos dinámicamente al método del repositorio
+            const history = await vehicleDao[historyMethodName](cid);
+            res.status(200).json({ history });
+        } catch (error) {
+            console.error(`Error al obtener historial (${historyMethodName}):`, error);
+            res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+        }
+    }
+
+    // Métodos específicos que usan el genérico
+    static getKilometrajes = (req, res) => this.getVehicleHistory(req, res, 'getKilometrajesForVehicle');
+    static getServices = (req, res) => this.getVehicleHistory(req, res, 'getServicesForVehicle');
+    static getReparaciones = (req, res) => this.getVehicleHistory(req, res, 'getReparacionesForVehicle');
+    static getDestinos = (req, res) => this.getVehicleHistory(req, res, 'getDestinosForVehicle');
+    static getRodados = (req, res) => this.getVehicleHistory(req, res, 'getRodadosForVehicle');
+    static getDescripciones = (req, res) => this.getVehicleHistory(req, res, 'getDescripcionesForVehicle');
 }
 
 export default VehicleDao;

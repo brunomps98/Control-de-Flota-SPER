@@ -67,6 +67,12 @@ router.post('/addVehicleNoImage', verifyToken, VehicleDao.addVehicle);
 router.delete('/vehicle/:pid', verifyToken, VehicleDao.deleteVehicle);
 router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleDao.deleteLastHistoryEntry);
 router.get('/vehicles', verifyToken, VehicleDao.getVehiclesForUser);
+router.get("/vehicle/:cid/kilometrajes", verifyToken, VehicleDao.getKilometrajes);
+router.get("/vehicle/:cid/services", verifyToken, VehicleDao.getServices);
+router.get("/vehicle/:cid/reparaciones", verifyToken, VehicleDao.getReparaciones);
+router.get("/vehicle/:cid/destinos", verifyToken, VehicleDao.getDestinos);
+router.get("/vehicle/:cid/rodados", verifyToken, VehicleDao.getRodados);
+router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripciones);
 
 
 // --- RUTAS DE SOPORTE  ---

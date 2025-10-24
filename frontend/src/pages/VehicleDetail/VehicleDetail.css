@@ -95,3 +95,85 @@
         page-break-inside: avoid;
     }
 }
+
+.history-section {
+    max-width: 960px;
+    margin: 25px auto 35px auto; /* Más espacio abajo para separar secciones */
+    padding: 10px;
+    border: 1px solid #E2E8F0; /* Borde sutil */
+    border-radius: 8px;
+    background-color: #F7FAFC; /* Fondo ligeramente gris */
+}
+
+/* Título de cada historial (Kilometraje, Services, etc.) */
+.history-section h3 {
+    font-size: 1.1rem;
+    color: #2D3748;
+    margin-top: 0;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #CBD5E0; /* Línea separadora */
+    padding-bottom: 8px;
+}
+
+/* --- Botón de Carga (Ver Historial) --- */
+.btn-load-history {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease-in-out;
+    display: block; /* Para que ocupe todo el ancho y se vea centrado */
+    width: 100%;
+    margin-top: 10px;
+}
+
+.btn-load-history:hover {
+    background-color: #0069d9;
+}
+
+/* --- Estilos de la Tabla de Historial --- */
+.history-section table {
+    width: 100%;
+    border-collapse: collapse; /* Para que los bordes se vean limpios */
+    margin-top: 15px;
+    font-size: 0.9rem;
+    table-layout: auto; /* Ajuste automático del ancho de columna */
+}
+
+.history-section th, .history-section td {
+    padding: 8px 12px;
+    border: 1px solid #E2E8F0; /* Bordes suaves */
+    text-align: left;
+    vertical-align: middle;
+}
+
+.history-section th {
+    background-color: #EDF2F7; /* Color de fondo para el encabezado */
+    font-weight: 600;
+    color: #4A5568;
+}
+
+/* Alineación para la columna de acciones/botón de eliminar */
+.history-section td:last-child {
+    width: 60px; /* Ancho fijo para el botón */
+    text-align: center;
+}
+
+/* Botón de eliminar dentro de la tabla */
+.delete-history-btn-small {
+    background: none;
+    border: none;
+    color: #DC3545; /* Rojo de destrucción */
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.delete-history-btn-small:hover {
+    color: #A00;
+    transform: scale(1.1);
+}

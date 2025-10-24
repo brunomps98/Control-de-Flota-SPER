@@ -5,31 +5,47 @@ import { toast } from 'react-toastify';
 
 const RealTimeVehicle = () => {
     const [formData, setFormData] = useState({
-        title: '', description: '', dominio: '', kilometros: '', destino: '',
+        title: '', // Inicializamos como vacío
+        description: '', dominio: '', kilometros: '', destino: '',
         anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
         service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
         thumbnail: null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // --- useEffect CORREGIDO ---
     useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await apiClient.get('/api/user/current');
-                const userData = response.data;
-                if (userData && userData.user) {
+                const userData = response.data.user; // Accedemos directo al user
+                if (userData) {
+                    // Lista de valores válidos de las opciones del select
+                    const validTitles = [
+                        "Direccion General", "Unidad Penal 1", "Unidad Penal 3",
+                        "Unidad Penal 4", "Unidad Penal 5", "Unidad Penal 6",
+                        "Unidad Penal 7", "Unidad Penal 8", "Unidad Penal 9",
+                        "Instituto", "Tratamiento"
+                    ];
+
+                    // Si la unidad del usuario es una opción válida, la usamos. Si no, dejamos el título vacío.
+                    const initialTitle = validTitles.includes(userData.unidad) ? userData.unidad : "";
+
                     setFormData(prevState => ({
                         ...prevState,
-                        title: userData.user.unidad || ''
+                        title: initialTitle
                     }));
                 }
             } catch (error) {
                 console.error("No se pudo obtener la sesión del usuario:", error);
+                // Si falla, también dejamos el título vacío por seguridad
+                setFormData(prevState => ({ ...prevState, title: "" }));
             }
         };
         fetchUserData();
-    }, []);
+    }, []); // El array vacío asegura que solo se ejecute al montar
 
+    // --- (handleChange - Sin cambios) ---
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -38,22 +54,25 @@ const RealTimeVehicle = () => {
         }));
     };
 
+    // --- (handleSubmit - Sin cambios respecto a la versión anterior simplificada) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        try {
-            // 1. Siempre creamos FormData
-            const dataToSend = new FormData();
+        // Validar que se haya seleccionado un establecimiento
+        if (!formData.title) {
+            toast.error('Por favor, seleccione un establecimiento.');
+            setIsSubmitting(false);
+            return;
+        }
 
-            // 2. Agregamos todos los campos de texto
+        try {
+            const dataToSend = new FormData();
             for (const key in formData) {
                 if (key !== 'thumbnail') {
                     dataToSend.append(key, formData[key]);
                 }
             }
-
-            // 3. Agregamos los archivos (si existen)
             if (formData.thumbnail && formData.thumbnail.length > 0) {
                 for (let i = 0; i < formData.thumbnail.length; i++) {
                     dataToSend.append('thumbnail', formData.thumbnail[i]);
@@ -61,17 +80,40 @@ const RealTimeVehicle = () => {
             }
 
             const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
-
             toast.success(response.data.message);
 
-            e.target.reset();
-            setFormData(prevState => ({ 
-                ...prevState,
-                description: '', dominio: '', kilometros: '', destino: '',
-                anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
-                service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
-                thumbnail: null
-            }));
+            // Reseteamos el formulario manteniendo el título inicial si aún es válido
+            const fetchUserDataAgain = async () => {
+                 try {
+                     const userRes = await apiClient.get('/api/user/current');
+                     const userData = userRes.data.user;
+                     if (userData) {
+                         const validTitles = ["Direccion General", "Unidad Penal 1", "Unidad Penal 3", "Unidad Penal 4", "Unidad Penal 5", "Unidad Penal 6", "Unidad Penal 7", "Unidad Penal 8", "Unidad Penal 9", "Instituto", "Tratamiento"];
+                         const resetTitle = validTitles.includes(userData.unidad) ? userData.unidad : "";
+                         setFormData({
+                             title: resetTitle, description: '', dominio: '', kilometros: '', destino: '',
+                             anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
+                             service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
+                             thumbnail: null
+                         });
+                         // Limpiar el input de archivo manualmente si es necesario
+                         const fileInput = document.getElementById('thumbnail');
+                         if (fileInput) fileInput.value = '';
+                     }
+                 } catch (err) {
+                     // Si falla al obtener usuario, reseteamos a valores vacíos
+                     setFormData({
+                         title: '', description: '', dominio: '', kilometros: '', destino: '',
+                         anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
+                         service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
+                         thumbnail: null
+                     });
+                     const fileInput = document.getElementById('thumbnail');
+                      if (fileInput) fileInput.value = '';
+                 }
+            }
+            fetchUserDataAgain(); // Llamamos para resetear con el title correcto
+
 
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error al agregar vehículo.');
@@ -90,6 +132,7 @@ const RealTimeVehicle = () => {
                     <div className="name-desc">
                         <div className="name-product">
                             <p>Establecimiento (Título de la Tarjeta)</p>
+                            {/* --- SELECT CORREGIDO --- */}
                             <select
                                 className="controls"
                                 name="title"
@@ -97,6 +140,8 @@ const RealTimeVehicle = () => {
                                 onChange={handleChange}
                                 required
                             >
+                                {/* Añadimos la opción inicial vacía */}
+                                <option value="">-- Seleccione Establecimiento --</option>
                                 <option value="Direccion General">Dirección General</option>
                                 <option value="Unidad Penal 1">Unidad Penal 1</option>
                                 <option value="Unidad Penal 3">Unidad Penal 3</option>
@@ -109,7 +154,9 @@ const RealTimeVehicle = () => {
                                 <option value="Instituto">Instituto</option>
                                 <option value="Tratamiento">Tratamiento</option>
                             </select>
+                            {/* ------------------------ */}
                         </div>
+                        {/* ... (resto del formulario sin cambios) ... */}
                         <div className="desc-product">
                             <p>Descripción de estado de Vehículo</p>
                             <input className="controls" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
@@ -133,7 +180,16 @@ const RealTimeVehicle = () => {
                     <div className="stock-code-price">
                         <div className="code-product">
                             <p>Año</p>
-                            <input className="controls" type="text" name="anio" value={formData.anio} onChange={handleChange} placeholder="año del vehiculo" required />
+                            <input
+                                className="controls"
+                                type="number"  /* Cambiado a number */
+                                max="9999"      /* Límite añadido */
+                                name="anio"
+                                value={formData.anio}
+                                onChange={handleChange}
+                                placeholder="año del vehiculo"
+                                required
+                             />
                         </div>
                         <div className="code-product">
                             <p>Modelo</p>
