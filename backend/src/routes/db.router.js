@@ -3,12 +3,14 @@ import { __dirname } from "../utils.js";
 import express from 'express';
 import multer from "multer";
 import path from 'path';
+
 import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
 import SupportController from "../controllers/support.controller.js";
-import { userModel } from "../models/user.model.js";
+
+import { userDao } from "../repository/index.js"; 
+
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import { verifyToken } from "../config/authMiddleware.js";
 
 const router = Router();
@@ -32,38 +34,42 @@ const upload = multer({ storage: storage });
 
 
 // --- RUTAS DE AUTENTICACIÓN  ---
-router.post('/register', UserDao.registerUser);
+router.post('/register', UserDao.registerUser); 
+
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     try {
-        const user = await userModel.findOne({ username }).lean();
-        if (!user) return res.status(401).json({ message: 'Credenciales incorrectas' });
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(401).json({ message: 'Credenciales incorrectas' });
-        const { password: _, ...userPayload } = user;
+        const user = await userDao.loginUser(username, password);
+        const { password: _, ...userPayload } = user.get({ plain: true });
+
         const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '8h' });
+        
         res.status(200).json({ status: 'success', user: userPayload, token });
+    
     } catch (error) {
-        res.status(500).json({ message: 'Error interno del servidor' });
+        if (error.message === "Credenciales inválidas") {
+            return res.status(401).json({ message: 'Credenciales incorrectas' });
+        }
+        res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     }
 });
+
 router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
 
-// --- RUTAS DE VEHÍCULOS (PROTEGIDAS) ---
+// --- RUTAS DE VEHÍCULOS (Protegidas) ---
 router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
 router.put("/vehicle/:productId", verifyToken, VehicleDao.updateVehicle); 
-router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicleWithImage); 
-router.post('/addVehicleNoImage', verifyToken, VehicleDao.addVehicleNoImage);
-
+router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicle); 
+router.post('/addVehicleNoImage', verifyToken, VehicleDao.addVehicle);
 router.delete('/vehicle/:pid', verifyToken, VehicleDao.deleteVehicle);
 router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleDao.deleteLastHistoryEntry);
 router.get('/vehicles', verifyToken, VehicleDao.getVehiclesForUser);
 
 
-// --- RUTAS DE SOPORTE (PÚBLICAS) ---
+// --- RUTAS DE SOPORTE  ---
 router.post('/support', upload.array('files'), SupportController.createTicket); 
 router.post('/support-no-files', SupportController.createTicketNoFiles);
 router.get('/support-tickets', SupportController.getTickets);

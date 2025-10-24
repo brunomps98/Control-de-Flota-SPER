@@ -9,7 +9,7 @@ class userRepository {
     }
 
     async loginUser(username, password){
-        return await this.dao.loginUser(username, password)
+        return await this.dao.logInUser(username, password)
     }
 
     async getUserByUsername(username){

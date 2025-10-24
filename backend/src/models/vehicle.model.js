@@ -1,84 +1,129 @@
-import mongoose from "mongoose";
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/configServer.js';
+import Usuario from './user.model.js'; 
 
-import mongoosePaginate from 'mongoose-paginate-v2';
-
-
-const productSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: false
-    },
-    description: {
-        type: [String],
-        required: false
+// --- 1. Modelo Principal: Vehiculo ---
+const Vehiculo = sequelize.define('Vehiculo', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
     dominio: {
-        type: String,
+        type: DataTypes.STRING(20),
         unique: true,
-        required: false
+        allowNull: false
     },
-    kilometros: {
-        type: [Number],
-        required: false
-    },
-    thumbnail: {
-        type: [String],
-        required: false
-    },
-    destino: {
-        type: [String],
-        required: false
-    },
-    anio: {
-        type: String,
-        required: false
-    },
-    modelo: {
-        type: String,
-        required: false
-    },
-    tipo: {
-        type: String,
-        required: false
-    },
-    chasis: {
-        type: String,
-        required: false
-    },
-    motor: {
-        type: String,
-        required: false
-    },
-    cedula: {
-        type: String,
-        required: false
-    },
-    service: {
-        type: [String],
-        required: false
-    },
-    rodado: {
-        type: [String],
-        required: false
-    },
-    reparaciones: {
-        type: [String],
-        required: false
-    },
-    marca: {
-        type: String,
-        required: false
-    },
-    usuario: {
-        type: String,
-        required: false
-    },
-})
+    marca: { type: DataTypes.STRING(100) },
+    modelo: { type: DataTypes.STRING(100) },
+    anio: { type: DataTypes.INTEGER }, 
+    tipo: { type: DataTypes.STRING(100) },
+    chasis: { type: DataTypes.STRING(100), unique: true },
+    motor: { type: DataTypes.STRING(100), unique: true },
+    cedula: { type: DataTypes.STRING(100) },
+    title: { type: DataTypes.STRING(255) },
+    usuario_id: { 
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: Usuario,
+            key: 'id'
+        }
+    }
+}, {
+    tableName: 'vehiculos',
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+});
+
+// --- 2. Modelos "Hijos" (para los arrays) ---
+
+const Kilometraje = sequelize.define('Kilometraje', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    kilometraje: { type: DataTypes.INTEGER, allowNull: false },
+    fecha_registro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'kilometrajes', timestamps: false });
+
+const Service = sequelize.define('Service', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    descripcion: { type: DataTypes.TEXT, allowNull: false },
+    fecha_service: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'services', timestamps: false });
+
+const Reparacion = sequelize.define('Reparacion', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    descripcion: { type: DataTypes.TEXT, allowNull: false },
+    fecha_reparacion: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'reparaciones', timestamps: false });
+
+const Destino = sequelize.define('Destino', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    descripcion: { type: DataTypes.TEXT, allowNull: false },
+    fecha_destino: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'destinos', timestamps: false });
+
+const Rodado = sequelize.define('Rodado', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    descripcion: { type: DataTypes.TEXT, allowNull: false },
+    fecha_rodado: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, { tableName: 'rodados', timestamps: false });
+
+const Thumbnail = sequelize.define('Thumbnail', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    url_imagen: { type: DataTypes.TEXT, allowNull: false }
+}, { tableName: 'thumbnails', timestamps: false });
+
+const Descripcion = sequelize.define('Descripcion', {
+    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
+    descripcion: { type: DataTypes.TEXT, allowNull: false }
+}, { tableName: 'descripciones', timestamps: false });
 
 
+// --- 3. Definición de TODAS las Relaciones ---
+
+// A) Relación Vehiculo -> Usuario (Chofer)
+// "Un Vehículo PERTENECE A UN Usuario (como chofer)"
+Vehiculo.belongsTo(Usuario, { foreignKey: 'usuario_id', as: 'chofer' });
+// "Un Usuario PUEDE TENER MUCHOS Vehículos asignados"
+Usuario.hasMany(Vehiculo, { foreignKey: 'usuario_id', as: 'vehiculosAsignados' });
 
 
-mongoose.set('strictQuery', false)
-productSchema.plugin(mongoosePaginate)
+// B) Relaciones Vehiculo -> Sus "Arrays"
+// "Un Vehículo TIENE MUCHOS..."
+Vehiculo.hasMany(Kilometraje, { foreignKey: 'vehiculo_id', as: 'kilometrajes' });
+Vehiculo.hasMany(Service, { foreignKey: 'vehiculo_id', as: 'services' });
+Vehiculo.hasMany(Reparacion, { foreignKey: 'vehiculo_id', as: 'reparaciones' });
+Vehiculo.hasMany(Destino, { foreignKey: 'vehiculo_id', as: 'destinos' });
+Vehiculo.hasMany(Rodado, { foreignKey: 'vehiculo_id', as: 'rodados' });
+Vehiculo.hasMany(Thumbnail, { foreignKey: 'vehiculo_id', as: 'thumbnails' });
+Vehiculo.hasMany(Descripcion, { foreignKey: 'vehiculo_id', as: 'descripciones' });
 
-export const productsModel = mongoose.model('productos', productSchema)
+// "...y cada uno de esos registros PERTENECE A UN Vehículo"
+Kilometraje.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Service.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Reparacion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Destino.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Rodado.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Thumbnail.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Descripcion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+
+
+// --- 4. Exportación de TODOS los modelos ---
+export {
+    Vehiculo,
+    Kilometraje,
+    Service,
+    Reparacion,
+    Destino,
+    Rodado,
+    Thumbnail,
+    Descripcion
+};

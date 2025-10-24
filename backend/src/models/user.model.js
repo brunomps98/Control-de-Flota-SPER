@@ -1,33 +1,64 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs'; 
+// src/models/user.model.js
+// Este es un MODELO DE SEQUELIZE
 
-const userCollection = 'user';
+import { DataTypes } from 'sequelize';
+import { sequelize } from '../config/configServer.js'; // Importamos la instancia de sequelize
+import bcrypt from 'bcryptjs';
 
-const userSchema = new mongoose.Schema({
-    username: { type: String, required: true },
-    password: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    admin: { type: Boolean, default: false },
-    unidad:{type :String, required:true},
-    up1: {  type: Boolean , default: false},
-    up3: {  type: Boolean , default: false},
-    up4: {  type: Boolean , default: false},
-    up5: {  type: Boolean , default: false},
-    up6: {  type: Boolean , default: false},
-    up7: {  type: Boolean , default: false},
-    up8: {  type: Boolean , default: false},
-    up9: {  type: Boolean , default: false},
-    dg: {  type: Boolean , default: false},
-    inst: {  type: Boolean , default: false}
+// Definimos el modelo 'Usuario' que se mapea a la tabla 'usuarios'
+
+const Usuario = sequelize.define('Usuario', {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
+    username: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+        unique: true
+    },
+    password: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    unidad: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+    },
+    // Roles y permisos
+    admin: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    up1: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up3: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up4: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up5: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up6: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up7: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up8: { type: DataTypes.BOOLEAN, defaultValue: false },
+    up9: { type: DataTypes.BOOLEAN, defaultValue: false },
+    dg: { type: DataTypes.BOOLEAN, defaultValue: false },
+    inst: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, {
+    // Opciones del modelo
+    tableName: 'usuarios', 
+    timestamps: true,      
+    createdAt: 'created_at', 
+    updatedAt: 'updated_at'  
 });
 
-// Middleware para hashear la contraseña antes de guardar
-userSchema.pre('save', function(next) {
-    if (!this.isModified('password')) {
-        return next();
+
+Usuario.beforeCreate(async (usuario) => {
+    if (usuario.password) {
+        const salt = bcrypt.genSaltSync(10);
+        usuario.password = bcrypt.hashSync(usuario.password, salt);
     }
-    this.password = bcrypt.hashSync(this.password, 10);
-    next();
 });
 
-export const userModel = mongoose.model('User', userSchema, userCollection);
+export default Usuario;
