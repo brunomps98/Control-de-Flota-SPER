@@ -6,11 +6,9 @@ import NavBar from '../../components/common/NavBar/NavBar';
 import { toast } from 'react-toastify';
 
 const EdditVehicle = () => {
-    // --- HOOKS
     const { productId } = useParams();
     const navigate = useNavigate();
 
-    // --- ESTADOS
     const [formData, setFormData] = useState({
         description: '',
         kilometros: '',
@@ -22,23 +20,24 @@ const EdditVehicle = () => {
     });
 
 
-    // --- CARGA DE DATOS ---
     useEffect(() => {
         const fetchVehicleData = async () => {
             try {
                 const response = await apiClient.get(`/api/vehicle/${productId}`);
-                const vehicleData = response.data.vehicle;
+                const vehicleData = response.data.vehicle; 
+
                 setFormData({
-                    description: vehicleData.description.slice(-1)[0] || '',
-                    kilometros: vehicleData.kilometros.slice(-1)[0] || '',
-                    destino: vehicleData.destino.slice(-1)[0] || '',
-                    service: vehicleData.service.slice(-1)[0] || '',
-                    rodado: vehicleData.rodado.slice(-1)[0] || '',
-                    reparaciones: vehicleData.reparaciones.slice(-1)[0] || '',
-                    usuario: vehicleData.usuario || '' 
+                    description: (vehicleData.descripciones && vehicleData.descripciones[0]?.descripcion) || '',
+                    kilometros: (vehicleData.kilometrajes && vehicleData.kilometrajes[0]?.kilometraje) || '',
+                    destino: (vehicleData.destinos && vehicleData.destinos[0]?.descripcion) || '',
+                    service: (vehicleData.services && vehicleData.services[0]?.descripcion) || '',
+                    rodado: (vehicleData.rodados && vehicleData.rodados[0]?.descripcion) || '',
+                    reparaciones: (vehicleData.reparaciones && vehicleData.reparaciones[0]?.descripcion) || '',
+                    usuario: (vehicleData.chofer && vehicleData.chofer.username) || '' 
                 });
+                // ---------------------------------
+
             } catch (err) {
-                // --- 3. MOSTRAR ERROR DE CARGA CON TOAST ---
                 toast.error(err.response?.data?.message || 'No se pudieron cargar los datos del vehículo.');
             }
         };
@@ -46,7 +45,6 @@ const EdditVehicle = () => {
         fetchVehicleData();
     }, [productId]);
 
-    // --- MANEJADOR DE CAMBIOS (Sin cambios) ---
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -55,32 +53,24 @@ const EdditVehicle = () => {
         }));
     };
 
-    // --- ENVÍO DE FORMULARIO CON TOAST ---
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            // Usamos apiClient.put como antes
             await apiClient.put(`/api/vehicle/${productId}`, formData);
-
-            // --- 4. MOSTRAR ÉXITO CON TOAST ---
             toast.success('Vehículo modificado con éxito.');
 
-            // Mantenemos la redirección después de un tiempo
             setTimeout(() => {
                 navigate(`/vehicle-detail/${productId}`); 
-            }, 1500); // 1.5 segundos
+            }, 1500);
 
         } catch (err) {
-            // --- 5. MOSTRAR ERROR DE ACTUALIZACIÓN CON TOAST ---
             toast.error(err.response?.data?.message || 'Error al actualizar el vehículo.');
         }
     };
 
-    // --- RENDERIZADO ---
     return (
         <>
-            {/* <NavBar /> */}
             <main>
                 <form id="formEditVehicle" onSubmit={handleSubmit}>
                     <div className="title-add-product">

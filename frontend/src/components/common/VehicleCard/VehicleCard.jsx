@@ -5,9 +5,8 @@ import apiClient from '../../../api/axiosConfig';
 const VehicleCard = ({ vehicle }) => {
     
     const apiBaseURL = apiClient.defaults.baseURL;
-
-    const imageUrl = vehicle.thumbnail && vehicle.thumbnail.length > 0
-        ? `${apiBaseURL}/uploads/${vehicle.thumbnail[0]}`
+    const imageUrl = vehicle.thumbnail
+        ? `${apiBaseURL}/uploads/${vehicle.thumbnail}`
         : '/images/default-vehicle.png';
     
     return (
@@ -21,9 +20,8 @@ const VehicleCard = ({ vehicle }) => {
                 <h3>{vehicle.marca} {vehicle.modelo}</h3>
                 <p>Dominio: {vehicle.dominio}</p>
                 <p>Año: {vehicle.anio}</p>
-                <p>Destino: {vehicle.destino}</p>
                 <div className="link">
-                    <Link to={`/vehicle-detail/${vehicle._id}`}>Ver Ficha</Link>
+                    <Link to={`/vehicle-detail/${vehicle.id}`}>Ver Ficha</Link>
                 </div>
             </div>
         </div>

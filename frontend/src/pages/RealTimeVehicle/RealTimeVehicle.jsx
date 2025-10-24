@@ -30,7 +30,6 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []);
 
-    // --- (handleChange) ---
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -39,46 +38,42 @@ const RealTimeVehicle = () => {
         }));
     };
 
-    // --- handleSubmit CON TOAST ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        const hasFiles = formData.thumbnail && formData.thumbnail.length > 0;
-
         try {
-            let response;
-            if (hasFiles) {
-                const dataToSend = new FormData();
+            // 1. Siempre creamos FormData
+            const dataToSend = new FormData();
+
+            // 2. Agregamos todos los campos de texto
+            for (const key in formData) {
+                if (key !== 'thumbnail') {
+                    dataToSend.append(key, formData[key]);
+                }
+            }
+
+            // 3. Agregamos los archivos (si existen)
+            if (formData.thumbnail && formData.thumbnail.length > 0) {
                 for (let i = 0; i < formData.thumbnail.length; i++) {
                     dataToSend.append('thumbnail', formData.thumbnail[i]);
                 }
-                for (const key in formData) {
-                    if (key !== 'thumbnail') {
-                        dataToSend.append(key, formData[key]);
-                    }
-                }
-                response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
-
-            } else {
-                const { thumbnail, ...textData } = formData;
-                response = await apiClient.post('/api/addVehicleNoImage', textData);
             }
 
-            // --- 3. MOSTRAR ÉXITO CON TOAST ---
+            const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
+
             toast.success(response.data.message);
 
             e.target.reset();
-            setFormData({
-                title: formData.title, 
+            setFormData(prevState => ({ 
+                ...prevState,
                 description: '', dominio: '', kilometros: '', destino: '',
                 anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
                 service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
                 thumbnail: null
-            });
+            }));
 
         } catch (error) {
-            // --- 4. MOSTRAR ERROR CON TOAST ---
             toast.error(error.response?.data?.message || 'Error al agregar vehículo.');
         } finally {
             setIsSubmitting(false);
@@ -87,13 +82,11 @@ const RealTimeVehicle = () => {
 
     return (
         <>
-
             <form id="formProduct" onSubmit={handleSubmit}>
                 <main>
                     <div className="title-add-product">
                         <h2 className="title-add">Cargar Vehículo</h2>
                     </div>
-                    {/* ... (Inputs del formulario) ... */}
                     <div className="name-desc">
                         <div className="name-product">
                             <p>Establecimiento (Título de la Tarjeta)</p>

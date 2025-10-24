@@ -8,35 +8,23 @@ import { Capacitor } from '@capacitor/core';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
-// Initialize SweetAlert for React
 const MySwal = withReactContent(Swal);
 
 const SupportTickets = () => {
     const navigate = useNavigate();
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // Estado para errores de carga o eliminación
+    const [error, setError] = useState(null);
 
-    // --- LÓGICA DEL BOTÓN ATRÁS ---
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-
-        const handleBackButton = () => {
-            navigate('/support');
-        };
-
+        const handleBackButton = () => navigate('/support');
         const listener = App.addListener('backButton', handleBackButton);
-
-        return () => {
-            listener.remove();
-        };
+        return () => listener.remove();
     }, [navigate]); 
 
-
-    // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTickets = async () => {
-            // Limpiamos errores previos al cargar
             setError(null);
             try {
                 const response = await apiClient.get('/api/support-tickets');
@@ -50,7 +38,6 @@ const SupportTickets = () => {
         fetchTickets();
     }, []);
 
-    // --- FUNCIÓN DE ELIMINAR CON SWEETALERT Y AXIOS ---
     const handleDelete = (ticketId) => {
         MySwal.fire({
             title: '¿Estás seguro?',
@@ -63,33 +50,22 @@ const SupportTickets = () => {
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // Limpiamos errores previos
                 setError(null);
                 try {
                     await apiClient.delete(`/api/support/${ticketId}`);
-                    // Actualizamos el estado local para quitar el ticket
-                    setTickets(prevTickets => prevTickets.filter(ticket => ticket._id !== ticketId));
-                    // Mostramos éxito
-                    MySwal.fire(
-                        '¡Eliminado!',
-                        'El caso de soporte ha sido eliminado.',
-                        'success'
-                    );
+                    
+                    setTickets(prevTickets => prevTickets.filter(ticket => ticket.id !== ticketId));
+                    
+                    MySwal.fire('¡Eliminado!', 'El caso de soporte ha sido eliminado.', 'success');
                 } catch (err) {
-                    // Guardamos el error para mostrarlo
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
                     setError(errorMessage);
-                    MySwal.fire(
-                        'Error',
-                        `No se pudo eliminar el ticket: ${errorMessage}`,
-                        'error'
-                    );
+                    MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
                 }
             }
         });
     };
     
-    // --- RENDERIZADO ---
     return (
         <div className="page-container">
             <header className="top-bar-support">
@@ -110,10 +86,9 @@ const SupportTickets = () => {
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
 
                     {loading && <p>Cargando tickets...</p>}
-                    {/* Mostramos el error si existe */}
                     {error && <p style={{ color: 'red', textAlign: 'center' }}>Error: {error}</p>}
 
-                    {!loading && !error && ( // Solo renderiza si no hay loading NI error de carga inicial
+                    {!loading && !error && (
                         <>
                             {tickets.length === 0 ? (
                                 <div className="no-tickets-message">
@@ -122,7 +97,7 @@ const SupportTickets = () => {
                                 </div>
                             ) : (
                                 tickets.map(ticket => (
-                                    <div className="ticket-card" key={ticket._id}>
+                                    <div className="ticket-card" key={ticket.id}>
                                         <div className="ticket-header">
                                             <h2>{ticket.name} {ticket.surname}</h2>
                                         </div>
@@ -132,10 +107,10 @@ const SupportTickets = () => {
                                             <p><strong>Problema:</strong> {ticket.problem_description}</p>
                                         </div>
                                         <div className="ticket-actions">
-                                            <Link to={`/case/${ticket._id}`} className="btn-action btn-view-case">Ver Caso Completo</Link>
+                                            <Link to={`/case/${ticket.id}`} className="btn-action btn-view-case">Ver Caso Completo</Link>
                                             <button
                                                 className="btn-action btn-delete-case delete-case-btn"
-                                                onClick={() => handleDelete(ticket._id)}
+                                                onClick={() => handleDelete(ticket.id)}
                                             >
                                                 Eliminar Caso
                                             </button>

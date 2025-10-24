@@ -131,7 +131,7 @@ class VehicleDao {
     // --- BORRADO ---
     static deleteVehicle = async (req, res) => {
         try {
-            const id = req.params.pid;
+            const id = req.params.pid || req.params.cid;
             const result = await vehicleDao.deleteVehicle(id);
             
             if (result instanceof Error) throw result;

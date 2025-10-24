@@ -19,14 +19,12 @@ const Case = () => {
 
     const apiBaseURL = apiClient.defaults.baseURL;
 
-    // --- CARGA DE DATOS CON AXIOS ---
     useEffect(() => {
         const fetchTicket = async () => {
             try {
                 const response = await apiClient.get(`/api/support/${ticketId}`);
                 setTicket(response.data.ticket);
             } catch (err) {
-                // Solo ponemos error si falla la carga inicial
                 if (!ticket) {
                      setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
                 }
@@ -38,22 +36,13 @@ const Case = () => {
         fetchTicket();
     }, [ticketId]);
 
-    // --- LÓGICA DEL BOTÓN ATRÁS ---
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-
-        const handleBackButton = () => {
-            navigate('/support-tickets');
-        };
-
+        const handleBackButton = () => navigate('/support-tickets');
         const listener = App.addListener('backButton', handleBackButton);
-
-        return () => {
-            listener.remove();
-        };
+        return () => listener.remove();
     }, [navigate]); 
 
-    // --- FUNCIÓN DE ELIMINAR CON SWEETALERT Y AXIOS ---
     const handleDelete = () => {
         MySwal.fire({
             title: '¿Estás seguro?',
@@ -66,38 +55,30 @@ const Case = () => {
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // Limpiamos errores previos
                 setError(null);
                 try {
                     await apiClient.delete(`/api/support/${ticketId}`);
-                    // Mostramos éxito y redirigimos
                     MySwal.fire(
                         '¡Eliminado!',
                         'El caso de soporte ha sido eliminado.',
                         'success'
                     ).then(() => {
-                         navigate('/support-tickets'); // Redirigir DESPUÉS de cerrar el popup de éxito
+                         navigate('/support-tickets');
                     });
                 } catch (err) {
-                    // Guardamos el error para mostrarlo
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
                     setError(errorMessage);
-                    MySwal.fire(
-                        'Error',
-                        `No se pudo eliminar el ticket: ${errorMessage}`,
-                        'error'
-                    );
+                    MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
                 }
             }
         });
     };
 
-    // --- RENDERIZADO
+    // --- RENDERIZADO ---
     if (loading) {
         return <p>Cargando detalles del caso...</p>;
     }
-    // Muestra error si hubo problema al cargar O al eliminar
-    if (error && !ticket) { // Solo muestra el error de carga si el ticket no existe
+    if (error && !ticket) { 
         return <p style={{ color: 'red' }}>Error: {error}</p>;
     }
     if (!ticket) {
@@ -121,8 +102,7 @@ const Case = () => {
 
             <main className="main-case-view">
                 <div className="case-container">
-                    {/* Mostramos error de eliminación si ocurrió */}
-                    {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error al eliminar: {error}</p>}
+                    {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error: {error}</p>}
 
                     <h1>Detalle del Caso de Soporte</h1>
                     <div className="ticket-header">
@@ -136,15 +116,20 @@ const Case = () => {
                         <p>{ticket.problem_description}</p>
                     </div>
                     <hr style={{ margin: '20px 0' }} />
-                    {ticket.files && ticket.files.length > 0 && (
+
+                    
+                    {/* 1. Usamos 'ticket.archivos' (el alias de Sequelize) */}
+                    {ticket.archivos && ticket.archivos.length > 0 && (
                         <>
                             <h3>Imágenes Adjuntas:</h3>
                             <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
-                                {ticket.files.map((file, index) => (
-                                    <a href={`${apiBaseURL}/uploads/${file}`} target="_blank" rel="noopener noreferrer" key={index}>
+                                {/* 2. Mapeamos 'archivos', 'fileObj' es un objeto */}
+                                {ticket.archivos.map((fileObj) => (
+                                    // 3. Usamos 'fileObj.url_archivo'
+                                    <a href={`${apiBaseURL}/uploads/${fileObj.url_archivo}`} target="_blank" rel="noopener noreferrer" key={fileObj.id}> {/* 4. Usamos 'fileObj.id' como key */}
                                         <img
-                                            src={`${apiBaseURL}/uploads/${file}`}
-                                            alt={`Imagen del caso ${index + 1}`}
+                                            src={`${apiBaseURL}/uploads/${fileObj.url_archivo}`} 
+                                            alt={`Imagen del caso ${fileObj.id}`}
                                             style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
                                         />
                                     </a>
@@ -152,6 +137,7 @@ const Case = () => {
                             </div>
                         </>
                     )}
+
                     <div className="ticket-actions">
                         <Link to="/support-tickets" className="btn-action btn-view-case">Volver a la Lista</Link>
                         <button className="btn-action btn-delete-case" onClick={handleDelete}>

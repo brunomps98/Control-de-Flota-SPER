@@ -32,7 +32,7 @@ const Login = () => {
             const { user, token } = response.data;
             localStorage.setItem('token', token);
 
-            const destinationPath = user && user.isAdmin ? '/vehicle-general' : '/vehicle';
+            const destinationPath = user && user.admin ? '/vehicle-general' : '/vehicle';
             navigate(destinationPath, { state: { username: user.username } });
 
         } catch (err) {

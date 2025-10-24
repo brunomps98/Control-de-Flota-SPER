@@ -26,7 +26,7 @@ const Vehicle = () => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
         }
-    }, []);
+    }, [location]); 
 
     useEffect(() => {
         const fetchVehicles = async () => {
@@ -46,6 +46,7 @@ const Vehicle = () => {
         };
         fetchVehicles();
     }, [searchParams]);
+
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -121,7 +122,7 @@ const Vehicle = () => {
                         <div key={i} className="vehicle-card-skeleton"></div>
                     ))
                 ) : vehicles.length > 0 ? (
-                    vehicles.map(vehicle => <VehicleCard key={vehicle._id} vehicle={vehicle} />)
+                    vehicles.map(vehicle => <VehicleCard key={vehicle.id} vehicle={vehicle} />)
                 ) : (
                     <p style={{ textAlign: 'center' }}>{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}
