@@ -59,7 +59,7 @@ const SupportTickets = () => {
                     MySwal.fire('¡Eliminado!', 'El caso de soporte ha sido eliminado.', 'success');
                 } catch (err) {
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
-                    setError(errorMessage);
+                    // setError(errorMessage); // <-- ¡No establecemos el error principal!
                     MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
                 }
             }
