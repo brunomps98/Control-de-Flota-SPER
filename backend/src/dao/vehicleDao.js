@@ -88,17 +88,15 @@ class VehicleDao {
     static vehicleDetail = (req, res) => getVehicleByIdHelper(req, res, 'vehicleDetail');
     static vehicleInformation = (req, res) => getVehicleByIdHelper(req, res, 'vehicleInformation');
     static edditVehicle = (req, res) => getVehicleByIdHelper(req, res, 'edditVehicle');
-    static getVehicleById = (req, res) => getVehicleByIdHelper(req, res, null); // Para JSON
+    static getVehicleById = (req, res) => getVehicleByIdHelper(req, res, null); 
 
     // --- LECTURA (VISTAS DE LISTA/PAGINADAS) ---
     static vehicle = (req, res) => renderVehicleView(req, res, 'vehicle');
     static vehicleGeneral = (req, res) => renderVehicleView(req, res, 'vehicleGeneral');
-    static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle'); // vehicleFilter ahora usa la misma lógica
-
-    // Para React (JSON)
+    static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle'); 
     static getVehiclesForUser = async (req, res) => {
         try {
-            const query = { ...req.query, user: req.user, limit: 1000, page: 1 }; // Sin paginación
+            const query = { ...req.query, user: req.user, limit: 1000, page: 1 };
             const result = await vehicleDao.getVehicles(query);
             res.status(200).json({ docs: result.docs });
         } catch (error) {
@@ -107,7 +105,6 @@ class VehicleDao {
         }
     }
 
-    // --- ACTUALIZACIÓN ---
     static updateVehicle = async (req, res) => {
         try {
             const id = req.params.productId;
@@ -156,6 +153,36 @@ class VehicleDao {
         }
     }
 
+    static deleteOneHistoryEntry = async (req, res) => {
+        try {
+            const { cid, fieldName, historyId } = req.params;
+
+            const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId);
+
+            if (result instanceof Error) throw result;
+
+            res.status(200).json({ status: "success", message: `Registro de ${fieldName} eliminado.` });
+        } catch (error) {
+            console.error(`Error al eliminar un registro de ${fieldName}:`, error);
+            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
+        }
+    }
+
+    static deleteAllHistory = async (req, res) => {
+        try {
+            const { cid, fieldName } = req.params;
+
+            const result = await vehicleDao.deleteAllHistory(cid, fieldName);
+
+            if (result instanceof Error) throw result;
+
+            res.status(200).json({ status: "success", message: `Historial de ${fieldName} eliminado.` });
+        } catch (error) {
+            console.error(`Error al eliminar todo el historial de ${fieldName}:`, error);
+            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
+        }
+    }
+
     // Ruta estática
     static realtimeVehicle = async (req, res) => {
         res.render('realtimeVehicle');
@@ -163,8 +190,7 @@ class VehicleDao {
 
     static getVehicleHistory = async (req, res, historyMethodName) => {
         try {
-            const { cid } = req.params; // Usamos 'cid' como en tus otras rutas
-            // Llamamos dinámicamente al método del repositorio
+            const { cid } = req.params; 
             const history = await vehicleDao[historyMethodName](cid);
             res.status(200).json({ history });
         } catch (error) {

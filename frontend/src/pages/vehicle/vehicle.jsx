@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useLocation } from 'react-router-dom';
+import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
@@ -11,6 +11,7 @@ const Vehicle = () => {
     const [error, setError] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
+    const navigate = useNavigate();
 
     const [filters, setFilters] = useState({
         dominio: searchParams.get('dominio') || '',
@@ -22,12 +23,18 @@ const Vehicle = () => {
         title: searchParams.get('title') || ''
     });
 
+    // --- EFECTOS ---
+
+    // Efecto para el Toast de Bienvenida (Tu implementación correcta)
     useEffect(() => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
+            // Limpia el estado para que el toast no vuelva a aparecer
+            navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location]); 
+    }, [location, navigate]);
 
+    // Efecto para cargar vehículos (Depende de searchParams)
     useEffect(() => {
         const fetchVehicles = async () => {
             setLoading(true);
@@ -39,46 +46,57 @@ const Vehicle = () => {
                 setVehicles(response.data.docs || []);
             } catch (err) {
                 toast.error(err.response?.data?.message || 'No se pudieron cargar los vehículos.');
-                setError('Error al cargar vehículos.'); 
+                setError('Error al cargar vehículos.');
             } finally {
                 setLoading(false);
             }
         };
         fetchVehicles();
-    }, [searchParams]);
+    }, [searchParams]); // <-- Se ejecuta cada vez que los parámetros de la URL cambian
+
+    // Efecto para Debouncing de filtros (Tu implementación correcta)
+    useEffect(() => {
+        // Establece un temporizador
+        const timer = setTimeout(() => {
+            // Crea los parámetros de búsqueda solo desde los filtros que tienen valor
+            const query = {};
+            for (const key in filters) {
+                if (filters[key]) query[key] = filters[key];
+            }
+            setSearchParams(query);
+        }, 400); // Espera 400ms después de la última pulsación de tecla
+
+        // Limpia el temporizador si el usuario sigue escribiendo
+        return () => clearTimeout(timer);
+        
+    }, [filters, setSearchParams]); // Se ejecuta cada vez que 'filters' cambia
+
+    
+    // --- MANEJADORES DE EVENTOS (Handlers) ---
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
-
-        clearTimeout(window.filterTimeout);
-        window.filterTimeout = setTimeout(() => {
-            const newFilters = { ...filters, [name]: value };
-            const query = {};
-            for (const key in newFilters) if (newFilters[key]) query[key] = newFilters[key];
-            setSearchParams(query);
-        }, 400);
     };
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        const newFilters = {};
+        // Forzamos la actualización de searchParams inmediatamente (lo que disparará el useEffect de fetch)
+        const query = {};
         for (const key in filters) {
-            if (filters[key]) {
-                newFilters[key] = filters[key];
-            }
+            if (filters[key]) query[key] = filters[key];
         }
-        setSearchParams(newFilters);
+        setSearchParams(query);
     };
 
     const handleClearFilters = () => {
         setFilters({
             dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
         });
-        setSearchParams({});
+        // setSearchParams({}) disparará el useEffect de debounce/fetch
     };
 
-
+    // --- RENDERIZADO ---
     return (
         <>
             <div className="titulo-products">
@@ -129,6 +147,6 @@ const Vehicle = () => {
             </div>
         </>
     );
-};
+}
 
 export default Vehicle;

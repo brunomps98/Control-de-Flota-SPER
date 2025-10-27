@@ -66,6 +66,8 @@ router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), Vehi
 router.post('/addVehicleNoImage', verifyToken, VehicleDao.addVehicle);
 router.delete('/vehicle/:pid', verifyToken, VehicleDao.deleteVehicle);
 router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleDao.deleteLastHistoryEntry);
+router.delete('/vehicle/:cid/history/:fieldName/:historyId', verifyToken, VehicleDao.deleteOneHistoryEntry);
+router.delete('/vehicle/:cid/history/all/:fieldName', verifyToken, VehicleDao.deleteAllHistory);
 router.get('/vehicles', verifyToken, VehicleDao.getVehiclesForUser);
 router.get("/vehicle/:cid/kilometrajes", verifyToken, VehicleDao.getKilometrajes);
 router.get("/vehicle/:cid/services", verifyToken, VehicleDao.getServices);

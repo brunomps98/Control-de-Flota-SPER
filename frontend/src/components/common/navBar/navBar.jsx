@@ -12,14 +12,11 @@ const Navbar = ({ user }) => {
 
   // --- FUNCIÓN DE LOGOUT PARA TOKENS ---
   const handleLogout = () => {
-    // 1. ¡Paso clave! Limpiamos el token del almacenamiento local
     localStorage.removeItem('token');
     
-    // 2. Redirigimos al usuario a la página de login
     navigate('/login');
   };
 
-  // --- RENDERIZADO (Sin cambios) ---
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">

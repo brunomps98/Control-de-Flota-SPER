@@ -11,7 +11,7 @@ import Layout from './components/Layout/Layout';
 // Paginas
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
-import Vehicle from './pages/Vehicle/Vehicle';
+import Vehicle from './pages/vehicle/vehicle';
 import Register from './pages/Register/Register';
 import Support from './pages/Support/Support';
 import SupportTickets from './pages/SupportTickets/SupportTickets';

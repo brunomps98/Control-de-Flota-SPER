@@ -1,7 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 
-// --- 1. Modelo Principal: Soporte ---
 const Soporte = sequelize.define('Soporte', {
     id: {
         type: DataTypes.INTEGER,
@@ -21,13 +20,13 @@ const Soporte = sequelize.define('Soporte', {
         type: DataTypes.STRING(50)
     },
     problem_description: {
-        type: DataTypes.TEXT // Usamos TEXT para descripciones largas
+        type: DataTypes.TEXT 
     }
 }, {
     tableName: 'soporte',
     timestamps: true,
     createdAt: 'created_at',
-    updatedAt: false // No definimos un updated_at en esta tabla
+    updatedAt: false 
 });
 
 
@@ -54,8 +53,8 @@ const SoporteArchivo = sequelize.define('SoporteArchivo', {
 
 // --- 3. Definición de la Relación ---
 Soporte.hasMany(SoporteArchivo, {
-    foreignKey: 'soporte_id', // La columna en SoporteArchivo que nos conecta
-    as: 'archivos'            // Un alias para cuando consultemos
+    foreignKey: 'soporte_id', 
+    as: 'archivos'           
 });
 
 // "Un Archivo de Soporte PERTENECE A UN ticket de soporte"

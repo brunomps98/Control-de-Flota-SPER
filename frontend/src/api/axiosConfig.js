@@ -36,7 +36,7 @@ const capacitorAdapter = async (config) => {
       };
     } else {
       const error = new Error(response.data.message || `Error con status ${response.status}`);
-      error.response = response; // Adjuntamos la respuesta completa al error
+      error.response = response; 
       return Promise.reject(error);
     }
 

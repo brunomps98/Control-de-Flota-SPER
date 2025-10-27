@@ -16,7 +16,6 @@ class SupportDao {
 
             // 3. Si hay archivos, los creamos en la tabla 'soporte_archivos'
             if (files && files.length > 0) {
-                // Preparamos los datos para bulkCreate
                 const fileData = files.map(url => ({
                     soporte_id: newTicket.id,
                     url_archivo: url
@@ -26,7 +25,7 @@ class SupportDao {
 
             // 4. Confirmamos la transacción
             await t.commit();
-            return newTicket; // Devolvemos el ticket creado
+            return newTicket; 
 
         } catch (error) {
             await t.rollback();
@@ -48,7 +47,7 @@ class SupportDao {
                 model: SoporteArchivo,
                 as: 'archivos' 
             }],
-            order: [['created_at', 'DESC']] // Ordenamos por fecha
+            order: [['created_at', 'DESC']]
         });
     }
 

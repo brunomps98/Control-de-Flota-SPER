@@ -27,6 +27,14 @@ class vehicleRepository {
         return await this.dao.deleteLastHistoryEntry(vid, fieldName);
     }
 
+    async deleteAllHistory(cid, fieldName) {
+        return await this.dao.deleteAllHistory(cid, fieldName);
+    }
+
+    async deleteOneHistoryEntry(cid, fieldName, historyId) {
+        return await this.dao.deleteOneHistoryEntry(cid, fieldName, historyId);
+    }
+
     async getKilometrajesForVehicle(id) {
         return await this.dao.getKilometrajesForVehicle(id);
     }

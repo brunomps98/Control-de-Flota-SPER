@@ -20,7 +20,6 @@ export default class VehicleManager {
             const filter = {}; // Filtros para la tabla 'vehiculos' (where principal)
             const includeWhere = []; // Filtros para tablas relacionadas (include)
 
-            // --- LÓGICA DE FILTRADO REVISADA ---
             if (user && !user.admin) {
                 // 1. Si el usuario NO es admin, SIEMPRE filtramos por su unidad
                 filter.title = user.unidad;
@@ -28,31 +27,25 @@ export default class VehicleManager {
                 // 2. Si el usuario ES admin Y SE PASÓ un filtro '?title=', lo aplicamos
                 filter.title = { [Op.iLike]: `%${title}%` };
             }
-            // 3. Si el usuario ES admin Y NO SE PASÓ un filtro '?title=',
-            //    'filter.title' NO se establece, por lo que se muestran TODOS los establecimientos.
 
-            // --- Otros filtros (sin cambios) ---
             if (dominio) filter.dominio = { [Op.iLike]: `%${dominio}%` };
             if (modelo) filter.modelo = { [Op.iLike]: `%${modelo}%` };
             if (marca) filter.marca = { [Op.iLike]: `%${marca}%` };
             if (año) filter.anio = parseInt(año);
             if (tipo) filter.tipo = { [Op.iLike]: `%${tipo}%` };
-            // (Quitamos el filtro por 'chofer' ya que no incluimos Usuario)
-
-            // Include para Destino (si se filtra por destino)
             if (destino) {
                 includeWhere.push({
                     model: Destino,
                     as: 'destinos',
                     where: { descripcion: { [Op.iLike]: `%${destino}%` } },
-                    required: true // INNER JOIN
+                    required: true 
                 });
             }
-            // Incluir siempre la primera imagen (LEFT JOIN)
+           
             includeWhere.push({ model: Thumbnail, as: 'thumbnails', required: false });
 
-            // --- DEBUGGING ---
-            console.log("Aplicando filtro:", filter); // Para ver qué filtro se usa
+            
+            console.log("Aplicando filtro:", filter); 
 
             // Consulta con paginación y filtros
             const { count, rows } = await Vehiculo.findAndCountAll({
@@ -61,17 +54,13 @@ export default class VehicleManager {
                 limit: parseInt(limit),
                 offset: offset,
                 order: [['dominio', 'ASC']],
-                // distinct: true // <-- ELIMINADO: Puede causar problemas con includes opcionales
             });
 
-            // --- DEBUGGING ---
             console.log(`Query encontró ${count} vehículos.`);
 
-            // ... (resto de la función para mapear 'docs' y devolver paginación, sin cambios) ...
              const totalPages = Math.ceil(count / limit);
              const docs = rows.map(product => {
                  const plainProduct = product.get({ plain: true });
-                 // Asegúrate de que thumbnails existe antes de acceder a él
                  const firstThumbnail = plainProduct.thumbnails && plainProduct.thumbnails.length > 0
                                       ? plainProduct.thumbnails[0].url_imagen
                                       : null;
@@ -94,17 +83,14 @@ export default class VehicleManager {
         }
     }
 
-    // --- OBTENER POR ID (YA ESTABA BIEN) ---
 getVehicleById = async (id) => {
         try {
-            // Ahora SOLO incluimos las miniaturas (thumbnails)
             return await Vehiculo.findByPk(id, {
                 include: [
                     { model: Thumbnail, as: 'thumbnails' }
                 ]
             });
         } catch (err) {
-            // Devolvemos el error para que el controlador lo maneje
             throw err;
         }
     }
@@ -112,23 +98,18 @@ getVehicleById = async (id) => {
 addVehicle = async (product) => {
         const t = await sequelize.transaction();
         try {
-            // El campo 'usuario' del formulario ahora es 'chofer'
             const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
-
-            // 1. YA NO buscamos el ID del chofer
-            // let choferId = null; // <-- LÍNEA ELIMINADA
-            // ... (lógica de findOne eliminada) ...
 
             // 2. Creamos el Vehículo
             const newVehicle = await Vehiculo.create({
                 title, dominio, anio, modelo, tipo, chasis, motor, cedula, marca,
-                chofer: usuario // <-- CAMBIO CLAVE: Guardamos el TEXTO del chofer
+                chofer: usuario 
             }, { transaction: t });
             
             const vehiculoId = newVehicle.id;
             const createsHijos = [];
 
-            // 3. Creamos los registros "hijos" (esta lógica no cambia)
+            // 3. Creamos los registros "hijos"
             if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: description }, { transaction: t }));
             if (kilometros) createsHijos.push(Kilometraje.create({ vehiculo_id: vehiculoId, kilometraje: parseInt(kilometros) }, { transaction: t }));
             if (destino) createsHijos.push(Destino.create({ vehiculo_id: vehiculoId, descripcion: destino }, { transaction: t }));
@@ -147,7 +128,6 @@ addVehicle = async (product) => {
             return newVehicle;
         } catch (err) {
             await t.rollback();
-            // Propagamos el error para que el controlador lo atrape
             throw err; 
         }
     }
@@ -250,6 +230,71 @@ addVehicle = async (product) => {
             return err;
         }
     }
+
+    // --- FUNCIÓN PARA BORRAR TODO EL HISTORIAL ---
+    deleteAllHistory = async (cid, fieldName) => {
+        try {
+            let model;
+
+            switch(fieldName) {
+                case 'kilometrajes': model = Kilometraje; break;
+                case 'services': model = Service; break;
+                case 'rodados': model = Rodado; break;
+                case 'reparaciones': model = Reparacion; break;
+                case 'descripciones': model = Descripcion; break;
+                case 'destinos': model = Destino; break;
+                default:
+                    throw new Error('Campo de historial no válido');
+            }
+
+            // Destruye TODOS los registros que coincidan con el vehiculo_id
+            const count = await model.destroy({
+                where: { vehiculo_id: cid }
+            });
+
+            return { success: true, message: `Se eliminaron ${count} registros de ${fieldName}.` };
+        
+        } catch(err) {
+            return err;
+        }
+    }
+
+    deleteOneHistoryEntry = async (cid, fieldName, historyId) => {
+        try {
+            let model;
+            switch(fieldName) {
+                case 'kilometrajes': model = Kilometraje; break;
+                case 'services': model = Service; break;
+                case 'rodados': model = Rodado; break;
+                case 'reparaciones': model = Reparacion; break;
+                case 'descripciones': model = Descripcion; break;
+                case 'destinos': model = Destino; break;
+                default:
+                    throw new Error('Campo de historial no válido');
+            }
+
+            // Busca la entrada específica por su ID y el ID del vehículo (por seguridad)
+            const entry = await model.findOne({
+                where: { 
+                    id: historyId,
+                    vehiculo_id: cid 
+                }
+            });
+
+            if (!entry) {
+                throw new Error('No se encontró el registro a eliminar.');
+            }
+
+            // Destruye el registro encontrado
+            await entry.destroy();
+
+            return { success: true, message: `Registro ${historyId} eliminado.` };
+        
+        } catch(err) {
+            return err;
+        }
+    }
+
     getHistoryForVehicle = async (vehiculoId, historyModel, orderField) => {
         try {
             // Función genérica para buscar historial
@@ -284,7 +329,6 @@ addVehicle = async (product) => {
     }
 
     getDescripcionesForVehicle = async (vehiculoId) => {
-        // Para descripciones, ordenamos por ID ya que no tienen fecha
         return this.getHistoryForVehicle(vehiculoId, Descripcion, 'id');
     }
 }

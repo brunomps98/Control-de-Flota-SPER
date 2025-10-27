@@ -1,8 +1,5 @@
-// src/models/user.model.js
-// Este es un MODELO DE SEQUELIZE
-
 import { DataTypes } from 'sequelize';
-import { sequelize } from '../config/configServer.js'; // Importamos la instancia de sequelize
+import { sequelize } from '../config/configServer.js'; 
 import bcrypt from 'bcryptjs';
 
 // Definimos el modelo 'Usuario' que se mapea a la tabla 'usuarios'
