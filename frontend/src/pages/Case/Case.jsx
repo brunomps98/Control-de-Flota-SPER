@@ -5,10 +5,7 @@ import './Case.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
-
-const MySwal = withReactContent(Swal);
+import MySwal from '../../utils/swal';
 
 const Case = () => {
     const { ticketId } = useParams();
