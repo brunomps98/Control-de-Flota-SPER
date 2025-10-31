@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './EdditVehicle.css';
-import NavBar from '../../components/common/NavBar/NavBar'; 
+import NavBar from '../../components/common/navBar/navBar'; 
 import { toast } from 'react-toastify';
 
 const EdditVehicle = () => {
