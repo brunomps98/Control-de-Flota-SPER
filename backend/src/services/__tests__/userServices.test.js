@@ -17,28 +17,6 @@ jest.mock('bcryptjs', () => ({
     compare: jest.fn(),
 }));
 
-// 3. 👇 --- CORRECCIÓN --- 👇
-// Este es el mock de 'sequelize' corregido (copiado de vehicleService.test.js)
-// Ya no usa jest.requireActual
-jest.mock('sequelize', () => {
-    // 1. Creamos una clase falsa para simular este error específico
-    class MockUniqueConstraintError extends Error {
-        constructor(message) {
-            super(message);
-            this.name = 'UniqueConstraintError';
-        }
-    }
-
-    // 2. Devolvemos un objeto que simula las exportaciones de 'sequelize'
-    return {
-        UniqueConstraintError: MockUniqueConstraintError,
-        Op: {
-            iLike: Symbol.for('iLike'),
-        }
-    };
-});
-// 👆 --- FIN DE LA CORRECCIÓN --- 👆
-
 // 4. Mockeamos 'configServer' (este ya estaba bien)
 jest.mock('../../config/configServer.js', () => ({
     sequelize: {
