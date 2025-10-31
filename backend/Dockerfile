@@ -2,7 +2,6 @@
 FROM node:20-alpine
 
 # 2. DIRECTORIO DE TRABAJO
-# Creamos y nos movemos a un directorio dentro del contenedor
 WORKDIR /usr/src/app
 
 # 3. COPIAR ARCHIVOS DE DEPENDENCIAS
