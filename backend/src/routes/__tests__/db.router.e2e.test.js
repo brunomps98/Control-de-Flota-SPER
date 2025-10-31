@@ -4,6 +4,8 @@ import app from '../../app.js'; // 1. Importamos la app de Express refactorizada
 import { userDao, vehicleDao } from '../../repository/index.js'; // 2. Importamos los repositorios que vamos a mockear
 import jwt from 'jsonwebtoken';
 
+process.env.SECRET_KEY = 'clave_secreta_para_probar_en_ci';
+
 // 3. Mockeamos la capa de Repositorio (la "base de datos")
 jest.mock('../../repository/index.js', () => ({
     userDao: {

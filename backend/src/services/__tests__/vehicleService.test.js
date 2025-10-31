@@ -39,14 +39,21 @@ jest.mock('../../config/configServer.js', () => ({
 
 // Mockeamos 'Op' para poder verificar los filtros iLike
 jest.mock('sequelize', () => {
-    // Mantenemos todo lo real de Sequelize, excepto 'Op'
-    const originalSequelize = jest.requireActual('sequelize');
+    // 1. Creamos una clase falsa para simular este error específico
+    class MockUniqueConstraintError extends Error {
+        constructor(message) {
+            super(message);
+            this.name = 'UniqueConstraintError';
+        }
+    }
+
+    // 2. Devolvemos un objeto que simula las exportaciones de 'sequelize'
     return {
-        ...originalSequelize,
+        UniqueConstraintError: MockUniqueConstraintError,
         Op: {
-            // Usamos un Symbol único para [Op.iLike] que el test pueda verificar
-            iLike: Symbol.for('iLike'), 
-        },
+            iLike: Symbol.for('iLike'),
+            // (puedes añadir Op.and, Op.or, etc. si los necesitas en el futuro)
+        }
     };
 });
 

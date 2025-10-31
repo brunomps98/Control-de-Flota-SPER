@@ -1,7 +1,8 @@
 import userManager from '../userServices'; 
 import Usuario from '../../models/user.model.js';
 import bcrypt from 'bcryptjs';
-import { UniqueConstraintError } from 'sequelize';
+// La importación de 'UniqueConstraintError' ahora será interceptada por nuestro mock
+import { UniqueConstraintError } from 'sequelize'; 
 
 // --- MOCKS ---
 
@@ -16,26 +17,29 @@ jest.mock('bcryptjs', () => ({
     compare: jest.fn(),
 }));
 
-// 3. Mockeamos 'sequelize' para poder simular el 'UniqueConstraintError'
+// 3. 👇 --- CORRECCIÓN --- 👇
+// Este es el mock de 'sequelize' corregido (copiado de vehicleService.test.js)
+// Ya no usa jest.requireActual
 jest.mock('sequelize', () => {
-    // Importamos el 'sequelize' real para mantener sus otras propiedades
-    const originalSequelize = jest.requireActual('sequelize');
-    
-    // Creamos una clase falsa para simular este error específico
+    // 1. Creamos una clase falsa para simular este error específico
     class MockUniqueConstraintError extends Error {
         constructor(message) {
             super(message);
             this.name = 'UniqueConstraintError';
         }
     }
-    
+
+    // 2. Devolvemos un objeto que simula las exportaciones de 'sequelize'
     return {
-        ...originalSequelize,
         UniqueConstraintError: MockUniqueConstraintError,
+        Op: {
+            iLike: Symbol.for('iLike'),
+        }
     };
 });
+// 👆 --- FIN DE LA CORRECCIÓN --- 👆
 
-// Mockeamos 'configServer' 
+// 4. Mockeamos 'configServer' (este ya estaba bien)
 jest.mock('../../config/configServer.js', () => ({
     sequelize: {
         transaction: jest.fn(),
@@ -63,8 +67,8 @@ describe('userManager Service', () => {
 
         // Configuramos respuestas por defecto
         Usuario.create.mockResolvedValue({ id: 1, email: 'test@test.com' });
-        Usuario.findOne.mockResolvedValue(null); // Por defecto, no encuentra al usuario
-        bcrypt.compare.mockResolvedValue(false); // Por defecto, la contraseña es incorrecta
+        Usuario.findOne.mockResolvedValue(null); 
+        bcrypt.compare.mockResolvedValue(false); 
     });
 
     // --- Tests para regUser ---
@@ -80,13 +84,13 @@ describe('userManager Service', () => {
             
             await manager.regUser(userData.username, userData.unidad, userData.email, userData.password);
 
-            // Aserción: Verificamos que se llamó a 'create' con la contraseña en texto plano,
-            // ya que el servicio confía en el hook 'beforeCreate' del modelo para el hash.
             expect(Usuario.create).toHaveBeenCalledWith(userData);
         });
 
         it('debería lanzar un error "Email already in use" si Usuario.create falla por UniqueConstraintError', async () => {
+            
             // Forzamos que 'create' falle con ese error
+            // 'UniqueConstraintError' ahora viene de nuestro mock
             Usuario.create.mockRejectedValue(new UniqueConstraintError('Email duplicado'));
 
             // Aserción: Verificamos que el 'catch' del servicio funciona y lanza el error correcto
@@ -111,32 +115,26 @@ describe('userManager Service', () => {
                 .rejects
                 .toThrow('Credenciales inválidas');
 
-            // Aserción: No se debe intentar comparar la contraseña si no hay usuario
             expect(bcrypt.compare).not.toHaveBeenCalled();
         });
 
         it('debería lanzar "Credenciales inválidas" si la contraseña es incorrecta', async () => {
-            // 1. Simulamos que el usuario SÍ existe
             Usuario.findOne.mockResolvedValue(mockUser);
             
             await expect(manager.logInUser('testuser', 'contraseña_incorrecta'))
                 .rejects
                 .toThrow('Credenciales inválidas');
             
-            // Aserción: Verificamos que SÍ se intentó comparar
             expect(Usuario.findOne).toHaveBeenCalledWith({ where: { username: 'testuser' } });
             expect(bcrypt.compare).toHaveBeenCalledWith('contraseña_incorrecta', mockUser.password);
         });
 
         it('debería devolver el usuario si el login es exitoso', async () => {
-            // 1. Simulamos que el usuario SÍ existe
             Usuario.findOne.mockResolvedValue(mockUser);
-            // 2. Simulamos que la contraseña SÍ coincide
             bcrypt.compare.mockResolvedValue(true);
 
             const result = await manager.logInUser('testuser', 'contraseña_correcta');
 
-            // Aserción: Verificamos que se devuelve el usuario
             expect(result).toEqual(mockUser);
             expect(bcrypt.compare).toHaveBeenCalledWith('contraseña_correcta', mockUser.password);
         });
