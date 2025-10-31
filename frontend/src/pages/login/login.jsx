@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './Login.css';
+import './login.css';
 import blackLogo from '../../assets/images/black-logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './Vehicle.css';
+import './vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 import { toast } from 'react-toastify';
 
