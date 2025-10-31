@@ -9,8 +9,8 @@ import './styles.css';
 import Layout from './components/Layout/Layout';
 
 // Paginas
-import Home from './pages/Home/Home';
-import Login from './pages/Login/Login';
+import Home from './pages/home/home';
+import Login from './pages/login/login';
 import Vehicle from './pages/vehicle/vehicle';
 import Register from './pages/Register/Register';
 import Support from './pages/Support/Support';
