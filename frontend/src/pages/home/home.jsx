@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import './Home.css';
+import './home.css';
 import logoSper from '../../assets/images/logo.png';
 import { useEffect } from 'react';
 import { App } from '@capacitor/app';
