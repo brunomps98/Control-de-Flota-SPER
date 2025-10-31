@@ -36,6 +36,7 @@ class SupportDao {
     async deleteTicket(id) {
         const ticket = await Soporte.findByPk(id);
         if (ticket) {
+            await ticket.destroy();
             return ticket;
         }
         return null;

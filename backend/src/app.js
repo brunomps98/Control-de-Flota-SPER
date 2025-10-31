@@ -1,6 +1,5 @@
 import express from "express";
 import { __dirname } from "./utils.js";
-import { connectToDB } from "./config/configServer.js";
 import dbRouter from './routes/db.router.js';
 import dotenv from "dotenv";
 import cors from "cors";
@@ -33,27 +32,9 @@ app.use(cors({
     credentials: true 
 }));
 
-const PORT = process.env.PORT || 8080;
-const HOST = '0.0.0.0'; 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", dbRouter);
 
-
-// Funcion para controlar el inicio a la base de datos y el servidor
-const startServer = async () => {
-    try {
-        await connectToDB(); 
-
-        app.listen(PORT, HOST, () => {
-            console.log(`Acceso local: http://localhost:${PORT}/\n`);
-        });
-    } catch (err) {
-        console.error("❌ Error al iniciar el servidor:", err);
-    }
-};
-
-// 3. Llamamos a la función para arrancar todo
-startServer();
+export default app;
