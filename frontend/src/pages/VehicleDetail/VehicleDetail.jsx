@@ -7,7 +7,6 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
-// --- CAMBIO 1: 'onDelete' ahora espera 'historyType' ---
 const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType }) => {
     if (loading) return <p>Cargando {title.toLowerCase()}...</p>;
     if (error) return <p style={{ color: 'red' }}>Error al cargar {title.toLowerCase()}: {error}</p>;
@@ -25,15 +24,13 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                 {(historyData || []).slice().reverse().map((item, index) => (
                     <tr key={item.id}>
                         <td>{item[fieldName]}</td>
-                        {/* Mostramos la fecha correspondiente */}
                         {fieldName === 'descripcion' && <td>{new Date(item.created_at || item.fecha_registro || item.fecha_service || item.fecha_reparacion || item.fecha_destino || item.fecha_rodado).toLocaleDateString()}</td>}
-                        {fieldName === 'kilometraje' && /* No mostramos fecha para km si no quieres */ null }
+                        {fieldName === 'kilometraje' && null }
                         {fieldName !== 'descripcion' && fieldName !== 'kilometraje' && <td>{new Date(item[`fecha_${fieldName.replace('es','').replace('s','')}`] || item.created_at).toLocaleDateString()}</td>}
                         
                         <td>
                             <button 
                                 className="delete-history-btn-small" 
-                                // --- CAMBIO 2: Pasamos el 'historyType' (ej: "services") en lugar de 'fieldName' (ej: "descripcion") ---
                                 onClick={() => onDelete(item.id, historyType)}
                                 title="Eliminar este registro"
                             >
@@ -55,9 +52,7 @@ const VehicleDetail = () => {
     const [vehicle, setVehicle] = useState(null); 
     const [loadingVehicle, setLoadingVehicle] = useState(true);
     const [errorVehicle, setErrorVehicle] = useState(null);
-    const apiBaseURL = apiClient.defaults.baseURL;
 
-    // Estados separados
     const [kilometrajes, setKilometrajes] = useState({ data: null, loading: false, error: null, loaded: false });
     const [services, setServices] = useState({ data: null, loading: false, error: null, loaded: false });
     const [reparaciones, setReparaciones] = useState({ data: null, loading: false, error: null, loaded: false });
@@ -90,12 +85,12 @@ const VehicleDetail = () => {
         try {
             const response = await apiClient.get(`/api/vehicle/${cid}/${endpoint}`);
             stateSetter({ data: response.data.history, loading: false, error: null, loaded: true });
-        } catch (err) {
+        } catch (err) { // 
             stateSetter({ data: null, loading: false, error: err.response?.data?.message || `Error cargando ${endpoint}`, loaded: true });
         }
     };
 
-    // --- MANEJADORES DE EDICIÓN Y BORRADO  ---
+
     const handleEdit = () => navigate(`/eddit-vehicle/${cid}`);
 
     const handleDeleteVehicle = () => {
@@ -104,7 +99,7 @@ const VehicleDetail = () => {
             text: "¡Vas a eliminar este vehículo! No podrás revertir esto.",
             icon: 'warning',
              showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
-        }).then(async (result) => {
+        }).then(async (result) => { 
             if (result.isConfirmed) {
                 setErrorVehicle(null); 
                 try {
@@ -120,16 +115,15 @@ const VehicleDetail = () => {
         });
     };
 
-     // --- BORRADO DE TODO EL HISTORIAL ---
+
      const handleDeleteAllHistory = (historyType) => { 
         MySwal.fire({
             title: '¿Estás seguro?',
             text: `Vas a eliminar TODO el historial de "${historyType}". ¡No podrás revertir esto!`,
             icon: 'warning',
-            // ...
-        }).then(async (result) => {
+
+        }).then(async (result) => { 
             if (result.isConfirmed) {
-                // --- CAMBIO 3: 'historyType' es correcto ('services', 'kilometrajes', etc.) ---
                 const stateSetter = eval(`set${historyType.charAt(0).toUpperCase() + historyType.slice(1)}`); 
                 stateSetter(prev => ({...prev, error: null}));
 
@@ -144,7 +138,7 @@ const VehicleDetail = () => {
         });
     };
 
-    // --- CAMBIO 4: Renombrado a 'historyType' para claridad ---
+    // --- BORRADO DE UN REGISTRO ---
     const handleDeleteOneHistoryEntry = (historyId, historyType) => {
         MySwal.fire({
             title: '¿Eliminar este registro?',
@@ -153,12 +147,10 @@ const VehicleDetail = () => {
             // ...
         }).then(async (result) => {
             if (result.isConfirmed) {
-                // --- CAMBIO 5: 'eval' ahora usa 'historyType' (ej: "setServices") ---
                 const stateSetter = eval(`set${historyType.charAt(0).toUpperCase() + historyType.slice(1)}`);
                 stateSetter(prev => ({ ...prev, error: null }));
 
                 try {
-                    // --- CAMBIO 6: La URL de la API ahora es correcta (ej: /history/services/id) ---
                     await apiClient.delete(`/api/vehicle/${cid}/history/${historyType}/${historyId}`);
                     
                     MySwal.fire('¡Eliminado!', 'El registro ha sido eliminado.', 'success');
@@ -181,8 +173,9 @@ const VehicleDetail = () => {
     if (errorVehicle && !vehicle) return <p style={{ color: 'red' }}>Error al cargar: {errorVehicle}</p>;
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
 
-    const mainImageUrl = vehicle.thumbnails && vehicle.thumbnails.length > 0
-        ? `${apiBaseURL}/uploads/${vehicle.thumbnails[0].url_imagen}`
+    // Lógica de imagen 
+    const mainImageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
+        ? vehicle.thumbnail[0]
         : '/images/default-vehicle.png';
 
     return (
@@ -234,7 +227,6 @@ const VehicleDetail = () => {
                                 fieldName="kilometraje"
                                 unit="km"
                                 vehicleId={cid}
-                                // --- CAMBIO 7: Pasamos el 'historyType' correcto ---
                                 historyType="kilometrajes"
                                 onDelete={handleDeleteOneHistoryEntry} 
                             />
@@ -262,7 +254,6 @@ const VehicleDetail = () => {
                                 error={services.error}
                                 fieldName="descripcion" 
                                 vehicleId={cid}
-                                // --- CAMBIO 8: Pasamos el 'historyType' correcto ---
                                 historyType="services"
                                 onDelete={handleDeleteOneHistoryEntry} 
                             />
@@ -290,7 +281,6 @@ const VehicleDetail = () => {
                                 error={reparaciones.error}
                                 fieldName="descripcion"
                                 vehicleId={cid}
-                                // --- CAMBIO 9: (Y así para todos los demás...) ---
                                 historyType="reparaciones"
                                 onDelete={handleDeleteOneHistoryEntry} 
                             />
@@ -378,17 +368,23 @@ const VehicleDetail = () => {
                          )}
                     </div>
 
+                    {/* --- IMÁGENES ADICIONALES  --- */}
                     <div className="image-description-p">
                         <h4 className="h4-p">IMÁGENES ADICIONALES:</h4>
                         <div className="img-div">
-                            {vehicle.thumbnails && vehicle.thumbnails.slice(1).map((img) => (
-                                <img className="img-p" src={`${apiBaseURL}/uploads/${img.url_imagen}`} alt={`Imagen ${img.id}`} key={img.id} />
+                            {vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.slice(1).map((imageUrl, index) => (
+                                <img 
+                                    className="img-p" 
+                                    src={imageUrl} 
+                                    alt={`Imagen adicional ${index + 1}`} 
+                                    key={index}
+                                />
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* LOS 4 BOTONES DEL FOOTER ESTÁN AQUÍ */}
+                {/* --- BOTONES DEL FOOTER --- */}
                 <div className="action-footer">
                     <Link to="/vehicle" className="action-btn btn-secondary">Volver a Lista</Link>
                     <button className="action-btn btn-secondary" onClick={() => window.print()}>Imprimir</button>

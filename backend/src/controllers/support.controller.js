@@ -1,6 +1,6 @@
-
-
 import { supportRepository } from "../repository/index.js";
+import { supabase } from '../config/supabaseClient.js'; 
+import path from 'path'; 
 
 class SupportController {
 
@@ -59,13 +59,51 @@ class SupportController {
         }
     };
 
-    // Crea un nuevo ticket (CON ARCHIVOS, desde FormData)
+
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
+            let fileUrls = []; // Array para las URLs públicas
+
             if (req.files && req.files.length > 0) {
-                ticketData.files = req.files.map(file => file.filename);
+                console.log(`Subiendo ${req.files.length} archivos de soporte a Supabase...`);
+
+                for (const file of req.files) {
+                    // Creamos un nombre de archivo único
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                    const extension = path.extname(file.originalname);
+                    // Usamos un prefijo 'files-' para diferenciarlo de 'thumbnail-'
+                    const fileName = `files-${uniqueSuffix}${extension}`; 
+
+                    // Subimos el archivo (buffer) al bucket 'uploads'
+                    const { error: uploadError } = await supabase.storage
+                        .from('uploads') 
+                        .upload(fileName, file.buffer, {
+                            contentType: file.mimetype,
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (uploadError) {
+                        throw new Error('Error al subir el archivo de soporte a Supabase: ' + uploadError.message);
+                    }
+
+                    // Obtenemos la URL pública
+                    const { data: publicUrlData } = supabase.storage
+                        .from('uploads')
+                        .getPublicUrl(fileName);
+                    
+                    if (!publicUrlData) {
+                        throw new Error('No se pudo obtener la URL pública de Supabase para el archivo de soporte.');
+                    }
+                    
+                    fileUrls.push(publicUrlData.publicUrl);
+                }
             }
+            
+
+            ticketData.files = fileUrls;
+
             await supportRepository.addSupportTicket(ticketData);
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
@@ -73,6 +111,7 @@ class SupportController {
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };
+
 
     // Crea un nuevo ticket (SIN ARCHIVOS, desde JSON)
     static createTicketNoFiles = async (req, res) => {

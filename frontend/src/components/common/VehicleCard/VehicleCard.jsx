@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
-import './VehicleCard.css';
-import apiClient from '../../../api/axiosConfig';
+import './VehicleCard.css'
 
 const VehicleCard = ({ vehicle }) => {
     
-    const apiBaseURL = apiClient.defaults.baseURL;
-    const imageUrl = vehicle.thumbnail
-        ? `${apiBaseURL}/uploads/${vehicle.thumbnail}`
-        : '/images/default-vehicle.png';
-    
+    const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
+        ? vehicle.thumbnail[0] 
+        : '/images/default-vehicle.png'; 
+
+
     return (
         <div className="card-s">
             <div className="face front">

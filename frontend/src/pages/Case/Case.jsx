@@ -14,7 +14,6 @@ const Case = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const apiBaseURL = apiClient.defaults.baseURL;
 
     useEffect(() => {
         const fetchTicket = async () => {
@@ -122,10 +121,11 @@ const Case = () => {
                             <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
                                 {/* 2. Mapeamos 'archivos', 'fileObj' es un objeto */}
                                 {ticket.archivos.map((fileObj) => (
-                                    // 3. Usamos 'fileObj.url_archivo'
-                                    <a href={`${apiBaseURL}/uploads/${fileObj.url_archivo}`} target="_blank" rel="noopener noreferrer" key={fileObj.id}> {/* 4. Usamos 'fileObj.id' como key */}
+                                    
+                                    // 3. Usamos 'fileObj.url_archivo' (que ahora será la URL de Supabase)
+                                    <a href={fileObj.url_archivo} target="_blank" rel="noopener noreferrer" key={fileObj.id}> {/* 4. Usamos 'fileObj.id' como key */}
                                         <img
-                                            src={`${apiBaseURL}/uploads/${fileObj.url_archivo}`} 
+                                            src={fileObj.url_archivo} 
                                             alt={`Imagen del caso ${fileObj.id}`}
                                             style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
                                         />
