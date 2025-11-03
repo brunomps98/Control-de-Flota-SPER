@@ -22,17 +22,17 @@ jobs:
             backend/package-lock.json
 
       # --- SECCIÓN DE FRONTEND ---
-      - name: 🧪 (Frontend) Instalar dependencias
+      - name:  (Frontend) Instalar dependencias
         run: npm install --prefix frontend
 
-      - name: 🧪 (Frontend) Ejecutar tests
+      - name:  (Frontend) Ejecutar tests
         run: npm test --prefix frontend
 
       # --- SECCIÓN DE BACKEND ---
-      - name: 🐘 (Backend) Instalar dependencias
+      - name:  (Backend) Instalar dependencias
         run: npm install --prefix backend
       
-      - name: 🐘 (Backend) Ejecutar tests
+      - name:  (Backend) Ejecutar tests
         run: npm test --prefix backend
         env: 
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
