@@ -48,7 +48,7 @@ describe('SupportController', () => {
     let mockResponse;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.clearAllMocks(); // Limpia los mocks entre tests
 
         mockRequest = {
             body: {},
@@ -63,7 +63,6 @@ describe('SupportController', () => {
         };
     });
 
-    // ... (el resto de tus tests 'describe' está perfecto) ...
     describe('getTickets', () => {
         it('debería obtener todos los tickets y responder 200', async () => {
             const mockData = [{ id: 's1', name: 'Test Ticket' }];
@@ -113,7 +112,7 @@ describe('SupportController', () => {
             await SupportController.createTicket(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Ahora esto funcionará
             expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',

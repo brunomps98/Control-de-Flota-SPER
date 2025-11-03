@@ -51,7 +51,7 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.clearAllMocks(); // Limpia los mocks entre tests
         mockRequest = {
             body: {},
             params: {},
@@ -87,7 +87,7 @@ describe('VehicleDao (Controller)', () => {
             // 3. Aserción
             // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Ahora esto funcionará
             expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
 
             // Verificamos que se llamó al repositorio con los datos combinados
@@ -121,7 +121,7 @@ describe('VehicleDao (Controller)', () => {
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             mockRequest.query = { page: '2', limit: '10' };
             const mockResult = {
-                docs: [{ id: 'v1', dominio: 'ABC1J23' }],
+                docs: [{ id: 'v1', dominio: 'ABC123' }],
                 page: 2,
                 limit: 10,
                 hasPrevPage: true,
