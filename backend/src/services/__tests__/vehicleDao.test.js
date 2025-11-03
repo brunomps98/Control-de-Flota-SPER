@@ -2,7 +2,6 @@
 
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 // 2. Mockear el repositorio

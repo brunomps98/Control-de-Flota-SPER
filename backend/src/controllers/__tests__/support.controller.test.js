@@ -2,7 +2,6 @@
 
 import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 // 2. Mockear el repositorio
