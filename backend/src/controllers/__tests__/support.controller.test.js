@@ -38,7 +38,7 @@ jest.mock('path', () => ({
 // --- IMPORTS DESPUÉS ---
 import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js'; // <-- 4. RE-AÑADIDO
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 
@@ -63,7 +63,7 @@ describe('SupportController', () => {
         };
     });
 
-    // ... (getTickets, getTicketById - sin cambios) ...
+    // ... (el resto de tus tests 'describe' está perfecto) ...
     describe('getTickets', () => {
         it('debería obtener todos los tickets y responder 200', async () => {
             const mockData = [{ id: 's1', name: 'Test Ticket' }];
@@ -100,10 +100,8 @@ describe('SupportController', () => {
         });
     });
 
-    // --- Tests para createTicket (API con FormData) ---
     describe('createTicket (con archivos)', () => {
         it('debería crear un ticket con archivos, subirlos a Supabase y responder 201', async () => {
-            // 1. Simulación
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
@@ -112,16 +110,11 @@ describe('SupportController', () => {
             }];
             supportRepository.addSupportTicket.mockResolvedValue({});
 
-            // 2. Ejecución
             await SupportController.createTicket(mockRequest, mockResponse);
 
-            // 3. Aserción
-            // Verificamos que se llamó a Supabase
-            expect(supabase.storage.from).toHaveBeenCalledWith('uploads'); // <-- 5. Ahora 'supabase' está definido
+            expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
             expect(mockSupabaseStorage.upload).toHaveBeenCalled();
             expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
-
-            // Verificamos que el repositorio fue llamado con la URL de Supabase
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
@@ -132,7 +125,6 @@ describe('SupportController', () => {
         });
     });
     
-    // ... (createTicketNoFiles, deleteTicket - sin cambios) ...
     describe('createTicketNoFiles (sin archivos)', () => {
         it('debería crear un ticket con un array de archivos vacío y responder 201', async () => {
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };

@@ -41,7 +41,7 @@ jest.mock('path', () => ({
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js'; // <-- 4. RE-AÑADIDO
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 
@@ -86,7 +86,7 @@ describe('VehicleDao (Controller)', () => {
 
             // 3. Aserción
             // Verificamos que se llamó a Supabase
-            expect(supabase.storage.from).toHaveBeenCalledWith('uploads'); // <-- 5. Ahora 'supabase' está definido
+            expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
             expect(mockSupabaseStorage.upload).toHaveBeenCalled();
             expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
 
@@ -121,7 +121,7 @@ describe('VehicleDao (Controller)', () => {
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             mockRequest.query = { page: '2', limit: '10' };
             const mockResult = {
-                docs: [{ id: 'v1', dominio: 'ABC123' }],
+                docs: [{ id: 'v1', dominio: 'ABC1J23' }],
                 page: 2,
                 limit: 10,
                 hasPrevPage: true,
