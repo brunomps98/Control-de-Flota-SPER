@@ -1,7 +1,7 @@
 // vehicleDao.test.js (CORREGIDO)
 
 // --- MOCKS PRIMERO ---
-// 1. Mockear el repositorio
+jest.mock('../../config/supabaseClient.js'); // <-- 1. USA EL MOCK GLOBAL
 jest.mock('../../repository/index.js', () => ({
     vehicleDao: {
         addVehicle: jest.fn(),
@@ -15,19 +15,16 @@ jest.mock('../../repository/index.js', () => ({
         getKilometrajesForVehicle: jest.fn(),
     }
 }));
-
-// 2. Mockear 'path'
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
-// (El mock de supabaseClient.js ya no es necesario aquí)
 // --- FIN DE MOCKS ---
 
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-// Importamos 'supabase' y la variable '__mockSupabaseStorage' desde el mock global
+// 2. Importamos las variables desde el MOCK GLOBAL
 import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
 import path from 'path';
 
@@ -74,7 +71,6 @@ describe('VehicleDao (Controller)', () => {
             // 3. Aserción
             // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            // Usamos la variable importada del mock para la aserción
             expect(__mockSupabaseStorage.upload).toHaveBeenCalled();
             expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
 
