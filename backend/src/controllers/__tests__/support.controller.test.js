@@ -1,39 +1,65 @@
-// support.controller.test.js (CORREGIDO Y REORDENADO)
+// support.controller.test.js (CORRECCIÓN DEFINITIVA)
 
-// --- MOCKS PRIMERO ---
-jest.mock('../../config/supabaseClient.js'); // <-- USA EL MOCK GLOBAL
-jest.mock('../../repository/index.js', () => ({
-    vehicleDao: {}, // Mockeamos los otros DAOs para que no den error
-    userDao: {},
-    supportRepository: { // Mockeamos solo lo que necesitamos
-        getAllSupportTickets: jest.fn(),
-        getSupportTicketById: jest.fn(),
-        addSupportTicket: jest.fn(),
-        deleteSupportTicket: jest.fn(),
+// 1. Definimos los mocks
+const mockSupabaseStorage = {
+    upload: jest.fn().mockResolvedValue({ error: null }),
+    getPublicUrl: jest.fn().mockReturnValue({
+        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
+    })
+};
+
+const mockSupportRepository = {
+    getAllSupportTickets: jest.fn(),
+    getSupportTicketById: jest.fn(),
+    addSupportTicket: jest.fn(),
+    deleteSupportTicket: jest.fn(),
+};
+
+// 2. Mockeamos las rutas de los archivos ANTES de importarlos
+jest.mock('../../config/supabaseClient.js', () => ({
+    supabase: {
+        storage: {
+            from: jest.fn(() => mockSupabaseStorage)
+        }
     }
+}));
+jest.mock('../../repository/index.js', () => ({
+    supportRepository: mockSupportRepository
 }));
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
-// --- FIN DE MOCKS ---
 
-// --- IMPORTS DESPUÉS ---
-import SupportController from '../support.controller.js'; // <-- Importamos el controlador correcto
+
+// 3. Importamos los módulos DESPUÉS de los mocks
+import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
-// Importamos 'supabase' y la variable '__mockSupabaseStorage' desde el MOCK GLOBAL
-import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
-
 // --- TESTS ---
-describe('SupportController', () => { // <-- Nombre del describe corregido
+describe('SupportController', () => {
     let mockRequest;
     let mockResponse;
 
     beforeEach(() => {
-        // Resetea todos los mocks a su estado original antes de cada test
+        // Resetea todos los mocks
         jest.restoreAllMocks(); 
+        
+        // Re-configura los mocks base para cada test
+        // (Esto es por si un test los modifica)
+        supportRepository.addSupportTicket.mockResolvedValue({});
+        supportRepository.getAllSupportTickets.mockResolvedValue([]);
+        supportRepository.getSupportTicketById.mockResolvedValue(null);
+        supportRepository.deleteSupportTicket.mockResolvedValue(true);
+        
+        mockSupabaseStorage.upload.mockResolvedValue({ error: null });
+        mockSupabaseStorage.getPublicUrl.mockReturnValue({
+             data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
+        });
+        
+        // Reinicia los objetos req/res
         mockRequest = { body: {}, params: {}, files: [], user: {} };
         mockResponse = {
             status: jest.fn(() => mockResponse),
@@ -67,7 +93,6 @@ describe('SupportController', () => { // <-- Nombre del describe corregido
 
     describe('createTicket (con archivos)', () => {
         it('debería crear un ticket con archivos, subirlos a Supabase y responder 201', async () => {
-            supportRepository.addSupportTicket.mockResolvedValue({});
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
@@ -78,13 +103,12 @@ describe('SupportController', () => { // <-- Nombre del describe corregido
             await SupportController.createTicket(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(__mockSupabaseStorage.upload).toHaveBeenCalled(); 
-            expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); 
+            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
-                // La URL debe coincidir con la que pusimos en el mock global
-                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
+                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto.jpg'] 
             });
             expect(mockResponse.status).toHaveBeenCalledWith(201);
             expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Ticket de soporte creado con éxito.' });
@@ -93,7 +117,6 @@ describe('SupportController', () => { // <-- Nombre del describe corregido
     
     describe('createTicketNoFiles (sin archivos)', () => {
         it('debería crear un ticket con un array de archivos vacío y responder 201', async () => {
-            supportRepository.addSupportTicket.mockResolvedValue({});
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
             await SupportController.createTicketNoFiles(mockRequest, mockResponse);
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
@@ -107,7 +130,6 @@ describe('SupportController', () => { // <-- Nombre del describe corregido
     
     describe('deleteTicket', () => {
         it('debería eliminar un ticket y responder 200', async () => {
-            supportRepository.deleteSupportTicket.mockResolvedValue(true);
             mockRequest.params = { pid: 's1' };
             await SupportController.deleteTicket(mockRequest, mockResponse);
             expect(supportRepository.deleteSupportTicket).toHaveBeenCalledWith('s1');

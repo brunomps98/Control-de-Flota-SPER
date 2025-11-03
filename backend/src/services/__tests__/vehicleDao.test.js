@@ -1,19 +1,34 @@
-// vehicleDao.test.js (CORREGIDO Y REORDENADO)
+// vehicleDao.test.js (CORRECCIÓN DEFINITIVA)
 
 // --- MOCKS PRIMERO ---
-jest.mock('../../config/supabaseClient.js'); // <-- USA EL MOCK GLOBAL
-jest.mock('../../repository/index.js', () => ({
-    vehicleDao: {
-        addVehicle: jest.fn(),
-        getVehicles: jest.fn(),
-        getVehicleById: jest.fn(),
-        updateVehicle: jest.fn(),
-        deleteVehicle: jest.fn(),
-        deleteLastHistoryEntry: jest.fn(),
-        deleteOneHistoryEntry: jest.fn(),
-        deleteAllHistory: jest.fn(),
-        getKilometrajesForVehicle: jest.fn(),
+const mockSupabaseStorage = {
+    upload: jest.fn().mockResolvedValue({ error: null }),
+    getPublicUrl: jest.fn().mockReturnValue({
+        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
+    })
+};
+
+const mockVehicleDao = {
+    addVehicle: jest.fn(),
+    getVehicles: jest.fn(),
+    getVehicleById: jest.fn(),
+    updateVehicle: jest.fn(),
+    deleteVehicle: jest.fn(),
+    deleteLastHistoryEntry: jest.fn(),
+    deleteOneHistoryEntry: jest.fn(),
+    deleteAllHistory: jest.fn(),
+    getKilometrajesForVehicle: jest.fn(),
+};
+
+jest.mock('../../config/supabaseClient.js', () => ({
+    supabase: {
+        storage: {
+            from: jest.fn(() => mockSupabaseStorage)
+        }
     }
+}));
+jest.mock('../../repository/index.js', () => ({
+    vehicleDao: mockVehicleDao
 }));
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
@@ -24,8 +39,7 @@ jest.mock('path', () => ({
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-// Importamos las variables desde el MOCK GLOBAL
-import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 
@@ -35,8 +49,20 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        // Resetea todos los mocks a su estado original antes de cada test
+        // Resetea todos los mocks
         jest.restoreAllMocks(); 
+        
+        // Re-configura los mocks base
+        vehicleDao.addVehicle.mockResolvedValue({ id: 'v1', dominio: 'ABC123' });
+        vehicleDao.getVehicles.mockResolvedValue({ docs: [] });
+        vehicleDao.getKilometrajesForVehicle.mockResolvedValue([]);
+
+        mockSupabaseStorage.upload.mockResolvedValue({ error: null });
+        mockSupabaseStorage.getPublicUrl.mockReturnValue({
+             data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
+        });
+
+        // Reinicia req/res
         mockRequest = {
             body: {},
             params: {},
@@ -68,12 +94,11 @@ describe('VehicleDao (Controller)', () => {
             await VehicleDao.addVehicle(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(__mockSupabaseStorage.upload).toHaveBeenCalled();
-            expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled();
+            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
                 modelo: 'Test',
-                // La URL debe coincidir con la que pusimos en el mock global
                 thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
             });
             expect(mockResponse.status).toHaveBeenCalledWith(201);
@@ -99,6 +124,7 @@ describe('VehicleDao (Controller)', () => {
 
     // --- Tests para vehicle (renderView) ---
     describe('vehicle (renderView)', () => {
+        // Este es el test que fallaba por el '1img'
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             const mockResult = {
                 docs: [{ id: 'v1', dominio: 'ABC123' }],
@@ -109,15 +135,18 @@ describe('VehicleDao (Controller)', () => {
                 hasNextPage: false
             };
             vehicleDao.getVehicles.mockResolvedValue(mockResult);
-            mockRequest.query = { page: '2', limit: '10' }; // <-- CORREGIDO DE '1img' A '10'
+            mockRequest.query = { page: '2', limit: '10' };
             
             await VehicleDao.vehicle(mockRequest, mockResponse);
             
+            // Verificamos que se llame con los parámetros correctos
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
-                limit: '10', // <-- CORREGIDO DE '1img' A '10'
+                limit: '10', // <-- CORREGIDO
                 user: mockRequest.user
             });
+            
+            // Verificamos que se renderice con los datos correctos
             expect(mockResponse.render).toHaveBeenCalledWith('vehicle', {
                 ...mockResult,
                 user: mockRequest.user,
