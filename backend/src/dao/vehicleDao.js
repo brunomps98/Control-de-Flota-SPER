@@ -1,12 +1,13 @@
 import { vehicleDao } from "../repository/index.js";
+import { supabase } from '../config/supabaseClient.js'; 
+import path from 'path'; 
 
-// Función auxiliar para renderizar vistas
+
 const renderVehicleView = async (req, res, viewName) => {
     try {
         const query = { ...req.query, user: req.user };
         const result = await vehicleDao.getVehicles(query);
         
-        // Creamos los links de paginación
         const createLink = (page) => {
             const params = new URLSearchParams(req.query);
             params.set('page', page);
@@ -23,7 +24,7 @@ const renderVehicleView = async (req, res, viewName) => {
     }
 };
 
-// Función auxiliar para obtener 1 vehículo
+
 const getVehicleByIdHelper = async (req, res, renderView) => {
     try {
         const id = req.params.cid || req.params.productId;
@@ -33,16 +34,15 @@ const getVehicleByIdHelper = async (req, res, renderView) => {
             return res.status(404).json({ status: 'error', error: 'product not found' });
         }
         
-        // Convertimos la instancia de Sequelize a un objeto plano
         const vehicle = vehicleInstance.get({ plain: true });
         
-        // Recreamos la lógica de 'lastIndex' para la vista
         const lastIndexS = (vehicle.services?.length || 0) - 1;
         const lastIndexR = (vehicle.rodados?.length || 0) - 1;
         const lastIndexK = (vehicle.kilometrajes?.length || 0) - 1;
         const lastIndexD = (vehicle.descripciones?.length || 0) - 1;
         const lastIndexT = (vehicle.destinos?.length || 0) - 1;
-        const allImages = vehicle.thumbnails || [];
+        
+        const allImages = vehicle.thumbnail || []; 
         
         if (renderView) {
             res.render(renderView, { 
@@ -64,10 +64,47 @@ class VehicleDao {
     static addVehicle = async (req, res) => {
         try {
             const { ...productData } = req.body;
-            const thumbnail = req.files ? req.files.map(file => file.filename) : [];
-            
-            const product = { ...productData, thumbnail };
+            let thumbnailUrls = []; // Usaremos un array para las URLs públicas
 
+            if (req.files && req.files.length > 0) {
+                console.log(`Subiendo ${req.files.length} archivos a Supabase...`);
+
+                for (const file of req.files) {
+                    // Creamos un nombre de archivo único
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                    const extension = path.extname(file.originalname);
+                    const fileName = `thumbnail-${uniqueSuffix}${extension}`;
+
+                    // Subimos el archivo (que está en memoria/buffer) a Supabase
+                    const { error: uploadError } = await supabase.storage
+                        .from('uploads') 
+                        .upload(fileName, file.buffer, {
+                            contentType: file.mimetype,
+                            cacheControl: '3600',
+                            upsert: false
+                        });
+
+                    if (uploadError) {
+                        throw new Error('Error al subir el archivo a Supabase: ' + uploadError.message);
+                    }
+
+                    // Obtenemos la URL pública de la imagen que acabamos de subir
+                    const { data: publicUrlData } = supabase.storage
+                        .from('uploads')
+                        .getPublicUrl(fileName);
+                    
+                    if (!publicUrlData) {
+                        throw new Error('No se pudo obtener la URL pública de Supabase.');
+                    }
+                    
+                    thumbnailUrls.push(publicUrlData.publicUrl);
+                }
+            }
+
+            // Creamos el objeto final del producto con las URLs de Supabase
+            const product = { ...productData, thumbnail: thumbnailUrls };
+
+            // Llamamos al repositorio para guardar en la base de datos
             const newProduct = await vehicleDao.addVehicle(product);
 
             if (newProduct instanceof Error) {
@@ -80,17 +117,14 @@ class VehicleDao {
             res.status(500).json({ message: "Error interno del servidor", error: error.message });
         }
     }
-    // Combinamos addVehicleWithImage y addVehicleNoImage en una sola
     static addVehicleWithImage = this.addVehicle;
     static addVehicleNoImage = this.addVehicle;
 
-    // --- LECTURA (VISTAS DE 1 VEHÍCULO) ---
     static vehicleDetail = (req, res) => getVehicleByIdHelper(req, res, 'vehicleDetail');
     static vehicleInformation = (req, res) => getVehicleByIdHelper(req, res, 'vehicleInformation');
     static edditVehicle = (req, res) => getVehicleByIdHelper(req, res, 'edditVehicle');
     static getVehicleById = (req, res) => getVehicleByIdHelper(req, res, null); 
 
-    // --- LECTURA (VISTAS DE LISTA/PAGINADAS) ---
     static vehicle = (req, res) => renderVehicleView(req, res, 'vehicle');
     static vehicleGeneral = (req, res) => renderVehicleView(req, res, 'vehicleGeneral');
     static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle'); 
@@ -110,7 +144,6 @@ class VehicleDao {
             const id = req.params.productId;
             const body = req.body;
             
-            // La lógica $set/$push ahora está en el service
             const updatedVehicle = await vehicleDao.updateVehicle(id, body);
 
             if (updatedVehicle instanceof Error) throw updatedVehicle;
@@ -125,7 +158,6 @@ class VehicleDao {
         }
     }
     
-    // --- BORRADO ---
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid || req.params.cid;
@@ -139,7 +171,6 @@ class VehicleDao {
         }
     }
 
-    // --- BORRADO DE HISTORIAL ($pop) ---
     static deleteLastHistoryEntry = async (req, res) => {
         try {
             const { vid, fieldName } = req.params;

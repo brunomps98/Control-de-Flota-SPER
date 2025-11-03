@@ -16,8 +16,6 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(__dirname + "/public"));
-
 // Parsear FRONT_URL robustamente (corta espacios, ignora cadenas vacías)
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
