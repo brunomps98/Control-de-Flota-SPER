@@ -1,35 +1,36 @@
 // vehicleDao.test.js (CORRECCIÓN DEFINITIVA)
 
 // --- MOCKS PRIMERO ---
-const mockSupabaseStorage = {
-    upload: jest.fn().mockResolvedValue({ error: null }),
-    getPublicUrl: jest.fn().mockReturnValue({
-        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
-    })
-};
-
-const mockVehicleDao = {
-    addVehicle: jest.fn(),
-    getVehicles: jest.fn(),
-    getVehicleById: jest.fn(),
-    updateVehicle: jest.fn(),
-    deleteVehicle: jest.fn(),
-    deleteLastHistoryEntry: jest.fn(),
-    deleteOneHistoryEntry: jest.fn(),
-    deleteAllHistory: jest.fn(),
-    getKilometrajesForVehicle: jest.fn(),
-};
-
+// 1. Mockea Supabase (implementación inline)
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
-            from: jest.fn(() => mockSupabaseStorage)
+            from: jest.fn(() => ({
+                upload: jest.fn().mockResolvedValue({ error: null }),
+                getPublicUrl: jest.fn().mockReturnValue({
+                    data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
+                })
+            }))
         }
     }
 }));
+
+// 2. Mockea el Repositorio (implementación inline)
 jest.mock('../../repository/index.js', () => ({
-    vehicleDao: mockVehicleDao
+    vehicleDao: {
+        addVehicle: jest.fn(),
+        getVehicles: jest.fn(),
+        getVehicleById: jest.fn(),
+        updateVehicle: jest.fn(),
+        deleteVehicle: jest.fn(),
+        deleteLastHistoryEntry: jest.fn(),
+        deleteOneHistoryEntry: jest.fn(),
+        deleteAllHistory: jest.fn(),
+        getKilometrajesForVehicle: jest.fn(),
+    }
 }));
+
+// 3. Mockea Path
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
@@ -49,19 +50,22 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        // Resetea todos los mocks
+        // Resetea TODOS los mocks (incluyendo implementaciones) antes de cada test
         jest.restoreAllMocks(); 
         
-        // Re-configura los mocks base
-        vehicleDao.addVehicle.mockResolvedValue({ id: 'v1', dominio: 'ABC123' });
+        // Re-configura los mocks base para cada test
+        const mockSupabaseStorage = {
+            upload: jest.fn().mockResolvedValue({ error: null }),
+            getPublicUrl: jest.fn().mockReturnValue({
+                data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
+            })
+        };
+        supabase.storage.from.mockReturnValue(mockSupabaseStorage);
+
+        vehicleDao.addVehicle.mockResolvedValue({ id: 'v1' });
         vehicleDao.getVehicles.mockResolvedValue({ docs: [] });
         vehicleDao.getKilometrajesForVehicle.mockResolvedValue([]);
-
-        mockSupabaseStorage.upload.mockResolvedValue({ error: null });
-        mockSupabaseStorage.getPublicUrl.mockReturnValue({
-             data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
-        });
-
+        
         // Reinicia req/res
         mockRequest = {
             body: {},
@@ -94,8 +98,9 @@ describe('VehicleDao (Controller)', () => {
             await VehicleDao.addVehicle(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled();
-            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled(); // <-- Ahora funcionará
+            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled(); // <-- Ahora funcionará
+
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
                 modelo: 'Test',
@@ -110,7 +115,7 @@ describe('VehicleDao (Controller)', () => {
 
         it('debería manejar errores del repositorio y responder 500', async () => {
             const error = new Error('Error de base de datos');
-            vehicleDao.addVehicle.mockRejectedValue(error);
+            vehicleDao.addVehicle.mockRejectedValue(error); // Este mock se aplica solo a este test
             
             await VehicleDao.addVehicle(mockRequest, mockResponse);
             
@@ -124,7 +129,6 @@ describe('VehicleDao (Controller)', () => {
 
     // --- Tests para vehicle (renderView) ---
     describe('vehicle (renderView)', () => {
-        // Este es el test que fallaba por el '1img'
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             const mockResult = {
                 docs: [{ id: 'v1', dominio: 'ABC123' }],
@@ -142,7 +146,7 @@ describe('VehicleDao (Controller)', () => {
             // Verificamos que se llame con los parámetros correctos
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
-                limit: '10', // <-- CORREGIDO
+                limit: '10', // <-- CORREGIDO (de '1img')
                 user: mockRequest.user
             });
             

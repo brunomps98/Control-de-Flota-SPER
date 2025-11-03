@@ -1,42 +1,45 @@
 // support.controller.test.js (CORRECCIÓN DEFINITIVA)
 
-// 1. Definimos los mocks
-const mockSupabaseStorage = {
-    upload: jest.fn().mockResolvedValue({ error: null }),
-    getPublicUrl: jest.fn().mockReturnValue({
-        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
-    })
-};
-
-const mockSupportRepository = {
-    getAllSupportTickets: jest.fn(),
-    getSupportTicketById: jest.fn(),
-    addSupportTicket: jest.fn(),
-    deleteSupportTicket: jest.fn(),
-};
-
-// 2. Mockeamos las rutas de los archivos ANTES de importarlos
+// --- MOCKS PRIMERO ---
+// 1. Mockea Supabase (implementación inline)
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
-            from: jest.fn(() => mockSupabaseStorage)
+            from: jest.fn(() => ({
+                upload: jest.fn().mockResolvedValue({ error: null }),
+                getPublicUrl: jest.fn().mockReturnValue({
+                    data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
+                })
+            }))
         }
     }
 }));
+
+// 2. Mockea el Repositorio (implementación inline)
 jest.mock('../../repository/index.js', () => ({
-    supportRepository: mockSupportRepository
+    vehicleDao: {},
+    userDao: {},
+    supportRepository: {
+        getAllSupportTickets: jest.fn(),
+        getSupportTicketById: jest.fn(),
+        addSupportTicket: jest.fn(),
+        deleteSupportTicket: jest.fn(),
+    }
 }));
+
+// 3. Mockea Path
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
+// --- FIN DE MOCKS ---
 
-
-// 3. Importamos los módulos DESPUÉS de los mocks
+// --- IMPORTS DESPUÉS ---
 import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
 import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
+
 
 // --- TESTS ---
 describe('SupportController', () => {
@@ -44,22 +47,24 @@ describe('SupportController', () => {
     let mockResponse;
 
     beforeEach(() => {
-        // Resetea todos los mocks
+        // Resetea TODOS los mocks (incluyendo implementaciones) antes de cada test
         jest.restoreAllMocks(); 
+
+        // Reconfigura el mock de 'from' CADA VEZ
+        // Esto es crucial para que 'upload' y 'getPublicUrl' existan en cada test
+        supabase.storage.from.mockReturnValue({
+            upload: jest.fn().mockResolvedValue({ error: null }),
+            getPublicUrl: jest.fn().mockReturnValue({
+                data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
+            })
+        });
         
-        // Re-configura los mocks base para cada test
-        // (Esto es por si un test los modifica)
+        // Configura el resto de mocks de repositorio
         supportRepository.addSupportTicket.mockResolvedValue({});
         supportRepository.getAllSupportTickets.mockResolvedValue([]);
         supportRepository.getSupportTicketById.mockResolvedValue(null);
         supportRepository.deleteSupportTicket.mockResolvedValue(true);
-        
-        mockSupabaseStorage.upload.mockResolvedValue({ error: null });
-        mockSupabaseStorage.getPublicUrl.mockReturnValue({
-             data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
-        });
-        
-        // Reinicia los objetos req/res
+
         mockRequest = { body: {}, params: {}, files: [], user: {} };
         mockResponse = {
             status: jest.fn(() => mockResponse),
@@ -103,8 +108,8 @@ describe('SupportController', () => {
             await SupportController.createTicket(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); 
-            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled(); 
+            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled();
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
