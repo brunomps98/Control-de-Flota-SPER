@@ -68,6 +68,10 @@ app.options('*', cors(corsOptions)); // Asegurar preflight
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => {
+    res.status(200).send('Server is live and healthy!');
+});
+
 app.use("/api", dbRouter);
 
 export default app;
