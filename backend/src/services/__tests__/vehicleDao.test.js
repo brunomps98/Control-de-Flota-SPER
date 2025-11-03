@@ -1,7 +1,7 @@
-// vehicleDao.test.js (CORREGIDO)
+// vehicleDao.test.js (REESCRITO Y CORREGIDO)
 
 // --- MOCKS PRIMERO ---
-jest.mock('../../config/supabaseClient.js'); // <-- 1. USA EL MOCK GLOBAL
+jest.mock('../../config/supabaseClient.js'); // Usa el mock global
 jest.mock('../../repository/index.js', () => ({
     vehicleDao: {
         addVehicle: jest.fn(),
@@ -24,7 +24,6 @@ jest.mock('path', () => ({
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-// 2. Importamos las variables desde el MOCK GLOBAL
 import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
 import path from 'path';
 
@@ -35,7 +34,11 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        // --- CORRECCIÓN CLAVE ---
+        // Resetea todos los mocks a su estado original antes de cada test
+        jest.restoreAllMocks(); 
+        // --- FIN CORRECCIÓN ---
+
         mockRequest = {
             body: {},
             params: {},
@@ -54,33 +57,27 @@ describe('VehicleDao (Controller)', () => {
     describe('addVehicle', () => {
 
         it('debería crear un vehículo con imágenes, subirlas a Supabase y responder 201', async () => {
-            // 1. Simulación
+            // Re-configuramos el mock para este test
+            const mockNewVehicle = { id: 'v1', dominio: 'ABC123', thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] };
+            vehicleDao.addVehicle.mockResolvedValue(mockNewVehicle);
+            
             mockRequest.body = { dominio: 'ABC123', modelo: 'Test' };
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
                 originalname: 'foto1.jpg',
                 mimetype: 'image/jpeg'
             }];
-            const mockNewVehicle = { id: 'v1', dominio: 'ABC123', thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] };
-            
-            vehicleDao.addVehicle.mockResolvedValue(mockNewVehicle);
 
-            // 2. Ejecución
             await VehicleDao.addVehicle(mockRequest, mockResponse);
 
-            // 3. Aserción
-            // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
             expect(__mockSupabaseStorage.upload).toHaveBeenCalled();
             expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
-
-            // Verificamos que se llamó al repositorio con los datos combinados
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
                 modelo: 'Test',
                 thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
             });
-            
             expect(mockResponse.status).toHaveBeenCalledWith(201);
             expect(mockResponse.json).toHaveBeenCalledWith({
                 message: "Vehículo creado con éxito",
@@ -91,7 +88,9 @@ describe('VehicleDao (Controller)', () => {
         it('debería manejar errores del repositorio y responder 500', async () => {
             const error = new Error('Error de base de datos');
             vehicleDao.addVehicle.mockRejectedValue(error);
+            
             await VehicleDao.addVehicle(mockRequest, mockResponse);
+            
             expect(mockResponse.status).toHaveBeenCalledWith(500);
             expect(mockResponse.json).toHaveBeenCalledWith({
                 message: "Error interno del servidor",
@@ -103,7 +102,6 @@ describe('VehicleDao (Controller)', () => {
     // ... (El resto de tus tests: vehicle, getKilometrajes - sin cambios) ...
     describe('vehicle (renderView)', () => {
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
-            mockRequest.query = { page: '2', limit: '10' };
             const mockResult = {
                 docs: [{ id: 'v1', dominio: 'ABC123' }],
                 page: 2,
@@ -113,7 +111,11 @@ describe('VehicleDao (Controller)', () => {
                 hasNextPage: false
             };
             vehicleDao.getVehicles.mockResolvedValue(mockResult);
+
+            mockRequest.query = { page: '2', limit: '10' };
+            
             await VehicleDao.vehicle(mockRequest, mockResponse);
+            
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
                 limit: '10',
@@ -130,10 +132,12 @@ describe('VehicleDao (Controller)', () => {
     
     describe('getKilometrajes', () => {
         it('debería obtener el historial y responder 200', async () => {
-            mockRequest.params = { cid: 'v1' };
             const mockHistory = [{ id: 'k1', kilometraje: 10000 }];
             vehicleDao.getKilometrajesForVehicle.mockResolvedValue(mockHistory);
+            mockRequest.params = { cid: 'v1' };
+
             await VehicleDao.getKilometrajes(mockRequest, mockResponse);
+
             expect(vehicleDao.getKilometrajesForVehicle).toHaveBeenCalledWith('v1');
             expect(mockResponse.status).toHaveBeenCalledWith(200);
             expect(mockResponse.json).toHaveBeenCalledWith({ history: mockHistory });
