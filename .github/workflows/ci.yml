@@ -39,3 +39,4 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          ALLOW_UNDEFINED_ORIGIN: ${{ secrets.ALLOW_UNDEFINED_ORIGIN }}
