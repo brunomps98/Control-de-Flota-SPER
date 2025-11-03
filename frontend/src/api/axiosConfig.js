@@ -5,7 +5,7 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 
 const platform = Capacitor.getPlatform();
 const baseURL = platform === 'android' 
-    ? 'http://10.0.2.2:8080' 
+    ? 'https://control-de-flota-backend.onrender.com' 
     : import.meta.env.VITE_API_URL;
 
 console.log('API baseURL selected:', baseURL);
