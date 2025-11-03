@@ -38,14 +38,14 @@ export default class VehicleManager {
                     model: Destino,
                     as: 'destinos',
                     where: { descripcion: { [Op.iLike]: `%${destino}%` } },
-                    required: true 
+                    required: true
                 });
             }
-           
+
             includeWhere.push({ model: Thumbnail, as: 'thumbnails', required: false });
 
-            
-            console.log("Aplicando filtro:", filter); 
+
+            console.log("Aplicando filtro:", filter);
 
             // Consulta con paginación y filtros
             const { count, rows } = await Vehiculo.findAndCountAll({
@@ -58,23 +58,27 @@ export default class VehicleManager {
 
             console.log(`Query encontró ${count} vehículos.`);
 
-             const totalPages = Math.ceil(count / limit);
-             const docs = rows.map(product => {
-                 const plainProduct = product.get({ plain: true });
-                 const firstThumbnail = plainProduct.thumbnails && plainProduct.thumbnails.length > 0
-                                      ? plainProduct.thumbnails[0].url_imagen
-                                      : null;
-                 return {
-                     ...plainProduct,
-                     thumbnail: firstThumbnail
-                 };
-             });
+            // --- CÓDIGO NUEVO (CORRECTO) ---
+            const totalPages = Math.ceil(count / limit);
+            const docs = rows.map(product => {
+                const plainProduct = product.get({ plain: true });
 
-             return {
-                 docs, totalDocs: count, limit: parseInt(limit), page: parseInt(page),
-                 totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages,
-                 prevPage: page > 1 ? page - 1 : null, nextPage: page < totalPages ? page + 1 : null,
-             };
+                // Extraemos TODAS las URLs de Supabase, no solo la primera
+                const thumbnailUrls = plainProduct.thumbnails
+                    ? plainProduct.thumbnails.map(t => t.url_imagen)
+                    : []; 
+
+                return {
+                    ...plainProduct,
+                    thumbnail: thumbnailUrls // <-- Ahora 'thumbnail' es un ARRAY de URLs
+                };
+            });
+
+            return {
+                docs, totalDocs: count, limit: parseInt(limit), page: parseInt(page),
+                totalPages, hasPrevPage: page > 1, hasNextPage: page < totalPages,
+                prevPage: page > 1 ? page - 1 : null, nextPage: page < totalPages ? page + 1 : null,
+            };
 
 
         } catch (err) {
@@ -83,7 +87,7 @@ export default class VehicleManager {
         }
     }
 
-getVehicleById = async (id) => {
+    getVehicleById = async (id) => {
         try {
             return await Vehiculo.findByPk(id, {
                 include: [
@@ -95,7 +99,7 @@ getVehicleById = async (id) => {
         }
     }
 
-addVehicle = async (product) => {
+    addVehicle = async (product) => {
         const t = await sequelize.transaction();
         try {
             const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
@@ -103,9 +107,9 @@ addVehicle = async (product) => {
             // 2. Creamos el Vehículo
             const newVehicle = await Vehiculo.create({
                 title, dominio, anio, modelo, tipo, chasis, motor, cedula, marca,
-                chofer: usuario 
+                chofer: usuario
             }, { transaction: t });
-            
+
             const vehiculoId = newVehicle.id;
             const createsHijos = [];
 
@@ -116,7 +120,7 @@ addVehicle = async (product) => {
             if (service) createsHijos.push(Service.create({ vehiculo_id: vehiculoId, descripcion: service }, { transaction: t }));
             if (rodado) createsHijos.push(Rodado.create({ vehiculo_id: vehiculoId, descripcion: rodado }, { transaction: t }));
             if (reparaciones) createsHijos.push(Reparacion.create({ vehiculo_id: vehiculoId, descripcion: reparaciones }, { transaction: t }));
-            
+
             if (thumbnail && thumbnail.length > 0) {
                 const imagenesData = thumbnail.map(url => ({ vehiculo_id: vehiculoId, url_imagen: url }));
                 createsHijos.push(Thumbnail.bulkCreate(imagenesData, { transaction: t }));
@@ -124,11 +128,11 @@ addVehicle = async (product) => {
 
             await Promise.all(createsHijos);
             await t.commit();
-            
+
             return newVehicle;
         } catch (err) {
             await t.rollback();
-            throw err; 
+            throw err;
         }
     }
 
@@ -150,14 +154,14 @@ addVehicle = async (product) => {
                         const data = { vehiculo_id: id };
                         if (key === 'kilometros') data.kilometraje = parseInt(updateData[key]);
                         else data.descripcion = updateData[key];
-                        
+
                         if (key === 'kilometros') pushCreates.push(Kilometraje.create(data, { transaction: t }));
                         if (key === 'service') pushCreates.push(Service.create(data, { transaction: t }));
                         if (key === 'rodado') pushCreates.push(Rodado.create(data, { transaction: t }));
                         if (key === 'reparaciones') pushCreates.push(Reparacion.create(data, { transaction: t }));
                         if (key === 'description') pushCreates.push(Descripcion.create(data, { transaction: t }));
                         if (key === 'destino') pushCreates.push(Destino.create(data, { transaction: t }));
-                        
+
                     } else {
                         setFields[key] = updateData[key];
                     }
@@ -173,7 +177,7 @@ addVehicle = async (product) => {
             if (pushCreates.length > 0) {
                 await Promise.all(pushCreates);
             }
-            
+
             await t.commit();
             return vehicle;
 
@@ -205,7 +209,7 @@ addVehicle = async (product) => {
             let model;
             let orderField;
 
-            switch(fieldName) {
+            switch (fieldName) {
                 case 'kilometros': model = Kilometraje; orderField = 'fecha_registro'; break;
                 case 'service': model = Service; orderField = 'fecha_service'; break;
                 case 'rodado': model = Rodado; orderField = 'fecha_rodado'; break;
@@ -222,11 +226,11 @@ addVehicle = async (product) => {
             if (!lastEntry) {
                 throw new Error('No se encontraron registros para eliminar');
             }
-            
+
             await lastEntry.destroy();
             return { success: true, message: `Último registro de ${fieldName} eliminado.` };
-        
-        } catch(err) {
+
+        } catch (err) {
             return err;
         }
     }
@@ -236,7 +240,7 @@ addVehicle = async (product) => {
         try {
             let model;
 
-            switch(fieldName) {
+            switch (fieldName) {
                 case 'kilometrajes': model = Kilometraje; break;
                 case 'services': model = Service; break;
                 case 'rodados': model = Rodado; break;
@@ -253,8 +257,8 @@ addVehicle = async (product) => {
             });
 
             return { success: true, message: `Se eliminaron ${count} registros de ${fieldName}.` };
-        
-        } catch(err) {
+
+        } catch (err) {
             return err;
         }
     }
@@ -262,7 +266,7 @@ addVehicle = async (product) => {
     deleteOneHistoryEntry = async (cid, fieldName, historyId) => {
         try {
             let model;
-            switch(fieldName) {
+            switch (fieldName) {
                 case 'kilometrajes': model = Kilometraje; break;
                 case 'services': model = Service; break;
                 case 'rodados': model = Rodado; break;
@@ -275,9 +279,9 @@ addVehicle = async (product) => {
 
             // Busca la entrada específica por su ID y el ID del vehículo (por seguridad)
             const entry = await model.findOne({
-                where: { 
+                where: {
                     id: historyId,
-                    vehiculo_id: cid 
+                    vehiculo_id: cid
                 }
             });
 
@@ -289,8 +293,8 @@ addVehicle = async (product) => {
             await entry.destroy();
 
             return { success: true, message: `Registro ${historyId} eliminado.` };
-        
-        } catch(err) {
+
+        } catch (err) {
             return err;
         }
     }
