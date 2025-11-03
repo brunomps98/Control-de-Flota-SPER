@@ -13,32 +13,19 @@ jest.mock('../../repository/index.js', () => ({
     }
 }));
 
-// 2. Mockear Supabase (para simular la subida)
-const mockSupabaseStorage = {
-    upload: jest.fn().mockResolvedValue({ error: null }),
-    getPublicUrl: jest.fn().mockReturnValue({
-        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
-    })
-};
-jest.mock('../../config/supabaseClient.js', () => ({
-    supabase: {
-        storage: {
-            from: jest.fn(() => mockSupabaseStorage)
-        }
-    }
-}));
-
-// 3. Mockear 'path'
+// 2. Mockear 'path'
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
+// (El mock de supabaseClient.js ya no es necesario aquí)
 // --- FIN DE MOCKS ---
 
 // --- IMPORTS DESPUÉS ---
 import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js';
+// Importamos 'supabase' y la variable '__mockSupabaseStorage' desde el mock global
+import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
 import path from 'path';
 
 
@@ -48,14 +35,8 @@ describe('SupportController', () => {
     let mockResponse;
 
     beforeEach(() => {
-        jest.clearAllMocks(); // Limpia los mocks entre tests
-
-        mockRequest = {
-            body: {},
-            params: {},
-            files: [], 
-            user: {}
-        };
+        jest.clearAllMocks(); 
+        mockRequest = { body: {}, params: {}, files: [], user: {} };
         mockResponse = {
             status: jest.fn(() => mockResponse),
             json: jest.fn(),
@@ -63,6 +44,7 @@ describe('SupportController', () => {
         };
     });
 
+    // ... (getTickets y getTicketById no cambian) ...
     describe('getTickets', () => {
         it('debería obtener todos los tickets y responder 200', async () => {
             const mockData = [{ id: 's1', name: 'Test Ticket' }];
@@ -79,7 +61,6 @@ describe('SupportController', () => {
             expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Error al obtener los tickets' });
         });
     });
-
     describe('getTicketById', () => {
         it('debería obtener un ticket por ID y responder 200', async () => {
             mockRequest.params = { ticketId: 's1' };
@@ -112,18 +93,22 @@ describe('SupportController', () => {
             await SupportController.createTicket(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Ahora esto funcionará
-            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            // Usamos la variable importada del mock para la aserción
+            expect(__mockSupabaseStorage.upload).toHaveBeenCalled(); 
+            expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            
+            // La URL aquí debe coincidir con la que pusimos en el mock
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
-                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto.jpg'] 
+                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
             });
             expect(mockResponse.status).toHaveBeenCalledWith(201);
             expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Ticket de soporte creado con éxito.' });
         });
     });
     
+    // ... (createTicketNoFiles y deleteTicket no cambian) ...
     describe('createTicketNoFiles (sin archivos)', () => {
         it('debería crear un ticket con un array de archivos vacío y responder 201', async () => {
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
@@ -137,7 +122,6 @@ describe('SupportController', () => {
             expect(mockResponse.status).toHaveBeenCalledWith(201);
         });
     });
-    
     describe('deleteTicket', () => {
         it('debería eliminar un ticket y responder 200', async () => {
             mockRequest.params = { pid: 's1' };
@@ -147,7 +131,6 @@ describe('SupportController', () => {
             expect(mockResponse.status).toHaveBeenCalledWith(200);
             expect(mockResponse.json).toHaveBeenCalledWith({ status: "success", message: "Ticket deleted successfully" });
         });
-        
         it('debería responder 404 si el ticket a eliminar no se encuentra', async () => {
             mockRequest.params = { pid: 's1' };
             supportRepository.deleteSupportTicket.mockResolvedValue(null);

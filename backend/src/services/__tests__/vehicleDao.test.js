@@ -16,32 +16,19 @@ jest.mock('../../repository/index.js', () => ({
     }
 }));
 
-// 2. Mockear Supabase (para simular la subida)
-const mockSupabaseStorage = {
-    upload: jest.fn().mockResolvedValue({ error: null }),
-    getPublicUrl: jest.fn().mockReturnValue({
-        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
-    })
-};
-jest.mock('../../config/supabaseClient.js', () => ({
-    supabase: {
-        storage: {
-            from: jest.fn(() => mockSupabaseStorage)
-        }
-    }
-}));
-
-// 3. Mockear 'path'
+// 2. Mockear 'path'
 jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
+// (El mock de supabaseClient.js ya no es necesario aquí)
 // --- FIN DE MOCKS ---
 
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js';
+// Importamos 'supabase' y la variable '__mockSupabaseStorage' desde el mock global
+import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
 import path from 'path';
 
 
@@ -51,7 +38,7 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        jest.clearAllMocks(); // Limpia los mocks entre tests
+        jest.clearAllMocks();
         mockRequest = {
             body: {},
             params: {},
@@ -87,8 +74,9 @@ describe('VehicleDao (Controller)', () => {
             // 3. Aserción
             // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Ahora esto funcionará
-            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
+            // Usamos la variable importada del mock para la aserción
+            expect(__mockSupabaseStorage.upload).toHaveBeenCalled();
+            expect(__mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
 
             // Verificamos que se llamó al repositorio con los datos combinados
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
