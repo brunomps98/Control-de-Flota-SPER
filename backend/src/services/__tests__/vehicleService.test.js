@@ -119,7 +119,7 @@ describe('VehicleManager Service', () => {
             // Aserción: Verificamos que la paginación y el mapeo de 'thumbnail' funcionen
             expect(result.totalPages).toBe(1);
             expect(result.totalDocs).toBe(1);
-            expect(result.docs[0].thumbnail).toBe('test.jpg');
+            expect(result.docs[0].thumbnail).toEqual(['test.jpg']);
         });
 
     });

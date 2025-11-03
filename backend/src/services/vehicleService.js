@@ -20,12 +20,12 @@ export default class VehicleManager {
             const filter = {}; // Filtros para la tabla 'vehiculos' (where principal)
             const includeWhere = []; // Filtros para tablas relacionadas (include)
 
-            if (user && !user.admin) {
-                // 1. Si el usuario NO es admin, SIEMPRE filtramos por su unidad
-                filter.title = user.unidad;
-            } else if (title) {
-                // 2. Si el usuario ES admin Y SE PASÓ un filtro '?title=', lo aplicamos
+            if (title) {
+                // 1. PRIORIDAD: Si se pasa un 'title' en la URL (desde la Navbar o el filtro), usarlo.
                 filter.title = { [Op.iLike]: `%${title}%` };
+            } else if (user && !user.admin) {
+                // 2. Si NO hay filtro 'title' Y el usuario NO es admin, filtrar por su unidad.
+                filter.title = user.unidad;
             }
 
             if (dominio) filter.dominio = { [Op.iLike]: `%${dominio}%` };
@@ -66,7 +66,7 @@ export default class VehicleManager {
                 // Extraemos TODAS las URLs de Supabase, no solo la primera
                 const thumbnailUrls = plainProduct.thumbnails
                     ? plainProduct.thumbnails.map(t => t.url_imagen)
-                    : []; 
+                    : [];
 
                 return {
                     ...plainProduct,
