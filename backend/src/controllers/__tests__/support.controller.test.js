@@ -2,7 +2,7 @@
 
 import SupportController from '../support.controller.js';
 import { supportRepository } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js'; // <-- 1. Importar Supabase
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 // 2. Mockear el repositorio
@@ -18,23 +18,28 @@ jest.mock('../../repository/index.js', () => ({
 }));
 
 // 3. Mockear Supabase (para simular la subida)
+// --- CÓDIGO CORREGIDO ---
+// Creamos un objeto mock reutilizable
+const mockSupabaseStorage = {
+    upload: jest.fn().mockResolvedValue({ error: null }),
+    getPublicUrl: jest.fn().mockReturnValue({
+        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
+    })
+};
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
-            from: jest.fn(() => ({
-                upload: jest.fn().mockResolvedValue({ error: null }),
-                getPublicUrl: jest.fn().mockReturnValue({
-                    data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto.jpg' }
-                })
-            }))
+            // Hacemos que .from() siempre devuelva nuestro objeto mock
+            from: jest.fn(() => mockSupabaseStorage) 
         }
     }
 }));
+// --- FIN DEL CÓDIGO CORREGIDO ---
 
 // 4. Mockear 'path' (solo la función 'extname')
 jest.mock('path', () => ({
-    ...jest.requireActual('path'), // Importa el resto de 'path'
-    extname: jest.fn(() => '.jpg') // Mockeamos solo extname
+    ...jest.requireActual('path'), 
+    extname: jest.fn(() => '.jpg') 
 }));
 
 
@@ -60,7 +65,6 @@ describe('SupportController', () => {
     });
 
     // ... (getTickets, getTicketById - sin cambios) ...
-    // --- Tests para getTickets (API) ---
     describe('getTickets', () => {
         it('debería obtener todos los tickets y responder 200', async () => {
             const mockData = [{ id: 's1', name: 'Test Ticket' }];
@@ -78,7 +82,6 @@ describe('SupportController', () => {
         });
     });
 
-    // --- Tests para getTicketById (API) ---
     describe('getTicketById', () => {
         it('debería obtener un ticket por ID y responder 200', async () => {
             mockRequest.params = { ticketId: 's1' };
@@ -103,7 +106,7 @@ describe('SupportController', () => {
         it('debería crear un ticket con archivos, subirlos a Supabase y responder 201', async () => {
             // 1. Simulación
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
-            // v--- 5. Mock de req.files CORREGIDO ---v
+            // (Mock de req.files CORREGIDO en la versión que me pasaste)
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
                 originalname: 'foto.jpg',
@@ -117,15 +120,15 @@ describe('SupportController', () => {
             // 3. Aserción
             // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled();
-            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Usamos la variable del mock
+            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled(); // Usamos la variable del mock
 
             // Verificamos que el repositorio fue llamado con la URL de Supabase
-            // v--- 6. Aserción CORREGIDA ---v
+            // (Aserción CORREGIDA en la versión que me pasaste)
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
-                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto.jpg'] // Esperamos la URL mockeada
+                files: ['https://mock.supabase.co/storage/v1/public/uploads/foto.jpg'] 
             });
             expect(mockResponse.status).toHaveBeenCalledWith(201);
             expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Ticket de soporte creado con éxito.' });
@@ -133,7 +136,6 @@ describe('SupportController', () => {
     });
     
     // ... (createTicketNoFiles, deleteTicket - sin cambios) ...
-    // --- Tests para createTicketNoFiles (API con JSON) ---
     describe('createTicketNoFiles (sin archivos)', () => {
         it('debería crear un ticket con un array de archivos vacío y responder 201', async () => {
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
@@ -148,7 +150,6 @@ describe('SupportController', () => {
         });
     });
     
-    // --- Tests para deleteTicket (API) ---
     describe('deleteTicket', () => {
         it('debería eliminar un ticket y responder 200', async () => {
             mockRequest.params = { pid: 's1' };

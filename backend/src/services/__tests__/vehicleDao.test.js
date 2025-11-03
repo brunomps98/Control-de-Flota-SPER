@@ -2,7 +2,7 @@
 
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
-import { supabase } from '../../config/supabaseClient.js'; // <-- 1. Importar Supabase
+import { supabase } from '../../config/supabaseClient.js';
 import path from 'path';
 
 // 2. Mockear el repositorio
@@ -21,23 +21,28 @@ jest.mock('../../repository/index.js', () => ({
 }));
 
 // 3. Mockear Supabase (para simular la subida)
+// --- CÓDIGO CORREGIDO ---
+// Creamos un objeto mock reutilizable
+const mockSupabaseStorage = {
+    upload: jest.fn().mockResolvedValue({ error: null }),
+    getPublicUrl: jest.fn().mockReturnValue({
+        data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
+    })
+};
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
-            from: jest.fn(() => ({
-                upload: jest.fn().mockResolvedValue({ error: null }),
-                getPublicUrl: jest.fn().mockReturnValue({
-                    data: { publicUrl: 'https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg' }
-                })
-            }))
+            // Hacemos que .from() siempre devuelva nuestro objeto mock
+            from: jest.fn(() => mockSupabaseStorage) 
         }
     }
 }));
+// --- FIN DEL CÓDIGO CORREGIDO ---
 
 // 4. Mockear 'path' (solo la función 'extname')
 jest.mock('path', () => ({
-    ...jest.requireActual('path'), // Importa el resto de 'path'
-    extname: jest.fn(() => '.jpg') // Mockeamos solo extname
+    ...jest.requireActual('path'), 
+    extname: jest.fn(() => '.jpg') 
 }));
 
 // --- TESTS ---
@@ -67,7 +72,7 @@ describe('VehicleDao (Controller)', () => {
         it('debería crear un vehículo con imágenes, subirlas a Supabase y responder 201', async () => {
             // 1. Simulación
             mockRequest.body = { dominio: 'ABC123', modelo: 'Test' };
-            // v--- 5. Mock de req.files CORREGIDO ---v
+            // (Mock de req.files CORREGIDO en la versión que me pasaste)
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
                 originalname: 'foto1.jpg',
@@ -83,15 +88,15 @@ describe('VehicleDao (Controller)', () => {
             // 3. Aserción
             // Verificamos que se llamó a Supabase
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled();
-            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled();
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Usamos la variable del mock
+            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled(); // Usamos la variable del mock
 
             // Verificamos que se llamó al repositorio con los datos combinados
-            // v--- 6. Aserción CORREGIDA ---v
+            // (Aserción CORREGIDA en la versión que me pasaste)
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
                 modelo: 'Test',
-                thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] // Esperamos la URL mockeada
+                thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
             });
             
             expect(mockResponse.status).toHaveBeenCalledWith(201);
@@ -114,7 +119,6 @@ describe('VehicleDao (Controller)', () => {
     });
 
     // ... (El resto de tus tests: vehicle, getKilometrajes - sin cambios) ...
-    // --- Tests para renderVehicleView (ej: VehicleDao.vehicle) ---
     describe('vehicle (renderView)', () => {
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             mockRequest.query = { page: '2', limit: '10' };
@@ -142,7 +146,6 @@ describe('VehicleDao (Controller)', () => {
         });
     });
     
-    // --- Tests para getVehicleHistory (ej: getKilometrajes) ---
     describe('getKilometrajes', () => {
         it('debería obtener el historial y responder 200', async () => {
             mockRequest.params = { cid: 'v1' };
