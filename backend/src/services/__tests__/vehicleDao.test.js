@@ -1,4 +1,4 @@
-// vehicleDao.test.js (CORREGIDO)
+// vehicleDao.test.js (CORREGIDO Y REORDENADO)
 
 // --- MOCKS PRIMERO ---
 jest.mock('../../config/supabaseClient.js'); // <-- USA EL MOCK GLOBAL
@@ -97,7 +97,7 @@ describe('VehicleDao (Controller)', () => {
         });
     });
 
-    // ... (El resto de tus tests: vehicle, getKilometrajes - sin cambios) ...
+    // --- Tests para vehicle (renderView) ---
     describe('vehicle (renderView)', () => {
         it('debería obtener vehículos y renderizar la vista "vehicle"', async () => {
             const mockResult = {
@@ -109,13 +109,13 @@ describe('VehicleDao (Controller)', () => {
                 hasNextPage: false
             };
             vehicleDao.getVehicles.mockResolvedValue(mockResult);
-            mockRequest.query = { page: '2', limit: '10' };
+            mockRequest.query = { page: '2', limit: '10' }; // <-- CORREGIDO DE '1img' A '10'
             
             await VehicleDao.vehicle(mockRequest, mockResponse);
             
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
-                limit: '1img',
+                limit: '10', // <-- CORREGIDO DE '1img' A '10'
                 user: mockRequest.user
             });
             expect(mockResponse.render).toHaveBeenCalledWith('vehicle', {
@@ -127,6 +127,7 @@ describe('VehicleDao (Controller)', () => {
         });
     });
     
+    // --- Tests para getKilometrajes ---
     describe('getKilometrajes', () => {
         it('debería obtener el historial y responder 200', async () => {
             const mockHistory = [{ id: 'k1', kilometraje: 10000 }];
