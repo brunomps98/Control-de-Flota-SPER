@@ -13,26 +13,33 @@ const Vehicle = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
+    // El estado de los filtros ahora se inicializa vacío
     const [filters, setFilters] = useState({
-        dominio: searchParams.get('dominio') || '',
-        modelo: searchParams.get('modelo') || '',
-        destino: searchParams.get('destino') || '',
-        marca: searchParams.get('marca') || '',
-        año: searchParams.get('año') || '',
-        tipo: searchParams.get('tipo') || '',
-        title: searchParams.get('title') || ''
+        dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
     // --- EFECTOS ---
 
-    // Efecto para el Toast de Bienvenida (Tu implementación correcta)
+    // Efecto para el Toast de Bienvenida
     useEffect(() => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
-            // Limpia el estado para que el toast no vuelva a aparecer
             navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location, navigate]);
+
+    useEffect(() => {
+        setFilters({
+            dominio: searchParams.get('dominio') || '',
+            modelo: searchParams.get('modelo') || '',
+            destino: searchParams.get('destino') || '',
+            marca: searchParams.get('marca') || '',
+            año: searchParams.get('año') || '',
+            tipo: searchParams.get('tipo') || '',
+            title: searchParams.get('title') || ''
+        });
+    }, [searchParams]);
+    // --- FIN DEL NUEVO EFECTO ---
 
     // Efecto para cargar vehículos (Depende de searchParams)
     useEffect(() => {
@@ -40,6 +47,7 @@ const Vehicle = () => {
             setLoading(true);
             setError(null);
             try {
+                // 'searchParams' es la única fuente de verdad para la API
                 const response = await apiClient.get('/api/vehicles', {
                     params: Object.fromEntries(searchParams)
                 });
@@ -52,28 +60,40 @@ const Vehicle = () => {
             }
         };
         fetchVehicles();
-    }, [searchParams]); // <-- Se ejecuta cada vez que los parámetros de la URL cambian
+    }, [searchParams]);
 
-    // Efecto para Debouncing de filtros (Tu implementación correcta)
+    // Efecto para Debouncing de filtros (ESTADO -> URL)
     useEffect(() => {
-        // Establece un temporizador
-        const timer = setTimeout(() => {
-            // Crea los parámetros de búsqueda solo desde los filtros que tienen valor
-            const query = {};
-            for (const key in filters) {
-                if (filters[key]) query[key] = filters[key];
-            }
-            setSearchParams(query);
-        }, 400); // Espera 400ms después de la última pulsación de tecla
 
-        // Limpia el temporizador si el usuario sigue escribiendo
+        const timer = setTimeout(() => {
+            const query = {};
+            let paramsChanged = false; // Flag para evitar bucles
+            
+            for (const key in filters) {
+                const urlValue = searchParams.get(key) || '';
+                if (filters[key] !== urlValue) {
+                    paramsChanged = true;
+                }
+                if (filters[key]) {
+                    query[key] = filters[key];
+                }
+            }
+
+            // Solo actualizamos la URL si los filtros realmente cambiaron
+            // O si los filtros están vacíos (limpiando)
+            if (paramsChanged || Object.keys(query).length === 0) {
+                 setSearchParams(query);
+            }
+           
+        }, 400); 
+
         return () => clearTimeout(timer);
         
-    }, [filters, setSearchParams]); // Se ejecuta cada vez que 'filters' cambia
+    }, [filters, setSearchParams, searchParams]); 
 
     
-    // --- MANEJADORES DE EVENTOS (Handlers) ---
 
+    // Este handler ahora solo actualiza el estado 'filters'
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -81,7 +101,7 @@ const Vehicle = () => {
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        // Forzamos la actualización de searchParams inmediatamente (lo que disparará el useEffect de fetch)
+        // Forzamos la actualización de searchParams inmediatamente
         const query = {};
         for (const key in filters) {
             if (filters[key]) query[key] = filters[key];
@@ -93,7 +113,6 @@ const Vehicle = () => {
         setFilters({
             dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
         });
-        // setSearchParams({}) disparará el useEffect de debounce/fetch
     };
 
     // --- RENDERIZADO ---
@@ -104,6 +123,8 @@ const Vehicle = () => {
             </div>
 
             <form className="filter-container" onSubmit={handleFilterSubmit}>
+                {/* Ahora los campos de texto reflejarán el estado 'filters'
+                    que está sincronizado con la URL */}
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} />
