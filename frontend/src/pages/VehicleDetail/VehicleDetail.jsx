@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './VehicleDetail.css'; 
+import './VehicleDetail.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
@@ -25,12 +25,12 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                     <tr key={item.id}>
                         <td>{item[fieldName]}</td>
                         {fieldName === 'descripcion' && <td>{new Date(item.created_at || item.fecha_registro || item.fecha_service || item.fecha_reparacion || item.fecha_destino || item.fecha_rodado).toLocaleDateString()}</td>}
-                        {fieldName === 'kilometraje' && null }
-                        {fieldName !== 'descripcion' && fieldName !== 'kilometraje' && <td>{new Date(item[`fecha_${fieldName.replace('es','').replace('s','')}`] || item.created_at).toLocaleDateString()}</td>}
-                        
+                        {fieldName === 'kilometraje' && null}
+                        {fieldName !== 'descripcion' && fieldName !== 'kilometraje' && <td>{new Date(item[`fecha_${fieldName.replace('es', '').replace('s', '')}`] || item.created_at).toLocaleDateString()}</td>}
+
                         <td>
-                            <button 
-                                className="delete-history-btn-small" 
+                            <button
+                                className="delete-history-btn-small"
                                 onClick={() => onDelete(item.id, historyType)}
                                 title="Eliminar este registro"
                             >
@@ -49,7 +49,7 @@ const VehicleDetail = () => {
     // --- ESTADOS ---
     const { cid } = useParams();
     const navigate = useNavigate();
-    const [vehicle, setVehicle] = useState(null); 
+    const [vehicle, setVehicle] = useState(null);
     const [loadingVehicle, setLoadingVehicle] = useState(true);
     const [errorVehicle, setErrorVehicle] = useState(null);
 
@@ -98,17 +98,17 @@ const VehicleDetail = () => {
             title: '¿Estás seguro?',
             text: "¡Vas a eliminar este vehículo! No podrás revertir esto.",
             icon: 'warning',
-             showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
-        }).then(async (result) => { 
+            showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                setErrorVehicle(null); 
+                setErrorVehicle(null);
                 try {
                     await apiClient.delete(`/api/vehicle/${cid}`);
                     MySwal.fire('¡Eliminado!', 'El vehículo ha sido eliminado.', 'success')
-                          .then(() => navigate('/vehicle'));
+                        .then(() => navigate('/vehicle'));
                 } catch (err) {
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el vehículo.';
-                    setErrorVehicle(errorMessage); 
+                    setErrorVehicle(errorMessage);
                     MySwal.fire('Error', `No se pudo eliminar el vehículo: ${errorMessage}`, 'error');
                 }
             }
@@ -116,16 +116,16 @@ const VehicleDetail = () => {
     };
 
 
-     const handleDeleteAllHistory = (historyType) => { 
+    const handleDeleteAllHistory = (historyType) => {
         MySwal.fire({
             title: '¿Estás seguro?',
             text: `Vas a eliminar TODO el historial de "${historyType}". ¡No podrás revertir esto!`,
             icon: 'warning',
 
-        }).then(async (result) => { 
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                const stateSetter = eval(`set${historyType.charAt(0).toUpperCase() + historyType.slice(1)}`); 
-                stateSetter(prev => ({...prev, error: null}));
+                const stateSetter = eval(`set${historyType.charAt(0).toUpperCase() + historyType.slice(1)}`);
+                stateSetter(prev => ({ ...prev, error: null }));
 
                 try {
                     await apiClient.delete(`/api/vehicle/${cid}/history/all/${historyType}`);
@@ -152,9 +152,9 @@ const VehicleDetail = () => {
 
                 try {
                     await apiClient.delete(`/api/vehicle/${cid}/history/${historyType}/${historyId}`);
-                    
+
                     MySwal.fire('¡Eliminado!', 'El registro ha sido eliminado.', 'success');
-                    
+
                     // Refrescamos la lista de historial
                     fetchHistory(historyType, stateSetter);
 
@@ -174,9 +174,9 @@ const VehicleDetail = () => {
     if (!vehicle) return <p>No se encontró el vehículo.</p>;
 
     // Lógica de imagen 
-    const mainImageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
-        ? vehicle.thumbnail[0]
-        : '/images/default-vehicle.png';
+    const mainImageUrl = (vehicle.thumbnails && Array.isArray(vehicle.thumbnails) && vehicle.thumbnails.length > 0)
+        ? vehicle.thumbnails[0].url_imagen // <-- Extraemos la URL del objeto
+        : ""; // Dejamos un string vacío si no hay imagen
 
     return (
         <>
@@ -192,7 +192,7 @@ const VehicleDetail = () => {
                             <img src={mainImageUrl} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                         </div>
                         <div className="vehicle-info-p">
-                            <p>ESTABLECIMIENTO: {vehicle.title}</p> 
+                            <p>ESTABLECIMIENTO: {vehicle.title}</p>
                             <p>CHOFER: {vehicle.chofer || 'Sin asignar'}</p>
                             <p>AÑO: {vehicle.anio}</p>
                             <p>MARCA: {vehicle.marca}</p>
@@ -219,7 +219,7 @@ const VehicleDetail = () => {
                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('kilometrajes', setKilometrajes)}>Ver Historial</button>
                         )}
                         {kilometrajes.loaded && (
-                             <HistorySection
+                            <HistorySection
                                 title="Kilometraje"
                                 historyData={kilometrajes.data}
                                 loading={kilometrajes.loading}
@@ -228,7 +228,7 @@ const VehicleDetail = () => {
                                 unit="km"
                                 vehicleId={cid}
                                 historyType="kilometrajes"
-                                onDelete={handleDeleteOneHistoryEntry} 
+                                onDelete={handleDeleteOneHistoryEntry}
                             />
                         )}
                     </div>
@@ -247,15 +247,15 @@ const VehicleDetail = () => {
                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('services', setServices)}>Ver Historial</button>
                         )}
                         {services.loaded && (
-                             <HistorySection
+                            <HistorySection
                                 title="Services"
                                 historyData={services.data}
                                 loading={services.loading}
                                 error={services.error}
-                                fieldName="descripcion" 
+                                fieldName="descripcion"
                                 vehicleId={cid}
                                 historyType="services"
-                                onDelete={handleDeleteOneHistoryEntry} 
+                                onDelete={handleDeleteOneHistoryEntry}
                             />
                         )}
                     </div>
@@ -271,10 +271,10 @@ const VehicleDetail = () => {
                             )}
                         </div>
                         {!reparaciones.loaded && !reparaciones.loading && (
-                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('reparaciones', setReparaciones)}>Ver Historial</button>
+                            <button className="action-btn btn-secondary" onClick={() => fetchHistory('reparaciones', setReparaciones)}>Ver Historial</button>
                         )}
                         {reparaciones.loaded && (
-                             <HistorySection
+                            <HistorySection
                                 title="Reparaciones"
                                 historyData={reparaciones.data}
                                 loading={reparaciones.loading}
@@ -282,7 +282,7 @@ const VehicleDetail = () => {
                                 fieldName="descripcion"
                                 vehicleId={cid}
                                 historyType="reparaciones"
-                                onDelete={handleDeleteOneHistoryEntry} 
+                                onDelete={handleDeleteOneHistoryEntry}
                             />
                         )}
                     </div>
@@ -297,11 +297,11 @@ const VehicleDetail = () => {
                                 </button>
                             )}
                         </div>
-                         {!destinos.loaded && !destinos.loading && (
-                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('destinos', setDestinos)}>Ver Historial</button>
+                        {!destinos.loaded && !destinos.loading && (
+                            <button className="action-btn btn-secondary" onClick={() => fetchHistory('destinos', setDestinos)}>Ver Historial</button>
                         )}
-                         {destinos.loaded && (
-                             <HistorySection
+                        {destinos.loaded && (
+                            <HistorySection
                                 title="Destinos"
                                 historyData={destinos.data}
                                 loading={destinos.loading}
@@ -309,13 +309,13 @@ const VehicleDetail = () => {
                                 fieldName="descripcion"
                                 vehicleId={cid}
                                 historyType="destinos"
-                                onDelete={handleDeleteOneHistoryEntry} 
+                                onDelete={handleDeleteOneHistoryEntry}
                             />
                         )}
                     </div>
 
                     {/* --- Rodados --- */}
-                     <div className="history-section">
+                    <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Rodados</h3>
                             {rodados.loaded && rodados.data && rodados.data.length > 0 && (
@@ -325,10 +325,10 @@ const VehicleDetail = () => {
                             )}
                         </div>
                         {!rodados.loaded && !rodados.loading && (
-                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('rodados', setRodados)}>Ver Historial</button>
+                            <button className="action-btn btn-secondary" onClick={() => fetchHistory('rodados', setRodados)}>Ver Historial</button>
                         )}
-                         {rodados.loaded && (
-                             <HistorySection
+                        {rodados.loaded && (
+                            <HistorySection
                                 title="Rodados"
                                 historyData={rodados.data}
                                 loading={rodados.loading}
@@ -336,13 +336,13 @@ const VehicleDetail = () => {
                                 fieldName="descripcion"
                                 vehicleId={cid}
                                 historyType="rodados"
-                                onDelete={handleDeleteOneHistoryEntry} 
+                                onDelete={handleDeleteOneHistoryEntry}
                             />
                         )}
                     </div>
 
                     {/* --- Descripciones --- */}
-                     <div className="history-section">
+                    <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Descripciones</h3>
                             {descripciones.loaded && descripciones.data && descripciones.data.length > 0 && (
@@ -351,11 +351,11 @@ const VehicleDetail = () => {
                                 </button>
                             )}
                         </div>
-                         {!descripciones.loaded && !descripciones.loading && (
-                             <button className="action-btn btn-secondary" onClick={() => fetchHistory('descripciones', setDescripciones)}>Ver Historial</button>
-                         )}
-                         {descripciones.loaded && (
-                             <HistorySection
+                        {!descripciones.loaded && !descripciones.loading && (
+                            <button className="action-btn btn-secondary" onClick={() => fetchHistory('descripciones', setDescripciones)}>Ver Historial</button>
+                        )}
+                        {descripciones.loaded && (
+                            <HistorySection
                                 title="Descripciones"
                                 historyData={descripciones.data}
                                 loading={descripciones.loading}
@@ -365,19 +365,19 @@ const VehicleDetail = () => {
                                 historyType="descripciones"
                                 onDelete={handleDeleteOneHistoryEntry}
                             />
-                         )}
+                        )}
                     </div>
 
                     {/* --- IMÁGENES ADICIONALES  --- */}
                     <div className="image-description-p">
                         <h4 className="h4-p">IMÁGENES ADICIONALES:</h4>
                         <div className="img-div">
-                            {vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.slice(1).map((imageUrl, index) => (
-                                <img 
-                                    className="img-p" 
-                                    src={imageUrl} 
-                                    alt={`Imagen adicional ${index + 1}`} 
-                                    key={index}
+                            {vehicle.thumbnails && Array.isArray(vehicle.thumbnails) && vehicle.thumbnails.slice(1).map((imgObj, index) => (
+                                <img
+                                    className="img-p"
+                                    src={imgObj.url_imagen}
+                                    alt={`Imagen adicional ${index + 1}`}
+                                    key={imgObj.id || index}
                                 />
                             ))}
                         </div>
