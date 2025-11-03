@@ -1,6 +1,5 @@
 name: Pruebas de CI (Frontend y Backend)
 
-# 1. Se ejecuta en cualquier push o pull request
 on:
   push:
   pull_request:
@@ -35,3 +34,8 @@ jobs:
       
       - name: 🐘 (Backend) Ejecutar tests
         run: npm test --prefix backend
+        env: 
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
