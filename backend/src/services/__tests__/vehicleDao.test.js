@@ -1,7 +1,7 @@
-// vehicleDao.test.js (REESCRITO Y CORREGIDO)
+// vehicleDao.test.js (CORREGIDO)
 
 // --- MOCKS PRIMERO ---
-jest.mock('../../config/supabaseClient.js'); // Usa el mock global
+jest.mock('../../config/supabaseClient.js'); // <-- USA EL MOCK GLOBAL
 jest.mock('../../repository/index.js', () => ({
     vehicleDao: {
         addVehicle: jest.fn(),
@@ -24,6 +24,7 @@ jest.mock('path', () => ({
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
 import { vehicleDao } from '../../repository/index.js';
+// Importamos las variables desde el MOCK GLOBAL
 import { supabase, __mockSupabaseStorage } from '../../config/supabaseClient.js';
 import path from 'path';
 
@@ -34,11 +35,8 @@ describe('VehicleDao (Controller)', () => {
     let mockResponse;
 
     beforeEach(() => {
-        // --- CORRECCIÓN CLAVE ---
         // Resetea todos los mocks a su estado original antes de cada test
         jest.restoreAllMocks(); 
-        // --- FIN CORRECCIÓN ---
-
         mockRequest = {
             body: {},
             params: {},
@@ -57,7 +55,6 @@ describe('VehicleDao (Controller)', () => {
     describe('addVehicle', () => {
 
         it('debería crear un vehículo con imágenes, subirlas a Supabase y responder 201', async () => {
-            // Re-configuramos el mock para este test
             const mockNewVehicle = { id: 'v1', dominio: 'ABC123', thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] };
             vehicleDao.addVehicle.mockResolvedValue(mockNewVehicle);
             
@@ -76,6 +73,7 @@ describe('VehicleDao (Controller)', () => {
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
                 modelo: 'Test',
+                // La URL debe coincidir con la que pusimos en el mock global
                 thumbnail: ['https://mock.supabase.co/storage/v1/public/uploads/foto1.jpg'] 
             });
             expect(mockResponse.status).toHaveBeenCalledWith(201);
@@ -111,14 +109,13 @@ describe('VehicleDao (Controller)', () => {
                 hasNextPage: false
             };
             vehicleDao.getVehicles.mockResolvedValue(mockResult);
-
             mockRequest.query = { page: '2', limit: '10' };
             
             await VehicleDao.vehicle(mockRequest, mockResponse);
             
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
-                limit: '10',
+                limit: '1img',
                 user: mockRequest.user
             });
             expect(mockResponse.render).toHaveBeenCalledWith('vehicle', {
