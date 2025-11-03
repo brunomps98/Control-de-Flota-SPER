@@ -1,10 +1,7 @@
 // support.controller.test.js (CORREGIDO)
 
-import SupportController from '../support.controller.js';
-import { supportRepository } from '../../repository/index.js';
-import path from 'path';
-
-// 2. Mockear el repositorio
+// --- MOCKS PRIMERO ---
+// 1. Mockear el repositorio
 jest.mock('../../repository/index.js', () => ({
     vehicleDao: {},
     userDao: {},
@@ -16,9 +13,7 @@ jest.mock('../../repository/index.js', () => ({
     }
 }));
 
-// 3. Mockear Supabase (para simular la subida)
-// --- CÓDIGO CORREGIDO ---
-// Creamos un objeto mock reutilizable
+// 2. Mockear Supabase (para simular la subida)
 const mockSupabaseStorage = {
     upload: jest.fn().mockResolvedValue({ error: null }),
     getPublicUrl: jest.fn().mockReturnValue({
@@ -28,18 +23,23 @@ const mockSupabaseStorage = {
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
-            // Hacemos que .from() siempre devuelva nuestro objeto mock
-            from: jest.fn(() => mockSupabaseStorage) 
+            from: jest.fn(() => mockSupabaseStorage)
         }
     }
 }));
-// --- FIN DEL CÓDIGO CORREGIDO ---
 
-// 4. Mockear 'path' (solo la función 'extname')
+// 3. Mockear 'path'
 jest.mock('path', () => ({
-    ...jest.requireActual('path'), 
-    extname: jest.fn(() => '.jpg') 
+    ...jest.requireActual('path'),
+    extname: jest.fn(() => '.jpg')
 }));
+// --- FIN DE MOCKS ---
+
+// --- IMPORTS DESPUÉS ---
+import SupportController from '../support.controller.js';
+import { supportRepository } from '../../repository/index.js';
+import { supabase } from '../../config/supabaseClient.js'; // <-- 4. RE-AÑADIDO
+import path from 'path';
 
 
 // --- TESTS ---
@@ -105,7 +105,6 @@ describe('SupportController', () => {
         it('debería crear un ticket con archivos, subirlos a Supabase y responder 201', async () => {
             // 1. Simulación
             mockRequest.body = { name: 'Bruno', email: 'test@test.com' };
-            // (Mock de req.files CORREGIDO en la versión que me pasaste)
             mockRequest.files = [{
                 buffer: Buffer.from('test file data'),
                 originalname: 'foto.jpg',
@@ -118,12 +117,11 @@ describe('SupportController', () => {
 
             // 3. Aserción
             // Verificamos que se llamó a Supabase
-            expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(mockSupabaseStorage.upload).toHaveBeenCalled(); // Usamos la variable del mock
-            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled(); // Usamos la variable del mock
+            expect(supabase.storage.from).toHaveBeenCalledWith('uploads'); // <-- 5. Ahora 'supabase' está definido
+            expect(mockSupabaseStorage.upload).toHaveBeenCalled();
+            expect(mockSupabaseStorage.getPublicUrl).toHaveBeenCalled();
 
             // Verificamos que el repositorio fue llamado con la URL de Supabase
-            // (Aserción CORREGIDA en la versión que me pasaste)
             expect(supportRepository.addSupportTicket).toHaveBeenCalledWith({
                 name: 'Bruno',
                 email: 'test@test.com',
