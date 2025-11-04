@@ -1,4 +1,4 @@
-/* --- ESTILOS DEL HEADER DE SOPORTE (Tu CSS Original) --- */
+/* --- ESTILOS DEL HEADER DE SOPORTE --- */
     .top-bar-support {
         background-color: #24303c;
         color: white;
@@ -29,23 +29,22 @@
         color: #ffffff;
     }
 
-    /* --- ESTILOS DEL BOTÓN (NUEVO) --- */
     .support-actions-container {
         width: 100%;
         display: flex;
-        justify-content: flex-end; /* Lo alinea a la derecha */
-        padding: 0 30px; /* Padding para que coincida con el header */
+        justify-content: flex-end; 
+        padding: 0 30px; 
         box-sizing: border-box;
-        margin-top: 20px; /* Espacio desde el header */
+        margin-top: 20px; 
     }
 
     .btn-view-tickets-alt {
         display: inline-block;
         padding: 12px 24px;
-        font-size: 1rem; /* Un poco más chico que el del form */
+        font-size: 1rem;
         font-weight: bold;
         color: white;
-        background-color: #009688; /* Color verde de tu home.css */
+        background-color: #009688; 
         border: none;
         border-radius: 25px;
         text-decoration: none;
@@ -56,13 +55,12 @@
     .btn-view-tickets-alt:hover {
         background-color: #007a6e;
     }
-    /* --- FIN DE ESTILOS DEL BOTÓN --- */
 
 
     /* --- TÍTULO PRINCIPAL "SOPORTE" --- */
     .support-title {
         text-align: center;
-        margin-top: 10px; /* Reducido para estar más cerca del botón */
+        margin-top: 10px; 
     }
 
     /* --- CLASES DEL FORMULARIO --- */
@@ -125,7 +123,7 @@
 
         /* Responsive para el botón "Ver Casos" */
         .support-actions-container {
-            padding: 0 20px; /* Menos padding en mobile */
+            padding: 0 20px; 
         }
 
         .btn-view-tickets-alt {
