@@ -1,4 +1,3 @@
-// frontend/src/pages/Support/__tests__/Support.test.jsx
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEventLib from '@testing-library/user-event';
@@ -8,7 +7,6 @@ import Support from '../Support';
 import apiClient from '../../../api/axiosConfig';
 import { toast } from 'react-toastify';
 
-// ... (Mocks sin cambios) ...
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
@@ -32,7 +30,6 @@ describe('Componente Support', () => {
         jest.clearAllMocks();
     });
 
-    // ... (TEST 1, 2, 3 sin cambios) ...
         it('debería renderizar el formulario de soporte correctamente', () => {
         render(
             <BrowserRouter>
@@ -94,7 +91,6 @@ describe('Componente Support', () => {
         await user.type(nameInput, 'Texto a borrar');
         await user.type(emailInput, 'email@borrar.com');
         await user.type(descriptionInput, 'Descripción a borrar');
-        // Simular selección de archivo (aunque no podamos verificar el estado fácilmente)
         const fakeFile = new File(['dummy'], 'test.png', { type: 'image/png' });
         await user.upload(fileInput, fakeFile);
 
@@ -107,12 +103,11 @@ describe('Componente Support', () => {
         expect(descriptionInput).toHaveValue('');
         // Verificamos que el valor del input de archivo se reseteó
         expect(fileInput.files.length).toBe(0);
-        // Opcional: Verificar que el *value* del input de archivo es vacío
         expect(fileInput).toHaveValue('');
     });
 
 
-    // --- TEST 4: Submit Exitoso (Sin Archivos) - CORREGIDO ---
+    // --- TEST 4: Submit Exitoso (Sin Archivos)  ---
     it('debería enviar datos (sin archivos), mostrar toast de éxito y limpiar formulario', async () => {
         const mockResponse = { data: { message: 'Caso enviado con éxito (sin archivos)' } };
         apiClient.post.mockResolvedValue(mockResponse);
@@ -157,7 +152,7 @@ describe('Componente Support', () => {
         expect(descriptionInput).toHaveValue('');
     });
 
-    // --- TEST 5: Submit Exitoso (Con Archivos) - CORREGIDO ---
+    // --- TEST 5: Submit Exitoso (Con Archivos)  ---
     it('debería enviar datos (con archivos) como FormData, mostrar toast y limpiar', async () => {
         const mockResponse = { data: { message: 'Caso enviado con éxito (con archivos)' } };
         apiClient.post.mockResolvedValue(mockResponse);
@@ -211,7 +206,7 @@ describe('Componente Support', () => {
         expect(fileInput.files.length).toBe(0);
     });
 
-    // --- TEST 6: Submit Fallido (Sin cambios, ya llenaba los campos) ---
+    // --- TEST 6: Submit Fallido  ---
     it('debería mostrar un toast de error si el envío falla', async () => {
         const errorMessage = 'Error del servidor al guardar';
         apiClient.post.mockRejectedValue({

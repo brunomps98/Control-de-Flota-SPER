@@ -13,7 +13,6 @@ const RealTimeVehicle = () => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // --- useEffect CORREGIDO ---
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -45,7 +44,6 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []); // El array vacío asegura que solo se ejecute al montar
 
-    // --- (handleChange - Sin cambios) ---
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -54,12 +52,10 @@ const RealTimeVehicle = () => {
         }));
     };
 
-    // --- (handleSubmit - Sin cambios respecto a la versión anterior simplificada) ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Validar que se haya seleccionado un establecimiento
         if (!formData.title) {
             toast.error('Por favor, seleccione un establecimiento.');
             setIsSubmitting(false);
@@ -132,7 +128,6 @@ const RealTimeVehicle = () => {
                     <div className="name-desc">
                         <div className="name-product">
                             <p>Establecimiento (Título de la Tarjeta)</p>
-                            {/* --- SELECT CORREGIDO --- */}
                             <select
                                 className="controls"
                                 name="title"
@@ -140,7 +135,6 @@ const RealTimeVehicle = () => {
                                 onChange={handleChange}
                                 required
                             >
-                                {/* Añadimos la opción inicial vacía */}
                                 <option value="">-- Seleccione Establecimiento --</option>
                                 <option value="Direccion General">Dirección General</option>
                                 <option value="Unidad Penal 1">Unidad Penal 1</option>
@@ -154,9 +148,7 @@ const RealTimeVehicle = () => {
                                 <option value="Instituto">Instituto</option>
                                 <option value="Tratamiento">Tratamiento</option>
                             </select>
-                            {/* ------------------------ */}
                         </div>
-                        {/* ... (resto del formulario sin cambios) ... */}
                         <div className="desc-product">
                             <p>Descripción de estado de Vehículo</p>
                             <input className="controls" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
@@ -182,8 +174,8 @@ const RealTimeVehicle = () => {
                             <p>Año</p>
                             <input
                                 className="controls"
-                                type="number"  /* Cambiado a number */
-                                max="9999"      /* Límite añadido */
+                                type="number"  
+                                max="9999"     
                                 name="anio"
                                 value={formData.anio}
                                 onChange={handleChange}

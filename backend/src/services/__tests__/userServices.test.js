@@ -1,7 +1,6 @@
 import userManager from '../userServices'; 
 import Usuario from '../../models/user.model.js';
 import bcrypt from 'bcryptjs';
-// La importación de 'UniqueConstraintError' ahora será interceptada por nuestro mock
 import { UniqueConstraintError } from 'sequelize'; 
 
 // --- MOCKS ---
@@ -68,7 +67,6 @@ describe('userManager Service', () => {
         it('debería lanzar un error "Email already in use" si Usuario.create falla por UniqueConstraintError', async () => {
             
             // Forzamos que 'create' falle con ese error
-            // 'UniqueConstraintError' ahora viene de nuestro mock
             Usuario.create.mockRejectedValue(new UniqueConstraintError('Email duplicado'));
 
             // Aserción: Verificamos que el 'catch' del servicio funciona y lanza el error correcto

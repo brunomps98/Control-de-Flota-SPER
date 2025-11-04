@@ -31,10 +31,10 @@ class UserDao {
             console.log(newUser);
             res.redirect('/login');
         } catch (error) {
-            // 3. Manejo de errores de API (con JSON)
+            // 3. Manejo de errores de API 
             if (error.message === 'Email already in use') {
                 console.log('El correo electrónico ya está en uso', error);
-                // Devolvemos un 409 Conflict (buena práctica para duplicados)
+                // Devolvemos un 409 Conflict 
                 res.status(409).json({ error: 'El correo electrónico ya está en uso' });
             } else {
                 console.log('Error al registrar usuario:', error)

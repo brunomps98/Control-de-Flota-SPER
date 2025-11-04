@@ -1,7 +1,6 @@
-// backend/src/routes/__tests__/db.router.e2e.test.js
 import supertest from 'supertest';
 import app from '../../app.js'; // 1. Importamos la app de Express refactorizada
-import { userDao, vehicleDao } from '../../repository/index.js'; // 2. Importamos los repositorios que vamos a mockear
+import { userDao, vehicleDao } from '../../repository/index.js'; // 2. Importamos los repositorios que mockeamos
 import jwt from 'jsonwebtoken';
 
 process.env.SECRET_KEY = 'clave_secreta_para_probar_en_ci';

@@ -1,4 +1,4 @@
-import Usuario from "../models/user.model.js"; // Importa el modelo de Sequelize
+import Usuario from "../models/user.model.js"; 
 import bcrypt from 'bcryptjs';
 import { UniqueConstraintError } from 'sequelize';
 

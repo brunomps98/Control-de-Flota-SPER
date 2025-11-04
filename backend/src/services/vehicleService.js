@@ -58,7 +58,6 @@ export default class VehicleManager {
 
             console.log(`Query encontró ${count} vehículos.`);
 
-            // --- CÓDIGO NUEVO (CORRECTO) ---
             const totalPages = Math.ceil(count / limit);
             const docs = rows.map(product => {
                 const plainProduct = product.get({ plain: true });
@@ -70,7 +69,7 @@ export default class VehicleManager {
 
                 return {
                     ...plainProduct,
-                    thumbnail: thumbnailUrls // <-- Ahora 'thumbnail' es un ARRAY de URLs
+                    thumbnail: thumbnailUrls 
                 };
             });
 
@@ -191,7 +190,7 @@ export default class VehicleManager {
         try {
             const vehicle = await Vehiculo.findByPk(id);
             if (!vehicle) throw new Error("Vehículo no encontrado");
-            await vehicle.destroy(); // ON DELETE CASCADE se encarga del resto
+            await vehicle.destroy(); 
             return { success: true };
         } catch (err) {
             return err;

@@ -1,7 +1,4 @@
-// backend/src/config/__mocks__/supabaseClient.js
-
 // 1. Creamos el objeto mock reutilizable
-// (Cambié el nombre de la URL para que coincida con el test de vehicleDao)
 const mockSupabaseStorage = {
     upload: jest.fn().mockResolvedValue({ error: null }),
     getPublicUrl: jest.fn().mockReturnValue({

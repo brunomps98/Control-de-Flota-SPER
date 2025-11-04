@@ -1,4 +1,3 @@
-// app.js (versión mejorada)
 import express from "express";
 import { __dirname } from "./utils.js";
 import dbRouter from './routes/db.router.js';
@@ -16,14 +15,12 @@ app.use((req, res, next) => {
   next();
 });
 
-// Parsear FRONT_URL robustamente (corta espacios, ignora cadenas vacías)
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
 
-// Orígenes adicionales útiles para mobile/dev
 const extras = [
   "capacitor://localhost",
   "ionic://localhost",
@@ -38,7 +35,6 @@ console.log('Allowed origins:', allowedOrigins);
 const corsOptions = {
   origin: function(origin, callback) {
     console.log('--> CORS origin header:', origin);
-    // Permitir solicitudes desde apps nativas o herramientas que no envían Origin
     if (!origin) {
       if (process.env.ALLOW_UNDEFINED_ORIGIN === 'true') {
         console.log('--> Allowing undefined origin because ALLOW_UNDEFINED_ORIGIN=true');
@@ -61,7 +57,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Asegurar preflight
+app.options('*', cors(corsOptions)); 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

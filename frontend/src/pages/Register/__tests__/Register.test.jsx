@@ -1,19 +1,18 @@
-// frontend/src/pages/Register/__tests__/Register.test.jsx
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEventLib from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-import { BrowserRouter } from 'react-router-dom'; // Necesario por useNavigate
+import { BrowserRouter } from 'react-router-dom'; 
 import Register from '../Register';
 
-// 🧠 Mockeamos react-router-dom (solo useNavigate)
+//  Mockeamos react-router-dom (solo useNavigate)
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useNavigate: () => mockNavigate,
 }));
 
-// 🧠 Mockeamos Capacitor (no hacen nada relevante en este test)
+//  Mockeamos Capacitor (no hacen nada relevante en este test)
 jest.mock('@capacitor/app', () => ({
     App: { addListener: jest.fn(() => ({ remove: jest.fn() })) },
 }));
@@ -21,10 +20,10 @@ jest.mock('@capacitor/core', () => ({
     Capacitor: { getPlatform: () => 'web' },
 }));
 
-// 🧠 Mockeamos la imagen
+//  Mockeamos la imagen
 jest.mock('../../../assets/images/logo.png', () => 'mock-logo.png');
 
-// 🧠 Setup de userEvent
+//  Setup de userEvent
 const userEvent = userEventLib.default || userEventLib;
 
 // --- INICIO DE LAS PRUEBAS ---

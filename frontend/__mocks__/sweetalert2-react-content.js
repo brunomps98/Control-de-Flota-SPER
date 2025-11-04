@@ -1,4 +1,3 @@
-// frontend/__mocks__/sweetalert2-react-content.js
 import React from 'react';
 
 // 1. Creamos la función mock una sola vez, aquí.
@@ -16,5 +15,4 @@ const withReactContent = (Swal) => {
 export default withReactContent;
 
 // 5. EXPORTAMOS LA FUNCIÓN MOCK 'fire' CON UN NOMBRE
-//    (Esto es lo que importará tu test)
 export { mockFire };

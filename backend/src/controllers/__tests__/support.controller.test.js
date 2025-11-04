@@ -1,7 +1,3 @@
-// support.controller.test.js (CORRECCIÓN DEFINITIVA)
-
-// --- MOCKS PRIMERO ---
-// 1. Mockea Supabase (implementación inline)
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
@@ -32,7 +28,6 @@ jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
-// --- FIN DE MOCKS ---
 
 // --- IMPORTS DESPUÉS ---
 import SupportController from '../support.controller.js';
@@ -51,7 +46,6 @@ describe('SupportController', () => {
         jest.restoreAllMocks(); 
 
         // Reconfigura el mock de 'from' CADA VEZ
-        // Esto es crucial para que 'upload' y 'getPublicUrl' existan en cada test
         supabase.storage.from.mockReturnValue({
             upload: jest.fn().mockResolvedValue({ error: null }),
             getPublicUrl: jest.fn().mockReturnValue({
@@ -59,7 +53,6 @@ describe('SupportController', () => {
             })
         });
         
-        // Configura el resto de mocks de repositorio
         supportRepository.addSupportTicket.mockResolvedValue({});
         supportRepository.getAllSupportTickets.mockResolvedValue([]);
         supportRepository.getSupportTicketById.mockResolvedValue(null);

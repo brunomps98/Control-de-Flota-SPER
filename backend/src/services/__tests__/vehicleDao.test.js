@@ -1,7 +1,3 @@
-// vehicleDao.test.js (CORRECCIÓN DEFINITIVA)
-
-// --- MOCKS PRIMERO ---
-// 1. Mockea Supabase (implementación inline)
 jest.mock('../../config/supabaseClient.js', () => ({
     supabase: {
         storage: {
@@ -146,7 +142,7 @@ describe('VehicleDao (Controller)', () => {
             // Verificamos que se llame con los parámetros correctos
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith({
                 page: '2',
-                limit: '10', // <-- CORREGIDO (de '1img')
+                limit: '10', 
                 user: mockRequest.user
             });
             

@@ -1,4 +1,3 @@
-// __mocks__/sweetalert2.js
 module.exports = {
   __esModule: true,
   default: {

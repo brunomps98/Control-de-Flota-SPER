@@ -5,7 +5,7 @@ import '@testing-library/jest-dom';
 import { BrowserRouter } from 'react-router-dom';
 import VehicleDetail from '../VehicleDetail';
 import apiClient from '../../../api/axiosConfig';
-import { mockFire } from 'sweetalert2-react-content'; // Importamos el mock de los tests anteriores
+import { mockFire } from 'sweetalert2-react-content'; 
 
 // --- MOCKS ---
 // 1. Mockeamos react-router-dom para 'useParams' y 'useNavigate'
@@ -63,8 +63,6 @@ const renderDetail = () => {
 describe('Componente VehicleDetail', () => {
 
   beforeEach(() => {
-    // Reseteamos mocks. 'resetMocks: true' en jest.config.cjs ya lo hace,
-    // pero somos explícitos con mockFire.
     mockFire.mockClear();
     mockFire.mockResolvedValue({}); // Default OK
 
@@ -72,7 +70,6 @@ describe('Componente VehicleDetail', () => {
     apiClient.defaults = { baseURL: 'http://mocked-api.com' };
 
     // Mockeamos la carga inicial del VEHÍCULO para TODOS los tests
-    // Usamos mockResolvedValue para que se mantenga
     apiClient.get.mockResolvedValue({ data: { vehicle: mockVehicleData } });
     
     // Mockeamos el delete del vehículo
@@ -97,7 +94,6 @@ describe('Componente VehicleDetail', () => {
     const verHistorialButtons = screen.getAllByRole('button', { name: 'Ver Historial' });
     expect(verHistorialButtons.length).toBe(6); // Hay 6 secciones
 
-    // 👇 --- CAMBIO: Verificamos LOS 4 BOTONES DEL FOOTER --- 👇
     expect(screen.getByRole('link', { name: 'Volver a Lista' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Imprimir' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Editar/Añadir Historial' })).toBeInTheDocument();

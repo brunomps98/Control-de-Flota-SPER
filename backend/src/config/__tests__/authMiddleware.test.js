@@ -30,7 +30,7 @@ describe('Auth Middleware', () => {
 
         it('debería devolver 401 si no se provee un token', () => {
             mockRequest = {
-                headers: {} // Sin cabecera 'authorization'
+                headers: {} 
             };
 
             verifyToken(mockRequest, mockResponse, nextFunction);
@@ -39,7 +39,7 @@ describe('Auth Middleware', () => {
             expect(mockResponse.json).toHaveBeenCalledWith({
                 message: 'Acceso no autorizado. Se requiere un token.'
             });
-            expect(nextFunction).not.toHaveBeenCalled(); // 'next' no debe llamarse
+            expect(nextFunction).not.toHaveBeenCalled(); 
         });
 
         it('debería devolver 403 si el token no es válido', () => {
@@ -116,7 +116,7 @@ describe('Auth Middleware', () => {
         });
 
         it('debería devolver 403 si req.user no existe', () => {
-            mockRequest = {}; // Sin req.user
+            mockRequest = {}; 
 
             isAdmin(mockRequest, mockResponse, nextFunction);
 

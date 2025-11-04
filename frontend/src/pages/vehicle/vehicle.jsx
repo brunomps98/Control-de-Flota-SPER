@@ -39,7 +39,6 @@ const Vehicle = () => {
             title: searchParams.get('title') || ''
         });
     }, [searchParams]);
-    // --- FIN DEL NUEVO EFECTO ---
 
     // Efecto para cargar vehículos (Depende de searchParams)
     useEffect(() => {
@@ -123,8 +122,6 @@ const Vehicle = () => {
             </div>
 
             <form className="filter-container" onSubmit={handleFilterSubmit}>
-                {/* Ahora los campos de texto reflejarán el estado 'filters'
-                    que está sincronizado con la URL */}
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} />

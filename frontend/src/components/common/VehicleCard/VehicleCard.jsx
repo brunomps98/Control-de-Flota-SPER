@@ -5,7 +5,7 @@ const VehicleCard = ({ vehicle }) => {
     
     const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
     ? vehicle.thumbnail[0] 
-    : ""; // Dejamos un string vacío si no hay imagen
+    : ""; 
 
 
     return (

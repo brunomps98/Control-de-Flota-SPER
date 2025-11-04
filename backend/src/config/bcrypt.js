@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs'; // 1. Usamos 'bcryptjs' y el nombre correcto
+import bcrypt from 'bcryptjs'; 
 
 // Función para encriptar la contraseña al registrarse
 export const createHash = (password) => {

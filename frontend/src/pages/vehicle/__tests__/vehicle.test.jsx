@@ -1,4 +1,3 @@
-// frontend/src/pages/vehicle/__tests__/Vehicle.test.jsx
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEventLib from '@testing-library/user-event';
@@ -8,7 +7,6 @@ import Vehicle from '../vehicle';
 import apiClient from '../../../api/axiosConfig';
 import { toast } from 'react-toastify';
 
-// Mocks (sin cambios)
 const mockNavigate = jest.fn();
 const mockSetSearchParams = jest.fn();
 let mockSearchParams = new URLSearchParams();
@@ -45,11 +43,9 @@ describe('Componente Vehicle', () => {
 
     afterEach(() => {
         jest.useRealTimers();
-        // Restaura el mock original después de cada test si lo modificaste
          jest.restoreAllMocks();
     });
 
-    // --- TEST 1: Carga inicial (Corregido) ---
     it('debería mostrar loading y luego cargar vehículos al montar', async () => {
         render(
             <BrowserRouter>
@@ -77,7 +73,7 @@ describe('Componente Vehicle', () => {
         expect(screen.queryAllByText((content, element) => element.classList.contains('vehicle-card-skeleton'))).toHaveLength(0);
     });
 
-    // --- TEST 2: Escribir en un filtro y Debounce (Corregido) ---
+    // --- TEST 2: Escribir en un filtro y Debounce ---
     it('debería actualizar searchParams después del debounce al escribir en un filtro', async () => {
         render(
             <BrowserRouter>
@@ -91,22 +87,19 @@ describe('Componente Vehicle', () => {
 
         await user.type(dominioInput, 'AB1');
         expect(dominioInput).toHaveValue('AB1');
-        expect(mockSetSearchParams).not.toHaveBeenCalled(); // Aún no
+        expect(mockSetSearchParams).not.toHaveBeenCalled(); 
 
         jest.advanceTimersByTime(401); // Pasa el debounce
 
         // Ahora SÍ se debe haber llamado, comparando con objeto plano
         await waitFor(() => {
              expect(mockSetSearchParams).toHaveBeenCalledTimes(1);
-             // Cambio: Comparamos con el objeto plano que genera tu código
              expect(mockSetSearchParams).toHaveBeenCalledWith({ dominio: 'AB1' });
         });
     });
 
-    // --- TEST 3: Botón Limpiar Filtros (Corregido) ---
     it('debería limpiar los filtros y searchParams al hacer clic en Limpiar', async () => {
         mockSearchParams = new URLSearchParams({ dominio: 'XYZ' });
-        // Re-espía useSearchParams con los params iniciales para este test
         jest.spyOn(require('react-router-dom'), 'useSearchParams').mockImplementation(() => [mockSearchParams, mockSetSearchParams]);
 
 
@@ -128,14 +121,12 @@ describe('Componente Vehicle', () => {
         jest.advanceTimersByTime(401); // Pasa el debounce
 
         await waitFor(() => {
-             // Cambio: Comparamos con objeto plano vacío
              expect(mockSetSearchParams).toHaveBeenCalledWith({});
-             // Verificamos que se llamó solo una vez después del setup inicial implícito
               expect(mockSetSearchParams).toHaveBeenCalledTimes(1);
         });
     });
 
-    // --- TEST 4: Botón Filtrar (Submit) (Corregido) ---
+    // --- TEST 4: Botón Filtrar (Submit) ---
     it('debería actualizar searchParams inmediatamente al hacer clic en Filtrar', async () => {
         render(
             <BrowserRouter>
@@ -160,14 +151,12 @@ describe('Componente Vehicle', () => {
              expect(mockSetSearchParams).toHaveBeenCalledTimes(1);
         });
 
-        // Adelantamos tiempo solo para asegurarnos que el debounce del 'type'
-        // (que se disparó antes del click) no cause una llamada extra.
         jest.advanceTimersByTime(401);
          expect(mockSetSearchParams).toHaveBeenCalledTimes(2);
     });
 
 
-    // --- TEST 5: Mostrar mensaje cuando no hay vehículos (Sin cambios aparentes) ---
+    // --- TEST 5: Mostrar mensaje cuando no hay vehículos  ---
     it('debería mostrar "No se encontraron vehículos" si la API devuelve array vacío', async () => {
         apiClient.get.mockResolvedValue({ data: { docs: [] } });
 
@@ -182,7 +171,7 @@ describe('Componente Vehicle', () => {
         expect(await screen.findByText('No se encontraron vehículos.')).toBeInTheDocument();
     });
 
-     // --- TEST 6: Mostrar mensaje de error si la API falla (Sin cambios aparentes) ---
+     // --- TEST 6: Mostrar mensaje de error si la API falla  ---
      it('debería mostrar mensaje de error si la API falla', async () => {
         const errorDeRed = { response: { data: { message: 'Error de red' } } };
         apiClient.get.mockRejectedValue(errorDeRed);

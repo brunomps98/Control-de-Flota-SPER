@@ -24,7 +24,7 @@ const mockUser = {
   admin: false,
   dg: true,
   up1: true,
-  up3: false, // Este no debería aparecer
+  up3: false, 
 };
 
 const mockAdminUser = {
@@ -34,7 +34,6 @@ const mockAdminUser = {
 };
 
 // --- FUNCIÓN HELPER PARA RENDERIZAR ---
-// Esto evita envolver cada test en <BrowserRouter>
 const renderNavbar = (user) => {
   return render(
     <BrowserRouter>
@@ -47,7 +46,6 @@ const renderNavbar = (user) => {
 describe('Componente Navbar', () => {
 
   // Limpiamos los mocks antes de cada test
-  // (Aunque 'resetMocks: true' ya lo hace, es buena práctica ser explícito)
   beforeEach(() => {
     mockNavigate.mockClear();
     mockLocalStorageRemoveItem.mockClear();
@@ -112,7 +110,6 @@ describe('Componente Navbar', () => {
     await user.click(dropdownToggle);
 
     // Busca los links que DEBEN estar
-    // Usamos 'findByText' porque el dropdown aparece asíncronamente (Bootstrap)
     expect(await screen.findByText('Direccion General')).toBeInTheDocument();
     expect(await screen.findByText('Unidad Penal 1')).toBeInTheDocument();
 

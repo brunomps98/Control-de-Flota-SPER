@@ -35,7 +35,7 @@ const EdditVehicle = () => {
                     reparaciones: (vehicleData.reparaciones && vehicleData.reparaciones[0]?.descripcion) || '',
                     usuario: vehicleData.chofer || ''
                 });
-                // ---------------------------------
+
 
             } catch (err) {
                 toast.error(err.response?.data?.message || 'No se pudieron cargar los datos del vehículo.');
