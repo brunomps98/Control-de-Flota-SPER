@@ -32,22 +32,19 @@ const Vehicle = () => {
     }, [location, navigate]);
 
     useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
+        if (Capacitor.getPlatform() === 'web') return; 
 
-        const handleBackButton = () => {
-            // Acción personalizada: Cerrar sesión y ir al login
-            localStorage.removeItem('token');
-            navigate('/login');
-        };
-
-        // Añadir el listener
-        const listenerPromise = App.addListener('backButton', handleBackButton);
+        const listenerPromise = App.addListener('backButton', (event) => {
+            if (location.pathname === '/vehicle') {
+                event.preventDefault(); 
+                App.exitApp(); // Cierra la aplicación
+            }
+        });
 
         return () => {
-            // Limpiar el listener al desmontar
             listenerPromise.then(listener => listener.remove());
         };
-    }, [navigate]); // Depende de 'navigate'
+    }, [location.pathname]); 
 
 
 

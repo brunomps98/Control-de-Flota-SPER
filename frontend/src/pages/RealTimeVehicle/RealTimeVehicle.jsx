@@ -48,20 +48,6 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []); // El array vacío asegura que solo se ejecute al montar
 
-    useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
-
-        const handleBackButton = () => {
-            navigate('/vehicle'); // <-- Acción: Volver a la lista de vehículos
-        };
-
-        const listenerPromise = App.addListener('backButton', handleBackButton);
-
-        return () => {
-            listenerPromise.then(listener => listener.remove());
-        };
-    }, [navigate]);
-
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({

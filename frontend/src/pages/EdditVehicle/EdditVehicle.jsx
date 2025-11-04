@@ -47,21 +47,6 @@ const EdditVehicle = () => {
         fetchVehicleData();
     }, [productId]);
 
-    useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
-
-        const handleBackButton = () => {
-            // Acción: Volver al detalle del vehículo
-            navigate(`/vehicle-detail/${productId}`); 
-        };
-
-        const listenerPromise = App.addListener('backButton', handleBackButton);
-
-        return () => {
-            listenerPromise.then(listener => listener.remove());
-        };
-    }, [navigate, productId]);
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({

@@ -61,21 +61,6 @@ const VehicleDetail = () => {
     const [rodados, setRodados] = useState({ data: null, loading: false, error: null, loaded: false });
     const [descripciones, setDescripciones] = useState({ data: null, loading: false, error: null, loaded: false });
 
-    // --- EFECTO DE BOTÓN ATRÁS  ---
-    useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
-
-        const handleBackButton = () => {
-            navigate('/vehicle'); // <-- Acción: Volver a la lista de vehículos
-        };
-
-        const listenerPromise = App.addListener('backButton', handleBackButton);
-
-        return () => {
-            listenerPromise.then(listener => listener.remove());
-        };
-    }, [navigate]); 
-
 
     // --- CARGA INICIAL ---
     const fetchVehicleData = async () => {
