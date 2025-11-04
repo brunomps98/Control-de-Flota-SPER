@@ -13,13 +13,67 @@ console.log('API baseURL selected:', baseURL);
 const capacitorAdapter = async (config) => {
   try {
     
+    // --- INICIO DE LA MODIFICACIÓN ---
+    // Si los datos son FormData, CapacitorHttp fallará.
+    // Usamos 'fetch' en su lugar, que SÍ funciona bien desde la WebView.
+    if (config.data instanceof FormData) {
+        console.log('Detectado FormData en Capacitor, usando fetch()...');
+        
+        // Obtenemos el token de localStorage (como hace el interceptor)
+        const token = localStorage.getItem('token');
+        
+        // Creamos los headers para fetch.
+        // NO definimos 'Content-Type', fetch lo hace solo para FormData.
+        const fetchHeaders = new Headers();
+        if (token) {
+            fetchHeaders.append('Authorization', `Bearer ${token}`);
+        }
+        
+        // Copiamos otros headers si son necesarios (excepto Content-Type)
+        if (config.headers) {
+            for (const key in config.headers) {
+                // Hacemos lowercase la key para la comparación
+                const lowerKey = key.toLowerCase();
+                // Omitimos 'content-type' y 'authorization' (que ya pusimos)
+                if (lowerKey !== 'content-type' && lowerKey !== 'authorization') {
+                    fetchHeaders.append(key, config.headers[key]);
+                }
+            }
+        }
 
+        const response = await fetch(`${config.baseURL}${config.url}`, {
+            method: config.method.toUpperCase(),
+            headers: fetchHeaders,
+            body: config.data,
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+             // Si fetch falla, creamos un error similar al de Axios
+             const error = new Error(responseData.message || `Error con status ${response.status}`);
+             error.response = { data: responseData, status: response.status };
+             return Promise.reject(error);
+        }
+
+        return {
+            data: responseData,
+            status: response.status,
+            statusText: 'OK',
+            headers: response.headers, // headers de respuesta de fetch
+            config: config,
+        };
+    }
+    // --- FIN DE LA MODIFICACIÓN ---
+
+
+    // Si no es FormData, usamos CapacitorHttp (para login, getVehicles, etc.)
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
       headers: config.headers,
       params: config.params,
-      data: config.data,
+      data: config.data, // Para JSON (ej. login)
     };
 
     const response = await CapacitorHttp.request(options);
@@ -59,9 +113,12 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+    // MODIFICACIÓN: No añadir token si es FormData, porque 'fetch' ya lo hizo.
+    if (!(config.data instanceof FormData)) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
     }
     return config;
   },
