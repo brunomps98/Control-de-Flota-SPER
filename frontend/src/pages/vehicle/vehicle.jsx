@@ -1,9 +1,13 @@
+// vehicle.jsx (CORREGIDO CON BOTÓN ATRÁS)
+
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 import { toast } from 'react-toastify';
+import { App } from '@capacitor/app'; 
+import { Capacitor } from '@capacitor/core'; 
 
 const Vehicle = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -13,7 +17,6 @@ const Vehicle = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
-    // El estado de los filtros ahora se inicializa vacío
     const [filters, setFilters] = useState({
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
@@ -27,6 +30,26 @@ const Vehicle = () => {
             navigate(location.pathname, { replace: true, state: {} });
         }
     }, [location, navigate]);
+
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
+
+        const handleBackButton = () => {
+            // Acción personalizada: Cerrar sesión y ir al login
+            localStorage.removeItem('token');
+            navigate('/login');
+        };
+
+        // Añadir el listener
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            // Limpiar el listener al desmontar
+            listenerPromise.then(listener => listener.remove());
+        };
+    }, [navigate]); // Depende de 'navigate'
+
+
 
     useEffect(() => {
         setFilters({
@@ -46,7 +69,6 @@ const Vehicle = () => {
             setLoading(true);
             setError(null);
             try {
-                // 'searchParams' es la única fuente de verdad para la API
                 const response = await apiClient.get('/api/vehicles', {
                     params: Object.fromEntries(searchParams)
                 });
@@ -61,13 +83,12 @@ const Vehicle = () => {
         fetchVehicles();
     }, [searchParams]);
 
+    
     // Efecto para Debouncing de filtros (ESTADO -> URL)
     useEffect(() => {
-
         const timer = setTimeout(() => {
             const query = {};
-            let paramsChanged = false; // Flag para evitar bucles
-            
+            let paramsChanged = false; 
             for (const key in filters) {
                 const urlValue = searchParams.get(key) || '';
                 if (filters[key] !== urlValue) {
@@ -77,37 +98,25 @@ const Vehicle = () => {
                     query[key] = filters[key];
                 }
             }
-
-            // Solo actualizamos la URL si los filtros realmente cambiaron
-            // O si los filtros están vacíos (limpiando)
             if (paramsChanged || Object.keys(query).length === 0) {
                  setSearchParams(query);
             }
-           
         }, 400); 
-
         return () => clearTimeout(timer);
-        
     }, [filters, setSearchParams, searchParams]); 
 
-    
-
-    // Este handler ahora solo actualiza el estado 'filters'
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
     };
-
     const handleFilterSubmit = (e) => {
         e.preventDefault();
-        // Forzamos la actualización de searchParams inmediatamente
         const query = {};
         for (const key in filters) {
             if (filters[key]) query[key] = filters[key];
         }
         setSearchParams(query);
     };
-
     const handleClearFilters = () => {
         setFilters({
             dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
@@ -120,9 +129,8 @@ const Vehicle = () => {
             <div className="titulo-products">
                 <h1>Flota de Vehículos</h1>
             </div>
-
             <form className="filter-container" onSubmit={handleFilterSubmit}>
-                <div className="filter-group">
+                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} />
                 </div>

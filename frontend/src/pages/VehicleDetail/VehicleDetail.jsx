@@ -4,6 +4,8 @@ import apiClient from '../../api/axiosConfig';
 import './VehicleDetail.css';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
+import { App } from '@capacitor/app'; 
+import { Capacitor } from '@capacitor/core';
 
 const MySwal = withReactContent(Swal);
 
@@ -44,7 +46,6 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
     );
 };
 
-
 const VehicleDetail = () => {
     // --- ESTADOS ---
     const { cid } = useParams();
@@ -59,6 +60,21 @@ const VehicleDetail = () => {
     const [destinos, setDestinos] = useState({ data: null, loading: false, error: null, loaded: false });
     const [rodados, setRodados] = useState({ data: null, loading: false, error: null, loaded: false });
     const [descripciones, setDescripciones] = useState({ data: null, loading: false, error: null, loaded: false });
+
+    // --- EFECTO DE BOTÓN ATRÁS  ---
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
+
+        const handleBackButton = () => {
+            navigate('/vehicle'); // <-- Acción: Volver a la lista de vehículos
+        };
+
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listenerPromise.then(listener => listener.remove());
+        };
+    }, [navigate]); 
 
 
     // --- CARGA INICIAL ---
@@ -130,9 +146,8 @@ const VehicleDetail = () => {
                 try {
                     await apiClient.delete(`/api/vehicle/${cid}/history/all/${historyType}`);
                     MySwal.fire('¡Eliminado!', `El historial de ${historyType} ha sido eliminado.`, 'success');
-                    fetchHistory(historyType, stateSetter); // Refrescamos
+                    fetchHistory(historyType, stateSetter); 
                 } catch (err) {
-                    // ...
                 }
             }
         });
@@ -144,7 +159,6 @@ const VehicleDetail = () => {
             title: '¿Eliminar este registro?',
             text: "Esta acción es irreversible.",
             icon: 'warning',
-            // ...
         }).then(async (result) => {
             if (result.isConfirmed) {
                 const stateSetter = eval(`set${historyType.charAt(0).toUpperCase() + historyType.slice(1)}`);
@@ -204,8 +218,6 @@ const VehicleDetail = () => {
                         </div>
                     </div>
 
-
-                    {/* --- Kilometraje --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Kilometraje</h3>
@@ -233,7 +245,6 @@ const VehicleDetail = () => {
                         )}
                     </div>
 
-                    {/* --- Services --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Services</h3>
@@ -260,7 +271,6 @@ const VehicleDetail = () => {
                         )}
                     </div>
 
-                    {/* --- Reparaciones --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Reparaciones</h3>
@@ -286,8 +296,6 @@ const VehicleDetail = () => {
                             />
                         )}
                     </div>
-
-                    {/* --- Destinos --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Destinos</h3>
@@ -314,7 +322,6 @@ const VehicleDetail = () => {
                         )}
                     </div>
 
-                    {/* --- Rodados --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Rodados</h3>
@@ -341,7 +348,6 @@ const VehicleDetail = () => {
                         )}
                     </div>
 
-                    {/* --- Descripciones --- */}
                     <div className="history-section">
                         <div className="history-header">
                             <h3>Historial de Descripciones</h3>
@@ -368,7 +374,6 @@ const VehicleDetail = () => {
                         )}
                     </div>
 
-                    {/* --- IMÁGENES ADICIONALES  --- */}
                     <div className="image-description-p">
                         <h4 className="h4-p">IMÁGENES ADICIONALES:</h4>
                         <div className="img-div">
@@ -384,7 +389,6 @@ const VehicleDetail = () => {
                     </div>
                 </div>
 
-                {/* --- BOTONES DEL FOOTER --- */}
                 <div className="action-footer">
                     <Link to="/vehicle" className="action-btn btn-secondary">Volver a Lista</Link>
                     <button className="action-btn btn-secondary" onClick={() => window.print()}>Imprimir</button>

@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../api/axiosConfig';
 import './RealTimeVehicle.css';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom'; 
+import { App } from '@capacitor/app'; 
+import { Capacitor } from '@capacitor/core'; 
 
 const RealTimeVehicle = () => {
     const [formData, setFormData] = useState({
@@ -12,6 +15,7 @@ const RealTimeVehicle = () => {
         thumbnail: null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const navigate = useNavigate(); 
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -43,6 +47,20 @@ const RealTimeVehicle = () => {
         };
         fetchUserData();
     }, []); // El array vacío asegura que solo se ejecute al montar
+
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
+
+        const handleBackButton = () => {
+            navigate('/vehicle'); // <-- Acción: Volver a la lista de vehículos
+        };
+
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listenerPromise.then(listener => listener.remove());
+        };
+    }, [navigate]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;

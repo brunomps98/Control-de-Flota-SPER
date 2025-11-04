@@ -4,6 +4,8 @@ import apiClient from '../../api/axiosConfig';
 import './EdditVehicle.css';
 import NavBar from '../../components/common/navBar/navBar'; 
 import { toast } from 'react-toastify';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core'; 
 
 const EdditVehicle = () => {
     const { productId } = useParams();
@@ -44,6 +46,21 @@ const EdditVehicle = () => {
 
         fetchVehicleData();
     }, [productId]);
+
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return; // No hacer nada en web
+
+        const handleBackButton = () => {
+            // Acción: Volver al detalle del vehículo
+            navigate(`/vehicle-detail/${productId}`); 
+        };
+
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listenerPromise.then(listener => listener.remove());
+        };
+    }, [navigate, productId]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
