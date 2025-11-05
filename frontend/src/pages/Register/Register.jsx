@@ -35,7 +35,7 @@ const Register = () => {
             [name]: value
         }));
     };
-
+    
     const handleSubmit = async (e) => {
         e.preventDefault(); 
         setError(''); 
@@ -50,14 +50,24 @@ const Register = () => {
         try {
             const response = await apiClient.post('/api/register', formData);
             
-            // ¡ÉXITO! Solo mostramos el toast.
+            // ¡ÉXITO! Mostramos el toast y limpiamos el formulario.
             toast.success(response.data.message || '¡Usuario registrado con éxito! Ya podés iniciar sesión.');
             
+            // Vaciamos el formulario para indicar que funcionó
+            setFormData({ username: '', unidad: '', email: '', passw: '' });
 
         } catch (err) {
-            const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
-            setError(errorMsg);
-            toast.error(errorMsg);
+            // Manejamos el error 409 (conflicto)
+            if (err.response?.status === 409) {
+                const errorMsg = 'El email o nombre de usuario ya existe.';
+                setError(errorMsg);
+                toast.error(errorMsg);
+            } else {
+                // Manejamos otros errores
+                const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
+                setError(errorMsg);
+                toast.error(errorMsg);
+            }
         }
     };
 
@@ -133,6 +143,7 @@ const Register = () => {
                                 required 
                             />
                         </div>
+                        
                         <div className="form-buttons-container">
                             <button type="submit" className="btn btn-primary">Registrarse</button> 
                             <button type="button" className="btn btn-secondary" onClick={handleGoToLogin}>Iniciar Sesión</button> 
