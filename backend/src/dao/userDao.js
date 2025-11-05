@@ -1,6 +1,5 @@
 import { userDao } from "../repository/index.js";
 
-
 class UserDao {
 
     static loginUser = async (req, res) => {
@@ -29,17 +28,18 @@ class UserDao {
             const newUser = await userDao.registerUser(username, unidad, email, passw);
 
             console.log(newUser);
-            res.redirect('/login');
+
+            res.status(201).json({ message: "Usuario registrado con éxito" });
+            
         } catch (error) {
-            // 3. Manejo de errores de API 
             if (error.message === 'Email already in use') {
                 console.log('El correo electrónico ya está en uso', error);
                 // Devolvemos un 409 Conflict 
-                res.status(409).json({ error: 'El correo electrónico ya está en uso' });
+                res.status(409).json({ message: 'El email o nombre de usuario ya existe.' });
             } else {
                 console.log('Error al registrar usuario:', error)
                 // Devolvemos un 500 Internal Server Error
-                res.status(500).json({ error: 'Error al registrar usuario', details: error.message });
+                res.status(500).json({ message: 'Error al registrar usuario', details: error.message });
             }
         }
     }
