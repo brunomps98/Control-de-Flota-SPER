@@ -4,39 +4,30 @@ import './Register.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import apiClient from '../../api/axiosConfig'; 
+import { toast } from 'react-toastify'; 
 
 const Register = () => {
-    // 4. Inicializa useNavigate
     const navigate = useNavigate();
-
-    // 1. Estado para guardar los datos de todos los inputs
     const [formData, setFormData] = useState({
         username: '',
         unidad: '',
         email: '',
         passw: ''
     });
-
-    // Estado para manejar los mensajes de error
     const [error, setError] = useState('');
 
-    // --- 5. LÓGICA DEL BOTÓN ATRÁS ---
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-
-        // Regla: En Register, volver a Home ('/')
         const handleBackButton = () => {
             navigate('/');
         };
-
         const listener = App.addListener('backButton', handleBackButton);
-
         return () => {
             listener.remove();
         };
     }, [navigate]); 
 
-    // 2. Función genérica que actualiza el estado cuando escribís en cualquier input
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prevState => ({
@@ -45,19 +36,36 @@ const Register = () => {
         }));
     };
 
-    // 3. Función que se ejecuta al presionar el botón de submit
-    const handleSubmit = (e) => {
+    // --- 3. handleSubmit  ---
+    const handleSubmit = async (e) => {
         e.preventDefault(); 
         setError(''); 
 
-        // Validación simple de ejemplo
-        if (!formData.username || !formData.email || !formData.passw) {
-            setError('Por favor, completá todos los campos obligatorios.');
-            return; // Detiene la ejecución si hay un error
+        if (!formData.username || !formData.email || !formData.passw || !formData.unidad) {
+            const errorMsg = 'Por favor, completá todos los campos obligatorios.';
+            setError(errorMsg);
+            toast.error(errorMsg); // Mostrar toast de error
+            return; 
         }
 
-        console.log('Datos a enviar al backend:', formData);
+        try {
+            // 4. ENVIAR DATOS AL BACKEND
+            const response = await apiClient.post('/api/register', formData);
 
+            // 5. MOSTRAR ÉXITO Y REDIRIGIR
+            toast.success(response.data.message || '¡Usuario registrado con éxito!');
+            
+            // Redirigir al login después de 2 segundos
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+
+        } catch (err) {
+            // 6. MANEJADOR DE ERRORES DEL BACKEND
+            const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
+            setError(errorMsg);
+            toast.error(errorMsg);
+        }
     };
 
     return (
@@ -84,6 +92,7 @@ const Register = () => {
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
+                                required 
                             />
                         </div>
 
@@ -96,6 +105,7 @@ const Register = () => {
                                 name="unidad"
                                 value={formData.unidad}
                                 onChange={handleChange}
+                                required 
                             />
                         </div>
 
@@ -109,6 +119,7 @@ const Register = () => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
+                                required 
                             />
                             <div id="emailHelp" className="form-text">Nunca compartiremos su correo electrónico con nadie más.</div>
                         </div>
@@ -122,6 +133,7 @@ const Register = () => {
                                 name="passw"
                                 value={formData.passw}
                                 onChange={handleChange}
+                                required 
                             />
                         </div>
 
@@ -130,6 +142,7 @@ const Register = () => {
                         </div>
                     </form>
 
+                    {/* Este 'error' ahora solo muestra errores de validación o del servidor */}
                     {error && (
                         <div className="alert alert-danger mt-3" role="alert">
                             {error}
