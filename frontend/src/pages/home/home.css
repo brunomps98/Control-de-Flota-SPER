@@ -31,7 +31,7 @@
 }
 
 .title h1 {
-    font-size: 1.1em; 
+    font-size: 0.7em; 
     font-weight: bold;
     margin: 0; 
 }
@@ -81,7 +81,7 @@
 
 .login-btn,
 .support-btn {
-    width: 200px;
+    width: 250px;
     padding: 14px 0;
     text-align: center;
     border-radius: 25px;
