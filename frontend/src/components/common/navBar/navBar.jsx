@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo.png';
-import './navBar.css';
+import './navBar.css'; // Usaremos este archivo con el CSS nuevo
 
 const Navbar = ({ user }) => {
   const navigate = useNavigate();
@@ -10,19 +10,20 @@ const Navbar = ({ user }) => {
     return null;
   }
 
-  // --- FUNCIÓN DE LOGOUT PARA TOKENS ---
+  // --- LÓGICA DE LOGOUT (SIN CAMBIOS) ---
   const handleLogout = () => {
     localStorage.removeItem('token');
-    
     navigate('/login');
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    // CAMBIO: Se reemplazó "bg-dark" por "app-navbar"
+    <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
       <div className="container-fluid">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/vehicle">
-          <img src={logo} alt="Logo SPER" width="50" height="50" />
-          SPER
+          {/* CAMBIO: Se eliminó width y height */}
+          <img src={logo} alt="Logo SPER" className="app-logo" />
+          <span>SPER</span>
         </Link>
         <button
           className="navbar-toggler"
@@ -36,9 +37,10 @@ const Navbar = ({ user }) => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          {/* LÓGICA DE LINKS (SIN CAMBIOS) */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link active" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
+              <Link className="nav-link" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
             </li>
             {user.admin ? (
               <li className="nav-item">
@@ -60,6 +62,7 @@ const Navbar = ({ user }) => {
               >
                 Unidades
               </a>
+              {/* LÓGICA DE DROPDOWN (SIN CAMBIOS) */}
               <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
                 {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General">Direccion General</Link></li>}
                 {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1">Unidad Penal 1</Link></li>}

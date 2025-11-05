@@ -1,14 +1,12 @@
 import React from 'react';
-import './footer.css';
+import './footer.css'; 
 
 const Footer = () => {
   return (
-    <footer>
-      <div>
-        <h3 className="footer1">
-          Departamento de Seguridad Informatica
-        </h3>
-      </div>
+    <footer className="app-footer">
+      <p>
+        © 2025 SPER - Departamento de Seguridad Informática
+      </p>
     </footer>
   );
 };

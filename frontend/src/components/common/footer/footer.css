@@ -1,77 +1,18 @@
-/* Estilo principal de la etiqueta footer */
-footer {
-    background-color: rgb(0, 0, 0);
-    display: flex;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.app-footer {
+    background-color: #1c2836;
+    color: #aeb9c4; 
+    padding: 25px 30px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    flex-shrink: 0; 
+    border-top: 1px solid #2d3a4b;
+    box-sizing: border-box;
     width: 100%;
-    justify-content: center;
-    height: 80px;
-    bottom: 0;
-    padding-top: 20px;
-    z-index: 100;
 }
 
-footer div h3 {
-    color: #fff;
-    font-weight: bold;
-    font-size: 25px;
-}
-
-.footer1 {
-    font-size: 15px;
-}
-
-/* Clase genérica para la barra de footer */
-.footer-bar {
-    position: relative;
-    bottom: unset;
-    height: auto;
-    padding: 15px;
-    background-color: #24303c;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Variantes del footer para páginas específicas */
-.footer-bar-vehicle {
-    position: relative;
-    bottom: unset;
-    height: auto;
-    padding: 15px;
-    background-color: #24303c;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.footer-bar-vehicle-general {
-    position: relative;
-    bottom: unset;
-    height: auto;
-    padding: 15px;
-    background-color: #24303c;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Estilos del footer dentro de la card de detalle de producto */
-.footer-p {
-    display: flex;
-    justify-content: space-between;
-}
-
-.footer-p>div {
-    flex-basis: 48%;
-}
-
-/* Ajuste responsive para el footer de la card */
-@media (max-width: 768px) {
-    .footer-p {
-        flex-direction: column;
-        gap: 10px;
-    }
+.app-footer p {
+    margin: 0;
 }
