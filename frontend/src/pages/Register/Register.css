@@ -1,4 +1,3 @@
-
 .register-page-container {
     display: flex;
     flex-direction: column;
@@ -8,15 +7,10 @@
 
 .register-page-container main {
     flex-grow: 1; 
-    
-   
     display: flex;
     justify-content: center;
     align-items: center;
 }
-
-
-/* --- ESTILOS DE LOS COMPONENTES --- */
 
 
 .banner-productos {
@@ -59,7 +53,6 @@
     margin-bottom: 20px;
 }
 
-/* --- ESTILOS DE ELEMENTOS DEL FORMULARIO (Bootstrap Overrides) --- */
 
 .mb-3 {
     margin-bottom: 1.5rem;
@@ -85,22 +78,45 @@
     color: #6c757d;
 }
 
-.btn-primary {
-    width: 100%;
+.form-buttons-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px; 
+    margin-top: 1.5rem;
+}
+
+.btn-primary,
+.btn-secondary { 
+    flex: 1; 
     padding: 12px;
     font-size: 1.1rem;
     font-weight: bold;
     color: #fff;
-    background-color: #0d6efd;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.2s;
+    text-align: center; 
+    text-decoration: none; 
 }
 
+.btn-primary {
+    background-color: #0d6efd;
+}
 .btn-primary:hover {
     background-color: #0b5ed7;
 }
+
+
+.btn-secondary {
+    background-color: #6c757d; 
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+
 
 .alert-danger {
     margin-top: 20px;

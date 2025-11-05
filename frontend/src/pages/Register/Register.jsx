@@ -36,7 +36,6 @@ const Register = () => {
         }));
     };
 
-    // --- 3. handleSubmit  ---
     const handleSubmit = async (e) => {
         e.preventDefault(); 
         setError(''); 
@@ -44,28 +43,26 @@ const Register = () => {
         if (!formData.username || !formData.email || !formData.passw || !formData.unidad) {
             const errorMsg = 'Por favor, completá todos los campos obligatorios.';
             setError(errorMsg);
-            toast.error(errorMsg); // Mostrar toast de error
+            toast.error(errorMsg); 
             return; 
         }
 
         try {
-            // 4. ENVIAR DATOS AL BACKEND
             const response = await apiClient.post('/api/register', formData);
-
-            // 5. MOSTRAR ÉXITO Y REDIRIGIR
-            toast.success(response.data.message || '¡Usuario registrado con éxito!');
             
-            // Redirigir al login después de 2 segundos
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            // ¡ÉXITO! Solo mostramos el toast.
+            toast.success(response.data.message || '¡Usuario registrado con éxito! Ya podés iniciar sesión.');
+            
 
         } catch (err) {
-            // 6. MANEJADOR DE ERRORES DEL BACKEND
             const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
             setError(errorMsg);
             toast.error(errorMsg);
         }
+    };
+
+    const handleGoToLogin = () => {
+        navigate('/login');
     };
 
     return (
@@ -136,15 +133,14 @@ const Register = () => {
                                 required 
                             />
                         </div>
-
-                        <div className="text-center">
+                        <div className="form-buttons-container">
                             <button type="submit" className="btn btn-primary">Registrarse</button> 
+                            <button type="button" className="btn btn-secondary" onClick={handleGoToLogin}>Iniciar Sesión</button> 
                         </div>
                     </form>
-
-                    {/* Este 'error' ahora solo muestra errores de validación o del servidor */}
+                    
                     {error && (
-                        <div className="alert alert-danger mt-3" role="alert">
+                        <div className="alert alert-danger" role="alert">
                             {error}
                         </div>
                     )}
