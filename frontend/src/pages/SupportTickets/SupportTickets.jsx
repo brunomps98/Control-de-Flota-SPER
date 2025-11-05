@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; 
 import apiClient from '../../api/axiosConfig';
 import './SupportTickets.css';
-import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import Swal from 'sweetalert2';
@@ -12,6 +11,7 @@ const MySwal = withReactContent(Swal);
 
 const SupportTickets = () => {
     const navigate = useNavigate();
+    
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -44,8 +44,8 @@ const SupportTickets = () => {
             text: "¡Vas a eliminar este caso de soporte!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#dc3545', 
+            cancelButtonColor: '#009688', 
             confirmButtonText: 'Sí, ¡eliminar!',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
@@ -53,40 +53,27 @@ const SupportTickets = () => {
                 setError(null);
                 try {
                     await apiClient.delete(`/api/support/${ticketId}`);
-                    
                     setTickets(prevTickets => prevTickets.filter(ticket => ticket.id !== ticketId));
-                    
                     MySwal.fire('¡Eliminado!', 'El caso de soporte ha sido eliminado.', 'success');
                 } catch (err) {
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
-                    // setError(errorMessage); // <-- ¡No establecemos el error principal!
                     MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
                 }
             }
         });
     };
+
     
     return (
-        <div className="page-container">
-            <header className="top-bar-support">
-                <div className="top-bar-left-support">
-                    <div className="logo-support">
-                        <Link to="/">
-                            <img src={logoSper} alt="Logo Sper" width="60" height="60" />
-                        </Link>
-                    </div>
-                    <div className="title-support">
-                        <h1>SPER</h1>
-                    </div>
-                </div>
-            </header>
+        <div className="login-page">
+            
 
             <main>
                 <div className="tickets-container">
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
 
-                    {loading && <p>Cargando tickets...</p>}
-                    {error && <p style={{ color: 'red', textAlign: 'center' }}>Error: {error}</p>}
+                    {loading && <p className="loading-message">Cargando tickets...</p>}
+                    {error && <p className="error-message">Error: {error}</p>}
 
                     {!loading && !error && (
                         <>
@@ -109,7 +96,7 @@ const SupportTickets = () => {
                                         <div className="ticket-actions">
                                             <Link to={`/case/${ticket.id}`} className="btn-action btn-view-case">Ver Caso Completo</Link>
                                             <button
-                                                className="btn-action btn-delete-case delete-case-btn"
+                                                className="btn-action btn-delete-case"
                                                 onClick={() => handleDelete(ticket.id)}
                                             >
                                                 Eliminar Caso
@@ -122,7 +109,6 @@ const SupportTickets = () => {
                     )}
                 </div>
             </main>
-
             <footer className="footer-bar">
                 <p>© 2025 SPER - Departamento de Seguridad Informática</p>
             </footer>

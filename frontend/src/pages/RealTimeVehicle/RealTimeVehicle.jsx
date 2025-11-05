@@ -8,8 +8,7 @@ import { Capacitor } from '@capacitor/core';
 
 const RealTimeVehicle = () => {
     const [formData, setFormData] = useState({
-        title: '', // Inicializamos como vacío
-        description: '', dominio: '', kilometros: '', destino: '',
+        title: '', description: '', dominio: '', kilometros: '', destino: '',
         anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
         service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
         thumbnail: null
@@ -21,32 +20,24 @@ const RealTimeVehicle = () => {
         const fetchUserData = async () => {
             try {
                 const response = await apiClient.get('/api/user/current');
-                const userData = response.data.user; // Accedemos directo al user
+                const userData = response.data.user; 
                 if (userData) {
-                    // Lista de valores válidos de las opciones del select
                     const validTitles = [
                         "Direccion General", "Unidad Penal 1", "Unidad Penal 3",
                         "Unidad Penal 4", "Unidad Penal 5", "Unidad Penal 6",
                         "Unidad Penal 7", "Unidad Penal 8", "Unidad Penal 9",
                         "Instituto", "Tratamiento"
                     ];
-
-                    // Si la unidad del usuario es una opción válida, la usamos. Si no, dejamos el título vacío.
                     const initialTitle = validTitles.includes(userData.unidad) ? userData.unidad : "";
-
-                    setFormData(prevState => ({
-                        ...prevState,
-                        title: initialTitle
-                    }));
+                    setFormData(prevState => ({ ...prevState, title: initialTitle }));
                 }
             } catch (error) {
                 console.error("No se pudo obtener la sesión del usuario:", error);
-                // Si falla, también dejamos el título vacío por seguridad
                 setFormData(prevState => ({ ...prevState, title: "" }));
             }
         };
         fetchUserData();
-    }, []); // El array vacío asegura que solo se ejecute al montar
+    }, []); 
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -82,7 +73,6 @@ const RealTimeVehicle = () => {
             const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
             toast.success(response.data.message);
 
-            // Reseteamos el formulario manteniendo el título inicial si aún es válido
             const fetchUserDataAgain = async () => {
                  try {
                      const userRes = await apiClient.get('/api/user/current');
@@ -96,12 +86,10 @@ const RealTimeVehicle = () => {
                              service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
                              thumbnail: null
                          });
-                         // Limpiar el input de archivo manualmente si es necesario
                          const fileInput = document.getElementById('thumbnail');
                          if (fileInput) fileInput.value = '';
                      }
                  } catch (err) {
-                     // Si falla al obtener usuario, reseteamos a valores vacíos
                      setFormData({
                          title: '', description: '', dominio: '', kilometros: '', destino: '',
                          anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
@@ -112,9 +100,7 @@ const RealTimeVehicle = () => {
                       if (fileInput) fileInput.value = '';
                  }
             }
-            fetchUserDataAgain(); // Llamamos para resetear con el title correcto
-
-
+            fetchUserDataAgain(); 
         } catch (error) {
             toast.error(error.response?.data?.message || 'Error al agregar vehículo.');
         } finally {
@@ -122,24 +108,26 @@ const RealTimeVehicle = () => {
         }
     };
 
+
     return (
-        <>
-            <form id="formProduct" onSubmit={handleSubmit}>
-                <main>
-                    <div className="title-add-product">
-                        <h2 className="title-add">Cargar Vehículo</h2>
-                    </div>
-                    <div className="name-desc">
-                        <div className="name-product">
-                            <p>Establecimiento (Título de la Tarjeta)</p>
+        <div className="login-page vehicle-form-page">
+            <main className="login-main">
+                <div className="login-card vehicle-form-card">
+                    <h2 className="form-title">Cargar Vehículo</h2>
+
+                    <form onSubmit={handleSubmit} className="vehicle-form-grid">
+
+                        <div className="form-group span-1">
+                            <label htmlFor="title" className="form-label">Establecimiento (Título)</label>
                             <select
-                                className="controls"
+                                id="title"
+                                className="form-control"
                                 name="title"
                                 value={formData.title}
                                 onChange={handleChange}
                                 required
                             >
-                                <option value="">-- Seleccione Establecimiento --</option>
+                                <option value="">-- Seleccione --</option>
                                 <option value="Direccion General">Dirección General</option>
                                 <option value="Unidad Penal 1">Unidad Penal 1</option>
                                 <option value="Unidad Penal 3">Unidad Penal 3</option>
@@ -153,104 +141,87 @@ const RealTimeVehicle = () => {
                                 <option value="Tratamiento">Tratamiento</option>
                             </select>
                         </div>
-                        <div className="desc-product">
-                            <p>Descripción de estado de Vehículo</p>
-                            <input className="controls" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
+                        <div className="form-group span-2">
+                            <label htmlFor="description" className="form-label">Descripción de estado</label>
+                            <input id="description" className="form-control" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
                         </div>
-                    </div>
-                     <div className="stock-code-price">
-                        <div className="code-product">
-                            <p>Patente</p>
-                            <input className="controls" type="text" name="dominio" value={formData.dominio} onChange={handleChange} placeholder="Ingrese el dominio" required />
+                        
+                        <div className="form-group span-1">
+                            <label htmlFor="dominio" className="form-label">Patente</label>
+                            <input id="dominio" className="form-control" type="text" name="dominio" value={formData.dominio} onChange={handleChange} placeholder="Ingrese el dominio" required />
                         </div>
-                        <div className="stock-product">
-                            <p>Kilómetros</p>
-                            <input className="controls" type="number" min="0" name="kilometros" value={formData.kilometros} onChange={handleChange} placeholder="Kilometraje actual" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="kilometros" className="form-label">Kilómetros</label>
+                            <input id="kilometros" className="form-control" type="number" min="0" name="kilometros" value={formData.kilometros} onChange={handleChange} placeholder="Kilometraje actual" required />
                         </div>
-                        <div className="code-product">
-                            <p>Destino</p>
-                            <input className="controls" type="text" name="destino" value={formData.destino} onChange={handleChange} placeholder="Unidad asignada" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="destino" className="form-label">Destino</label>
+                            <input id="destino" className="form-control" type="text" name="destino" value={formData.destino} onChange={handleChange} placeholder="Unidad asignada" required />
                         </div>
-                    </div>
 
-                    <div className="stock-code-price">
-                        <div className="code-product">
-                            <p>Año</p>
-                            <input
-                                className="controls"
-                                type="number"  
-                                max="9999"     
-                                name="anio"
-                                value={formData.anio}
-                                onChange={handleChange}
-                                placeholder="año del vehiculo"
-                                required
-                             />
+                        <div className="form-group span-1">
+                            <label htmlFor="anio" className="form-label">Año</label>
+                            <input id="anio" className="form-control" type="number" max="9999" name="anio" value={formData.anio} onChange={handleChange} placeholder="año del vehiculo" required />
                         </div>
-                        <div className="code-product">
-                            <p>Modelo</p>
-                            <input className="controls" type="text" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej:s10, berlingo" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="modelo" className="form-label">Modelo</label>
+                            <input id="modelo" className="form-control" type="text" name="modelo" value={formData.modelo} onChange={handleChange} placeholder="Ej:s10, berlingo" required />
                         </div>
-                        <div className="code-product">
-                            <p>Tipo</p>
-                            <input className="controls" type="text" name="tipo" value={formData.tipo} onChange={handleChange} placeholder="Ingrese tipo de vehiculo" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="tipo" className="form-label">Tipo</label>
+                            <input id="tipo" className="form-control" type="text" name="tipo" value={formData.tipo} onChange={handleChange} placeholder="Ingrese tipo de vehiculo" required />
                         </div>
-                    </div>
 
-                    <div className="stock-code-price">
-                        <div className="price-product">
-                            <p>N° Chasis</p>
-                            <input className="controls" type="text" name="chasis" value={formData.chasis} onChange={handleChange} placeholder="Ingrese n° de chasis" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="chasis" className="form-label">N° Chasis</label>
+                            <input id="chasis" className="form-control" type="text" name="chasis" value={formData.chasis} onChange={handleChange} placeholder="Ingrese n° de chasis" required />
                         </div>
-                        <div className="price-product">
-                            <p>N° Motor</p>
-                            <input className="controls" type="text" name="motor" value={formData.motor} onChange={handleChange} placeholder="Ingrese n° de motor" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="motor" className="form-label">N° Motor</label>
+                            <input id="motor" className="form-control" type="text" name="motor" value={formData.motor} onChange={handleChange} placeholder="Ingrese n° de motor" required />
                         </div>
-                        <div className="price-product">
-                            <p>N° Cedula</p>
-                            <input className="controls" type="text" name="cedula" value={formData.cedula} onChange={handleChange} placeholder="Ingrese n° de cedula" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="cedula" className="form-label">N° Cedula</label>
+                            <input id="cedula" className="form-control" type="text" name="cedula" value={formData.cedula} onChange={handleChange} placeholder="Ingrese n° de cedula" required />
                         </div>
-                    </div>
 
-                    <div className="stock-code-price">
-                        <div className="price-product">
-                            <p>Service</p>
-                            <input className="controls" type="date" name="service" value={formData.service} onChange={handleChange} placeholder="fecha de ultimo service" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="service" className="form-label">Service</label>
+                            <input id="service" className="form-control" type="date" name="service" value={formData.service} onChange={handleChange} required />
                         </div>
-                        <div className="price-product">
-                            <p>Rodado</p>
-                            <input className="controls" type="date" name="rodado" value={formData.rodado} onChange={handleChange} placeholder="fecha de cambio de rodado" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="rodado" className="form-label">Rodado</label>
+                            <input id="rodado" className="form-control" type="date" name="rodado" value={formData.rodado} onChange={handleChange} required />
                         </div>
-                        <div className="price-product">
-                            <p>Marca</p>
-                            <input className="controls" type="text" name="marca" value={formData.marca} onChange={handleChange} placeholder="ingrese marca del vehiculo" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="marca" className="form-label">Marca</label>
+                            <input id="marca" className="form-control" type="text" name="marca" value={formData.marca} onChange={handleChange} placeholder="ingrese marca del vehiculo" required />
                         </div>
-                    </div>
 
-                    <div className="stock-code-price">
-                        <div className="price-product">
-                            <p>Reparaciones</p>
-                            <input className="controls" type="text" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="indicar reparaciones realizadas" required />
+                        <div className="form-group span-2">
+                            <label htmlFor="reparaciones" className="form-label">Reparaciones</label>
+                            <input id="reparaciones" className="form-control" type="text" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="indicar reparaciones realizadas" required />
                         </div>
-                        <div className="price-product">
-                            <p>Chofer</p>
-                            <input className="controls" type="text" name="usuario" value={formData.usuario} onChange={handleChange} placeholder="indicar el chofer actual" required />
+                        <div className="form-group span-1">
+                            <label htmlFor="usuario" className="form-label">Chofer</label>
+                            <input id="usuario" className="form-control" type="text" name="usuario" value={formData.usuario} onChange={handleChange} placeholder="indicar el chofer actual" required />
                         </div>
-                    </div>
 
-                    <div className="url-product">
-                        <p>Imágenes</p>
-                        <input className="controls" type="file" name="thumbnail" id="thumbnail" onChange={handleChange} multiple title="Por favor, seleccione las imágenes que desea subir..." />
-                    </div>
+                        <div className="form-group span-3">
+                            <label htmlFor="thumbnail" className="form-label">Imágenes</label>
+                            <input id="thumbnail" className="form-control" type="file" name="thumbnail" onChange={handleChange} multiple title="Por favor, seleccione las imágenes que desea subir..." />
+                        </div>
+                        
+                        <div className="form-group span-3">
+                            <button className="login-submit-btn" type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? 'Registrando...' : 'Registrar Vehículo'}
+                            </button>
+                        </div>
 
-                    <div className="button-reg">
-                        <button className="botons" type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? 'Registrando...' : 'Registrar Vehículo'}
-                        </button>
-                    </div>
-                </main>
-            </form>
-        </>
+                    </form>
+                </div>
+            </main>
+        </div>
     );
 }
 

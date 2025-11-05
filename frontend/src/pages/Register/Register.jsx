@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom'; 
-import './Register.css';
+import './Register.css'; 
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 
 const Register = () => {
     const navigate = useNavigate();
+    
     const [formData, setFormData] = useState({
         username: '',
         unidad: '',
@@ -39,31 +40,22 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault(); 
         setError(''); 
-
         if (!formData.username || !formData.email || !formData.passw || !formData.unidad) {
             const errorMsg = 'Por favor, completá todos los campos obligatorios.';
             setError(errorMsg);
             toast.error(errorMsg); 
             return; 
         }
-
         try {
             const response = await apiClient.post('/api/register', formData);
-            
-            // ¡ÉXITO! Mostramos el toast y limpiamos el formulario.
             toast.success(response.data.message || '¡Usuario registrado con éxito! Ya podés iniciar sesión.');
-            
-            // Vaciamos el formulario para indicar que funcionó
             setFormData({ username: '', unidad: '', email: '', passw: '' });
-
         } catch (err) {
-            // Manejamos el error 409 (conflicto)
             if (err.response?.status === 409) {
                 const errorMsg = 'El email o nombre de usuario ya existe.';
                 setError(errorMsg);
                 toast.error(errorMsg);
             } else {
-                // Manejamos otros errores
                 const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
                 setError(errorMsg);
                 toast.error(errorMsg);
@@ -75,19 +67,18 @@ const Register = () => {
         navigate('/login');
     };
 
-    return (
-        <div className="register-page-container">
-            <div className="banner-productos">
-                <div className="navbar-r">
-                    <img src={logoSper} alt="Logo SPER" className="logo-r"/>
-                </div>
-            </div>
 
-            <main>
-                <div className="container register">
-                    <div className="title-r">
-                        <h1>Registro</h1>
-                    </div>
+    return (
+        <div className="login-page"> 
+            
+
+            <main className="login-main">
+                
+                <div className="login-card">
+                    <img src={logoSper} alt="Logo SPER" className="login-logo" />
+
+                    <h2 className="form-title">Crear cuenta</h2>
+                    <p className="form-subtitle">Ingresá tus datos para registrarte.</p>
                     
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
@@ -128,7 +119,7 @@ const Register = () => {
                                 onChange={handleChange}
                                 required 
                             />
-                            <div id="emailHelp" className="form-text">Nunca compartiremos su correo electrónico con nadie más.</div>
+                            <div id="emailHelp" className="form-text">Tu email no será compartido.</div>
                         </div>
 
                         <div className="mb-3">
@@ -144,9 +135,9 @@ const Register = () => {
                             />
                         </div>
                         
-                        <div className="form-buttons-container">
-                            <button type="submit" className="btn btn-primary">Registrarse</button> 
-                            <button type="button" className="btn btn-secondary" onClick={handleGoToLogin}>Iniciar Sesión</button> 
+                        <div className="button-container">
+                            <button type="submit" className="login-submit-btn">Registrarse</button> 
+                            <button type="button" className="login-secondary-btn" onClick={handleGoToLogin}>Iniciar Sesión</button> 
                         </div>
                     </form>
                     
@@ -158,11 +149,9 @@ const Register = () => {
                 </div>
             </main>
 
-            <div>
-                <footer className="footer-bar">
-                    <p>© 2025 SPER - Departamento de Seguridad Informática</p>
-                </footer>
-            </div>
+            <footer className="footer-bar">
+                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+            </footer>
         </div>
     );
 }

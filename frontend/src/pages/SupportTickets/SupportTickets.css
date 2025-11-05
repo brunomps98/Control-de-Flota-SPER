@@ -1,51 +1,22 @@
-.top-bar-support {
-    background-color: #24303c;
-    color: white;
-    width: 100%;
-    padding: 20px 30px;
-    box-sizing: border-box;
+/* --- Importación de Fuente --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+/* --- Contenedor de Página Completa (Estilo Base) --- */
+.login-page {
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-.top-bar-support .top-bar-left-support {
+    min-height: 100vh;
     width: 100%;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #2a3a4e 0%, #1c2836 100%);
+    color: #aeb9c4;
 }
 
-.logo-support {
-    margin-right: 15px;
-}
-
-.title-support {
-    display: flex;
-    align-items: center;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: #ffffff;
-}
-
-.top-bar-support .support-title {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.top-bar-support .support-title h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
+.login-page main {
+    flex-grow: 1;
 }
 
 /* --- CONTENEDOR PRINCIPAL Y TÍTULO DE LA LISTA --- */
-
-/* #information-title {
-
-}
-
-*/
-
 .tickets-container {
     max-width: 900px;
     margin: 30px auto;
@@ -55,32 +26,42 @@
     gap: 25px;
 }
 
-/* --- ESTILOS DE LAS TARJETAS DE TICKET --- */
+#information-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #4a5568;
+}
 
+/* --- ESTILOS DE LAS TARJETAS DE TICKET (Tema Oscuro) --- */
 .ticket-card {
-    background-color: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    transition: box-shadow 0.3s ease;
+    background-color: #24303c; /* Color de tarjeta oscuro */
+    border: 1px solid #4a5568; /* Borde oscuro */
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
 .ticket-card:hover {
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
 
 .ticket-header h2 {
     margin: 0 0 15px 0;
-    color: #333;
+    color: #ffffff; /* Título blanco */
     font-size: 1.5rem;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid #1c2836; /* Separador oscuro */
     padding-bottom: 10px;
 }
 
 .ticket-body {
     margin: 15px 0;
-    color: #555;
+    color: #aeb9c4; /* Texto claro */
 }
 
 .ticket-body p {
@@ -88,60 +69,109 @@
     line-height: 1.6;
 }
 
+.ticket-body p strong {
+    color: #ffffff; /* Labels en negrita más claros */
+    font-weight: 600;
+}
+
+/* --- ESTILOS DE BOTONES DE ACCIÓN (Nuevos) --- */
 .ticket-actions {
     display: flex;
+    flex-wrap: wrap; /* Para responsive en móvil */
     gap: 15px;
     margin-top: 20px;
 }
 
 .btn-action {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+    flex: 1; /* Ocupan espacio disponible */
+    min-width: 150px; /* Ancho mínimo */
+    padding: 12px 20px;
+    border-radius: 25px;
     font-weight: bold;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    text-align: center;
     transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
 }
 
+/* Botón Primario (Verde) */
 .btn-view-case {
-    background-color: #3498db;
+    background-color: #009688;
+    border: 2px solid #009688;
     color: white;
 }
 
 .btn-view-case:hover {
-    background-color: #2980b9;
+    background-color: #007a6e;
+    border-color: #007a6e;
+    transform: translateY(-2px);
 }
 
+/* Botón Destructivo (Rojo) */
 .btn-delete-case {
-    background-color: #e74c3c;
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
     color: white;
 }
 
 .btn-delete-case:hover {
-    background-color: #c0392b;
+    background-color: #c82333;
+    border-color: #c82333;
+    transform: translateY(-2px);
 }
 
-/* --- MENSAJE PARA CUANDO NO HAY TICKETS --- */
+/* --- MENSAJES (Carga, Error, Vacío) --- */
+.loading-message,
+.error-message {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 40px;
+    color: #ffffff;
+}
+
+.error-message {
+    color: #f8d7da;
+    background-color: #a93c46;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+}
 
 .no-tickets-message {
     text-align: center;
     font-size: 1.2rem;
-    color: #777;
+    color: #aeb9c4;
     padding: 50px;
-    background-color: #f9f9f9;
-    border: 2px dashed #ddd;
+    background-color: #24303c; /* Fondo de tarjeta */
+    border: 2px dashed #4a5568; /* Borde oscuro */
     border-radius: 8px;
 }
 
-.page-container {
-  display: flex;
-  flex-direction: column; 
-  min-height: 100vh;      
+/* --- FOOTER (Consistente) --- */
+.footer-bar {
+    background-color: #24303c;
+    color: #aeb9c4;
+    padding: 20px 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    width: 100%;
+    flex-shrink: 0; 
+    box-sizing: border-box;
 }
 
-.page-container main {
-  flex-grow: 1; 
+/* --- Responsive --- */
+@media (max-width: 768px) {
+    .tickets-container {
+        margin: 20px auto;
+        padding: 15px;
+    }
+
+    #information-title {
+        font-size: 1.8rem;
+    }
+
+    .ticket-card {
+        padding: 20px;
+    }
 }

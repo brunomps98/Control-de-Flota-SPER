@@ -1,56 +1,188 @@
-.main-case-view {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.page-full-dark {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px 20px;
-    background-color: #f4f7f6; 
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    background-color: #24303c;
+    color: #aeb9c4;
+    box-sizing: border-box;
 }
 
-/* --- ESTILOS PARA EL CONTENEDOR DEL TICKET (LA "TARJETA") --- */
+.page-full-dark main {
+    flex-grow: 1; 
+}
+
+.main-content-dark {
+    width: 100%;
+    padding: 40px 20px; 
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 .case-container {
     width: 100%;
-    max-width: 900px;
-    margin: 0;
-    padding: 40px;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
+    max-width: 1100px;
+    
+    margin: 0 auto; 
+    padding: 30px 40px; 
+    box-sizing: border-box;
+    background-color: #1c2836;
+    border: 1px solid #4a5568; 
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
 }
 
 .case-container h1 {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
     font-size: 2.2rem;
-    color: #2c3e50;
+    color: #ffffff;
+    border-bottom: 1px solid #4a5568;
 }
-
 .case-container .ticket-header h2 {
     font-size: 1.8rem;
-    color: #34495e;
+    color: #ffffff;
+    margin-bottom: 15px;
 }
-
+.case-container .case-details p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+.case-container .case-details p strong {
+    color: #ffffff;
+    font-weight: 600;
+}
 .case-container .case-details h3 {
     font-size: 1.2rem;
     color: #009688; 
     margin-top: 25px;
+    margin-bottom: 10px;
+}
+.case-container hr {
+    border: 0;
+    height: 1px;
+    background: #4a5568;
+    margin: 25px 0;
 }
 
-/*
-
-.title-case {
-
+.image-gallery-section h3 {
+    font-size: 1.2rem;
+    color: #009688;
+    margin-bottom: 15px;
+}
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+.image-gallery img {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    border: 2px solid #4a5568;
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.image-gallery img:hover {
+    transform: scale(1.05);
+    border-color: #009688;
 }
 
-*/
-
-.page-container {
-  display: flex;
-  flex-direction: column; 
-  min-height: 100vh;     
+.ticket-actions {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 1px solid #4a5568;
+}
+.btn-action {
+    flex: 1; 
+    min-width: 150px; 
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    text-align: center;
+}
+.btn-view-case {
+    background-color: #009688;
+    border: 2px solid #009688;
+    color: white;
+}
+.btn-view-case:hover {
+    background-color: #007a6e;
+    border-color: #007a6e;
+    transform: translateY(-2px);
+}
+.btn-delete-case {
+    background-color: #dc3545;
+    border: 2px solid #dc3545;
+    color: white;
+}
+.btn-delete-case:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+    transform: translateY(-2px);
 }
 
-/* 2. Estilos para que la sección de contenido principal crezca */
-.page-container .main-case-view {
-  flex-grow: 1; }
+.loading-message,
+.error-message {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 40px;
+    color: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
+}
+.error-message {
+    font-size: 1.1rem;
+    color: #f8d7da;
+    background-color: #a93c46;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.footer-bar-darker {
+    background-color: #1c2836; 
+    color: #aeb9c4;
+    padding: 20px 30px;
+    text-align: center;
+    font-size: 0.9rem;
+    width: 100%;
+    flex-shrink: 0; 
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .main-content-dark {
+        padding: 30px 15px; 
+    }
+    
+    .case-container {
+        padding: 25px 20px; 
+    }
+
+    .case-container h1 {
+        font-size: 1.8rem;
+    }
+    .case-container .ticket-header h2 {
+        font-size: 1.5rem;
+    }
+    .image-gallery img {
+        max-width: 100%;
+    }
+    .ticket-actions {
+        flex-direction: column;
+    }
+}

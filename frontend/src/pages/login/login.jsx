@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './login.css';
-import blackLogo from '../../assets/images/black-logo.png';
+import logoSper from '../../assets/images/logo.png'; 
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'react-toastify'; 
@@ -23,19 +23,14 @@ const Login = () => {
         };
     }, [navigate]);
 
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
             const response = await apiClient.post('/api/login', { username, password });
             const { user, token } = response.data;
             localStorage.setItem('token', token);
-
             const destinationPath = '/vehicle';
-            
             navigate(destinationPath, { state: { username: user.username } });
-
         } catch (err) {
             console.error("Login Error:", err);
             toast.error(err.response?.data?.message || 'Error al iniciar sesión');
@@ -43,11 +38,14 @@ const Login = () => {
     };
 
     return (
-        <div className="main-container">
-            <div className="left-side">
-                <div className="container login">
+        <div className="login-page">
+            <main className="login-main">
+                <div className="login-card">
+                    <img src={logoSper} alt="Logo SPER" className="login-logo" />
+                    
                     <h2 className="form-title">Iniciar sesión</h2>
                     <p className="form-subtitle">Bienvenido, por favor ingresa tus datos.</p>
+
                     <form onSubmit={handleSubmit} className="login-form">
                         <div className="mb-3">
                             <label htmlFor="usernameInput" className="form-label">Usuario</label>
@@ -71,13 +69,16 @@ const Login = () => {
                                 required
                             />
                         </div>
-                        <button type="submit" className="signup-btn1">Iniciar sesión</button>
+                        <button type="submit" className="login-submit-btn">
+                            Iniciar sesión
+                        </button>
                     </form>
                 </div>
-            </div>
-            <div className="right-side">
-                <img src={blackLogo} alt="SPER Logo" />
-            </div>
+            </main>
+
+            <footer className="footer-bar">
+                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+            </footer>
         </div>
     );
 };

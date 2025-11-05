@@ -1,262 +1,417 @@
-/* --- ESTILO PARA LA BARRA DE BOTONES EXTERNA --- */
+/* --- 1. CONTENEDOR DE PÁGINA (Fondo) --- */
+/* (Usamos el mismo que en vehicle.css) */
+.vehicle-page-container {
+    background-color: #f4f7f6;
+    padding: 30px 40px; 
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+}
 
-.action-footer {
-    max-width: 960px;
-    margin: 20px auto;
+/* Contenedor principal para centrar */
+.vehicle-detail-main {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Títulos Principales --- */
+.vehicle-main-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+.vehicle-main-subtitle {
+    font-size: 1.1rem;
+    color: #4a5568;
+    margin-bottom: 30px;
+}
+
+/* --- 2. LAYOUT DE 2 COLUMNAS (Galería + Info) --- */
+.detail-header-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* Columna izquierda más ancha */
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* --- 3. COLUMNA IZQUIERDA (Galería) --- */
+.gallery-container {
     display: flex;
-    justify-content: flex-end; 
+    flex-direction: column;
+    gap: 15px;
+    /* Para que no se mueva al cargar */
+    min-height: 400px; 
+}
+
+.main-image-wrapper {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background-color: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumbnail-list {
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-/* --- Estilos de los botones  --- */
-
-.action-btn {
-    padding: 9px 20px;
+.thumbnail-image {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
     border-radius: 6px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    border: 2px solid transparent;
     cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    border: 1px solid transparent;
-    transition: all 0.2s ease-in-out;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
+    opacity: 0.7;
+    transition: all 0.3s ease;
 }
 
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.thumbnail-image:hover {
+    opacity: 1;
+    transform: scale(1.05);
 }
 
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
+.thumbnail-image.selected {
+    opacity: 1;
+    border-color: #009688; /* Tu color de acento */
 }
-.btn-primary:hover { background-color: #0069d9; }
 
-.btn-secondary {
+/* --- 4. COLUMNA DERECHA (Info + Acciones) --- */
+.info-actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Tarjeta de Información */
+.info-card {
     background-color: #ffffff;
-    color: #4A5568;
-    border-color: #CBD5E0;
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
-.btn-secondary:hover { background-color: #F7FAFC; }
 
-.destructive-btn {
+.info-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-card p {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin: 0 0 12px 0;
+    line-height: 1.5;
+}
+
+.info-card p strong {
+    color: #1a202c;
+    font-weight: 600;
+    padding-right: 10px;
+}
+
+.info-card p span {
+    text-align: right;
+}
+
+.info-card hr {
+    border: 0;
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 15px 0;
+}
+
+/* Tarjeta de Acciones */
+.actions-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.actions-card h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0 0 20px 0;
+}
+
+.actions-card .btn-action {
+    display: block; /* Ocupan todo el ancho */
+    width: 100%;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.actions-card .btn-action:last-child {
+    margin-bottom: 0;
+}
+
+
+/* --- 5. ESTILOS DE BOTONES (Consistentes) --- */
+.btn-action {
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-action.btn-primary {
+    background-color: #009688;
+    color: white;
+}
+.btn-action.btn-primary:hover {
+    background-color: #007a6e;
+}
+
+.btn-action.btn-secondary {
+    background-color: #e2e8f0;
+    color: #4a5568;
+    border-color: #e2e8f0;
+}
+.btn-action.btn-secondary:hover {
+    background-color: #cbd5e0;
+}
+
+.btn-action.btn-destructive {
     background-color: #dc3545;
     color: white;
-    border-color: #dc3545;
 }
-.destructive-btn:hover { background-color: #c82333; }
-
-
-/* --- AJUSTE RESPONSIVE --- */
-
-@media (max-width: 768px) {
-    .action-footer {
-        flex-direction: column;   
-        align-items: stretch;  
-        margin-left: 15px;    
-        margin-right: 15px;
-    }
+.btn-action.btn-destructive:hover {
+    background-color: #c82333;
 }
 
 
-
-@media print {
-
-    /* Oculta elementos innecesarios para impresión */
-    .action-footer,
-    .h6-imp,
-    .navbar-container {
-        display: none !important;
-    }
-
-
-    body, html, .body-p {
-        overflow-y: visible !important; 
-        height: auto !important;      
-        background: none !important;   
-    }
-
-    .card-p {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        border: none !important;
-        box-shadow: none !important; 
-    }
-
-    .vehicle-image-p {
-        page-break-inside: avoid;
-    }
+/* --- 6. SECCIÓN DE HISTORIALES (Grilla) --- */
+.history-grid-title {
+    margin-top: 50px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e2e8f0;
+}
+.history-grid-title h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1a202c;
 }
 
-.history-section {
-    max-width: 960px;
-    margin: 25px auto 35px auto; 
-    padding: 10px;
-    border: 1px solid #E2E8F0; 
-    border-radius: 8px;
-    background-color: #F7FAFC; 
-}
-
-/* Título de cada historial (Modificado) */
-.history-section h3 {
-    font-size: 1.1rem;
-    color: #2D3748;
-    margin: 0;
-    padding: 0;
-    border-bottom: none; 
-}
-
-/* --- Botón de Carga (Ver Historial) --- */
-.btn-load-history {
-    background-color: #007bff;
-    color: white;
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease-in-out;
-    display: block; 
-    width: 100%;
-    margin-top: 10px;
-}
-
-.btn-load-history:hover {
-    background-color: #0069d9;
-}
-
-/* --- Estilos de la Tabla de Historial --- */
-.history-section table {
-    width: 100%;
-    border-collapse: collapse; 
-    margin-top: 15px;
-    font-size: 0.9rem;
-    table-layout: auto; 
-}
-
-.history-section th, .history-section td {
-    padding: 8px 12px;
-    border: 1px solid #E2E8F0; 
-    text-align: left;
-    vertical-align: middle;
-}
-
-.history-section th {
-    background-color: #EDF2F7; 
-    font-weight: 600;
-    color: #4A5568;
-}
-
-
-.card-p {
-    padding: 1.5rem;
-}
-
-.content-p {
-    display: flex;        
-    flex-wrap: wrap;      
-    gap: 2rem;            
-    align-items: flex-start; 
-}
-
-.vehicle-image-p {
-    flex: 1 1 400px; 
-    max-width: 100%; 
-}
-
-.vehicle-info-p {
-    flex: 1 1 300px; 
-    min-width: 280px; 
-}
-
-.vehicle-image-p img {
-    width: 100%;           
-    height: auto;         
-    max-height: 450px;  
-    object-fit: contain;   
-    display: block;       
-    border-radius: 8px;    
-    border: 1px solid #E2E8F0; 
-    background-color: #f8f8f8; 
-}
-
-
-.image-description-p {
-    padding-top: 1.5rem;
-    margin-top: 1.5rem;
-    border-top: 1px solid #E2E8F0; 
-}
-
-.img-div {
+.history-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem; 
+    /* Dos columnas para los historiales */
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
 }
 
-.img-p {
-    width: 100%;
-    height: 120px;     
-    object-fit: cover;   
+/* Estilo de Tarjeta para cada Historial */
+.history-section-placeholder,
+.history-section {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-section-placeholder {
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-size: 1rem;
+    color: #4a5568;
+    font-weight: 600;
+}
+
+.history-section.empty,
+.history-section.loading,
+.history-section.error {
+    justify-content: center;
+}
+
+.history-section.empty p,
+.history-section.loading p,
+.history-section.error p {
+    text-align: center;
+    font-size: 1rem;
+    color: #4a5568;
+}
+
+.btn-load-history {
+    background-color: #009688;
+    color: white;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
     border-radius: 8px;
-    border: 1px solid #E2E8F0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+.btn-load-history:hover {
+    background-color: #007a6e;
 }
 
-
-/* Contenedor para el Título H3 y el botón "Eliminar Todo" */
+/* Cabecera del Historial */
 .history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #CBD5E0; 
-    padding-bottom: 8px;
-    margin-bottom: 12px; 
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+.history-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
 }
 
-/* Nuevo botón pequeño de "Eliminar Todo" */
-.destructive-btn-small {
+.btn-history-delete-all {
+    background-color: #fef0f0;
+    color: #dc3545;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-history-delete-all:hover {
     background-color: #dc3545;
     color: white;
-    border: 1px solid #dc3545;
-    padding: 4px 10px; 
-    border-radius: 6px;
-    font-size: 0.8rem; 
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
 }
 
-.destructive-btn-small:hover {
-    background-color: #c82333;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Tabla de Historial */
+.history-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
 }
-
-/* --- Estilos para el botón de borrado individual --- */
-
-.history-section td:last-child {
+.history-section th, 
+.history-section td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+.history-section th {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+.history-section td {
+    color: #2D3748;
+}
+.history-section tr:last-child td {
+    border-bottom: none;
+}
+.history-section .action-col {
     width: 60px;
     text-align: center;
 }
 
-.delete-history-btn-small {
+.btn-history-delete-one {
     background: none;
     border: none;
-    color: #DC3545; 
+    color: #90a0b1;
     cursor: pointer;
     font-size: 1.1rem; 
     padding: 0;
-    transition: color 0.2s, transform 0.2s;
+    transition: all 0.2s;
+}
+.btn-history-delete-one:hover {
+    color: #dc3545; 
+    transform: scale(1.1);
 }
 
-.delete-history-btn-small:hover {
-    color: #A00; 
-    transform: scale(1.1);
+/* --- MENSAJES DE CARGA/ERROR PRINCIPAL --- */
+.detail-loading-message,
+.detail-error-message {
+    text-align: center;
+    font-size: 1.2rem;
+    padding: 60px 20px;
+    color: #4a5568;
+}
+.detail-error-message {
+    color: #dc3545;
+    background-color: #fff;
+    border: 1px solid #f5c2c7;
+    border-radius: 8px;
+}
+
+
+/* --- 7. RESPONSIVE --- */
+@media (max-width: 960px) {
+    .vehicle-page-container {
+        padding: 20px 15px;
+    }
+
+    /* Se apila la grilla principal */
+    .detail-header-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Se apila la grilla de historiales */
+    .history-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .vehicle-main-title {
+        font-size: 1.8rem;
+    }
+    .vehicle-main-subtitle {
+        font-size: 1rem;
+        margin-bottom: 20px;
+    }
+    .info-card, .actions-card, .history-section {
+        padding: 20px;
+    }
+}
+
+/* --- 8. ESTILOS DE IMPRESIÓN --- */
+@media print {
+    body, .vehicle-page-container {
+        background-color: #ffffff !important;
+        padding: 0;
+    }
+    .navbar-container, .footer-bar, .actions-card {
+        display: none !important;
+    }
+    .vehicle-detail-main, .info-card, .history-section {
+        box-shadow: none;
+        border: 1px solid #000;
+        margin: 10px 0;
+    }
+    .detail-header-grid, .history-grid {
+        grid-template-columns: 1fr;
+    }
+    .gallery-container, .history-header button {
+        display: none;
+    }
 }

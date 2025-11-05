@@ -1,23 +1,34 @@
-/* Título Principal de la Página */
-.titulo-products h1 {
-    margin-top: 25px;
-    color: rgb(0, 0, 0);
-    text-align: center;
+/* --- 1. CONTENEDOR DE PÁGINA (NUEVO) --- */
+.vehicle-page-container {
+    /* Fondo gris claro, inspirado en Castellaro */
+    background-color: #f4f7f6;
+    /* Relleno para separar del navbar/footer */
+    padding: 30px 40px; 
+    font-family: 'Inter', sans-serif;
 }
 
-/* --- Formulario de Filtros --- */
+/* Título Principal de la Página */
+.titulo-products h1 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #1a202c; /* Texto oscuro */
+    text-align: center;
+    font-weight: 700;
+}
+
+/* --- 2. FORMULARIO DE FILTROS (REDISEÑADO) --- */
 .filter-container {
-    width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-end;
-    gap: 15px 20px;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
+    gap: 16px;
+    padding: 24px;
+    background-color: #ffffff; /* Fondo blanco */
+    border-radius: 12px; /* Bordes más suaves */
     margin-bottom: 40px;
-    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+    border: 1px solid #e2e8f0;
 }
 
 .filter-group {
@@ -26,33 +37,90 @@
 }
 
 .filter-group label {
-    font-size: 0.9rem;
-    color: #555;
-    margin-bottom: 5px;
-    font-weight: bold;
+    font-size: 0.875rem; /* 14px */
+    color: #4a5568; /* Texto gris oscuro */
+    margin-bottom: 6px;
+    font-weight: 600;
 }
 
 .filter-group input {
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
     min-width: 180px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-group input::placeholder {
+    color: #a0aec0;
+}
+
+.filter-group input:focus {
+    outline: none;
+    border-color: #009688; /* Color de acento de tu app */
+    box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
 }
 
 .filter-buttons {
     display: flex;
     gap: 10px;
+    padding-bottom: 2px; /* Alineación con los inputs */
 }
 
-/* --- Grilla de Vehículos Adaptable --- */
+/* --- 3. BOTONES DE FILTRO (NUEVOS ESTILOS) --- */
+.btn-filter-primary,
+.btn-filter-secondary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Botón primario (Inspirado en tu color verde) */
+.btn-filter-primary {
+    background-color: #009688;
+    color: white;
+}
+.btn-filter-primary:hover {
+    background-color: #007a6e;
+}
+
+/* Botón secundario (Limpiar) */
+.btn-filter-secondary {
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+.btn-filter-secondary:hover {
+    background-color: #cbd5e0;
+}
+
+
+/* --- 4. GRILLA DE VEHÍCULOS (Tu CSS original, está bien) --- */
 .vehicle-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    grid-auto-rows: 200px;
+    /* Usamos un minmax más grande para tarjetas más anchas */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
 }
 
-/* --- Diseño de las Tarjetas de Vehículo --- */
+.no-vehicles-message {
+    text-align: center;
+    color: #4a5568;
+    font-size: 1.1rem;
+    grid-column: 1 / -1; /* Ocupa toda la grilla */
+    padding: 40px;
+}
+
+/* --- 5. TARJETAS (PENDIENTE DE REFACTOR) --- */
+/* Estos son tus estilos actuales. Los dejaremos por ahora
+   para no romper tu <VehicleCard />.
+   El próximo paso es refactorizar esto. */
 .vehicle-card {
     text-decoration: none;
     position: relative;
@@ -61,7 +129,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: block;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4 / 3; /* Tus tarjetas tienen esta proporción */
 }
 
 .vehicle-card:hover {
@@ -101,21 +169,51 @@
     color: #ddd;
 }
 
-.vehicle-grid.loading {
-    opacity: 0.5;
-    transition: opacity 0.3s ease-in-out;
-}
 
+/* --- Skeleton (Tu CSS, un poco adaptado) --- */
 .vehicle-card-skeleton {
-  height: 200px;
-  background: linear-gradient(90deg, #eee 25%, #ddd 50%, #eee 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: 8px;
-  margin: 10px;
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 10px;
+    aspect-ratio: 4 / 3; /* Mantiene la misma forma */
 }
 
 @keyframes loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* --- Responsive para Filtros --- */
+@media (max-width: 768px) {
+    .vehicle-page-container {
+        padding: 20px 15px;
+    }
+
+    .filter-container {
+        padding: 20px;
+    }
+
+    .filter-group {
+        width: 100%; /* Ocupa todo el ancho en móvil */
+    }
+
+    .filter-group input {
+        min-width: 0; /* Resetea el ancho mínimo */
+        width: 100%;
+    }
+
+    .filter-buttons {
+        width: 100%;
+    }
+
+    .btn-filter-primary,
+    .btn-filter-secondary {
+        flex: 1; /* Los botones ocupan 50% c/u */
+    }
+
+    .vehicle-grid {
+        /* Una sola columna en móvil */
+        grid-template-columns: 1fr;
+    }
 }

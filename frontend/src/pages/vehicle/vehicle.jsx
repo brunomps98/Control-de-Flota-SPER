@@ -21,7 +21,7 @@ const Vehicle = () => {
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
-    // --- EFECTOS ---
+    // --- EFECTOS (SIN CAMBIOS) ---
 
     // Efecto para el Toast de Bienvenida
     useEffect(() => {
@@ -122,38 +122,39 @@ const Vehicle = () => {
 
     // --- RENDERIZADO ---
     return (
-        <>
+        
+        <div className="vehicle-page-container">
             <div className="titulo-products">
                 <h1>Flota de Vehículos</h1>
             </div>
             <form className="filter-container" onSubmit={handleFilterSubmit}>
                  <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
-                    <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} />
+                    <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} placeholder="AA-123-BB" />
                 </div>
                 <div className="filter-group">
                     <label htmlFor="modelo">Modelo:</label>
-                    <input type="text" id="modelo" name="modelo" value={filters.modelo} onChange={handleFilterChange} />
+                    <input type="text" id="modelo" name="modelo" value={filters.modelo} onChange={handleFilterChange} placeholder="Ranger" />
                 </div>
                 <div className="filter-group">
                     <label htmlFor="destino">Destino:</label>
-                    <input type="text" id="destino" name="destino" value={filters.destino} onChange={handleFilterChange} />
+                    <input type="text" id="destino" name="destino" value={filters.destino} onChange={handleFilterChange} placeholder="U.P. N°1" />
                 </div>
                 <div className="filter-group">
                     <label htmlFor="marca">Marca:</label>
-                    <input type="text" id="marca" name="marca" value={filters.marca} onChange={handleFilterChange} />
+                    <input type="text" id="marca" name="marca" value={filters.marca} onChange={handleFilterChange} placeholder="Ford" />
                 </div>
                 <div className="filter-group">
                     <label htmlFor="año">Año:</label>
-                    <input type="text" id="año" name="año" value={filters.año} onChange={handleFilterChange} />
+                    <input type="text" id="año" name="año" value={filters.año} onChange={handleFilterChange} placeholder="2020" />
                 </div>
                 <div className="filter-group">
                     <label htmlFor="tipo">Tipo:</label>
-                    <input type="text" id="tipo" name="tipo" value={filters.tipo} onChange={handleFilterChange} />
+                    <input type="text" id="tipo" name="tipo" value={filters.tipo} onChange={handleFilterChange} placeholder="Camioneta" />
                 </div>
                 <div className="filter-buttons">
-                    <button type="submit" className="btn btn-primary">Filtrar</button>
-                    <button type="button" className="btn btn-secondary" onClick={handleClearFilters}>Limpiar</button>
+                    <button type="submit" className="btn-filter-primary">Filtrar</button>
+                    <button type="button" className="btn-filter-secondary" onClick={handleClearFilters}>Limpiar</button>
                 </div>
             </form>
 
@@ -165,10 +166,11 @@ const Vehicle = () => {
                 ) : vehicles.length > 0 ? (
                     vehicles.map(vehicle => <VehicleCard key={vehicle.id} vehicle={vehicle} />)
                 ) : (
-                    <p style={{ textAlign: 'center' }}>{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
+                    <p className="no-vehicles-message">{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}
             </div>
-        </>
+        </div>
+        
     );
 }
 

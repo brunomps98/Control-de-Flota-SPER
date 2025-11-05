@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './Case.css';
-import logoSper from '../../assets/images/logo.png';
+import './Case.css'; 
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import MySwal from '../../utils/swal';
@@ -28,7 +27,6 @@ const Case = () => {
                 setLoading(false);
             }
         };
-
         fetchTicket();
     }, [ticketId]);
 
@@ -45,8 +43,8 @@ const Case = () => {
             text: "¡Vas a eliminar este caso de soporte!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#009688',
             confirmButtonText: 'Sí, ¡eliminar!',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
@@ -70,81 +68,65 @@ const Case = () => {
         });
     };
 
-    // --- RENDERIZADO ---
-    if (loading) {
-        return <p>Cargando detalles del caso...</p>;
-    }
-    if (error && !ticket) { 
-        return <p style={{ color: 'red' }}>Error: {error}</p>;
-    }
-    if (!ticket) {
-        return <p>No se encontró el ticket.</p>;
-    }
-
     return (
-        <div className="page-container">
-            <header className="top-bar-support">
-                <Link to="/">
-                    <div className="top-bar-left-support">
-                        <div className="logo-support">
-                            <img src={logoSper} alt="Logo Sper" width="60" height="60" />
+        <div className="page-full-dark">
+
+            <main className="main-content-dark">
+                
+                {loading && (
+                    <p className="loading-message">Cargando detalles del caso...</p>
+                )}
+                {error && !ticket && (
+                    <p className="error-message">Error: {error}</p>
+                )}
+                {!loading && !ticket && !error && (
+                     <p className="error-message">No se encontró el ticket.</p>
+                )}
+
+                {ticket && (
+                    <div className="case-container"> 
+                        {error && <p className="error-message" style={{marginBottom: '15px'}}>Error: {error}</p>}
+
+                        <h1>Detalle del Caso de Soporte</h1>
+                        <div className="ticket-header">
+                            <h2>Reportado por: {ticket.name} {ticket.surname}</h2>
                         </div>
-                        <div className="title-support">
-                            <h1>SPER</h1>
+                        <div className="case-details">
+                            <p><strong>Email de Contacto:</strong> {ticket.email}</p>
+                            <p><strong>Teléfono de Contacto:</strong> {ticket.phone}</p>
+                            <hr />
+                            <h3>Descripción del Problema Reportado:</h3>
+                            <p>{ticket.problem_description}</p>
                         </div>
-                    </div>
-                </Link>
-            </header>
-
-            <main className="main-case-view">
-                <div className="case-container">
-                    {error && <p style={{ color: 'red', textAlign: 'center', marginBottom: '15px' }}>Error: {error}</p>}
-
-                    <h1>Detalle del Caso de Soporte</h1>
-                    <div className="ticket-header">
-                        <h2>Reportado por: {ticket.name} {ticket.surname}</h2>
-                    </div>
-                    <div className="case-details">
-                        <p><strong>Email de Contacto:</strong> {ticket.email}</p>
-                        <p><strong>Teléfono de Contacto:</strong> {ticket.phone}</p>
-                        <hr style={{ margin: '20px 0' }} />
-                        <h3>Descripción del Problema Reportado:</h3>
-                        <p>{ticket.problem_description}</p>
-                    </div>
-                    <hr style={{ margin: '20px 0' }} />
-
-                    
-                    {/* 1. Usamos 'ticket.archivos' (el alias de Sequelize) */}
-                    {ticket.archivos && ticket.archivos.length > 0 && (
-                        <>
-                            <h3>Imágenes Adjuntas:</h3>
-                            <div className="image-gallery" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '15px' }}>
-                                {/* 2. Mapeamos 'archivos', 'fileObj' es un objeto */}
-                                {ticket.archivos.map((fileObj) => (
-                                    
-                                    // 3. Usamos 'fileObj.url_archivo' (que ahora será la URL de Supabase)
-                                    <a href={fileObj.url_archivo} target="_blank" rel="noopener noreferrer" key={fileObj.id}> {/* 4. Usamos 'fileObj.id' como key */}
-                                        <img
-                                            src={fileObj.url_archivo} 
-                                            alt={`Imagen del caso ${fileObj.id}`}
-                                            style={{ maxWidth: '200px', borderRadius: '5px', border: '1px solid #ddd' }}
-                                        />
-                                    </a>
-                                ))}
+                        <hr />
+                        
+                        {ticket.archivos && ticket.archivos.length > 0 && (
+                            <div className="image-gallery-section">
+                                <h3>Imágenes Adjuntas:</h3>
+                                <div className="image-gallery">
+                                    {ticket.archivos.map((fileObj) => (
+                                        <a href={fileObj.url_archivo} target="_blank" rel="noopener noreferrer" key={fileObj.id}>
+                                            <img
+                                                src={fileObj.url_archivo} 
+                                                alt={`Imagen del caso ${fileObj.id}`}
+                                            />
+                                        </a>
+                                    ))}
+                                </div>
                             </div>
-                        </>
-                    )}
+                        )}
 
-                    <div className="ticket-actions">
-                        <Link to="/support-tickets" className="btn-action btn-view-case">Volver a la Lista</Link>
-                        <button className="btn-action btn-delete-case" onClick={handleDelete}>
-                            Eliminar Caso
-                        </button>
+                        <div className="ticket-actions">
+                            <Link to="/support-tickets" className="btn-action btn-view-case">Volver a la Lista</Link>
+                            <button className="btn-action btn-delete-case" onClick={handleDelete}>
+                                Eliminar Caso
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
             </main>
 
-            <footer className="footer-bar">
+            <footer className="footer-bar-darker">
                 <p>© 2025 SPER - Departamento de Seguridad Informática</p>
             </footer>
         </div>

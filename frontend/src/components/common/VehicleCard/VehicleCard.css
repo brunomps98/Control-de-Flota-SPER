@@ -1,124 +1,84 @@
-/* --- Estilos para la grilla contenedora --- */
-.vehicle-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    /* Espacio entre las tarjetas */
-    padding: 20px;
-    margin-top: 20px;
-    /* Espacio superior para separar del formulario */
+.vehicle-card-link {
+    display: flex; 
+    flex-direction: column; 
+    text-decoration: none;
+    color: inherit;
+    background-color: #ffffff; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
+    border: 1px solid #e2e8f0; 
+    overflow: hidden; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%; 
 }
 
-/* --- Estilos para la Tarjeta Individual con Efecto de Volteo --- */
-.card-s {
-    position: relative;
-    width: 250px;
-    /* Ancho fijo para cada tarjeta */
-    height: 250px;
-    /* Altura fija para cada tarjeta */
-    perspective: 600px;
-    /* Perspectiva 3D para el efecto de giro */
-    cursor: pointer;
-    /* Indica que es interactiva */
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    /* Sombra para dar profundidad */
-    transform-style: preserve-3d; 
+.vehicle-card-link:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.card-s .face {
-    position: absolute;
+.vehicle-card-image {
     width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 10px;
+    aspect-ratio: 16 / 10; 
     overflow: hidden;
-    transition: transform 0.8s ease;
-    align-items: center;
 }
 
-.card-s .front {
-    transform: rotateY(0deg);
-    background-color: white;
-}
-
-.card-s .front img {
+.vehicle-card-image img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
+    object-fit: cover; 
+    transition: transform 0.4s ease;
 }
 
-.card-s .front h3 {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-
-    z-index: 1;
-    height: 45px;
-    line-height: 45px;
-    padding: 0 5px;
-    text-align: center;
-    color: #fff;
-    background: rgba(0, 0, 0, 0.6);
-    margin: 0;
-    font-size: 1.1em;
+.vehicle-card-link:hover .vehicle-card-image img {
+    transform: scale(1.05); 
 }
 
-.card-s .back {
-    transform: rotateY(180deg);
-    background: #24303c;
-    padding: 15px;
-    color: #f3f3f3;
+.vehicle-card-content {
+    padding: 24px;
+    flex-grow: 1; 
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    text-align: center;
 }
 
-.card-s .back h3 {
-    margin-bottom: 10px;
-    font-size: 1.2em;
-    color: #00bcd4;
+.vehicle-card-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.25rem; 
+    font-weight: 700;
+    color: #1a202c; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; 
 }
 
-.card-s .back p {
-    margin: 5px 0;
-    font-size: 0.9em;
+.vehicle-card-details {
+    margin: 0 0 20px 0;
+    font-size: 0.9rem;
+    color: #4a5568; 
 }
 
-.card-s .back .link a {
+
+.vehicle-card-button {
     display: inline-block;
-    padding: 8px 15px;
-    margin-top: 10px;
-    background: #1f53c5;
-    color: #fff;
+    width: 100%;
+    text-align: center;
+    padding: 12px 20px;
+    background-color: #009688;
+    color: #ffffff;
+    border-radius: 8px;
+    font-weight: 600;
     text-decoration: none;
-    border-radius: 5px;
     transition: background-color 0.3s ease;
+    margin-top: auto; 
 }
 
-.card-s .back .link a:hover {
-    background: #153c8f;
+.vehicle-card-link:hover .vehicle-card-button {
+    background-color: #007a6e;
 }
 
-.card-s:hover .front {
-    transform: rotateY(180deg);
-}
-
-.card-s:hover .back {
-    transform: rotateY(360deg);
-}
 
 @media (max-width: 768px) {
-    .card-s {
-        width: 100%;
-        max-width: 300px;
-        height: 200px;
+    .vehicle-card-content {
+        padding: 20px;
     }
 }
