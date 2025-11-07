@@ -1,22 +1,22 @@
 import { vehicleDao } from "../repository/index.js";
-import { supabase } from '../config/supabaseClient.js'; 
-import path from 'path'; 
+import { supabase } from '../config/supabaseClient.js';
+import path from 'path';
 
 
 const renderVehicleView = async (req, res, viewName) => {
     try {
         const query = { ...req.query, user: req.user };
         const result = await vehicleDao.getVehicles(query);
-        
+
         const createLink = (page) => {
             const params = new URLSearchParams(req.query);
             params.set('page', page);
             return `?${params.toString()}`;
         };
-        
+
         result.prevLink = result.hasPrevPage ? createLink(result.prevPage) : '';
         result.nextLink = result.hasNextPage ? createLink(result.nextPage) : '';
-        
+
         res.render(viewName, { ...result, user: req.user });
     } catch (error) {
         console.log(`Error al renderizar ${viewName}`, error);
@@ -33,38 +33,41 @@ const getVehicleByIdHelper = async (req, res, renderView) => {
         if (vehicleInstance == null || vehicleInstance.error) {
             return res.status(404).json({ status: 'error', error: 'product not found' });
         }
-        
+
         const vehicle = vehicleInstance.get({ plain: true });
-        
+
         const lastIndexS = (vehicle.services?.length || 0) - 1;
         const lastIndexR = (vehicle.rodados?.length || 0) - 1;
         const lastIndexK = (vehicle.kilometrajes?.length || 0) - 1;
         const lastIndexD = (vehicle.descripciones?.length || 0) - 1;
         const lastIndexT = (vehicle.destinos?.length || 0) - 1;
-        
-        const allImages = vehicle.thumbnail || []; 
-        
+
+        const allImages = vehicle.thumbnail || [];
+
         if (renderView) {
-            res.render(renderView, { 
-                vehicle, allImages, firstImage: true, 
-                lastIndexS, lastIndexK, lastIndexR, lastIndexD, lastIndexT 
+            res.render(renderView, {
+                vehicle, allImages, firstImage: true,
+                lastIndexS, lastIndexK, lastIndexR, lastIndexD, lastIndexT
             });
         } else {
             res.status(200).json({ vehicle });
         }
     } catch (error) {
-        res.status(500).json({ error: 'error al leer el vehicle' });
+        console.error('ERROR CAPTURADO EN getVehicleByIdHelper:', error);
+        res.status(500).json({
+            error: 'error al leer el vehicle',
+            details: error.message 
+        });
     }
 };
 
 
 class VehicleDao {
 
-    // --- CREACIÓN ---
     static addVehicle = async (req, res) => {
         try {
             const { ...productData } = req.body;
-            let thumbnailUrls = []; // Usaremos un array para las URLs públicas
+            let thumbnailUrls = []; 
 
             if (req.files && req.files.length > 0) {
                 console.log(`Subiendo ${req.files.length} archivos a Supabase...`);
@@ -77,7 +80,7 @@ class VehicleDao {
 
                     // Subimos el archivo (que está en memoria/buffer) a Supabase
                     const { error: uploadError } = await supabase.storage
-                        .from('uploads') 
+                        .from('uploads')
                         .upload(fileName, file.buffer, {
                             contentType: file.mimetype,
                             cacheControl: '3600',
@@ -92,11 +95,11 @@ class VehicleDao {
                     const { data: publicUrlData } = supabase.storage
                         .from('uploads')
                         .getPublicUrl(fileName);
-                    
+
                     if (!publicUrlData) {
                         throw new Error('No se pudo obtener la URL pública de Supabase.');
                     }
-                    
+
                     thumbnailUrls.push(publicUrlData.publicUrl);
                 }
             }
@@ -123,11 +126,11 @@ class VehicleDao {
     static vehicleDetail = (req, res) => getVehicleByIdHelper(req, res, 'vehicleDetail');
     static vehicleInformation = (req, res) => getVehicleByIdHelper(req, res, 'vehicleInformation');
     static edditVehicle = (req, res) => getVehicleByIdHelper(req, res, 'edditVehicle');
-    static getVehicleById = (req, res) => getVehicleByIdHelper(req, res, null); 
+    static getVehicleById = (req, res) => getVehicleByIdHelper(req, res, null);
 
     static vehicle = (req, res) => renderVehicleView(req, res, 'vehicle');
     static vehicleGeneral = (req, res) => renderVehicleView(req, res, 'vehicleGeneral');
-    static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle'); 
+    static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle');
     static getVehiclesForUser = async (req, res) => {
         try {
             const query = { ...req.query, user: req.user, limit: 1000, page: 1 };
@@ -143,7 +146,7 @@ class VehicleDao {
         try {
             const id = req.params.productId;
             const body = req.body;
-            
+
             const updatedVehicle = await vehicleDao.updateVehicle(id, body, req.user);
 
             if (updatedVehicle instanceof Error) throw updatedVehicle;
@@ -157,12 +160,12 @@ class VehicleDao {
             res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
         }
     }
-    
+
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid || req.params.cid;
             const result = await vehicleDao.deleteVehicle(id, req.user);
-            
+
             if (result instanceof Error) throw result;
 
             res.status(200).json({ status: "success", deletedProduct: result });
@@ -177,7 +180,7 @@ class VehicleDao {
             const result = await vehicleDao.deleteLastHistoryEntry(vid, fieldName);
 
             if (result instanceof Error) throw result;
-            
+
             res.status(200).json({ status: "success", message: result.message });
         } catch (error) {
             res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
@@ -186,7 +189,7 @@ class VehicleDao {
 
     static deleteOneHistoryEntry = async (req, res) => {
         let { cid, fieldName, historyId } = req.params;
-        
+
         try {
             const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId, req.user);
 
@@ -221,7 +224,7 @@ class VehicleDao {
 
     static getVehicleHistory = async (req, res, historyMethodName) => {
         try {
-            const { cid } = req.params; 
+            const { cid } = req.params;
             const history = await vehicleDao[historyMethodName](cid);
             res.status(200).json({ history });
         } catch (error) {

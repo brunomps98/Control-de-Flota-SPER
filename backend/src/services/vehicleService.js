@@ -6,7 +6,6 @@ import Usuario from '../models/user.model.js';
 import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
 
-// --- ▼▼ NUEVA FUNCIÓN HELPER DE PERMISOS ▼▼ ---
 const checkPermission = (user, vehicleTitle) => {
     if (user.admin) {
         return true; // El Admin siempre tiene permiso
@@ -27,7 +26,7 @@ const checkPermission = (user, vehicleTitle) => {
         "Tratamiento": "trat"
     };
 
-    const requiredPermission = unitMap[vehicleTitle]; // ej: "up6"
+    const requiredPermission = unitMap[vehicleTitle];
     
     // Si la unidad no existe en el map O el usuario no tiene ese flag en true
     if (!requiredPermission || !user[requiredPermission]) {
@@ -36,13 +35,12 @@ const checkPermission = (user, vehicleTitle) => {
     
     return true; // El usuario tiene permiso
 };
-// --- ▲▲ FIN DE LA FUNCIÓN HELPER ▲▲ ---
 
 
 export default class VehicleManager {
 
     getVehicles = async (queryParams) => {
-        // ... (Esta función ya está correcta, la dejamos como está) ...
+
         try {
             const {
                 page = 1, limit = 10, dominio, modelo, destino,
@@ -122,7 +120,6 @@ export default class VehicleManager {
         }
     }
 
-    // --- CAMBIO: getVehicleById AHORA REQUIERE 'user' ---
     getVehicleById = async (id, user) => {
         try {
             const vehicle = await Vehiculo.findByPk(id, {
@@ -139,14 +136,12 @@ export default class VehicleManager {
             });
 
             if (!vehicle) {
-                throw new Error("Vehículo no encontrado");
+                return null;
             }
 
-            // --- ▼▼ VALIDACIÓN DE PERMISO (Goal 3) ▼▼ ---
             if (!checkPermission(user, vehicle.title)) {
                 throw new Error('Permiso denegado. No tiene acceso a este vehículo.');
             }
-            // --- ▲▲ FIN DE LA VALIDACIÓN ▲▲ ---
 
             return vehicle;
 
@@ -155,20 +150,16 @@ export default class VehicleManager {
         }
     }
 
-    // --- CAMBIO: addVehicle AHORA REQUIERE 'user' ---
     addVehicle = async (product, user) => {
         const t = await sequelize.transaction();
         try {
             const { usuario, title, description, dominio, kilometros, destino, anio, modelo, tipo, chasis, motor, cedula, service, rodado, reparaciones, marca, thumbnail } = product;
 
-            // --- ▼▼ VALIDACIÓN DE PERMISO (Goal 2) ▼▼ ---
             if (!checkPermission(user, title)) {
                  throw new Error('Permiso denegado. No puede agregar vehículos a esta unidad.');
             }
-            // --- ▲▲ FIN DE LA VALIDACIÓN ▲▲ ---
 
 
-            // 2. Creamos el Vehículo
             const newVehicle = await Vehiculo.create({
                 title, dominio, anio, modelo, tipo, chasis, motor, cedula, marca,
                 chofer: usuario
@@ -177,8 +168,6 @@ export default class VehicleManager {
             const vehiculoId = newVehicle.id;
             const createsHijos = [];
 
-            // 3. Creamos los registros "hijos"
-            // (Se crea 'description' como el primer 'chofer' en el historial)
             if (usuario) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: usuario }, { transaction: t }));
             if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: description }, { transaction: t })); // Mantenemos la descripción por si acaso
             
@@ -204,17 +193,16 @@ export default class VehicleManager {
     }
 
     // --- FUNCIÓN DE ACTUALIZACIÓN ---
-    updateVehicle = async (id, updateData, user) => { // <-- CAMBIO: Añadido 'user'
+    updateVehicle = async (id, updateData, user) => { 
         const t = await sequelize.transaction();
         try {
             const vehicle = await Vehiculo.findByPk(id, { transaction: t });
             if (!vehicle) throw new Error("Vehículo no encontrado");
 
-            // --- ▼▼ VALIDACIÓN DE PERMISO (Goal 3) ▼▼ ---
+            // --- VALIDACIÓN DE PERMISO  ---
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado. No puede modificar este vehículo.');
             }
-            // --- ▲▲ FIN DE LA VALIDACIÓN ▲▲ ---
 
             const setFields = {}; 
             const pushCreates = []; 
@@ -236,16 +224,10 @@ export default class VehicleManager {
                         if (key === 'destino') pushCreates.push(Destino.create(data, { transaction: t }));
 
                     } else if (key === 'usuario') { 
-                        // CAMBIO: Si se actualiza el 'usuario' (chofer), lo guardamos como 'description'
                         pushCreates.push(Descripcion.create({ vehiculo_id: id, descripcion: updateData[key] }, { transaction: t }));
                     }
                 }
             }
-
-            // 2. Actualizamos el vehículo (NO actualizamos campos principales, solo historial)
-            // if (Object.keys(setFields).length > 0) {
-            //    await vehicle.update(setFields, { transaction: t });
-            // }
 
             // 3. Creamos los nuevos registros de historial
             if (pushCreates.length > 0) {
@@ -261,20 +243,16 @@ export default class VehicleManager {
         }
     }
 
-    // --- (Resto de funciones: deleteVehicle, delete...History, getHistory...) ---
-    // (Asegúrate de que estas funciones también tengan la validación 'checkPermission' si es necesario)
-    // ... (El código de deleteVehicle, deleteAllHistory, deleteOneHistoryEntry, etc. va aquí sin cambios) ...
     
-    deleteVehicle = async (id, user) => { // <-- CAMBIO: Añadido 'user'
+    deleteVehicle = async (id, user) => { 
         try {
             const vehicle = await Vehiculo.findByPk(id);
             if (!vehicle) throw new Error("Vehículo no encontrado");
 
-            // --- ▼▼ VALIDACIÓN DE PERMISO ▼▼ ---
+            // ---  VALIDACIÓN DE PERMISO  ---
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado. No puede eliminar este vehículo.');
             }
-            // --- ▲▲ FIN DE LA VALIDACIÓN ▲▲ ---
 
             await vehicle.destroy();
             return { success: true };
@@ -283,7 +261,7 @@ export default class VehicleManager {
         }
     }
     
-    deleteAllHistory = async (cid, fieldName, user) => { // <-- CAMBIO: Añadido 'user'
+    deleteAllHistory = async (cid, fieldName, user) => { 
         try {
             // Primero, verificamos el permiso sobre el vehículo padre
             const vehicle = await Vehiculo.findByPk(cid);
@@ -291,12 +269,10 @@ export default class VehicleManager {
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado.');
             }
-            // --- Fin de la validación ---
 
             let model;
             switch (fieldName) {
                 case 'kilometrajes': model = Kilometraje; break;
-                // ... (resto de los cases) ...
                 case 'services': model = Service; break;
                 case 'rodados': model = Rodado; break;
                 case 'reparaciones': model = Reparacion; break;
@@ -314,7 +290,7 @@ export default class VehicleManager {
         }
     }
 
-    deleteOneHistoryEntry = async (cid, fieldName, historyId, user) => { // <-- CAMBIO: Añadido 'user'
+    deleteOneHistoryEntry = async (cid, fieldName, historyId, user) => { 
         try {
             // Primero, verificamos el permiso sobre el vehículo padre
             const vehicle = await Vehiculo.findByPk(cid);
@@ -322,12 +298,10 @@ export default class VehicleManager {
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado.');
             }
-            // --- Fin de la validación ---
 
             let model;
             switch (fieldName) {
                 case 'kilometrajes': model = Kilometraje; break;
-                // ... (resto de los cases) ...
                 case 'services': model = Service; break;
                 case 'rodados': model = Rodado; break;
                 case 'reparaciones': model = Reparacion; break;
@@ -350,7 +324,6 @@ export default class VehicleManager {
         }
     }
     
-    // --- (Funciones get...History... sin cambios) ---
     getHistoryForVehicle = async (vehiculoId, historyModel, orderField) => {
         try {
             // Función genérica para buscar historial
