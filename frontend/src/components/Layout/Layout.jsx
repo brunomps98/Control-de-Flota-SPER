@@ -1,3 +1,5 @@
+// En: frontend/src/components/Layout/Layout.jsx
+
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
@@ -6,6 +8,10 @@ import Footer from '../common/footer/footer';
 import '../Layout/Layout.css';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import { SocketProvider } from '../../context/SocketContext';
+import ChatWrapper from '../chat/ChatWrapper';
+
+
 
 const Layout = () => {
     const [user, setUser] = useState(null);
@@ -30,10 +36,8 @@ const Layout = () => {
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-
         const handleBackButton = () => {
             const path = location.pathname;
-
             if (path === '/vehicle' || path === '/vehicle-general') {
                 App.exitApp(); 
             } 
@@ -41,9 +45,7 @@ const Layout = () => {
                 navigate(-1); 
             } 
         };
-
         const listener = App.addListener('backButton', handleBackButton);
-
         return () => {
             listener.remove();
         };
@@ -57,14 +59,18 @@ const Layout = () => {
         return null;
     }
 
+    // --- ▼▼ 2. ENVOLVEMOS EL LAYOUT CON EL PROVIDER ▼▼ ---
     return (
-        <div className="layout-container">
-            <Navbar user={user} />
-            <main>
-                <Outlet context={{ user }} />
-            </main>
-            <Footer />
-        </div>
+        <SocketProvider>
+            <div className="layout-container">
+                <Navbar user={user} />
+                <main>
+                    <Outlet context={{ user }} />
+                </main>
+                <Footer />
+                <ChatWrapper user={user} />
+            </div>
+        </SocketProvider>
     );
 } 
 

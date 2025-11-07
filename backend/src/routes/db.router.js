@@ -9,6 +9,7 @@ import SupportController from "../controllers/support.controller.js";
 import { userDao } from "../repository/index.js";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
+import ChatController from "../controllers/chat.controller.js";
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -71,6 +72,11 @@ router.get("/vehicle/:cid/reparaciones", verifyToken, VehicleDao.getReparaciones
 router.get("/vehicle/:cid/destinos", verifyToken, VehicleDao.getDestinos);
 router.get("/vehicle/:cid/rodados", verifyToken, VehicleDao.getRodados);
 router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripciones);
+
+// --- RUTAS DE CHAT (Protegidas) ---
+router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
+router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
+router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
 
 
 // --- RUTAS DE SOPORTE  ---

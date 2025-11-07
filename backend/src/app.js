@@ -1,3 +1,5 @@
+// En: app.js
+
 import express from "express";
 import { __dirname } from "./utils.js";
 import dbRouter from './routes/db.router.js';
@@ -14,6 +16,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- ▼▼ [INICIO DE LA SOLUCIÓN] ▼▼ ---
+
+// 1. Definimos las opciones de CORS (como ya las tenías)
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
   .split(',')
@@ -25,14 +30,12 @@ const extras = [
   "ionic://localhost",
   "http://localhost",
   "http://127.0.0.1",
+  "http://localhost:5173" // Mantenemos esto por si acaso
 ];
-
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
-
 
 const corsOptions = {
   origin: function(origin, callback) {
-    
     if (!origin) {
       if (process.env.ALLOW_UNDEFINED_ORIGIN === 'true') {
         return callback(null, true);
@@ -40,11 +43,9 @@ const corsOptions = {
         return callback(new Error('CORS - origin undefined not allowed'), false);
       }
     }
-
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    
     return callback(new Error('CORS - origin not allowed: ' + origin), false);
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -52,8 +53,9 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); 
+// 2. Eliminamos el CORS global de aquí
+// app.use(cors(corsOptions)); // <-- ELIMINADO
+// app.options('*', cors(corsOptions)); // <-- ELIMINADO
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,6 +64,13 @@ app.get('/', (req, res) => {
     res.status(200).send('Server is live and healthy!');
 });
 
-app.use("/api", dbRouter);
+// 3. Aplicamos el middleware de CORS y las opciones
+//    *SOLAMENTE* al router de la API.
+app.use("/api", cors(corsOptions), dbRouter);
+
+// Manejamos las peticiones OPTIONS explícitamente *solo* para /api
+app.options('/api/*', cors(corsOptions)); 
+
+// --- ▲▲ [FIN DE LA SOLUCIÓN] ▲▲ ---
 
 export default app;

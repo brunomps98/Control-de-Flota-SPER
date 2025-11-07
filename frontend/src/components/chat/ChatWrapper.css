@@ -1,0 +1,172 @@
+/* En: frontend/src/components/chat/ChatWrapper.css (Versión Completa) */
+
+/* --- 1. Contenedor Principal (Posición: Abajo a la Izquierda) --- */
+.chat-wrapper-container {
+    position: fixed; /* <-- ¡La línea clave! */
+    bottom: 20px;
+    right: 20px; /* <-- Posición Izquierda */
+    z-index: 1000;
+}
+
+/* --- 2. La Burbuja --- */
+.chat-bubble-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.chat-bubble-button:hover {
+    transform: scale(1.1);
+}
+
+/* --- 3. La Ventana de Chat --- */
+.chat-window {
+    position: absolute;
+    bottom: 80px; 
+    right: 0; /* Alineado a la izquierda del contenedor */
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; 
+    animation: slide-up 0.3s ease-out;
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 4. Partes de la Ventana (Header, Body, Footer) --- */
+.chat-header {
+    background: #f1f1f1;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+.chat-header h3 { margin: 0; font-size: 1.1rem; }
+.chat-close-btn { background: none; border: none; cursor: pointer; padding: 0; color: #555; }
+.chat-close-btn:hover { color: #000; }
+.chat-body { flex-grow: 1; padding: 15px; overflow-y: auto; }
+.chat-footer { padding: 10px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
+.chat-footer input { flex-grow: 1; border: 1px solid #ccc; border-radius: 20px; padding: 8px 12px; font-size: 0.9rem; }
+.chat-footer button { background: #007bff; color: white; border: none; border-radius: 20px; padding: 8px 15px; cursor: pointer; font-weight: bold; }
+.chat-footer button:hover { background: #0056b3; }
+
+/* --- 5. Estilos de Mensajes (Invitado) --- */
+.message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.message-bubble { padding: 8px 12px; border-radius: 18px; max-width: 80%; word-wrap: break-word; }
+.message-sender { font-size: 0.8rem; font-weight: bold; margin-bottom: 4px; color: #555; }
+.message-bubble.received { background-color: #f0f0f0; color: #333; align-self: flex-start; border-bottom-left-radius: 4px; }
+.message-bubble.received .message-sender { color: #007bff; }
+.message-bubble.sent { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+.message-bubble.sent .message-sender { color: #f0f0f0; }
+
+/* --- 6. Estilos de Bandeja de Entrada (Admin) --- */
+.admin-inbox {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.admin-room-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.admin-room-item:hover { background-color: #f9f9f9; }
+.admin-room-item:last-child { border-bottom: none; }
+.room-item-user { font-weight: bold; font-size: 0.95rem; color: #333; }
+.room-item-preview { font-size: 0.9rem; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.room-item-unit { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+/* --- Estilo del Botón "Atrás" (Admin) --- */
+.chat-header {
+    /* (Ya lo tienes, solo asegúrate de que 'align-items' esté 'center') */
+    display: flex;
+    align-items: center;
+}
+
+.chat-back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-right: 10px; /* Espacio entre "atrás" y el título */
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+.chat-back-btn:hover {
+    color: #000;
+}
+
+/* --- Estilos de Timestamp del Mensaje --- */
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.message-sender {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.message-timestamp {
+    font-size: 0.75rem; /* Más pequeño */
+    color: #888;      /* Color gris */
+    margin-left: 10px;  /* Espacio del nombre */
+}
+
+/* Ajustes de color para burbujas enviadas */
+.message-bubble.sent .message-sender {
+    color: #f0f0f0;
+}
+.message-bubble.sent .message-timestamp {
+    color: #e0e0e0; /* Un gris un poco más claro */
+}
+
+/* Ajustes de color para burbujas recibidas */
+.message-bubble.received .message-sender {
+    color: #007bff;
+}
+
+/* --- Estilo de Timestamp de la Bandeja de Entrada (Admin) --- */
+.admin-room-item {
+    position: relative; /* Para posicionar el timestamp */
+}
+
+.room-item-timestamp {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 0.75rem;
+    color: #888;
+}
