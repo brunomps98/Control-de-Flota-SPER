@@ -185,16 +185,16 @@ class VehicleDao {
     }
 
     static deleteOneHistoryEntry = async (req, res) => {
+        let { cid, fieldName, historyId } = req.params;
+        
         try {
-            const { cid, fieldName, historyId } = req.params;
-
             const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId);
 
             if (result instanceof Error) throw result;
 
             res.status(200).json({ status: "success", message: `Registro de ${fieldName} eliminado.` });
         } catch (error) {
-            console.error(`Error al eliminar un registro de ${fieldName}:`, error);
+            console.error(`Error al eliminar un registro de ${fieldName} (ID: ${historyId}):`, error);
             res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
         }
     }

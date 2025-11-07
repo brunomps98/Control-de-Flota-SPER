@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// CAMBIO 1: Importamos useLocation
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './VehicleDetail.css'; 
@@ -54,11 +53,11 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
             <table>
                 <thead>
                     <tr>
-                        <th style={{ width: historyType === 'descripciones' ? 'auto' : '60%' }}>
+                        <th style={{ width: (historyType === 'descripciones' || historyType === 'services' || historyType === 'rodados') ? 'auto' : '60%' }}>
                             {labelName || (fieldName === 'kilometraje' ? 'Kilometraje' : 'Descripción')} {unit}
                         </th>
                         
-                        {historyType !== 'descripciones' && <th>Fecha</th>}
+                        {historyType !== 'descripciones' && historyType !== 'services' && historyType !== 'rodados' && <th>Fecha</th>}
                         
                         <th className="action-col">Borrar</th>
                     </tr>
@@ -68,7 +67,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                         <tr key={item.id}>
                             <td>{item[fieldName]}</td>
                             
-                            {historyType !== 'descripciones' && (
+                            {historyType !== 'descripciones' && historyType !== 'services' && historyType !== 'rodados' && (
                                 <td>
                                     {
                                         formatDate(
@@ -105,7 +104,6 @@ const VehicleDetail = () => {
     // --- ESTADOS ---
     const { cid } = useParams();
     const navigate = useNavigate();
-    // CAMBIO 2: Obtenemos la 'location'
     const location = useLocation(); 
     const [vehicle, setVehicle] = useState(null);
     const [loadingVehicle, setLoadingVehicle] = useState(true);
@@ -125,8 +123,6 @@ const VehicleDetail = () => {
         setLoadingVehicle(true);
         try {
             const response = await apiClient.get(`/api/vehicle/${cid}`);
-            // Si el backend devuelve { vehicle: {...} }
-            // o devuelve directamente el objeto, manejamos ambos casos:
             const vehiclePayload = response.data.vehicle ? response.data.vehicle : response.data;
             setVehicle(vehiclePayload);
             
@@ -143,9 +139,6 @@ const VehicleDetail = () => {
         }
     };
 
-    // CAMBIO 3: Añadimos 'location.key' a las dependencias.
-    // Esto fuerza el re-fetch CADA VEZ que navegamos a esta página
-    // (ej. al volver de 'EdditVehicle').
     useEffect(() => {
         fetchVehicleData();
     }, [cid, location.key]); 
@@ -166,21 +159,16 @@ const VehicleDetail = () => {
         stateSetter(prev => ({ ...prev, loading: true, error: null }));
         try {
             const response = await apiClient.get(`/api/vehicle/${cid}/${historyType}`);
-            // Manejo flexible: algunos endpoints devuelven .history u otros directamente la array
             const historyArray = response.data.history ? response.data.history : response.data;
             stateSetter({ data: historyArray, loading: false, error: null });
             
-            // CAMBIO 4: Eliminamos 'fetchVehicleData()' de aquí.
-            // Ya no es necesario y causaba el parpadeo de la página.
-
         } catch (err) {
             stateSetter({ data: null, loading: false, error: err.response?.data?.message || `Error cargando ${historyType}` });
         }
     };
 
-    // NUEVO: Al montar / al volver a esta ruta, cargamos los historiales
+    // Al montar / al volver a esta ruta, cargamos los historiales
     useEffect(() => {
-        // Solo llamamos si hay un cid válido
         if (!cid) return;
         fetchHistory('kilometrajes');
         fetchHistory('descripciones');
@@ -230,7 +218,7 @@ const VehicleDetail = () => {
                     await apiClient.delete(`/api/vehicle/${cid}/history/all/${historyType}`);
                     MySwal.fire('¡Eliminado!', `El historial de ${historyType} ha sido eliminado.`, 'success');
                     stateSetter({ data: null, loading: false, error: null }); 
-                    fetchVehicleData(); // Refrescamos la ficha (esto está bien)
+                    fetchVehicleData(); 
                 } catch (err) {
                     MySwal.fire('Error', 'No se pudo eliminar el historial.', 'error');
                 }
@@ -251,7 +239,7 @@ const VehicleDetail = () => {
                 try {
                     await apiClient.delete(`/api/vehicle/${cid}/history/${historyType}/${historyId}`);
                     MySwal.fire('¡Eliminado!', 'El registro ha sido eliminado.', 'success');
-                    fetchHistory(historyType); // Refresca solo este historial
+                    fetchHistory(historyType); 
                 } catch (err) {
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el registro.';
                     stateSetter(prev => ({ ...prev, error: errorMessage }));
@@ -275,30 +263,33 @@ const VehicleDetail = () => {
 
     const allImages = vehicle.thumbnails || [];
 
-    // --- LÓGICA DE "LATEST" (MODIFICADA: prioriza los historiales cargados en estado) ---
-    const getLatestHistory = (historyArray, fieldName) => {
-        if (historyArray && historyArray.length > 0) {
-            return historyArray[historyArray.length - 1][fieldName];
+    // --- ▼▼ ARREGLO PRINCIPAL: Variables "Latest" ▼▼ ---
+        
+    // Función helper para obtener el último registro (el PRIMERO en el array, ya que el backend ordena DESC)
+    const getLatestValue = (historyState, fieldName, fallbackValue) => {
+        // 1. Prioridad: El estado de React (ej: 'kilometrajes')
+        //    (Este se actualiza cuando apretamos "Cargar Historial")
+        if (historyState.data && historyState.data.length > 0) {
+            // El backend ordena DESC, así que el item [0] es el más nuevo
+            return historyState.data[0][fieldName];
         }
-        return null; 
+
+        // 2. Fallback: El historial que vino DENTRO del objeto 'vehicle'
+        //    (Este se actualiza cuando volvemos de 'EdditVehicle')
+        const vehicleHistory = vehicle[historyState.historyKey]; // ej: vehicle['kilometrajes']
+        if (vehicleHistory && vehicleHistory.length > 0) {
+            // El backend ordena DESC, así que el item [0] es el más nuevo
+            return vehicleHistory[0][fieldName];
+        }
+
+        // 3. Fallback: El campo original del 'vehicle' (ej: 'vehicle.kilometros')
+        return fallbackValue || 'N/A';
     };
-
-    // Priorizar datos cargados en estado (por ejemplo luego de editar desde EdditVehicle),
-    // si no existen, fallback a vehicle.<historyArray> (respuesta del backend), y finalmente al campo directo.
-    const latestChofer =
-        (descripciones.data && descripciones.data.length > 0)
-            ? getLatestHistory(descripciones.data, 'descripcion')
-            : (getLatestHistory(vehicle.descripciones, 'descripcion') || vehicle.chofer || 'Sin asignar');
-
-    const latestKilometraje =
-        (kilometrajes.data && kilometrajes.data.length > 0)
-            ? getLatestHistory(kilometrajes.data, 'kilometraje')
-            : (getLatestHistory(vehicle.kilometrajes, 'kilometraje') || vehicle.kilometros || 'N/A');
-
-    const latestDestino =
-        (destinos.data && destinos.data.length > 0)
-            ? getLatestHistory(destinos.data, 'descripcion')
-            : (getLatestHistory(vehicle.destinos, 'descripcion') || vehicle.destino || 'N/A');
+    
+    // Asignamos los "últimos valores" a las variables
+    const latestChofer = getLatestValue(descripciones, 'descripcion', vehicle.chofer);
+    const latestKilometraje = getLatestValue(kilometrajes, 'kilometraje', vehicle.kilometros);
+    const latestDestino = getLatestValue(destinos, 'descripcion', vehicle.destino);
 
 
     return (
@@ -337,6 +328,7 @@ const VehicleDetail = () => {
                             <p><strong>Dominio:</strong> <span>{vehicle.dominio}</span></p>
                             <p><strong>Año:</strong> <span>{vehicle.anio}</span></p>
                             
+                            {/* CAMBIO: Se usan las variables "latest" */}
                             <p><strong>Kilometraje:</strong> <span>{latestKilometraje} km</span></p>
                             <p><strong>Destino:</strong> <span>{latestDestino}</span></p>
                             <p><strong>Chofer:</strong> <span>{latestChofer}</span></p>
@@ -380,6 +372,7 @@ const VehicleDetail = () => {
                         loading={services.loading}
                         error={services.error}
                         fieldName="descripcion"
+                        labelName="Fecha de Service" 
                         historyType="services"
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
@@ -413,6 +406,7 @@ const VehicleDetail = () => {
                         loading={rodados.loading}
                         error={rodados.error}
                         fieldName="descripcion"
+                        labelName="Fecha de Rodado"
                         historyType="rodados"
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}

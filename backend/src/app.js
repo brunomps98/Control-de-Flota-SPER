@@ -9,9 +9,8 @@ const app = express();
 
 console.log('\n');
 
-// Middleware logger
 app.use((req, res, next) => {
-  console.log(`--> Petición recibida: ${req.method} ${req.originalUrl}`);
+  console.log(`[BACK] --> Petición recibida: ${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -30,17 +29,14 @@ const extras = [
 
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
 
-console.log('Allowed origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function(origin, callback) {
-    console.log('--> CORS origin header:', origin);
+    
     if (!origin) {
       if (process.env.ALLOW_UNDEFINED_ORIGIN === 'true') {
-        console.log('--> Allowing undefined origin because ALLOW_UNDEFINED_ORIGIN=true');
         return callback(null, true);
       } else {
-        console.log('--> Rejecting undefined origin (set ALLOW_UNDEFINED_ORIGIN=true to allow)');
         return callback(new Error('CORS - origin undefined not allowed'), false);
       }
     }
@@ -48,7 +44,7 @@ const corsOptions = {
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    console.log(`--> CORS rejecting origin: ${origin}`);
+    
     return callback(new Error('CORS - origin not allowed: ' + origin), false);
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
