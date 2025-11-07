@@ -28,7 +28,7 @@ const renderVehicleView = async (req, res, viewName) => {
 const getVehicleByIdHelper = async (req, res, renderView) => {
     try {
         const id = req.params.cid || req.params.productId;
-        const vehicleInstance = await vehicleDao.getVehicleById(id);
+        const vehicleInstance = await vehicleDao.getVehicleById(id, req.user);
 
         if (vehicleInstance == null || vehicleInstance.error) {
             return res.status(404).json({ status: 'error', error: 'product not found' });
@@ -105,7 +105,7 @@ class VehicleDao {
             const product = { ...productData, thumbnail: thumbnailUrls };
 
             // Llamamos al repositorio para guardar en la base de datos
-            const newProduct = await vehicleDao.addVehicle(product);
+            const newProduct = await vehicleDao.addVehicle(product, req.user);
 
             if (newProduct instanceof Error) {
                 throw newProduct;
@@ -144,7 +144,7 @@ class VehicleDao {
             const id = req.params.productId;
             const body = req.body;
             
-            const updatedVehicle = await vehicleDao.updateVehicle(id, body);
+            const updatedVehicle = await vehicleDao.updateVehicle(id, body, req.user);
 
             if (updatedVehicle instanceof Error) throw updatedVehicle;
             if (!updatedVehicle) {
@@ -161,7 +161,7 @@ class VehicleDao {
     static deleteVehicle = async (req, res) => {
         try {
             const id = req.params.pid || req.params.cid;
-            const result = await vehicleDao.deleteVehicle(id);
+            const result = await vehicleDao.deleteVehicle(id, req.user);
             
             if (result instanceof Error) throw result;
 
@@ -188,7 +188,7 @@ class VehicleDao {
         let { cid, fieldName, historyId } = req.params;
         
         try {
-            const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId);
+            const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId, req.user);
 
             if (result instanceof Error) throw result;
 
@@ -203,7 +203,7 @@ class VehicleDao {
         try {
             const { cid, fieldName } = req.params;
 
-            const result = await vehicleDao.deleteAllHistory(cid, fieldName);
+            const result = await vehicleDao.deleteAllHistory(cid, fieldName, req.user);
 
             if (result instanceof Error) throw result;
 

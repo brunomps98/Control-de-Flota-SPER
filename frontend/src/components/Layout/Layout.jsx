@@ -61,7 +61,7 @@ const Layout = () => {
         <div className="layout-container">
             <Navbar user={user} />
             <main>
-                <Outlet />
+                <Outlet context={{ user }} />
             </main>
             <Footer />
         </div>

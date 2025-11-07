@@ -3,15 +3,20 @@ import { __dirname } from "../utils.js";
 import express from 'express';
 import multer from "multer";
 import path from 'path';
-
 import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
 import SupportController from "../controllers/support.controller.js";
-
 import { userDao } from "../repository/index.js";
-
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
+
+const verifyAdmin = (req, res, next) => {
+    if (!req.user || !req.user.admin) {
+        return res.status(403).json({ message: 'Acción no autorizada. Solo los administradores pueden realizar esta acción.' });
+    }
+    next();
+};
+
 
 const router = Router();
 
@@ -25,7 +30,7 @@ const upload = multer({ storage: storage });
 
 
 // --- RUTAS DE AUTENTICACIÓN  ---
-router.post('/register', UserDao.registerUser);
+router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
 
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;

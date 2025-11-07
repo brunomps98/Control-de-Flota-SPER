@@ -7,6 +7,9 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core'; 
 
 const RealTimeVehicle = () => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
     const [formData, setFormData] = useState({
         title: '', description: '', dominio: '', kilometros: '', destino: '',
         anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
@@ -21,19 +24,31 @@ const RealTimeVehicle = () => {
             try {
                 const response = await apiClient.get('/api/user/current');
                 const userData = response.data.user; 
+                
+                setUser(userData);
+                
                 if (userData) {
-                    const validTitles = [
-                        "Direccion General", "Unidad Penal 1", "Unidad Penal 3",
-                        "Unidad Penal 4", "Unidad Penal 5", "Unidad Penal 6",
-                        "Unidad Penal 7", "Unidad Penal 8", "Unidad Penal 9",
-                        "Instituto", "Tratamiento"
-                    ];
-                    const initialTitle = validTitles.includes(userData.unidad) ? userData.unidad : "";
+                    const unitMap = {
+                        "Direccion General": "dg", "Unidad Penal 1": "up1", "Unidad Penal 3": "up3",
+                        "Unidad Penal 4": "up4", "Unidad Penal 5": "up5", "Unidad Penal 6": "up6",
+                        "Unidad Penal 7": "up7", "Unidad Penal 8": "up8", "Unidad Penal 9": "up9",
+                        "Instituto": "inst", "Tratamiento": "trat"
+                    };
+                    
+                    let initialTitle = "";
+                    const userPermissionKey = unitMap[userData.unidad]; // ej: "up6"
+                    
+                    if (userPermissionKey && userData[userPermissionKey]) { 
+                        initialTitle = userData.unidad;
+                    }
+                    
                     setFormData(prevState => ({ ...prevState, title: initialTitle }));
                 }
             } catch (error) {
                 console.error("No se pudo obtener la sesión del usuario:", error);
-                setFormData(prevState => ({ ...prevState, title: "" }));
+                toast.error("Error al cargar datos de usuario.");
+            } finally {
+                setLoading(false); 
             }
         };
         fetchUserData();
@@ -73,41 +88,39 @@ const RealTimeVehicle = () => {
             const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
             toast.success(response.data.message);
 
-            const fetchUserDataAgain = async () => {
-                 try {
-                     const userRes = await apiClient.get('/api/user/current');
-                     const userData = userRes.data.user;
-                     if (userData) {
-                         const validTitles = ["Direccion General", "Unidad Penal 1", "Unidad Penal 3", "Unidad Penal 4", "Unidad Penal 5", "Unidad Penal 6", "Unidad Penal 7", "Unidad Penal 8", "Unidad Penal 9", "Instituto", "Tratamiento"];
-                         const resetTitle = validTitles.includes(userData.unidad) ? userData.unidad : "";
-                         setFormData({
-                             title: resetTitle, description: '', dominio: '', kilometros: '', destino: '',
-                             anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
-                             service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
-                             thumbnail: null
-                         });
-                         const fileInput = document.getElementById('thumbnail');
-                         if (fileInput) fileInput.value = '';
-                     }
-                 } catch (err) {
-                     setFormData({
-                         title: '', description: '', dominio: '', kilometros: '', destino: '',
-                         anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
-                         service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
-                         thumbnail: null
-                     });
-                     const fileInput = document.getElementById('thumbnail');
-                      if (fileInput) fileInput.value = '';
-                 }
+            const resetForm = (initialTitle = "") => {
+                 setFormData({
+                     title: initialTitle, description: '', dominio: '', kilometros: '', destino: '',
+                     anio: '', modelo: '', tipo: '', chasis: '', motor: '', cedula: '',
+                     service: '', rodado: '', marca: '', reparaciones: '', usuario: '',
+                     thumbnail: null
+                 });
+                 const fileInput = document.getElementById('thumbnail');
+                 if (fileInput) fileInput.value = '';
             }
-            fetchUserDataAgain(); 
+            
+            resetForm(formData.title);
+
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Error al agregar vehículo.');
+            if (error.response && error.response.status === 403) {
+                 toast.error('Permiso denegado: No puede agregar vehículos a esa unidad.');
+            } else {
+                 toast.error(error.response?.data?.message || 'Error al agregar vehículo.');
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
+    if (loading || !user) {
+        return (
+            <div className="login-page vehicle-form-page">
+                <main className="login-main">
+                    <p style={{color: 'white', fontSize: '1.2rem'}}>Cargando...</p>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="login-page vehicle-form-page">
@@ -128,17 +141,17 @@ const RealTimeVehicle = () => {
                                 required
                             >
                                 <option value="">-- Seleccione --</option>
-                                <option value="Direccion General">Dirección General</option>
-                                <option value="Unidad Penal 1">Unidad Penal 1</option>
-                                <option value="Unidad Penal 3">Unidad Penal 3</option>
-                                <option value="Unidad Penal 4">Unidad Penal 4</option>
-                                <option value="Unidad Penal 5">Unidad Penal 5</option>
-                                <option value="Unidad Penal 6">Unidad Penal 6</option>
-                                <option value="Unidad Penal 7">Unidad Penal 7</option>
-                                <option value="Unidad Penal 8">Unidad Penal 8</option>
-                                <option value="Unidad Penal 9">Unidad Penal 9</option>
-                                <option value="Instituto">Instituto</option>
-                                <option value="Tratamiento">Tratamiento</option>
+                                {(user.admin || user.dg) && <option value="Direccion General">Dirección General</option>}
+                                {(user.admin || user.up1) && <option value="Unidad Penal 1">Unidad Penal 1</option>}
+                                {(user.admin || user.up3) && <option value="Unidad Penal 3">Unidad Penal 3</option>}
+                                {(user.admin || user.up4) && <option value="Unidad Penal 4">Unidad Penal 4</option>}
+                                {(user.admin || user.up5) && <option value="Unidad Penal 5">Unidad Penal 5</option>}
+                                {(user.admin || user.up6) && <option value="Unidad Penal 6">Unidad Penal 6</option>}
+                                {(user.admin || user.up7) && <option value="Unidad Penal 7">Unidad Penal 7</option>}
+                                {(user.admin || user.up8) && <option value="Unidad Penal 8">Unidad Penal 8</option>}
+                                {(user.admin || user.up9) && <option value="Unidad Penal 9">Unidad Penal 9</option>}
+                                {(user.admin || user.inst) && <option value="Instituto">Instituto</option>}
+                                {(user.admin || user.trat) && <option value="Tratamiento">Tratamiento</option>}
                             </select>
                         </div>
                         <div className="form-group span-2">
