@@ -82,12 +82,6 @@ const Support = () => {
         <div className="login-page">
             <main className="login-main">
 
-                <div className="support-actions-container">
-                    <Link to="/support-tickets" className="support-view-cases-btn">
-                        Ver Lista de Casos de Soporte
-                    </Link>
-                </div>
-
                 <div className="login-card support-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
                     <h2 className="form-title">Soporte</h2>

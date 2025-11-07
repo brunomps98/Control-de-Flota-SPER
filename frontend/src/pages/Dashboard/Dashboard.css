@@ -1,0 +1,51 @@
+.dashboard-container {
+    /* Usamos el fondo claro de vehicle.jsx */
+    background-color: #f4f7f6;
+    padding: 30px 40px; 
+    font-family: 'Inter', sans-serif;
+    min-height: 100%;
+}
+
+.dashboard-title {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #1a202c;
+    font-weight: 700;
+}
+
+.widget-grid {
+    display: grid;
+    /* Creamos una grilla para los widgets */
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.dashboard-widget {
+    /* Usamos el estilo de tarjeta oscura */
+    background-color: #1c2836;
+    color: #f0f0f0;
+    border: 1px solid #4a5568;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 25px;
+}
+
+.dashboard-widget h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 25px 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #4a5568;
+}
+
+.chart-container {
+    /* Damos altura al gráfico */
+    position: relative;
+    height: 400px;
+}
+
+
+.dashboard-container .error-message {
+    color: #dc3545;
+}
