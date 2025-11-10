@@ -1,8 +1,41 @@
 import { supportRepository } from "../repository/index.js";
 import { supabase } from '../config/supabaseClient.js'; 
 import path from 'path'; 
+import { sendNewTicketEmail } from '../services/email.service.js'; 
+import Usuario from '../models/user.model.js'; 
+
 
 class SupportController {
+
+    /**
+     * @summary Busca a todos los admins y les envía el email de notificación.
+     * Se ejecuta "fire-and-forget" para no hacer esperar al usuario.
+     */
+    static _sendNotificationToAdmins = async (ticketData, fileUrls) => {
+        try {
+            // 1. Buscar todos los emails de admins
+            const admins = await Usuario.findAll({
+                where: { admin: true },
+                attributes: ['email'] 
+            });
+
+            if (admins.length === 0) {
+                console.warn("[Support Controller] No se encontraron admins para notificar.");
+                return;
+            }
+
+            const adminEmails = admins.map(admin => admin.email);
+
+            // 2. Enviar el correo (sin 'await' para que se ejecute en segundo plano)
+            sendNewTicketEmail(adminEmails, ticketData, fileUrls);
+
+        } catch (error) {
+            // Este error solo se loguea en el backend, no detiene al usuario.
+            console.error("[Support Controller] Error al buscar admins para notificar:", error);
+        }
+    };
+    // --- ▲▲ ------------------------- ▲▲ ---
+
 
     // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
     static renderSupportForm = (req, res) => {
@@ -63,21 +96,18 @@ class SupportController {
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
-            let fileUrls = []; // Array para las URLs públicas
+            let fileUrls = [];
 
             if (req.files && req.files.length > 0) {
                 console.log(`Subiendo ${req.files.length} archivos de soporte a Supabase...`);
 
                 for (const file of req.files) {
-                    // Creamos un nombre de archivo único
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                     const extension = path.extname(file.originalname);
-                    // Usamos un prefijo 'files-' para diferenciarlo de 'thumbnail-'
                     const fileName = `files-${uniqueSuffix}${extension}`; 
 
-                    // Subimos el archivo (buffer) al bucket 'uploads'
                     const { error: uploadError } = await supabase.storage
-                        .from('uploads') 
+                        .from('uploads')
                         .upload(fileName, file.buffer, {
                             contentType: file.mimetype,
                             cacheControl: '3600',
@@ -88,7 +118,6 @@ class SupportController {
                         throw new Error('Error al subir el archivo de soporte a Supabase: ' + uploadError.message);
                     }
 
-                    // Obtenemos la URL pública
                     const { data: publicUrlData } = supabase.storage
                         .from('uploads')
                         .getPublicUrl(fileName);
@@ -101,10 +130,12 @@ class SupportController {
                 }
             }
             
-
             ticketData.files = fileUrls;
 
             await supportRepository.addSupportTicket(ticketData);
+
+            SupportController._sendNotificationToAdmins(ticketData, fileUrls);
+            
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
             console.error("ERROR AL CREAR TICKET (con archivos):", error);
@@ -121,6 +152,9 @@ class SupportController {
             ticketData.files = []; 
             
             await supportRepository.addSupportTicket(ticketData);
+            
+            SupportController._sendNotificationToAdmins(ticketData, []); // Pasamos un array vacío de archivos
+
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
             console.error("ERROR AL CREAR TICKET (sin archivos):", error);

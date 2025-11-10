@@ -1,13 +1,18 @@
-// vehicle.jsx (CORREGIDO CON BOTÓN ATRÁS)
-
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 import { toast } from 'react-toastify';
-import { App } from '@capacitor/app'; 
-import { Capacitor } from '@capacitor/core'; 
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
+
+const FilterIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.973 1.011a.75.75 0 0 1 .472.691l1.524 8.283a.75.75 0 0 1-.472.691A18.66 18.66 0 0 1 12 15c-2.755 0-5.455-.232-7.973-1.011a.75.75 0 0 1-.472-.691l-1.524-8.283a.75.75 0 0 1 .472-.691A18.66 18.66 0 0 1 12 3Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v5.25m0 0 3-3m-3 3-3-3" />
+    </svg>
+);
 
 const Vehicle = () => {
     const [vehicles, setVehicles] = useState([]);
@@ -21,8 +26,6 @@ const Vehicle = () => {
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
-    // --- EFECTOS (SIN CAMBIOS) ---
-
     // Efecto para el Toast de Bienvenida
     useEffect(() => {
         if (location.state?.username) {
@@ -31,20 +34,22 @@ const Vehicle = () => {
         }
     }, [location, navigate]);
 
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
     useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return; 
+        if (Capacitor.getPlatform() === 'web') return;
 
         const listenerPromise = App.addListener('backButton', (event) => {
             if (location.pathname === '/vehicle') {
-                event.preventDefault(); 
-                App.exitApp(); // Cierra la aplicación
+                event.preventDefault();
+                App.exitApp(); 
             }
         });
 
         return () => {
             listenerPromise.then(listener => listener.remove());
         };
-    }, [location.pathname]); 
+    }, [location.pathname]);
 
 
 
@@ -60,7 +65,6 @@ const Vehicle = () => {
         });
     }, [searchParams]);
 
-    // Efecto para cargar vehículos (Depende de searchParams)
     useEffect(() => {
         const fetchVehicles = async () => {
             setLoading(true);
@@ -80,12 +84,12 @@ const Vehicle = () => {
         fetchVehicles();
     }, [searchParams]);
 
-    
+
     // Efecto para Debouncing de filtros (ESTADO -> URL)
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
-            let paramsChanged = false; 
+            let paramsChanged = false;
             for (const key in filters) {
                 const urlValue = searchParams.get(key) || '';
                 if (filters[key] !== urlValue) {
@@ -96,11 +100,11 @@ const Vehicle = () => {
                 }
             }
             if (paramsChanged || Object.keys(query).length === 0) {
-                 setSearchParams(query);
+                setSearchParams(query);
             }
-        }, 400); 
+        }, 400);
         return () => clearTimeout(timer);
-    }, [filters, setSearchParams, searchParams]); 
+    }, [filters, setSearchParams, searchParams]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -122,13 +126,25 @@ const Vehicle = () => {
 
     // --- RENDERIZADO ---
     return (
-        
+
         <div className="vehicle-page-container">
             <div className="titulo-products">
                 <h1>Flota de Vehículos</h1>
             </div>
-            <form className="filter-container" onSubmit={handleFilterSubmit}>
-                 <div className="filter-group">
+
+            <button
+                className="btn-filter-toggle"
+                onClick={() => setIsFilterOpen(prev => !prev)}
+            >
+                <FilterIcon />
+                {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            </button>
+
+            <form
+                className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
+                onSubmit={handleFilterSubmit}
+            >
+                <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} placeholder="AA-123-BB" />
                 </div>
@@ -170,7 +186,7 @@ const Vehicle = () => {
                 )}
             </div>
         </div>
-        
+
     );
 }
 

@@ -37,7 +37,7 @@ const SoporteArchivo = sequelize.define('SoporteArchivo', {
         primaryKey: true,
         autoIncrement: true
     },
-    soporte_id: { // La clave foránea
+    soporte_id: { 
         type: DataTypes.INTEGER,
         allowNull: false
     },

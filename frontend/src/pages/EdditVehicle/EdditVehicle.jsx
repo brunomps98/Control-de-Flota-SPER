@@ -24,11 +24,7 @@ const EdditVehicle = () => {
     }, [navigate, productId]);
 
     // --- LÓGICA DE CARGA ---
-    // (No hacemos fetch de datos viejos, el form es solo para AÑADIR)
     useEffect(() => {
-        // Opcional: Podríamos cargar el 'vehicle' solo para mostrar el nombre,
-        // pero para este formulario, no es necesario.
-        // Dejamos los campos vacíos.
         setFormData({
             description: '',
             kilometros: '',
@@ -52,14 +48,9 @@ const EdditVehicle = () => {
         try {
             await apiClient.put(`/api/vehicle/${productId}`, formData);
             toast.success('Historial actualizado con éxito.');
-
-            // --- ▼▼ ESTE ES EL ARREGLO ▼▼ ---
-            // Usamos window.location.assign en lugar de navigate.
-            // Esto fuerza un "hard refresh" de la página de detalle,
-            // asegurando que SÍ O SÍ pida los datos nuevos.
             setTimeout(() => {
                 window.location.assign(`/vehicle-detail/${productId}`);
-            }, 1500); // Mantenemos el delay para que el toast se vea
+            }, 1500); 
 
         } catch (err) {
             toast.error(err.response?.data?.message || 'Error al actualizar el vehículo.');

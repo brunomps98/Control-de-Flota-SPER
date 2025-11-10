@@ -66,9 +66,9 @@ export default class userManager {
             // 3. Crear el payload final para la base de datos
             const newUserPayload = {
                 username,
-                unidad, // Guardamos el string 
+                unidad,
                 email,
-                password, // El hook 'beforeCreate' lo hasheará
+                password, 
                 ...permissions 
             };
 
@@ -80,7 +80,6 @@ export default class userManager {
 
         } catch (error) {
             if (error instanceof UniqueConstraintError) {
-                // Captura el error si el email ya existe
                 throw new Error('Email already in use');
             }
             throw error; // Lanza otros errores
@@ -91,14 +90,12 @@ export default class userManager {
         // 1. Encontrar al usuario SOLO por el username
         const user = await Usuario.findOne({ 
             where: { username },
-            // Nos aseguramos de traer los permisos booleanos al hacer login
             attributes: {
-                exclude: ['password'] // Excluimos el password, pero traemos todo lo demás
+                exclude: ['password'] 
             }
         });
 
         if (!user) {
-            // No decimos "usuario no encontrado" por seguridad
             throw new Error("Credenciales inválidas");
         }
         

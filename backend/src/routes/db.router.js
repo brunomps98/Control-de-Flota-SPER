@@ -18,7 +18,6 @@ const verifyAdmin = (req, res, next) => {
     next();
 };
 
-
 const router = Router();
 
 router.use((req, res, next) => {
@@ -77,7 +76,7 @@ router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripcion
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
-
+// Ruta /chat/upload-image eliminada
 
 // --- RUTAS DE SOPORTE  ---
 router.post('/support', upload.array('files'), SupportController.createTicket);

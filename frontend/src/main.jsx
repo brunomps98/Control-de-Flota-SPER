@@ -13,7 +13,7 @@ import AdminRoute from './components/common/AdminRoute/AdminRoute';
 import Home from './pages/home/home';
 import Login from './pages/login/login';
 import Vehicle from './pages/vehicle/vehicle';
-import Register from './pages/Register/Register'; // <--- Lo movemos
+import Register from './pages/Register/Register'; 
 import Support from './pages/Support/Support';
 import SupportTickets from './pages/SupportTickets/SupportTickets';
 import Case from './pages/Case/Case';
@@ -35,8 +35,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/support" element={<Support />} /> 
-        {/* --- CAMBIO 1: Eliminamos '/register' de aquí --- */}
-
 
         {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
         <Route element={<Layout />}>
@@ -52,7 +50,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="/support-tickets" element={<SupportTickets />} />
             <Route path="/case/:ticketId" element={<Case />} />
             <Route path="/register" element={<Register />} />
-
           </Route>
           
         </Route>

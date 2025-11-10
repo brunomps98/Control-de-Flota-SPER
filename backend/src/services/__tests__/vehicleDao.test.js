@@ -31,7 +31,6 @@ jest.mock('path', () => ({
     ...jest.requireActual('path'),
     extname: jest.fn(() => '.jpg')
 }));
-// --- FIN DE MOCKS ---
 
 // --- IMPORTS DESPUÉS ---
 import VehicleDao from '../../dao/vehicleDao.js';
@@ -94,8 +93,8 @@ describe('VehicleDao (Controller)', () => {
             await VehicleDao.addVehicle(mockRequest, mockResponse);
 
             expect(supabase.storage.from).toHaveBeenCalledWith('uploads');
-            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled(); // <-- Ahora funcionará
-            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled(); // <-- Ahora funcionará
+            expect(supabase.storage.from('uploads').upload).toHaveBeenCalled(); 
+            expect(supabase.storage.from('uploads').getPublicUrl).toHaveBeenCalled(); 
 
             expect(vehicleDao.addVehicle).toHaveBeenCalledWith({
                 dominio: 'ABC123',
@@ -111,7 +110,7 @@ describe('VehicleDao (Controller)', () => {
 
         it('debería manejar errores del repositorio y responder 500', async () => {
             const error = new Error('Error de base de datos');
-            vehicleDao.addVehicle.mockRejectedValue(error); // Este mock se aplica solo a este test
+            vehicleDao.addVehicle.mockRejectedValue(error); 
             
             await VehicleDao.addVehicle(mockRequest, mockResponse);
             

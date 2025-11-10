@@ -33,7 +33,7 @@ const checkPermission = (user, vehicleTitle) => {
         return false;
     }
     
-    return true; // El usuario tiene permiso
+    return true;
 };
 
 
@@ -125,7 +125,6 @@ export default class VehicleManager {
             const vehicle = await Vehiculo.findByPk(id, {
                 include: [
                     { model: Thumbnail, as: 'thumbnails' },
-                    // Incluimos todos los historiales para que la "Ficha" funcione
                     { model: Kilometraje, as: 'kilometrajes', order: [['fecha_registro', 'DESC']] },
                     { model: Service, as: 'services', order: [['fecha_service', 'DESC']] },
                     { model: Reparacion, as: 'reparaciones', order: [['fecha_reparacion', 'DESC']] },

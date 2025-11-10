@@ -1,18 +1,18 @@
-// En: frontend/src/components/chat/ChatWrapper.jsx (Con Timestamps)
-
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatWrapper.css';
 import { useSocket } from '../../context/SocketContext';
 import apiClient from '../../api/axiosConfig';
-
-// --- ▼▼ 1. IMPORTAMOS LIBRERÍA DE FECHAS ▼▼ ---
-// (Asegúrate de haber corrido: npm install date-fns)
+import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
-import { es } from 'date-fns/locale'; // Para formato en español (ej. "Ayer")
-// --- ▲▲ -------------------------------------- ▲▲ ---
+import { es } from 'date-fns/locale';
 
-
-// --- Iconos (Sin cambios) ---
+// --- Iconos ---
+const ThreeDotIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+    </svg>
+);
 const ChatIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="32" height="32">
         <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-3.86 8.25-8.625 8.25a9.76 9.76 0 0 1-2.53-..429m-3.53-3.61a3.847 3.847 0 0 1-4.13-3.69C2.25 12 3.86 8.25 8.625 8.25c4.765 0 8.625 3.69 8.625 8.25 0 .81-.123 1.58-.35 2.29l3.22 3.22a.75.75 0 0 0 1.06-1.06l-3.22-3.22A9.73 9.73 0 0 0 21 12Z" />
@@ -28,40 +28,27 @@ const BackIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
     </svg>
 );
-// --- Fin de Iconos ---
 
-
-// --- ▼▼ 2. FUNCIÓN HELPER PARA FORMATEAR FECHA ▼▼ ---
+// --- Función Helper de Timestamp ---
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
-    
     try {
-        const date = parseISO(isoDateString); // Convierte el string de la DB a un objeto Date
-
-        if (isToday(date)) {
-            // "1:06 PM"
-            return format(date, 'p', { locale: es }); // 'p' es el formato de hora corta
-        }
-        if (isYesterday(date)) {
-            // "Ayer"
-            return 'Ayer';
-        }
-        // "7/11/2025"
-        return format(date, 'P', { locale: es }); // 'P' es el formato de fecha corta
+        const date = parseISO(isoDateString); 
+        if (isToday(date)) { return format(date, 'p', { locale: es }); }
+        if (isYesterday(date)) { return 'Ayer'; }
+        return format(date, 'P', { locale: es }); 
     } catch (error) {
         console.error("Error formateando fecha:", error);
-        return ''; // Devuelve vacío si la fecha es inválida
+        return ''; 
     }
 };
-// --- ▲▲ ----------------------------------------- ▲▲ ---
-
 
 // --- LÓGICA DE CHATWINDOW ---
 const ChatWindow = ({ onClose, user }) => {
     const socket = useSocket(); 
     const messagesEndRef = useRef(null); 
     
-    // --- Estados (Sin cambios) ---
+    // --- Estados ---
     const [isLoading, setIsLoading] = useState(true);
     const [newMessage, setNewMessage] = useState("");
     const [guestRoom, setGuestRoom] = useState(null);
@@ -71,11 +58,14 @@ const ChatWindow = ({ onClose, user }) => {
     const [selectedRoom, setSelectedRoom] = useState(null); 
     const [adminMessages, setAdminMessages] = useState([]); 
     const [isChatLoading, setIsChatLoading] = useState(false); 
+    const [openMenuId, setOpenMenuId] = useState(null);
+    const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const typingTimerRef = useRef(null);
 
-    // --- 1. Efecto para Cargar Datos (API) ---
+    // --- Efecto para Cargar Datos (API) ---
     useEffect(() => {
         if (!user) return; 
-
         if (user.admin) {
             const fetchAdminRooms = async () => {
                 try {
@@ -100,56 +90,103 @@ const ChatWindow = ({ onClose, user }) => {
         }
     }, [user]); 
 
-    // --- 2. Efecto para Escuchar Sockets ---
+    // --- Efecto para Escuchar Sockets ---
     useEffect(() => {
         if (!socket) return; 
-
+        
         const handleNewMessage = (message) => {
             const guestRoomId = guestRoom?.id;
             const adminSelectedRoomId = selectedRoom?.id;
-
             if (!user.admin && message.room_id === guestRoomId) {
                 setGuestMessages((prev) => [...prev, message]);
             } else if (user.admin && message.room_id === adminSelectedRoomId) {
                 setAdminMessages((prev) => [...prev, message]);
             }
         };
-        
+
+        // Alguien está escribiendo
+        const handleShowTyping = (payload) => {
+            setIsOtherUserTyping(true);
+        };
+        // Alguien dejó de escribir
+        const handleHideTyping = (payload) => {
+            setIsOtherUserTyping(false);
+        };
+
         const handleAdminNotification = ({ message, roomId }) => {
             if (user.admin) {
                 setAdminRooms(prevRooms => 
                     prevRooms.map(room => 
                         room.id === roomId 
-                        // Actualizamos el last_message Y el updated_at
                         ? { ...room, last_message: message.content.substring(0, 30), updated_at: message.created_at } 
                         : room
-                    )
-                    // Re-ordenamos la lista
-                    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+                    ).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
                 );
             }
         };
+        const handleMessageDeleted = (payload) => {
+            const { messageId, roomId } = payload;
+            if (user.admin && selectedRoom?.id === roomId) {
+                setAdminMessages(prev => prev.filter(m => m.id !== messageId));
+            }
+            if (!user.admin && guestRoom?.id === roomId) {
+                setGuestMessages(prev => prev.filter(m => m.id !== messageId));
+            }
+        };
+        const handleRoomDeleted = (payload) => {
+            const { roomId } = payload;
+            if (user.admin) {
+                setAdminRooms(prev => prev.filter(r => r.id !== roomId));
+                if (selectedRoom?.id === roomId) {
+                    handleBackToInbox(); 
+                }
+            }
+            if (!user.admin && guestRoom?.id === roomId) {
+                setGuestMessages([]);
+                setGuestRoom(null); 
+            }
+        };
+        const handleSuccess = (payload) => { toast.success(payload.message); };
+        const handleError = (payload) => { toast.error(payload.message); };
 
         socket.on('new_message', handleNewMessage);
         socket.on('new_message_notification', handleAdminNotification);
+        socket.on('message_deleted', handleMessageDeleted);
+        socket.on('room_deleted', handleRoomDeleted);
+        socket.on('show_typing', handleShowTyping);
+        socket.on('hide_typing', handleHideTyping);
+        socket.on('operation_success', handleSuccess);
+        socket.on('operation_error', handleError);
         
         return () => {
             socket.off('new_message', handleNewMessage);
             socket.off('new_message_notification', handleAdminNotification);
+            socket.off('message_deleted', handleMessageDeleted);
+            socket.off('room_deleted', handleRoomDeleted);
+            socket.off('show_typing', handleShowTyping);
+            socket.off('hide_typing', handleHideTyping);
+            socket.off('operation_success', handleSuccess);
+            socket.off('operation_error', handleError);
         };
     }, [socket, user, guestRoom, selectedRoom]); 
 
-    // --- 3. Efecto para Auto-Scroll ---
+    // --- Efecto para Auto-Scroll ---
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [guestMessages, adminMessages]); 
 
-    // --- 4. Funciones (Enviar Mensaje y Admin) ---
+    // --- Funciones ---
     const handleSendMessage = (e) => {
         e.preventDefault();
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
+        
+        // Validación solo para texto
         if (!socket || !newMessage.trim() || !targetRoomId) return;
-        socket.emit('send_message', { roomId: targetRoomId, content: newMessage });
+        
+        socket.emit('send_message', { 
+            roomId: targetRoomId, 
+            content: newMessage.trim() 
+        });
         setNewMessage(""); 
     };
     
@@ -165,45 +202,126 @@ const ChatWindow = ({ onClose, user }) => {
         finally { setIsChatLoading(false); }
     };
 
-    const handleBackToInbox = () => {
+    const handleBackToInbox = React.useCallback(() => {
         setCurrentView('inbox');
         setSelectedRoom(null);
         setAdminMessages([]);
+    }, []); 
+
+    const handleCopy = (text) => {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                toast.success('¡Mensaje copiado!');
+            }, (err) => {
+                toast.error('No se pudo copiar.');
+            });
+        }
+        setOpenMenuId(null); 
+    };
+    const handleDelete = (messageId) => {
+        setOpenMenuId(null); 
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Vas a eliminar este mensaje! No podrás revertir esto.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33', 
+            cancelButtonColor: '#007bff', 
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                socket.emit('delete_message', { messageId });
+            }
+        });
+    };
+    const handleClearHistory = () => {
+        const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
+        if (!targetRoomId) return;
+        setIsHeaderMenuOpen(false);
+        Swal.fire({
+            title: '¿Eliminar este chat?',
+            text: "¡Vas a eliminar esta sala de chat! El invitado tendrá que iniciar una nueva conversación. No podrás revertir esto.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#007bff',
+            confirmButtonText: 'Sí, ¡eliminar chat!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                socket.emit('delete_room', { roomId: targetRoomId });
+            }
+        });
     };
 
-    // --- 5. Renderizado ---
+    const handleTypingChange = (e) => {
+        setNewMessage(e.target.value);
+
+        const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
+        if (!socket || !targetRoomId) return;
+
+        if (!typingTimerRef.current) {
+            socket.emit('typing_start', { roomId: targetRoomId });
+        }
+
+        if (typingTimerRef.current) {
+            clearTimeout(typingTimerRef.current);
+        }
+
+        typingTimerRef.current = setTimeout(() => {
+            socket.emit('typing_stop', { roomId: targetRoomId });
+            typingTimerRef.current = null; 
+        }, 2000);
+    };
     
-    // Función helper para renderizar la lista de mensajes (de admin o invitado)
+    // --- Renderizado ---
+    
     const renderMessageList = (messages) => (
         <div className="message-list">
             {messages.map((msg) => (
-                <div 
-                    key={msg.id} 
-                    className={`message-bubble ${msg.sender_id === user.id ? 'sent' : 'received'}`}
-                >
-                    <div className="message-header">
-                        <span className="message-sender">
-                            {msg.sender_id === user.id ? (user.admin ? 'Tú (Admin)' : 'Tú') : (msg.sender?.username || 'Admin')}
-                        </span>
-                        {/* --- ▼▼ 3. MOSTRAMOS LA FECHA FORMATEADA ▼▼ --- */}
-                        <span className="message-timestamp">
-                            {formatTimestamp(msg.created_at)}
-                        </span>
-                        {/* --- ▲▲ --------------------------------------- ▲▲ --- */}
+                <div key={msg.id} className={`message-row ${msg.sender_id === user.id ? 'sent' : 'received'}`}>
+                    <div className="message-bubble">
+                        <div className="message-header">
+                            <span className="message-sender">
+                                {msg.sender_id === user.id ? (user.admin ? 'Tú (Admin)' : 'Tú') : (msg.sender?.username || 'Admin')}
+                            </span>
+                            <span className="message-timestamp">
+                                {formatTimestamp(msg.created_at)}
+                            </span>
+                        </div>
+                        <div className="message-content">
+                            {msg.content}
+                        </div>
                     </div>
-                    <div className="message-content">
-                        {msg.content}
+                    <div className="message-options-wrapper">
+                        <button className="message-options-btn" onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}>
+                            <ThreeDotIcon />
+                        </button>
+                        {openMenuId === msg.id && (
+                            <div className="message-menu">
+                                <button onClick={() => handleCopy(msg.content)}>Copiar</button>
+                                <button className="message-menu-delete" onClick={() => handleDelete(msg.id)}>Eliminar</button>
+                            </div>
+                        )}
                     </div>
                 </div>
             ))}
+            {isOtherUserTyping && (
+                <div className="message-row received">
+                    <div className="message-bubble typing-indicator">
+                        <span className="dot"></span>
+                        <span className="dot"></span>
+                        <span className="dot"></span>
+                    </div>
+                </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     );
 
-    // El "cuerpo" (lista de mensajes o lista de salas)
     const renderChatBody = () => {
         if (isLoading) { return <p>Cargando...</p>; }
-        
         if (user.admin) {
             if (currentView === 'inbox') {
                 return (
@@ -211,14 +329,16 @@ const ChatWindow = ({ onClose, user }) => {
                         {adminRooms.length === 0 && <p>No hay conversaciones activas.</p>}
                         {adminRooms.map(room => (
                             <div key={room.id} className="admin-room-item" onClick={() => handleSelectRoom(room)}>
-                                <div className="room-item-user">{room.user.username}</div>
+                                
+                                <div className="room-item-user">
+                                    <div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>
+
+                                    {room.user.username}
+                                </div>
+
                                 <div className="room-item-preview">{room.last_message}</div>
                                 <div className="room-item-unit">{room.user.unidad}</div>
-                                {/* --- ▼▼ 4. MOSTRAMOS FECHA EN LA BANDEJA DE ENTRADA ▼▼ --- */}
-                                <div className="room-item-timestamp">
-                                    {formatTimestamp(room.updated_at)}
-                                </div>
-                                {/* --- ▲▲ ------------------------------------------------ ▲▲ --- */}
+                                <div className="room-item-timestamp">{formatTimestamp(room.updated_at)}</div>
                             </div>
                         ))}
                     </div>
@@ -229,16 +349,13 @@ const ChatWindow = ({ onClose, user }) => {
                 return renderMessageList(adminMessages);
             }
         }
-
-        // Vista de Invitado
         if (guestMessages.length === 0 && !isLoading) {
             return <p>Inicia la conversación. Un administrador te responderá.</p>;
         }
         return renderMessageList(guestMessages);
     };
     
-    // El "pie" (caja de texto para enviar)
-    const renderChatFooter = () => {
+   const renderChatFooter = () => {
         if (user.admin && currentView === 'inbox') return null; 
         return (
             <form className="chat-footer" onSubmit={handleSendMessage}>
@@ -246,18 +363,29 @@ const ChatWindow = ({ onClose, user }) => {
                     type="text" 
                     placeholder="Escribe un mensaje..." 
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleTypingChange} 
                     disabled={isLoading || isChatLoading}
                 />
-                <button type="submit" disabled={isLoading || isChatLoading}>
+                <button 
+                    type="submit" 
+                    className="chat-btn-send"
+                    disabled={isLoading || isChatLoading || !newMessage.trim()}
+                >
                     Enviar
                 </button>
             </form>
         );
     };
-
+    
     return (
-        <div className="chat-window">
+        <div className="chat-window" onClick={(e) => {
+            if (openMenuId && !e.target.closest('.message-options-btn') && !e.target.closest('.message-menu')) {
+                setOpenMenuId(null);
+            }
+            if (isHeaderMenuOpen && !e.target.closest('.chat-header-menu-btn') && !e.target.closest('.chat-header-menu')) {
+                setIsHeaderMenuOpen(false);
+            }
+        }}>
             <div className="chat-header">
                 {user.admin && currentView === 'chat' && (
                     <button onClick={handleBackToInbox} className="chat-back-btn">
@@ -265,11 +393,37 @@ const ChatWindow = ({ onClose, user }) => {
                     </button>
                 )}
                 <h3>
-                    {user.admin ? (currentView === 'inbox' ? 'Bandeja de Entrada' : (selectedRoom?.user?.username || 'Chat')) : 'Chat de Soporte'}
+                    {user.admin ? (
+                        currentView === 'inbox' ? (
+                            'Bandeja de Entrada' 
+                        ) : (
+                            <div className="chat-header-title-with-status">
+                                <div className={`online-indicator ${selectedRoom?.isOnline ? 'online' : ''}`}></div>
+                                {selectedRoom?.user?.username || 'Chat'}
+                            </div>
+                        )
+                    ) : (
+                        'Chat de Soporte'
+                    )}
                 </h3>
-                <button onClick={onClose} className="chat-close-btn">
-                    <CloseIcon />
-                </button>
+                {!(user.admin && currentView === 'inbox') && (
+                    <div className="chat-header-options">
+                        <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(prev => !prev)}>
+                            <ThreeDotIcon />
+                        </button>
+                        {isHeaderMenuOpen && (
+                            <div className="chat-header-menu">
+                                <button className="message-menu-delete" onClick={handleClearHistory}>Eliminar historial</button>
+                                <button onClick={onClose}>Cerrar chat</button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {(user.admin && currentView === 'inbox') && (
+                     <button onClick={onClose} className="chat-close-btn-simple">
+                        <CloseIcon />
+                    </button>
+                )}
             </div>
             <div className="chat-body">
                 {renderChatBody()}
@@ -280,12 +434,11 @@ const ChatWindow = ({ onClose, user }) => {
 };
 
 
-// --- El Componente Principal (Wrapper) (Sin cambios) ---
+// --- El Componente Principal (Wrapper) ---
 const ChatWrapper = ({ user }) => {
-    const [isOpen, setIsOpen] =  useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const toggleChat = () => setIsOpen(prev => !prev);
 
-    // Si el usuario no existe (aún cargando o deslogueado), no renderices el chat
     if (!user) {
         return null;
     }

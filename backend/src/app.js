@@ -1,5 +1,3 @@
-// En: app.js
-
 import express from "express";
 import { __dirname } from "./utils.js";
 import dbRouter from './routes/db.router.js';
@@ -16,9 +14,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- ▼▼ [INICIO DE LA SOLUCIÓN] ▼▼ ---
 
-// 1. Definimos las opciones de CORS (como ya las tenías)
+// 1. Definimos las opciones de CORS 
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
   .split(',')
@@ -30,7 +27,7 @@ const extras = [
   "ionic://localhost",
   "http://localhost",
   "http://127.0.0.1",
-  "http://localhost:5173" // Mantenemos esto por si acaso
+  "http://localhost:5173" 
 ];
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
 
@@ -53,10 +50,6 @@ const corsOptions = {
   optionsSuccessStatus: 200
 };
 
-// 2. Eliminamos el CORS global de aquí
-// app.use(cors(corsOptions)); // <-- ELIMINADO
-// app.options('*', cors(corsOptions)); // <-- ELIMINADO
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -70,7 +63,5 @@ app.use("/api", cors(corsOptions), dbRouter);
 
 // Manejamos las peticiones OPTIONS explícitamente *solo* para /api
 app.options('/api/*', cors(corsOptions)); 
-
-// --- ▲▲ [FIN DE LA SOLUCIÓN] ▲▲ ---
 
 export default app;

@@ -38,8 +38,8 @@
 
 /* --- ESTILOS DE LAS TARJETAS DE TICKET (Tema Oscuro) --- */
 .ticket-card {
-    background-color: #24303c; /* Color de tarjeta oscuro */
-    border: 1px solid #4a5568; /* Borde oscuro */
+    background-color: #24303c; 
+    border: 1px solid #4a5568;
     border-radius: 10px;
     padding: 25px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
@@ -53,15 +53,15 @@
 
 .ticket-header h2 {
     margin: 0 0 15px 0;
-    color: #ffffff; /* Título blanco */
+    color: #ffffff; 
     font-size: 1.5rem;
-    border-bottom: 2px solid #1c2836; /* Separador oscuro */
+    border-bottom: 2px solid #1c2836; 
     padding-bottom: 10px;
 }
 
 .ticket-body {
     margin: 15px 0;
-    color: #aeb9c4; /* Texto claro */
+    color: #aeb9c4; 
 }
 
 .ticket-body p {
@@ -70,21 +70,21 @@
 }
 
 .ticket-body p strong {
-    color: #ffffff; /* Labels en negrita más claros */
+    color: #ffffff; 
     font-weight: 600;
 }
 
-/* --- ESTILOS DE BOTONES DE ACCIÓN (Nuevos) --- */
+/* --- ESTILOS DE BOTONES DE ACCIÓN  --- */
 .ticket-actions {
     display: flex;
-    flex-wrap: wrap; /* Para responsive en móvil */
+    flex-wrap: wrap; 
     gap: 15px;
     margin-top: 20px;
 }
 
 .btn-action {
-    flex: 1; /* Ocupan espacio disponible */
-    min-width: 150px; /* Ancho mínimo */
+    flex: 1; 
+    min-width: 150px; 
     padding: 12px 20px;
     border-radius: 25px;
     font-weight: bold;
@@ -143,12 +143,12 @@
     font-size: 1.2rem;
     color: #aeb9c4;
     padding: 50px;
-    background-color: #24303c; /* Fondo de tarjeta */
-    border: 2px dashed #4a5568; /* Borde oscuro */
+    background-color: #24303c; 
+    border: 2px dashed #4a5568; 
     border-radius: 8px;
 }
 
-/* --- FOOTER (Consistente) --- */
+/* --- FOOTER  --- */
 .footer-bar {
     background-color: #24303c;
     color: #aeb9c4;

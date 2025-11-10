@@ -59,7 +59,7 @@ describe('VehicleManager Service', () => {
 
         // Mockeamos las respuestas por defecto de los modelos
         Vehiculo.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
-        Vehiculo.create.mockResolvedValue({ id: 'v1-mock' }); // Simulamos que devuelve un ID
+        Vehiculo.create.mockResolvedValue({ id: 'v1-mock' }); 
         Kilometraje.create.mockResolvedValue({});
         Thumbnail.bulkCreate.mockResolvedValue({});
     });

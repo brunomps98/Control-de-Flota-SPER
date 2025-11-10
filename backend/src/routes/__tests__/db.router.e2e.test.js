@@ -1,8 +1,6 @@
 import supertest from 'supertest';
-import app from '../../app.js'; // 1. Importamos la app de Express refactorizada
-import { userDao, vehicleDao } from '../../repository/index.js'; // 2. Importamos los repositorios que mockeamos
-import jwt from 'jsonwebtoken';
-
+import app from '../../app.js'; 
+import { userDao, vehicleDao } from '../../repository/index.js';
 process.env.SECRET_KEY = 'clave_secreta_para_probar_en_ci';
 
 // 3. Mockeamos la capa de Repositorio (la "base de datos")
@@ -18,8 +16,8 @@ jest.mock('../../repository/index.js', () => ({
 
 // 4. Mockeamos jsonwebtoken para controlar el middleware 'verifyToken'
 jest.mock('jsonwebtoken', () => ({
-    ...jest.requireActual('jsonwebtoken'), // Mantenemos el 'sign' real
-    verify: jest.fn(), // Pero mockeamos 'verify'
+    ...jest.requireActual('jsonwebtoken'), 
+    verify: jest.fn(), 
 }));
 
 // 5. Creamos el "cliente" de supertest
@@ -117,12 +115,9 @@ describe('E2E Tests for API Routes (db.router.js)', () => {
             expect(response.statusCode).toBe(200);
             expect(response.body.docs[0].dominio).toBe('ABC123');
 
-            // 5. ASERCIÓN MÁS IMPORTANTE (Verifica que el middleware funcionó):
-            // Verificamos que el 'vehicleDao.getVehicles' fue llamado con el 'user'
-            // que fue inyectado por el middleware 'verifyToken'.
             expect(vehicleDao.getVehicles).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    user: mockUserPayload // El filtro de 'user' fue aplicado
+                    user: mockUserPayload 
                 })
             );
         });

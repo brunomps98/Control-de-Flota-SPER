@@ -1,10 +1,7 @@
-// En: controllers/chat.controller.js
-
-// --- ▼▼ IMPORTS CORREGIDOS ▼▼ ---
 import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
-// --- ▲▲ ---------------------- ▲▲ ---
 import { Op } from 'sequelize';
+import { onlineUsers } from '../socket/onlineUsers.js';
 
 class ChatController {
 
@@ -51,14 +48,13 @@ class ChatController {
 
         } catch (error) {
             console.error('[CHAT] Error en getMyRoom:', error);
-            res.status(500).json({ 
-                message: 'Error interno del servidor al obtener el chat', 
-                error: error.message 
+            res.status(500).json({
+                message: 'Error interno del servidor al obtener el chat',
+                error: error.message
             });
         }
     }
 
-    // --- ▼▼ FUNCIÓN NUEVA AÑADIDA ▼▼ ---
 
     /**
      * @summary Obtiene TODAS las salas de chat (solo para Admins)
@@ -67,28 +63,32 @@ class ChatController {
      */
     static getAdminRooms = async (req, res) => {
         try {
-            // Buscamos todas las salas
             const rooms = await ChatRoom.findAll({
                 include: [{
                     model: Usuario,
-                    as: 'user', // Esto es el 'dueño' de la sala (el invitado)
-                    attributes: ['id', 'username', 'email', 'unidad'] // Datos del invitado
+                    as: 'user',
+                    attributes: ['id', 'username', 'email', 'unidad']
                 }],
                 order: [
-                    // Ordenamos por 'updated_at' descendente
-                    // La tabla se actualiza cada vez que hay un nuevo mensaje
-                    ['updated_at', 'DESC'] 
+                    ['updated_at', 'DESC']
                 ]
             });
 
-            res.status(200).json(rooms);
+            // --- Lógica de Status Online ---
+            // Mapeamos las salas y añadimos el campo 'isOnline'
+            const roomsWithStatus = rooms.map(room => {
+                const plainRoom = room.get({ plain: true });
+                const isOnline = !!onlineUsers[plainRoom.user_id]; // true si existe, false si no
+                return { ...plainRoom, isOnline };
+            });
 
-        } catch (error)
-        {
+            res.status(200).json(roomsWithStatus); // <-- Devolvemos las salas con el status
+
+        } catch (error) {
             console.error('[CHAT] Error en getAdminRooms:', error);
-            res.status(500).json({ 
-                message: 'Error interno del servidor al obtener las salas', 
-                error: error.message 
+            res.status(500).json({
+                message: 'Error interno del servidor al obtener las salas',
+                error: error.message
             });
         }
     }
@@ -106,9 +106,6 @@ class ChatController {
             if (!room) {
                 return res.status(404).json({ message: 'Sala no encontrada' });
             }
-
-            // (No necesitamos verificar permisos de admin aquí porque
-            // la ruta /api/chat/room/... ya estará protegida por verifyAdmin)
 
             // 2. Buscamos todos los mensajes de esa sala
             const messages = await ChatMessage.findAll({
@@ -128,9 +125,9 @@ class ChatController {
 
         } catch (error) {
             console.error('[CHAT] Error en getMessagesForRoom:', error);
-            res.status(500).json({ 
-                message: 'Error interno del servidor al obtener los mensajes', 
-                error: error.message 
+            res.status(500).json({
+                message: 'Error interno del servidor al obtener los mensajes',
+                error: error.message
             });
         }
     }

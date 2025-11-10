@@ -1,5 +1,5 @@
 import { Soporte, SoporteArchivo } from '../models/support.model.js';
-import { sequelize } from '../config/configServer.js'; // Para transacciones
+import { sequelize } from '../config/configServer.js'; 
 
 class SupportDao {
 

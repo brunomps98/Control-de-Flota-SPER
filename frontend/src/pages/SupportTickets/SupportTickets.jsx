@@ -109,9 +109,6 @@ const SupportTickets = () => {
                     )}
                 </div>
             </main>
-            <footer className="footer-bar">
-                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
-            </footer>
         </div>
     );
 }

@@ -1,5 +1,3 @@
-// En: frontend/src/context/SocketContext.jsx
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
@@ -21,16 +19,12 @@ export const SocketProvider = ({ children }) => {
             return;
         }
 
-        // --- ▼▼ [AQUÍ ESTÁ LA OTRA PARTE DE LA SOLUCIÓN] ▼▼ ---
         const newSocket = io(SOCKET_URL, {
             auth: {
                 token: token 
             },
-            // Le decimos al CLIENTE que use la misma ruta
-            // que definimos en el servidor
             path: "/socket.io/"
         });
-        // --- ▲▲ [FIN DE LA SOLUCIAR] ▲▲ ---
 
         setSocket(newSocket);
 

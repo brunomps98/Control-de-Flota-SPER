@@ -1,8 +1,6 @@
-/* --- 1. CONTENEDOR DE PÁGINA (NUEVO) --- */
+/* --- 1. CONTENEDOR DE PÁGINA  --- */
 .vehicle-page-container {
-    /* Fondo gris claro, inspirado en Castellaro */
     background-color: #f4f7f6;
-    /* Relleno para separar del navbar/footer */
     padding: 30px 40px; 
     font-family: 'Inter', sans-serif;
 }
@@ -11,12 +9,12 @@
 .titulo-products h1 {
     margin-top: 0;
     margin-bottom: 30px;
-    color: #1a202c; /* Texto oscuro */
+    color: #1a202c; 
     text-align: center;
     font-weight: 700;
 }
 
-/* --- 2. FORMULARIO DE FILTROS (REDISEÑADO) --- */
+/* --- 2. FORMULARIO DE FILTROS  --- */
 .filter-container {
     display: flex;
     flex-wrap: wrap;
@@ -24,10 +22,10 @@
     align-items: flex-end;
     gap: 16px;
     padding: 24px;
-    background-color: #ffffff; /* Fondo blanco */
-    border-radius: 12px; /* Bordes más suaves */
+    background-color: #ffffff; 
+    border-radius: 12px;
     margin-bottom: 40px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Sombra sutil */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
     border: 1px solid #e2e8f0;
 }
 
@@ -37,8 +35,8 @@
 }
 
 .filter-group label {
-    font-size: 0.875rem; /* 14px */
-    color: #4a5568; /* Texto gris oscuro */
+    font-size: 0.875rem;
+    color: #4a5568;
     margin-bottom: 6px;
     font-weight: 600;
 }
@@ -59,17 +57,17 @@
 
 .filter-group input:focus {
     outline: none;
-    border-color: #009688; /* Color de acento de tu app */
+    border-color: #009688; 
     box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
 }
 
 .filter-buttons {
     display: flex;
     gap: 10px;
-    padding-bottom: 2px; /* Alineación con los inputs */
+    padding-bottom: 2px; 
 }
 
-/* --- 3. BOTONES DE FILTRO (NUEVOS ESTILOS) --- */
+/* --- 3. BOTONES DE FILTRO  --- */
 .btn-filter-primary,
 .btn-filter-secondary {
     padding: 10px 20px;
@@ -101,10 +99,9 @@
 }
 
 
-/* --- 4. GRILLA DE VEHÍCULOS (Tu CSS original, está bien) --- */
+/* --- 4. GRILLA DE VEHÍCULOS  --- */
 .vehicle-grid {
     display: grid;
-    /* Usamos un minmax más grande para tarjetas más anchas */
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
 }
@@ -113,14 +110,10 @@
     text-align: center;
     color: #4a5568;
     font-size: 1.1rem;
-    grid-column: 1 / -1; /* Ocupa toda la grilla */
+    grid-column: 1 / -1; 
     padding: 40px;
 }
 
-/* --- 5. TARJETAS (PENDIENTE DE REFACTOR) --- */
-/* Estos son tus estilos actuales. Los dejaremos por ahora
-   para no romper tu <VehicleCard />.
-   El próximo paso es refactorizar esto. */
 .vehicle-card {
     text-decoration: none;
     position: relative;
@@ -129,7 +122,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     display: block;
-    aspect-ratio: 4 / 3; /* Tus tarjetas tienen esta proporción */
+    aspect-ratio: 4 / 3; 
 }
 
 .vehicle-card:hover {
@@ -169,14 +162,12 @@
     color: #ddd;
 }
 
-
-/* --- Skeleton (Tu CSS, un poco adaptado) --- */
 .vehicle-card-skeleton {
     background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 10px;
-    aspect-ratio: 4 / 3; /* Mantiene la misma forma */
+    aspect-ratio: 4 / 3; 
 }
 
 @keyframes loading {
@@ -184,36 +175,71 @@
   100% { background-position: -200% 0; }
 }
 
-/* --- Responsive para Filtros --- */
+.btn-filter-toggle {
+    display: none; 
+}
+
 @media (max-width: 768px) {
     .vehicle-page-container {
         padding: 20px 15px;
     }
 
+    .btn-filter-toggle {
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        gap: 8px; 
+        
+        width: 100%;
+        background-color: #009688;
+        color: white;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 20px;
+    }
+
     .filter-container {
-        padding: 20px;
+        padding: 0; 
+        margin-bottom: 30px;
+        
+        overflow: hidden;
+        max-height: 0;
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+        transition: max-height 0.4s ease-out, padding 0.4s ease-out;
     }
 
+    /* --- CUANDO ESTÁ ABIERTO --- */
+    .filter-container.filter-mobile-open {
+        max-height: 1000px; 
+        padding: 20px; 
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        background-color: #ffffff;
+    }
+    
     .filter-group {
-        width: 100%; /* Ocupa todo el ancho en móvil */
+        width: 100%; 
     }
-
     .filter-group input {
-        min-width: 0; /* Resetea el ancho mínimo */
+        min-width: 0; 
         width: 100%;
     }
-
     .filter-buttons {
         width: 100%;
     }
-
     .btn-filter-primary,
     .btn-filter-secondary {
-        flex: 1; /* Los botones ocupan 50% c/u */
+        flex: 1; 
     }
 
     .vehicle-grid {
-        /* Una sola columna en móvil */
         grid-template-columns: 1fr;
     }
 }

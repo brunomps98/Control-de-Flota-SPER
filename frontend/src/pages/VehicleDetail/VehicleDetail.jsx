@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
 
 const MySwal = withReactContent(Swal);
 
-// --- COMPONENTE DE HISTORIAL (Sin cambios) ---
+// --- COMPONENTE DE HISTORIAL  ---
 const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType, onDeleteAll, fetchHistory, labelName }) => {
     
     const formatDate = (dateString) => {
@@ -179,7 +179,7 @@ const VehicleDetail = () => {
     }, [cid, location.key]);
 
 
-    // --- LÓGICA DE BOTONES (Sin cambios) ---
+    // --- LÓGICA DE BOTONES ---
     const handleEdit = () => navigate(`/eddit-vehicle/${cid}`);
 
     const handleDeleteVehicle = () => {
@@ -262,31 +262,21 @@ const VehicleDetail = () => {
     if (!vehicle) return <div className="vehicle-page-container"><p className="detail-loading-message">No se encontró el vehículo.</p></div>;
 
     const allImages = vehicle.thumbnails || [];
-
-    // --- ▼▼ ARREGLO PRINCIPAL: Variables "Latest" ▼▼ ---
         
-    // Función helper para obtener el último registro (el PRIMERO en el array, ya que el backend ordena DESC)
+    // Función helper para obtener el último registro
     const getLatestValue = (historyState, fieldName, fallbackValue) => {
-        // 1. Prioridad: El estado de React (ej: 'kilometrajes')
-        //    (Este se actualiza cuando apretamos "Cargar Historial")
         if (historyState.data && historyState.data.length > 0) {
-            // El backend ordena DESC, así que el item [0] es el más nuevo
             return historyState.data[0][fieldName];
         }
 
-        // 2. Fallback: El historial que vino DENTRO del objeto 'vehicle'
-        //    (Este se actualiza cuando volvemos de 'EdditVehicle')
-        const vehicleHistory = vehicle[historyState.historyKey]; // ej: vehicle['kilometrajes']
+        const vehicleHistory = vehicle[historyState.historyKey]; 
         if (vehicleHistory && vehicleHistory.length > 0) {
-            // El backend ordena DESC, así que el item [0] es el más nuevo
             return vehicleHistory[0][fieldName];
         }
 
-        // 3. Fallback: El campo original del 'vehicle' (ej: 'vehicle.kilometros')
         return fallbackValue || 'N/A';
     };
     
-    // Asignamos los "últimos valores" a las variables
     const latestChofer = getLatestValue(descripciones, 'descripcion', vehicle.chofer);
     const latestKilometraje = getLatestValue(kilometrajes, 'kilometraje', vehicle.kilometros);
     const latestDestino = getLatestValue(destinos, 'descripcion', vehicle.destino);
@@ -328,7 +318,6 @@ const VehicleDetail = () => {
                             <p><strong>Dominio:</strong> <span>{vehicle.dominio}</span></p>
                             <p><strong>Año:</strong> <span>{vehicle.anio}</span></p>
                             
-                            {/* CAMBIO: Se usan las variables "latest" */}
                             <p><strong>Kilometraje:</strong> <span>{latestKilometraje} km</span></p>
                             <p><strong>Destino:</strong> <span>{latestDestino}</span></p>
                             <p><strong>Chofer:</strong> <span>{latestChofer}</span></p>

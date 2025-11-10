@@ -10,25 +10,19 @@ const baseURL = platform === 'android'
 
 console.log('API baseURL selected:', baseURL);
 
-// --- ADAPTADOR DE CAPACITOR (Simplificado) ---
-// Este adaptador ya NO se encarga de la autenticación, solo del envío.
 const capacitorAdapter = async (config) => {
   try {
-    // El interceptor (que se ejecuta PRIMERO) ya agregó el token.
-    // Los headers en 'config.headers' ya están correctos.
 
-    // 1. Manejo de FormData (con fetch)
+    // 1. Manejo de FormData 
     if (config.data instanceof FormData) {
         console.log('Detectado FormData en Capacitor, usando fetch()...');
         
-        // Los headers ya vienen con 'Authorization' gracias al interceptor.
-        // Solo necesitamos asegurarnos de que 'Content-Type' no esté.
         const fetchHeaders = new Headers(config.headers);
-        fetchHeaders.delete('Content-Type'); // fetch debe poner el 'boundary' él mismo
+        fetchHeaders.delete('Content-Type'); 
 
         const response = await fetch(`${config.baseURL}${config.url}`, {
             method: config.method.toUpperCase(),
-            headers: fetchHeaders, // Headers ya incluyen el token
+            headers: fetchHeaders, 
             body: config.data,
         });
 
@@ -53,7 +47,7 @@ const capacitorAdapter = async (config) => {
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
-      headers: config.headers, // Ya tiene el token del interceptor
+      headers: config.headers, 
       params: config.params,
       data: config.data,
     };
@@ -88,13 +82,9 @@ const capacitorAdapter = async (config) => {
 // --- CREACIÓN DEL CLIENTE ---
 const apiClient = axios.create({
     baseURL: baseURL,
-    // El adapter se aplica solo en móvil
     adapter: platform === 'web' ? undefined : capacitorAdapter,
 });
 
-// --- INTERCEPTOR DE SOLICITUD (LA SOLUCIÓN) ---
-// Este interceptor se ejecuta SIEMPRE, en WEB y MÓVIL,
-// ANTES de que la solicitud se envíe o pase al adaptador.
 apiClient.interceptors.request.use(
   (config) => {
     // 1. Obtenemos el token en CADA solicitud
@@ -104,9 +94,6 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
-
-    // 3. Si es FormData, nos aseguramos de que Axios (en web)
-    // no fuerce un 'Content-Type: application/json'
     if (config.data instanceof FormData) {
         // Dejamos que el navegador (o fetch en el adapter) ponga el 'Content-Type'
         delete config.headers['Content-Type'];
@@ -117,7 +104,7 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor de respuesta (sin cambios)
+// Interceptor de respuesta 
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => Promise.reject(error)
