@@ -1,5 +1,3 @@
-// adb install -r C:\Users\Usuario\Desktop\proyectoVehiculosSper\frontend\android\app\build\outputs\apk\debug\app-debug.apk
-
 import axios from 'axios';
 import { Capacitor, CapacitorHttp } from '@capacitor/core'; 
 
