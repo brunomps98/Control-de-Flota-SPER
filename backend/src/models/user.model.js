@@ -28,7 +28,7 @@ const Usuario = sequelize.define('Usuario', {
         allowNull: false
     },
     
-    // Columna FCM (¡Esta se queda!)
+    // Columna FCM 
     fcm_token: {
         type: DataTypes.STRING,
         allowNull: true,

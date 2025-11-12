@@ -277,22 +277,45 @@ const ChatWindow = ({ onClose, user }) => {
     
     // --- Renderizado ---
     
+    // Función helper para renderizar la lista de mensajes (de admin o invitado)
     const renderMessageList = (messages) => (
         <div className="message-list">
             {messages.map((msg) => (
                 <div key={msg.id} className={`message-row ${msg.sender_id === user.id ? 'sent' : 'received'}`}>
                     <div className="message-bubble">
                         <div className="message-header">
+                            
+                            {/* --- ESTA ES LA LÍNEA MODIFICADA --- */}
                             <span className="message-sender">
-                                {msg.sender_id === user.id ? (user.admin ? 'Tú (Admin)' : 'Tú') : (msg.sender?.username || 'Admin')}
+                                {
+                                    msg.sender_id === user.id ? 
+                                        (user.admin ? 'Tú (Admin)' : 'Tú') // Mensaje enviado por mí
+                                    : 
+                                        (msg.sender?.admin ? 'Admin' : msg.sender?.username) // Mensaje recibido de otro
+                                }
                             </span>
+                            {/* --- FIN DE LA MODIFICACIÓN --- */}
+
                             <span className="message-timestamp">
                                 {formatTimestamp(msg.created_at)}
                             </span>
                         </div>
-                        <div className="message-content">
-                            {msg.content}
-                        </div>
+                        {/* Lógica de imágenes (si existe) */}
+                        {msg.image_urls && msg.image_urls.length > 0 && (
+                            <div className="message-image-container">
+                                {msg.image_urls.map((url, index) => (
+                                    <a href={url} target="_blank" rel="noopener noreferrer" key={index}>
+                                        <img src={url} alt={`Adjunto ${index + 1}`} className="message-image" />
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+                        {/* Lógica de texto (si existe) */}
+                        {msg.content && (
+                            <div className="message-content">
+                                {msg.content}
+                            </div>
+                        )}
                     </div>
                     <div className="message-options-wrapper">
                         <button className="message-options-btn" onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}>
@@ -307,6 +330,8 @@ const ChatWindow = ({ onClose, user }) => {
                     </div>
                 </div>
             ))}
+
+            {/* Indicador "Escribiendo..." */}
             {isOtherUserTyping && (
                 <div className="message-row received">
                     <div className="message-bubble typing-indicator">
