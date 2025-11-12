@@ -15,28 +15,52 @@ const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0'; 
 const httpServer = http.createServer(app);
 
-const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
+const rawFront = process.env.FRONT_URL || "";
+const allowedFromEnv = rawFront
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
 
 const mobileOrigins = [
   "capacitor://localhost",
   "ionic://localhost",
-  "http://localhost" 
+  "http://localhost",
+  "http://127.0.0.1",
+  "http://localhost:5173" 
 ];
+
+const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...mobileOrigins]));
+
+const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
+
 
 const io = new SocketIOServer(httpServer, {
     cors: {
-        origin: [
-            "http://localhost:5173", 
-            vercelRegex, 
-            ...mobileOrigins 
-        ], 
+        origin: function(origin, callback) {
+          
+          if (!origin) { 
+            if (process.env.ALLOW_UNDEFINED_ORIGIN === 'true') {
+              return callback(null, true);
+            } else {
+              return callback(new Error('CORS (Socket.io) - origin undefined no permitido'), false);
+            }
+          }
+          
+          if (vercelRegex.test(origin)) {
+            return callback(null, true);
+          }
+          
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          }
+          
+          return callback(new Error('CORS (Socket.io) - origen no permitido: ' + origin), false);
+        },
         methods: ["GET", "POST"],
         credentials: true
     },
     path: "/socket.io/" 
 });
-
-
 
 initializeSocket(io);
 
