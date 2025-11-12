@@ -27,7 +27,8 @@ const extras = [
   "ionic://localhost",
   "http://localhost",
   "http://127.0.0.1",
-  "http://localhost:5173" 
+  "http://localhost:5173", 
+  "http://10.0.2.2"
 ];
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
 
