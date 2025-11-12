@@ -56,7 +56,7 @@ const getVehicleByIdHelper = async (req, res, renderView) => {
         console.error('ERROR CAPTURADO EN getVehicleByIdHelper:', error);
         res.status(500).json({
             error: 'error al leer el vehicle',
-            details: error.message 
+            details: error.message
         });
     }
 };
@@ -67,7 +67,7 @@ class VehicleDao {
     static addVehicle = async (req, res) => {
         try {
             const { ...productData } = req.body;
-            let thumbnailUrls = []; 
+            let thumbnailUrls = [];
 
             if (req.files && req.files.length > 0) {
                 console.log(`Subiendo ${req.files.length} archivos a Supabase...`);
@@ -203,15 +203,20 @@ class VehicleDao {
     }
 
     static deleteAllHistory = async (req, res) => {
+        // --- SOLUCIÓN: Mover la declaración fuera del try ---
+        const { cid, fieldName } = req.params;
+
         try {
-            const { cid, fieldName } = req.params;
+            // La línea de req.params ya no es necesaria aquí
 
             const result = await vehicleDao.deleteAllHistory(cid, fieldName, req.user);
 
             if (result instanceof Error) throw result;
 
             res.status(200).json({ status: "success", message: `Historial de ${fieldName} eliminado.` });
+
         } catch (error) {
+            
             console.error(`Error al eliminar todo el historial de ${fieldName}:`, error);
             res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
         }
