@@ -23,11 +23,12 @@ export const SocketProvider = ({ children }) => {
             auth: {
                 token: token 
             },
-            path: "/socket.io/"
+            path: "/socket.io/" 
         });
 
         setSocket(newSocket);
 
+        // --- Manejo de eventos de conexión ---
         newSocket.on('connect', () => {
             console.log('Socket.io: Conectado al servidor ✅ ID:', newSocket.id);
         });
@@ -40,12 +41,14 @@ export const SocketProvider = ({ children }) => {
             console.log('Socket.io: Desconectado del servidor 🔌');
         });
 
+        // Función de limpieza: se desconecta cuando el componente se desmonta
         return () => {
             newSocket.disconnect();
         };
 
-    }, []); 
+    }, []); // El array vacío [] asegura que esto se ejecute solo una vez
 
+    // 5. Proveemos el socket al resto de la aplicación
     return (
         <SocketContext.Provider value={socket}>
             {children}

@@ -1,5 +1,3 @@
-// En: src/server.js (Modificado para Android)
-
 import app from './app.js'; 
 import { connectToDB } from "./config/configServer.js";
 import dotenv from "dotenv";
@@ -17,32 +15,27 @@ const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0'; 
 const httpServer = http.createServer(app);
 
-
-// --- ▼▼ [AQUÍ ESTÁ LA CORRECCIÓN] ▼▼ ---
-
-// 1. El comodín de Vercel (que ya tenías)
 const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
 
-// 2. Los orígenes de Capacitor/Móvil (copiados de tu app.js)
 const mobileOrigins = [
   "capacitor://localhost",
   "ionic://localhost",
-  "http://localhost" // Android a veces usa http://localhost (sin puerto)
+  "http://localhost" 
 ];
 
 const io = new SocketIOServer(httpServer, {
     cors: {
         origin: [
-            "http://localhost:5173", // Tu web local
-            vercelRegex, // Todas tus URLs de Vercel
-            ...mobileOrigins // AÑADIMOS ESTO: Todas tus URLs de Capacitor
+            "http://localhost:5173", 
+            vercelRegex, 
+            ...mobileOrigins 
         ], 
         methods: ["GET", "POST"],
         credentials: true
     },
     path: "/socket.io/" 
 });
-// --- ▲▲ [FIN DE LA CORRECCIÓN] ▲▲ ---
+
 
 
 initializeSocket(io);
