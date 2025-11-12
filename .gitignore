@@ -28,3 +28,6 @@ yarn-error.log*
 
 # Carpeta de archivos subidos
 /backend/src/public/uploads
+
+# Ignorar claves de servicio
+/backend/src/config/firebase-service-account.json

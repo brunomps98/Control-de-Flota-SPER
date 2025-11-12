@@ -2,10 +2,14 @@ import jwt from 'jsonwebtoken';
 import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import { onlineUsers } from './onlineUsers.js';
+import { onlineAdmins } from './onlineAdmins.js';
+import { sendPushNotification } from '../services/notification.service.js';
+// --- ▲▲ -------------------------------------------- ▲▲ ---
+
 
 export const initializeSocket = (io) => {
 
-    io.use((socket, next) => {
+    io.use((socket, next) => { 
         try {
             const token = socket.handshake.auth.token;
             if (!token) {
@@ -25,10 +29,18 @@ export const initializeSocket = (io) => {
 
         let userRoomName = '';
 
+        // LÓGICA DE ONLINE/OFFLINE 
         if (socket.user.admin) {
             socket.join('admin_room');
             userRoomName = 'admin_room';
-            console.log(`[SOCKET] 👑 ${socket.user.username} se unió a 'admin_room'`);
+            
+            // Lógica de Admin Online
+            onlineAdmins.add(socket.user.id);
+            if (onlineAdmins.size === 1) { // Si es el primer admin
+                io.emit('support_status_change', { isOnline: true });
+            }
+            console.log(`[SOCKET] 👑 ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
+            
         } else {
             try {
                 const [room] = await ChatRoom.findOrCreate({
@@ -45,18 +57,17 @@ export const initializeSocket = (io) => {
             }
         }
 
+        //  LÓGICA DE BORRADO 
         socket.on('delete_room', async (payload) => {
             try {
                 const { roomId } = payload;
                 if (!roomId) {
                     return socket.emit('operation_error', { message: 'ID de sala no válido.' });
                 }
-
                 const room = await ChatRoom.findByPk(roomId);
                 if (!room) {
                     return socket.emit('operation_error', { message: 'La sala no existe.' });
                 }
-
                 if (socket.user.admin || room.user_id === socket.user.id) {
                     await room.destroy();
                     io.to(`room_${roomId}`).emit('room_deleted', {
@@ -78,12 +89,10 @@ export const initializeSocket = (io) => {
                 if (!messageId) {
                     return socket.emit('operation_error', { message: 'ID de mensaje no válido.' });
                 }
-
                 const message = await ChatMessage.findByPk(messageId);
                 if (!message) {
                     return socket.emit('operation_error', { message: 'El mensaje no existe.' });
                 }
-
                 if (socket.user.admin || message.sender_id === socket.user.id) {
                     const roomId = message.room_id;
                     await message.destroy();
@@ -101,36 +110,29 @@ export const initializeSocket = (io) => {
             }
         });
 
-        // Oyente para "empezó a escribir"
+        //  LÓGICA "ESCRIBIENDO... 
         socket.on('typing_start', (payload) => {
             try {
                 const { roomId } = payload;
                 if (!roomId) return;
-                
                 const roomName = `room_${roomId}`;
                 socket.to(roomName).emit('show_typing', { userId: socket.user.id, username: socket.user.username });
-            
             } catch (error) {
                 console.error("[SOCKET] Error en 'typing_start':", error);
             }
         });
-
-        // Oyente para "dejó de escribir"
         socket.on('typing_stop', (payload) => {
             try {
                 const { roomId } = payload;
                 if (!roomId) return;
-                
                 const roomName = `room_${roomId}`;
-                // Le avisamos a la sala que el usuario dejó de escribir
                 socket.to(roomName).emit('hide_typing', { userId: socket.user.id });
-
             } catch (error) {
                 console.error("[SOCKET] Error en 'typing_stop':", error);
             }
         });
 
-        socket.on('admin_join_room', (roomId) => {
+        socket.on('admin_join_room', (roomId) => { 
             try {
                 if (!socket.user.admin) {
                     console.warn(`[SOCKET] ⚠️ Intento no autorizado de ${socket.user.username} para unirse a sala ${roomId}`);
@@ -144,6 +146,8 @@ export const initializeSocket = (io) => {
             }
         });
 
+        
+        // LÓGICA 'send_message'  ---
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content } = payload;
@@ -154,7 +158,7 @@ export const initializeSocket = (io) => {
                 }
 
                 if (!socket.user.admin && userRoomName !== `room_${roomId}`) {
-                    console.warn(`[SOCKET] ⚠️ Intento de escritura no autorizado de ${socket.user.username} en sala ${roomId}`);
+                    console.warn(`[SOCKET] ⚠️ Intento de escritura no autorizado...`);
                     return;
                 }
 
@@ -180,11 +184,33 @@ export const initializeSocket = (io) => {
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
+                // --- Lógica de Notificación de Bandeja de Entrada  ---
                 if (!socket.user.admin) {
                     io.to('admin_room').emit('new_message_notification', {
                         message: messageWithSender,
                         roomId: roomId
                     });
+                }
+                
+                // --- Lógica de Notificaciones Push  ---
+                const title = `Nuevo mensaje de ${socket.user.username}`;
+                const body = content.substring(0, 100);
+                
+                if (socket.user.admin) {
+                    const room = await ChatRoom.findByPk(roomId);
+                    if (room && !onlineUsers[room.user_id]) { 
+                        const user = await Usuario.findByPk(room.user_id);
+                        if (user && user.fcm_token) {
+                            sendPushNotification(user.fcm_token, title, body, { chatRoomId: String(roomId) });
+                        }
+                    }
+                } else {
+                    const admins = await Usuario.findAll({ where: { admin: true } });
+                    for (const admin of admins) {
+                        if (admin.fcm_token && !onlineAdmins.has(admin.id)) { 
+                            sendPushNotification(admin.fcm_token, title, body, { chatRoomId: String(roomId) });
+                        }
+                    }
                 }
 
             } catch (error) {
@@ -192,10 +218,20 @@ export const initializeSocket = (io) => {
                 socket.emit('send_message_error', { message: 'No se pudo enviar tu mensaje.' });
             }
         });
+        // --- ▲▲ --------------------------------------------- ▲▲ ---
 
 
+        // --- Logica Disconnect  ---
         socket.on('disconnect', () => {
             console.log(`[SOCKET] ❌ Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
+            
+            if (socket.user.admin && socket.user.id) {
+                onlineAdmins.delete(socket.user.id);
+                if (onlineAdmins.size === 0) { 
+                    io.emit('support_status_change', { isOnline: false });
+                }
+                console.log(`[SOCKET] Status update: Admin ${socket.user.username} está offline. (Admins Online: ${onlineAdmins.size})`);
+            }
             
             if (!socket.user.admin && socket.user.id) {
                 delete onlineUsers[socket.user.id];

@@ -27,6 +27,14 @@ const Usuario = sequelize.define('Usuario', {
         type: DataTypes.STRING(255),
         allowNull: false
     },
+    
+    // Columna FCM (¡Esta se queda!)
+    fcm_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true
+    },
+
     // Roles y permisos
     admin: {
         type: DataTypes.BOOLEAN,
@@ -43,7 +51,6 @@ const Usuario = sequelize.define('Usuario', {
     dg: { type: DataTypes.BOOLEAN, defaultValue: false },
     inst: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
-    // Opciones del modelo
     tableName: 'usuarios', 
     timestamps: true,      
     createdAt: 'created_at', 
@@ -57,5 +64,6 @@ Usuario.beforeCreate(async (usuario) => {
         usuario.password = bcrypt.hashSync(usuario.password, salt);
     }
 });
+
 
 export default Usuario;

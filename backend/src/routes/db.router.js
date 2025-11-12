@@ -10,6 +10,10 @@ import { userDao } from "../repository/index.js";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
+// --- ▼▼ IMPORTS AÑADIDOS ▼▼ ---
+import Usuario from '../models/user.model.js'; // Para la nueva ruta
+import { Op } from 'sequelize'; // Para la nueva ruta
+// --- ▲▲ -------------------- ▲▲ ---
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -29,7 +33,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-// --- RUTAS DE AUTENTICACIÓN  ---
+// --- RUTAS DE AUTENTICACIÓN ---
 router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
 
 router.post('/login', async (req, res) => {
@@ -54,6 +58,38 @@ router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
+// Ruta para guardar token FCM
+
+router.post('/user/fcm-token', verifyToken, async (req, res) => {
+    try {
+        const { fcmToken } = req.body;
+        const userId = req.user.id;
+
+        if (!fcmToken) {
+            return res.status(400).json({ message: 'No se proporcionó token.' });
+        }
+        
+        // Desvincula este token de cualquier *otro* usuario
+        await Usuario.update({ fcm_token: null }, {
+            where: { 
+                fcm_token: fcmToken,
+                id: { [Op.ne]: userId } // [Op.ne] significa "no es igual"
+            }
+        });
+
+        // 2. Asigna el token al usuario actual
+        await Usuario.update({ fcm_token: fcmToken }, {
+            where: { id: userId }
+        });
+
+        res.status(200).json({ message: 'Token FCM actualizado.' });
+    } catch (error) {
+        console.error("Error al guardar FCM token:", error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+});
+// --- ▲▲ ----------------------------------------- ▲▲ ---
+
 
 // --- RUTAS DE VEHÍCULOS (Protegidas) ---
 router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
@@ -76,7 +112,6 @@ router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripcion
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
-// Ruta /chat/upload-image eliminada
 
 // --- RUTAS DE SOPORTE  ---
 router.post('/support', upload.array('files'), SupportController.createTicket);

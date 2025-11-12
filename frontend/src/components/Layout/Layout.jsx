@@ -7,7 +7,9 @@ import '../Layout/Layout.css';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import ChatWrapper from '../chat/ChatWrapper';
-import { SocketProvider } from '../../context/SocketContext';
+import { SocketProvider } from '../../context/SocketContext'; 
+import { PushNotifications } from '@capacitor/push-notifications';
+import { toast } from 'react-toastify';
 
 
 const Layout = () => {
@@ -48,6 +50,58 @@ const Layout = () => {
         };
     }, [navigate, location]); 
     
+    useEffect(() => {
+        // Solo ejecutar en plataformas nativas (Android/iOS)
+        if (Capacitor.getPlatform() === 'web') return;
+
+        const registerForNotifications = async () => {
+            try {
+                // 1. Pedir permiso al usuario
+                let permStatus = await PushNotifications.checkPermissions();
+
+                if (permStatus.receive === 'prompt') {
+                    permStatus = await PushNotifications.requestPermissions();
+                }
+
+                if (permStatus.receive !== 'granted') {
+                    throw new Error('Permiso de notificaciones no concedido.');
+                }
+
+                // 2. Si el permiso fue concedido, registrar el dispositivo
+                await PushNotifications.register();
+
+                // 3. Escuchar el evento 'registration' para obtener el token FCM
+                PushNotifications.addListener('registration', async (token) => {
+                    console.log('Token FCM obtenido:', token.value);
+                    try {
+                        // 4. Enviar el token a nuestro backend 
+                        await apiClient.post('/api/user/fcm-token', { fcmToken: token.value });
+                        console.log('Token FCM guardado en el backend.');
+                    } catch (err) {
+                        console.error('Error guardando token FCM en backend:', err);
+                        toast.error('No se pudo registrar para notificaciones.');
+                    }
+                });
+
+                // 5. Escuchar errores
+                PushNotifications.addListener('registrationError', (error) => {
+                    console.error('Error de registro de Push:', error);
+                    toast.error('Error al registrar notificaciones.');
+                });
+
+            } catch (error) {
+                // Si el usuario denegó el permiso, esto se logueará
+                console.warn('Error al registrar notificaciones:', error.message);
+            }
+        };
+
+        // Ejecutamos la función
+        registerForNotifications();
+
+    }, []); 
+
+    
+
     if (loading) {
         return <div>Cargando...</div>;
     }
