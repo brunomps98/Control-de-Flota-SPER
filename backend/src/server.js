@@ -21,14 +21,19 @@ const HOST = '0.0.0.0';
 // --- ▼▼ 3. LÓGICA DEL SERVIDOR ---
 const httpServer = http.createServer(app);
 
-// Creamos el servidor de Sockets (io) sobre el servidor HTTP
+// 1. Definimos un "comodín" (Regex) para todas tus URLs de Vercel
+const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
+
+// 2. Creamos el servidor 'io' con la configuración de CORS correcta
 const io = new SocketIOServer(httpServer, {
     cors: {
-        origin: "http://localhost:5173", 
+        origin: [
+            "http://localhost:5173", // Tu local (para seguir probando)
+            vercelRegex 
+        ], 
         methods: ["GET", "POST"],
         credentials: true
     },
-    // Le damos a Socket.io su PROPIA ruta para que no choque con Express
     path: "/socket.io/" 
 });
 

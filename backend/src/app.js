@@ -31,6 +31,9 @@ const extras = [
 ];
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
 
+// Definimos el "comodín" (Regex) de Vercel
+const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
+
 const corsOptions = {
   origin: function(origin, callback) {
     if (!origin) {
@@ -40,9 +43,12 @@ const corsOptions = {
         return callback(new Error('CORS - origin undefined not allowed'), false);
       }
     }
-    if (allowedOrigins.includes(origin)) {
+    
+    // Permitir si está en la lista O si coincide con el Regex de Vercel
+    if (allowedOrigins.includes(origin) || vercelRegex.test(origin)) {
       return callback(null, true);
     }
+    
     return callback(new Error('CORS - origin not allowed: ' + origin), false);
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -57,8 +63,7 @@ app.get('/', (req, res) => {
     res.status(200).send('Server is live and healthy!');
 });
 
-// 3. Aplicamos el middleware de CORS y las opciones
-//    *SOLAMENTE* al router de la API.
+// Aplicamos el middleware de CORS y las opciones
 app.use("/api", cors(corsOptions), dbRouter);
 
 // Manejamos las peticiones OPTIONS explícitamente *solo* para /api
