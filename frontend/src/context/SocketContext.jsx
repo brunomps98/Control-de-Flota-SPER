@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
+import { Capacitor } from '@capacitor/core';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL;
+const platform = Capacitor.getPlatform();
+const SOCKET_URL = platform === 'android' 
+    ? 'https://control-de-flota-backend.onrender.com' 
+    : import.meta.env.VITE_API_URL;
+
+
 const SocketContext = createContext();
 
 export const useSocket = () => {
@@ -19,11 +25,15 @@ export const SocketProvider = ({ children }) => {
             return;
         }
 
+        console.log('Socket: Intentando conectar a:', SOCKET_URL);
+
         const newSocket = io(SOCKET_URL, {
             auth: {
                 token: token 
             },
-            path: "/socket.io/" 
+            path: "/socket.io/",
+            transports: ['websocket'],
+            upgrade: false 
         });
 
         setSocket(newSocket);
