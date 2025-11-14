@@ -59,7 +59,7 @@ export const initializeSocket = (io) => {
             }
         }
 
-        //  LÓGICA DE BORRADO 
+        // --- LÓGICA DE BORRADO  ---
         socket.on('delete_room', async (payload) => {
             try {
                 const { roomId } = payload;
@@ -70,15 +70,45 @@ export const initializeSocket = (io) => {
                 if (!room) {
                     return socket.emit('operation_error', { message: 'La sala no existe.' });
                 }
-                if (socket.user.admin || room.user_id === socket.user.id) {
-                    await room.destroy();
+
+                
+                //  Si el usuario es ADMIN, se borra todo para todos.
+                if (socket.user.admin) {
+                    await room.destroy(); // Borra de la DB
+                    
+                    // Notifica a todos en la sala (incluido el invitado)
                     io.to(`room_${roomId}`).emit('room_deleted', {
                         roomId: roomId
                     });
-                    socket.emit('operation_success', { message: 'Chat eliminado' });
+                    
+                    socket.emit('operation_success', { message: 'Chat eliminado permanentemente' });
+                
+                // Si el usuario es el INVITADO (dueño de la sala)
+                } else if (room.user_id === socket.user.id) {
+                    
+                    // NO borramos la sala de la DB.
+                    // Solo le decimos AL INVITADO que la sala fue "borrada".
+                    // Su frontend (ChatWrapper) reaccionará a 'room_deleted' y cerrará su vista.
+                    socket.emit('room_deleted', {
+                        roomId: roomId
+                    });
+                    
+                    // Le mandamos un success solo a él.
+                    socket.emit('operation_success', { message: 'Has salido del chat.' });
+                    
+                    // Actualizamos el 'last_message' para que el admin vea
+                    await room.update({ last_message: "El usuario ha abandonado el chat." });
+                    
+                    // Notificamos al admin que la bandeja de entrada debe refrescarse
+                    io.to('admin_room').emit('new_message_notification', {
+                        message: { content: "El usuario ha abandonado el chat.", created_at: new Date().toISOString() },
+                        roomId: roomId
+                    });
+
                 } else {
-                    socket.emit('operation_error', { message: 'No tienes permiso para eliminar este chat.' });
+                    socket.emit('operation_error', { message: 'No tienes permiso para esta acción.' });
                 }
+
             } catch (error) {
                 console.error("[SOCKET] Error en 'delete_room':", error);
                 socket.emit('operation_error', { message: 'Error al eliminar el chat.' });

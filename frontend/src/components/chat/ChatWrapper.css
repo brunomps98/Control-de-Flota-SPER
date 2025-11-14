@@ -1,4 +1,4 @@
-/* --- 1. Contenedor Principal  --- */
+/* Contenedor Principal  */
 .chat-wrapper-container {
     position: fixed;
     bottom: 20px;
@@ -6,7 +6,7 @@
     z-index: 1000;
 }
 
-/* --- 2. La Burbuja --- */
+/*  La Burbuja  */
 .chat-bubble-button {
     background-color: #009688;
     color: white;
@@ -26,7 +26,7 @@
     transform: scale(1.1);
 }
 
-/* --- 3. La Ventana de Chat --- */
+/* La Ventana de Chat  */
 .chat-window {
     position: absolute;
     bottom: 80px;
@@ -54,7 +54,7 @@
     }
 }
 
-/* --- 4. Partes de la Ventana (Header, Body, Footer) --- */
+/*  Partes de la Ventana (Header, Body, Footer)  */
 .chat-header {
     background: #009688;
     color: white;
@@ -118,7 +118,7 @@
     background: #007a6e;
 }
 
-/* --- 5. Estilos de Mensajes (Invitado) --- */
+/* Estilos de Mensajes  */
 .message-list {
     display: flex;
     flex-direction: column;
@@ -191,7 +191,7 @@
     color: #007bff;
 }
 
-/* --- 6. Estilos de Bandeja de Entrada (Admin) --- */
+/* Estilos de Bandeja de Entrada (Admin)  */
 .admin-inbox {
     display: flex;
     flex-direction: column;
@@ -243,7 +243,7 @@
     color: #888;
 }
 
-/* --- 7. Estilo del Botón "Atrás" (Admin) --- */
+/* Estilo del Botón "Atrás" (Admin) */
 .chat-back-btn {
     background: none;
     border: none;
@@ -259,7 +259,7 @@
     color: #000;
 }
 
-/* --- 8. Estilos del Menú de Opciones (3 puntos) --- */
+/* Estilos del Menú de Opciones (3 puntos)  */
 .message-options-wrapper {
     position: relative;
     visibility: hidden;
@@ -484,7 +484,7 @@
     cursor: not-allowed;
 }
 
-/* --- Vista Previa de Imagen --- */
+/* Vista Previa de Imagen */
 .image-preview-container {
     position: absolute;
     bottom: 100%;
@@ -631,4 +631,104 @@
         transform: scale(1);
         opacity: 1;
     }
+}
+
+.chat-bubble-button {
+    position: relative;
+}
+
+.chat-unread-badge {
+    position: absolute;
+    top: -5px;  
+    right: -5px; 
+    
+    background-color: #d33; 
+    color: white;
+    font-weight: bold;
+    
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    
+    transform: scale(1);
+    transition: transform 0.2s ease-out;
+}
+
+.chat-unread-badge.pop {
+    transform: scale(1.1);
+}
+
+
+.admin-inbox {
+    overflow-y: auto;
+}
+
+.chat-list-header {
+    background-color: #f0f0f0;
+    color: #555;
+    font-weight: bold;
+    font-size: 0.8rem;
+    padding: 6px 15px;
+    text-transform: uppercase;
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.new-chat-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.new-chat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.new-chat-item:hover {
+    background-color: #f9f9f9;
+}
+
+.new-chat-item .user-info {
+    flex-grow: 1;
+}
+
+.new-chat-item .user-name {
+    font-weight: bold;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.new-chat-item .user-unit {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.new-chat-item .online-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ccc; 
+    margin-right: 0; 
+    border: 1px solid #bbb;
+}
+
+.new-chat-item .online-indicator.online {
+    background-color: #4CAF50; 
+    border: 1px solid #388E3C;
+    box-shadow: 0 0 5px #4CAF50;
 }

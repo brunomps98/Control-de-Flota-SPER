@@ -33,46 +33,49 @@ const BackIcon = () => (
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
     try {
-        const date = parseISO(isoDateString); 
+        const date = parseISO(isoDateString);
         if (isToday(date)) { return format(date, 'p', { locale: es }); }
         if (isYesterday(date)) { return 'Ayer'; }
-        return format(date, 'P', { locale: es }); 
+        return format(date, 'P', { locale: es });
     } catch (error) {
         console.error("Error formateando fecha:", error);
-        return ''; 
+        return '';
     }
 };
 
 // --- LÓGICA DE CHATWINDOW ---
 const ChatWindow = ({ onClose, user }) => {
-    const socket = useSocket(); 
-    const messagesEndRef = useRef(null); 
-    
+    const socket = useSocket();
+    const messagesEndRef = useRef(null);
+
     // --- Estados ---
     const [isLoading, setIsLoading] = useState(true);
     const [newMessage, setNewMessage] = useState("");
     const [guestRoom, setGuestRoom] = useState(null);
     const [guestMessages, setGuestMessages] = useState([]);
-    const [adminRooms, setAdminRooms] = useState([]); 
-    const [currentView, setCurrentView] = useState('inbox'); 
-    const [selectedRoom, setSelectedRoom] = useState(null); 
-    const [adminMessages, setAdminMessages] = useState([]); 
-    const [isChatLoading, setIsChatLoading] = useState(false); 
+    // Estados de admin
+    const [activeRooms, setActiveRooms] = useState([]); 
+    const [newChatUsers, setNewChatUsers] = useState([]); 
+    const [currentView, setCurrentView] = useState('inbox');
+    const [selectedRoom, setSelectedRoom] = useState(null);
+    const [adminMessages, setAdminMessages] = useState([]);
+    const [isChatLoading, setIsChatLoading] = useState(false);
     const [openMenuId, setOpenMenuId] = useState(null);
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
     const typingTimerRef = useRef(null);
 
-    // --- Efecto para Cargar Datos (API) ---
+    // --- 2. EFECTO DE CARGA DE DATOS  ---
     useEffect(() => {
-        if (!user) return; 
+        if (!user) return;
         if (user.admin) {
             const fetchAdminRooms = async () => {
                 try {
                     setIsLoading(true);
                     const response = await apiClient.get('/api/chat/rooms');
-                    setAdminRooms(response.data);
-                } catch (error) { console.error("Error al cargar salas de admin:", error); } 
+                    setActiveRooms(response.data.activeRooms);
+                    setNewChatUsers(response.data.newChatUsers);
+                } catch (error) { console.error("Error al cargar salas de admin:", error); }
                 finally { setIsLoading(false); }
             };
             fetchAdminRooms();
@@ -83,17 +86,17 @@ const ChatWindow = ({ onClose, user }) => {
                     const response = await apiClient.get('/api/chat/myroom');
                     setGuestRoom(response.data.room);
                     setGuestMessages(response.data.messages);
-                } catch (error) { console.error("Error al cargar la sala de chat:", error); } 
+                } catch (error) { console.error("Error al cargar la sala de chat:", error); }
                 finally { setIsLoading(false); }
             };
             fetchGuestRoom();
         }
-    }, [user]); 
+    }, [user]);
 
-    // --- Efecto para Escuchar Sockets ---
+    // --- Efecto para Escuchar Sockets  ---
     useEffect(() => {
-        if (!socket) return; 
-        
+        if (!socket) return;
+
         const handleNewMessage = (message) => {
             const guestRoomId = guestRoom?.id;
             const adminSelectedRoomId = selectedRoom?.id;
@@ -104,18 +107,13 @@ const ChatWindow = ({ onClose, user }) => {
             }
         };
 
-        // Alguien está escribiendo
-        const handleShowTyping = (payload) => {
-            setIsOtherUserTyping(true);
-        };
-        // Alguien dejó de escribir
-        const handleHideTyping = (payload) => {
-            setIsOtherUserTyping(false);
-        };
+        const handleShowTyping = (payload) => { setIsOtherUserTyping(true); };
+        const handleHideTyping = (payload) => { setIsOtherUserTyping(false); };
 
         const handleAdminNotification = ({ message, roomId }) => {
             if (user.admin) {
-                setAdminRooms(prevRooms => 
+                // Mueve la sala actualizada al principio de 'activeRooms'
+                setActiveRooms(prevRooms => 
                     prevRooms.map(room => 
                         room.id === roomId 
                         ? { ...room, last_message: message.content.substring(0, 30), updated_at: message.created_at } 
@@ -136,14 +134,14 @@ const ChatWindow = ({ onClose, user }) => {
         const handleRoomDeleted = (payload) => {
             const { roomId } = payload;
             if (user.admin) {
-                setAdminRooms(prev => prev.filter(r => r.id !== roomId));
+                setActiveRooms(prev => prev.filter(r => r.id !== roomId));
                 if (selectedRoom?.id === roomId) {
-                    handleBackToInbox(); 
+                    handleBackToInbox();
                 }
             }
             if (!user.admin && guestRoom?.id === roomId) {
                 setGuestMessages([]);
-                setGuestRoom(null); 
+                setGuestRoom(null);
             }
         };
         const handleSuccess = (payload) => { toast.success(payload.message); };
@@ -157,7 +155,7 @@ const ChatWindow = ({ onClose, user }) => {
         socket.on('hide_typing', handleHideTyping);
         socket.on('operation_success', handleSuccess);
         socket.on('operation_error', handleError);
-        
+
         return () => {
             socket.off('new_message', handleNewMessage);
             socket.off('new_message_notification', handleAdminNotification);
@@ -168,45 +166,67 @@ const ChatWindow = ({ onClose, user }) => {
             socket.off('operation_success', handleSuccess);
             socket.off('operation_error', handleError);
         };
-    }, [socket, user, guestRoom, selectedRoom]); 
+    }, [socket, user, guestRoom, selectedRoom]);
 
     // --- Efecto para Auto-Scroll ---
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [guestMessages, adminMessages]); 
+    }, [guestMessages, adminMessages]);
 
     // --- Funciones ---
     const handleSendMessage = (e) => {
         e.preventDefault();
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
-        
-        // Validación solo para texto
         if (!socket || !newMessage.trim() || !targetRoomId) return;
-        
-        socket.emit('send_message', { 
-            roomId: targetRoomId, 
-            content: newMessage.trim() 
+        socket.emit('send_message', {
+            roomId: targetRoomId,
+            content: newMessage.trim()
         });
-        setNewMessage(""); 
+        setNewMessage("");
     };
-    
+
     const handleSelectRoom = async (room) => {
         try {
-            setIsChatLoading(true); 
-            setCurrentView('chat'); 
-            setSelectedRoom(room); 
+            setIsChatLoading(true);
+            setCurrentView('chat');
+            setSelectedRoom(room);
             const response = await apiClient.get(`/api/chat/room/${room.id}/messages`);
             setAdminMessages(response.data.messages);
             socket.emit('admin_join_room', room.id);
-        } catch (error) { console.error("Error al cargar mensajes de la sala:", error); } 
+        } catch (error) { console.error("Error al cargar mensajes de la sala:", error); }
         finally { setIsChatLoading(false); }
+    };
+
+    // Funcion que inicia un chat desde el admin
+    const handleStartNewChat = async (targetUser) => {
+        try {
+            setIsChatLoading(true); // Mostramos "Cargando..." en la vista de chat
+            
+            // Llamamos a la nueva ruta del backend
+            const response = await apiClient.post('/api/chat/find-or-create-room', { 
+                userId: targetUser.id 
+            });
+
+            // El backend nos devuelve la sala 
+            const room = response.data;
+        
+            handleSelectRoom(room);
+            setActiveRooms(prev => [room, ...prev.filter(r => r.user_id !== targetUser.id)]);
+            setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
+
+        } catch (error) {
+            console.error("Error al iniciar nueva conversación:", error);
+            toast.error("No se pudo iniciar el chat.");
+            setIsChatLoading(false);
+        }
+        // finally se ejecuta dentro de handleSelectRoom
     };
 
     const handleBackToInbox = React.useCallback(() => {
         setCurrentView('inbox');
         setSelectedRoom(null);
         setAdminMessages([]);
-    }, []); 
+    }, []);
 
     const handleCopy = (text) => {
         if (navigator.clipboard) {
@@ -216,17 +236,18 @@ const ChatWindow = ({ onClose, user }) => {
                 toast.error('No se pudo copiar.');
             });
         }
-        setOpenMenuId(null); 
+        setOpenMenuId(null);
     };
+    
     const handleDelete = (messageId) => {
-        setOpenMenuId(null); 
+        setOpenMenuId(null);
         Swal.fire({
             title: '¿Estás seguro?',
             text: "¡Vas a eliminar este mensaje! No podrás revertir esto.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#d33', 
-            cancelButtonColor: '#007bff', 
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#007bff',
             confirmButtonText: 'Sí, ¡eliminar!',
             cancelButtonText: 'Cancelar'
         }).then((result) => {
@@ -235,6 +256,7 @@ const ChatWindow = ({ onClose, user }) => {
             }
         });
     };
+    
     const handleClearHistory = () => {
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!targetRoomId) return;
@@ -257,50 +279,39 @@ const ChatWindow = ({ onClose, user }) => {
 
     const handleTypingChange = (e) => {
         setNewMessage(e.target.value);
-
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!socket || !targetRoomId) return;
-
         if (!typingTimerRef.current) {
             socket.emit('typing_start', { roomId: targetRoomId });
         }
-
         if (typingTimerRef.current) {
             clearTimeout(typingTimerRef.current);
         }
-
         typingTimerRef.current = setTimeout(() => {
             socket.emit('typing_stop', { roomId: targetRoomId });
-            typingTimerRef.current = null; 
+            typingTimerRef.current = null;
         }, 2000);
     };
-    
+
     // --- Renderizado ---
-    
-    // Función helper para renderizar la lista de mensajes (de admin o invitado)
     const renderMessageList = (messages) => (
         <div className="message-list">
             {messages.map((msg) => (
                 <div key={msg.id} className={`message-row ${msg.sender_id === user.id ? 'sent' : 'received'}`}>
                     <div className="message-bubble">
                         <div className="message-header">
-                            
-                            {/* --- ESTA ES LA LÍNEA MODIFICADA --- */}
                             <span className="message-sender">
                                 {
-                                    msg.sender_id === user.id ? 
-                                        (user.admin ? 'Tú (Admin)' : 'Tú') // Mensaje enviado por mí
-                                    : 
-                                        (msg.sender?.admin ? 'Admin' : msg.sender?.username) // Mensaje recibido de otro
+                                    msg.sender_id === user.id ?
+                                        (user.admin ? 'Tú (Admin)' : 'Tú')
+                                        :
+                                        (msg.sender?.admin ? 'Admin' : msg.sender?.username)
                                 }
                             </span>
-                            {/* --- FIN DE LA MODIFICACIÓN --- */}
-
                             <span className="message-timestamp">
                                 {formatTimestamp(msg.created_at)}
                             </span>
                         </div>
-                        {/* Lógica de imágenes (si existe) */}
                         {msg.image_urls && msg.image_urls.length > 0 && (
                             <div className="message-image-container">
                                 {msg.image_urls.map((url, index) => (
@@ -310,7 +321,6 @@ const ChatWindow = ({ onClose, user }) => {
                                 ))}
                             </div>
                         )}
-                        {/* Lógica de texto (si existe) */}
                         {msg.content && (
                             <div className="message-content">
                                 {msg.content}
@@ -330,8 +340,6 @@ const ChatWindow = ({ onClose, user }) => {
                     </div>
                 </div>
             ))}
-
-            {/* Indicador "Escribiendo..." */}
             {isOtherUserTyping && (
                 <div className="message-row received">
                     <div className="message-bubble typing-indicator">
@@ -345,54 +353,84 @@ const ChatWindow = ({ onClose, user }) => {
         </div>
     );
 
+    // ---  FUNCIÓN renderChatBody ---
     const renderChatBody = () => {
         if (isLoading) { return <p>Cargando...</p>; }
+        
+        // --- LÓGICA DE ADMIN  ---
         if (user.admin) {
+            // --- VISTA BANDEJA DE ENTRADA ---
             if (currentView === 'inbox') {
                 return (
                     <div className="admin-inbox">
-                        {adminRooms.length === 0 && <p>No hay conversaciones activas.</p>}
-                        {adminRooms.map(room => (
+                        
+                        {/* SECCIÓN CHATS ACTIVOS */}
+                        <div className="chat-list-header">Chats Activos</div>
+                        {activeRooms.length === 0 && (
+                            <p style={{padding: '10px 15px', fontSize: '0.9rem', color: '#777'}}>
+                                No hay conversaciones activas.
+                            </p>
+                        )}
+                        {activeRooms.map(room => (
                             <div key={room.id} className="admin-room-item" onClick={() => handleSelectRoom(room)}>
-                                
                                 <div className="room-item-user">
                                     <div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>
-
                                     {room.user.username}
                                 </div>
-
                                 <div className="room-item-preview">{room.last_message}</div>
                                 <div className="room-item-unit">{room.user.unidad}</div>
                                 <div className="room-item-timestamp">{formatTimestamp(room.updated_at)}</div>
                             </div>
                         ))}
+
+                        {/* SECCIÓN  INICIAR NUEVO CHAT */}
+                        <div className="chat-list-header">Iniciar Nuevo Chat</div>
+                        <div className="new-chat-list">
+                            {newChatUsers.length === 0 && (
+                                <p style={{padding: '10px 15px', fontSize: '0.9rem', color: '#777'}}>
+                                    No hay más usuarios para contactar.
+                                </p>
+                            )}
+                            {newChatUsers.map(chatUser => (
+                                <div key={chatUser.id} className="new-chat-item" onClick={() => handleStartNewChat(chatUser)}>
+                                    <div className={`online-indicator ${chatUser.isOnline ? 'online' : ''}`}></div>
+                                    <div className="user-info">
+                                        <div className="user-name">{chatUser.username}</div>
+                                        <div className="user-unit">{chatUser.unidad}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 );
             }
+            //  VISTA DE CHAT  
             if (currentView === 'chat') {
                 if (isChatLoading) { return <p>Cargando mensajes...</p>; }
                 return renderMessageList(adminMessages);
             }
         }
+        
+        // LÓGICA DE INVITADO 
         if (guestMessages.length === 0 && !isLoading) {
             return <p>Inicia la conversación. Un administrador te responderá.</p>;
         }
         return renderMessageList(guestMessages);
     };
-    
-   const renderChatFooter = () => {
-        if (user.admin && currentView === 'inbox') return null; 
+
+    const renderChatFooter = () => {
+        if (user.admin && currentView === 'inbox') return null;
         return (
             <form className="chat-footer" onSubmit={handleSendMessage}>
-                <input 
-                    type="text" 
-                    placeholder="Escribe un mensaje..." 
+                <input
+                    type="text"
+                    placeholder="Escribe un mensaje..."
                     value={newMessage}
-                    onChange={handleTypingChange} 
+                    onChange={handleTypingChange}
                     disabled={isLoading || isChatLoading}
                 />
-                <button 
-                    type="submit" 
+                <button
+                    type="submit"
                     className="chat-btn-send"
                     disabled={isLoading || isChatLoading || !newMessage.trim()}
                 >
@@ -401,7 +439,7 @@ const ChatWindow = ({ onClose, user }) => {
             </form>
         );
     };
-    
+
     return (
         <div className="chat-window" onClick={(e) => {
             if (openMenuId && !e.target.closest('.message-options-btn') && !e.target.closest('.message-menu')) {
@@ -420,7 +458,7 @@ const ChatWindow = ({ onClose, user }) => {
                 <h3>
                     {user.admin ? (
                         currentView === 'inbox' ? (
-                            'Bandeja de Entrada' 
+                            'Bandeja de Entrada'
                         ) : (
                             <div className="chat-header-title-with-status">
                                 <div className={`online-indicator ${selectedRoom?.isOnline ? 'online' : ''}`}></div>
@@ -445,7 +483,7 @@ const ChatWindow = ({ onClose, user }) => {
                     </div>
                 )}
                 {(user.admin && currentView === 'inbox') && (
-                     <button onClick={onClose} className="chat-close-btn-simple">
+                    <button onClick={onClose} className="chat-close-btn-simple">
                         <CloseIcon />
                     </button>
                 )}
@@ -459,20 +497,40 @@ const ChatWindow = ({ onClose, user }) => {
 };
 
 
-// --- El Componente Principal (Wrapper) ---
-const ChatWrapper = ({ user }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const toggleChat = () => setIsOpen(prev => !prev);
+// El Componente Principal (Wrapper) 
+const ChatWrapper = ({ user, isChatOpen, unreadChatCount, onToggleChat }) => {
+    // Estado para la animación de "pop"
+    const [popping, setPopping] = useState(false);
 
     if (!user) {
         return null;
     }
 
+    // Efecto para la animación de "pop"
+    useEffect(() => {
+        // Solo hacemos 'pop' si el número de no leídos AUMENTA
+        if (unreadChatCount > 0) {
+            setPopping(true);
+            const timer = setTimeout(() => setPopping(false), 200); // Duración de la animación en CSS
+            return () => clearTimeout(timer);
+        }
+    }, [unreadChatCount]);
+
     return (
         <div className="chat-wrapper-container">
-            {isOpen && <ChatWindow onClose={toggleChat} user={user} />}
-            <button className="chat-bubble-button" onClick={toggleChat}>
-                {isOpen ? <CloseIcon /> : <ChatIcon />}
+            {/* Usamos el prop 'isChatOpen' para mostrar/ocultar */}
+            {isChatOpen && <ChatWindow onClose={onToggleChat} user={user} />}
+
+            {/* Usamos el prop 'onToggleChat' para el click */}
+            <button className="chat-bubble-button" onClick={onToggleChat}>
+                {isChatOpen ? <CloseIcon /> : <ChatIcon />}
+
+                {/* Mostramos el globo contador si hay mensajes no leídos */}
+                {unreadChatCount > 0 && (
+                    <span className={`chat-unread-badge ${popping ? 'pop' : ''}`}>
+                        {unreadChatCount > 9 ? '9+' : unreadChatCount}
+                    </span>
+                )}
             </button>
         </div>
     );

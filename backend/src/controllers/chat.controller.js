@@ -6,46 +6,31 @@ import { onlineUsers } from '../socket/onlineUsers.js';
 class ChatController {
 
     /**
-     * @summary Obtiene la sala de chat personal de un usuario (invitado)
-     * o la crea si no existe.
-     * @description Esta es la función principal que llama el widget de chat
-     * del invitado para inicializarse.
+     * @summary 
      */
     static getMyRoom = async (req, res) => {
         try {
-            const userId = req.user.id; // Obtenemos el ID del usuario desde el token (verifyToken)
-
-            // 1. Buscamos si el usuario ya tiene una sala
-            // Usamos findOrCreate para hacerlo en un solo paso
+            const userId = req.user.id; 
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
-                defaults: { // Si no existe, la crea con estos valores
+                defaults: {
                     user_id: userId,
                     last_message: "Inicia tu consulta..."
                 }
             });
-
-            // 2. Si la sala se acaba de crear, 'created' será true.
             if (created) {
                 console.log(`[CHAT] Nueva sala creada para el usuario ${userId}`);
             }
-
-            // 3. Ahora, obtenemos todos los mensajes de esa sala
             const messages = await ChatMessage.findAll({
                 where: { room_id: room.id },
-                order: [
-                    ['created_at', 'ASC'] // Ordenamos del más antiguo al más nuevo
-                ],
+                order: [['created_at', 'ASC']],
                 include: [{
                     model: Usuario,
                     as: 'sender',
-                    attributes: ['id', 'username', 'admin'] // Solo incluimos datos seguros del remitente
+                    attributes: ['id', 'username', 'admin']
                 }]
             });
-
-            // 4. Devolvemos la sala y sus mensajes
             res.status(200).json({ room, messages });
-
         } catch (error) {
             console.error('[CHAT] Error en getMyRoom:', error);
             res.status(500).json({
@@ -57,32 +42,67 @@ class ChatController {
 
 
     /**
-     * @summary Obtiene TODAS las salas de chat (solo para Admins)
-     * @description Devuelve una lista de todas las salas, ordenadas por
-     * la más recientemente actualizada (último mensaje).
+     * @summary Obtiene TODAS las salas y usuarios para la bandeja de entrada del Admin
+     * @description Devuelve dos listas: salas activas y usuarios sin sala.
      */
     static getAdminRooms = async (req, res) => {
         try {
-            const rooms = await ChatRoom.findAll({
+            // OBTENER SALAS ACTIVAS
+            const activeRooms = await ChatRoom.findAll({
                 include: [{
                     model: Usuario,
                     as: 'user',
+                    where: { admin: false }, // Asegurarnos de que solo sean chats de invitados
                     attributes: ['id', 'username', 'email', 'unidad']
                 }],
                 order: [
-                    ['updated_at', 'DESC']
+                    ['updated_at', 'DESC'] // Ordenar por el último mensaje
                 ]
             });
 
-            // --- Lógica de Status Online ---
-            // Mapeamos las salas y añadimos el campo 'isOnline'
-            const roomsWithStatus = rooms.map(room => {
+            // Inyectar 'isOnline' a las salas activas
+            const userIdsWithRooms = []; // Guardamos los IDs para excluirlos después
+            const activeRoomsWithStatus = activeRooms.map(room => {
                 const plainRoom = room.get({ plain: true });
-                const isOnline = !!onlineUsers[plainRoom.user_id]; // true si existe, false si no
+                const isOnline = !!onlineUsers[plainRoom.user_id]; //
+                userIdsWithRooms.push(plainRoom.user_id); // Añadir a la lista de exclusión
                 return { ...plainRoom, isOnline };
             });
 
-            res.status(200).json(roomsWithStatus); // <-- Devolvemos las salas con el status
+
+            // Obtener usuarios sin sala
+            
+            // Obtenemos los IDs de todos los admins para excluirlos
+            const adminUsers = await Usuario.findAll({
+                where: { admin: true },
+                attributes: ['id']
+            });
+            const adminIds = adminUsers.map(admin => admin.id);
+
+            // Combinamos todos los IDs a excluir (admins + usuarios que ya tienen chat)
+            const allExcludedIds = [...userIdsWithRooms, ...adminIds];
+            
+            // Buscamos todos los usuarios que NO están en la lista de exclusión
+            const newChatUsers = await Usuario.findAll({
+                where: {
+                    id: { [Op.notIn]: allExcludedIds }
+                },
+                attributes: ['id', 'username', 'email', 'unidad'], // Solo datos públicos
+                order: [['username', 'ASC']] // Orden alfabético
+            });
+
+            // Inyectar 'isOnline' a los usuarios nuevos
+            const newChatUsersWithStatus = newChatUsers.map(user => {
+                const plainUser = user.get({ plain: true });
+                const isOnline = !!onlineUsers[plainUser.id]; //
+                return { ...plainUser, isOnline }; // Devolvemos el objeto de usuario
+            });
+
+            // DEVOLVER AMBAS LISTAS 
+            res.status(200).json({
+                activeRooms: activeRoomsWithStatus,
+                newChatUsers: newChatUsersWithStatus
+            });
 
         } catch (error) {
             console.error('[CHAT] Error en getAdminRooms:', error);
@@ -95,34 +115,24 @@ class ChatController {
 
     /**
      * @summary Obtiene los mensajes de UNA sala específica (solo para Admins)
-     * @description Carga el historial de chat de una sala que el admin seleccionó.
      */
     static getMessagesForRoom = async (req, res) => {
         try {
             const { roomId } = req.params;
-
-            // 1. Buscamos la sala para asegurarnos de que existe
             const room = await ChatRoom.findByPk(roomId);
             if (!room) {
                 return res.status(404).json({ message: 'Sala no encontrada' });
             }
-
-            // 2. Buscamos todos los mensajes de esa sala
             const messages = await ChatMessage.findAll({
                 where: { room_id: roomId },
-                order: [
-                    ['created_at', 'ASC'] // Ordenamos del más antiguo al más nuevo
-                ],
+                order: [['created_at', 'ASC']],
                 include: [{
                     model: Usuario,
                     as: 'sender',
-                    attributes: ['id', 'username', 'admin'] // Datos del remitente
+                    attributes: ['id', 'username', 'admin']
                 }]
             });
-
-            // 3. Devolvemos la sala y sus mensajes
             res.status(200).json({ room, messages });
-
         } catch (error) {
             console.error('[CHAT] Error en getMessagesForRoom:', error);
             res.status(500).json({
@@ -131,7 +141,51 @@ class ChatController {
             });
         }
     }
-}
 
+
+    /**
+     * @summary Busca o crea una sala para un usuario específico (para Admins)
+     * @description Permite a un admin iniciar un chat haciendo clic en un usuario.
+     */
+    static findOrCreateRoomForUser = async (req, res) => {
+        const { userId } = req.body; // ID del usuario con el que el admin quiere chatear
+        if (!userId) {
+            return res.status(400).json({ message: "Falta el ID del usuario." });
+        }
+
+        try {
+            // Buscar o crear la sala
+            const [room, created] = await ChatRoom.findOrCreate({
+                where: { user_id: userId },
+                defaults: {
+                    user_id: userId,
+                    last_message: "Conversación iniciada por el admin."
+                }
+            });
+
+            if (created) {
+                console.log(`[CHAT] Admin ha creado una nueva sala para el usuario ${userId}`);
+            }
+
+            // Devolver la sala completa, con los datos del usuario
+            const finalRoom = await ChatRoom.findByPk(room.id, {
+                include: [{
+                    model: Usuario,
+                    as: 'user',
+                    attributes: ['id', 'username', 'email', 'unidad']
+                }]
+            });
+
+            //  Añadir el estado 'isOnline'
+            const isOnline = !!onlineUsers[finalRoom.user_id];
+            
+            res.status(200).json({ ...finalRoom.get({ plain: true }), isOnline });
+
+        } catch (error) {
+            console.error('[CHAT] Error en findOrCreateRoomForUser:', error);
+            res.status(500).json({ message: 'Error al crear o buscar la sala.' });
+        }
+    }
+}
 
 export default ChatController;

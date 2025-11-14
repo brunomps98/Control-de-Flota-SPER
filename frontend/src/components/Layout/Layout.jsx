@@ -14,18 +14,22 @@ import { toast } from 'react-toastify';
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
 const Layout = () => {
-    // Seccion de Hooks
+    // --- Hooks de Estado (Sección de Hooks) ---
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    // Notificaciones de Campana
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
+    // Notificaciones de Chat
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
 
     const navigate = useNavigate();
     const location = useLocation();
     const timerRef = useRef(null);
 
-    // Callbacks
+    // --- Callbacks ---
     const handleInactivityLogout = useCallback(() => {
         localStorage.removeItem('token');
         toast.info('Tu sesión se cerró automáticamente por inactividad.');
@@ -39,7 +43,7 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
-    // Effects
+    // --- UseEffects ---
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
@@ -102,7 +106,6 @@ const Layout = () => {
         };
     }, [user, resetInactivityTimer]);
 
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (isNotificationOpen) {
@@ -113,51 +116,86 @@ const Layout = () => {
         return () => {
             window.removeEventListener('click', handleClickOutside);
         };
-    }, [isNotificationOpen]); // Se re-ejecuta solo si 'isNotificationOpen' cambia
+    }, [isNotificationOpen]);
     
+    // --- Componentes "Oyentes" de Sockets ---
 
-    
-    // Componente Oyente Interno
+    // Oyente para la Campana  (Solo Admins)
     const NotificationsListener = () => {
         const socket = useSocket(); 
-
         useEffect(() => {
             if (!socket) return; 
-
             const handleNewNotification = (data) => {
                 console.log("Nueva notificación recibida:", data);
                 setNotifications(prev => [data, ...prev.slice(0, 9)]); 
                 setUnreadCount(prev => prev + 1);
                 toast.info(`🔔 ${data.message}`, { icon: false });
             };
-
             socket.on('new_notification', handleNewNotification);
-
             return () => {
                 socket.off('new_notification', handleNewNotification);
             };
         }, [socket]); 
-
         return null; 
     };
 
+    // Oyente para el Globo de Chat  (Todos los Usuarios)
+    const ChatListener = () => {
+        const socket = useSocket();
+        useEffect(() => {
+            if (!socket || !user) return;
+
+            // Handler para cuando SOY INVITADO y recibo un mensaje
+            const handleGuestMessage = (message) => {
+                if (!isChatOpen && !user.admin) {
+                    setUnreadChatCount(prev => prev + 1);
+                }
+            };
+            // Handler para cuando SOY ADMIN y me notifican de un mensaje
+            const handleAdminNotification = (data) => {
+                if (!isChatOpen && user.admin) {
+                    setUnreadChatCount(prev => prev + 1);
+                }
+            };
+
+            socket.on('new_message', handleGuestMessage); // Para invitados
+            socket.on('new_message_notification', handleAdminNotification); // Para admins
+
+            return () => {
+                socket.off('new_message', handleGuestMessage);
+                socket.off('new_message_notification', handleAdminNotification);
+            };
+        }, [socket, user, isChatOpen]); // Depende de isChatOpen
+
+        return null;
+    };
+
+    // --- Early Returns ---
     if (loading) {
         return <div>Cargando...</div>;
     }
-
     if (!user) {
         return null;
     }
 
-    // Funciones Handler 
+    // --- Funciones Handler ---
     const handleBellClick = (event) => {
-        event.stopPropagation(); // Evita que el 'click' se propague al 'window'
+        event.stopPropagation();
         setIsNotificationOpen(prev => !prev);
         if (!isNotificationOpen) {
             setUnreadCount(0);
         }
     };
 
+    // Handler para ABRIR/CERRAR el chat
+    const handleToggleChat = () => {
+        if (!isChatOpen) {
+            setUnreadChatCount(0); // Resetea el contador al ABRIR
+        }
+        setIsChatOpen(prev => !prev);
+    };
+
+    // --- Renderizado ---
     return (
         <SocketProvider>
             <div className="layout-container" onClick={(e) => {
@@ -176,10 +214,19 @@ const Layout = () => {
                     <Outlet context={{ user }} />
                 </main>
                 <Footer />
-                <ChatWrapper user={user} />
+                
+                {/* Pasamos los props de estado al ChatWrapper */}
+                <ChatWrapper 
+                    user={user}
+                    isChatOpen={isChatOpen}
+                    unreadChatCount={unreadChatCount}
+                    onToggleChat={handleToggleChat}
+                />
             </div>
             
+            {/* Montamos AMBOS oyentes */}
             {user.admin && <NotificationsListener />}
+            {user && <ChatListener />}
         </SocketProvider>
     );
 }

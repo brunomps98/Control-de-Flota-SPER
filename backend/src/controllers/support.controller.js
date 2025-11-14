@@ -14,7 +14,7 @@ class SupportController {
      */
     static _sendNotificationToAdmins = async (ticketData, fileUrls) => {
         try {
-            // 1. Buscar todos los emails de admins
+            // Buscamos todos los emails de admins
             const admins = await Usuario.findAll({
                 where: { admin: true },
                 attributes: ['email']
