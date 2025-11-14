@@ -1,0 +1,121 @@
+.dashboard-container {
+    padding: 2rem 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header-block {
+    border-bottom: 2px solid #009688;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    color: #000000; 
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.dashboard-subtitle {
+    color: #000000; 
+    font-size: 1.1rem;
+    font-weight: 400;
+    margin-top: 0; 
+    margin-bottom: 0;
+}
+
+.user-table-container {
+    background-color: #24303c;
+    border: 1px solid #4a5568;
+    border-radius: 10px;
+    overflow: hidden; 
+}
+
+.table.table-dark {
+    --bs-table-bg: #24303c; 
+    --bs-table-striped-bg: #2d3a4b; 
+    --bs-table-border-color: #4a5568; 
+    margin-bottom: 0; 
+}
+
+.table tbody td:nth-child(5) {
+    text-align: center;
+}
+
+.table tbody td:nth-child(6) {
+    min-width: 160px; 
+}
+
+
+@media (max-width: 992px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+    
+    .user-table-container {
+        background-color: transparent;
+        border: none;
+        overflow: visible;
+    }
+    
+    .user-table-container table {
+        border-collapse: separate; 
+    }
+
+    .user-table-container thead {
+        display: none;
+    }
+
+    .user-table-container table,
+    .user-table-container tbody,
+    .user-table-container tr {
+        display: block;
+        width: 100%;
+    }
+
+    .user-table-container tr {
+        background-color: var(--bs-table-striped-bg) !important; 
+        border-radius: 8px; 
+        padding: 1rem 1rem; 
+        margin-bottom: 1rem;
+
+        border-bottom: none; 
+    }
+    .user-table-container tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .user-table-container td {
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        padding: 0.5rem 0.2rem;
+        border: none;
+        width: 100%;
+        text-align: right; 
+        background-color: transparent !important;
+    }
+
+    .user-table-container td::before {
+        content: attr(data-label); 
+        font-weight: bold;
+        text-align: left; 
+        padding-right: 1rem;
+        color: #aeb9c4;
+        white-space: nowrap;
+    }
+
+    .user-table-container td[data-label="Es Admin"] span {
+        min-width: 40px; 
+    }
+
+    .user-table-container td[data-label="Acciones"] {
+        justify-content: flex-end; 
+        gap: 10px;
+    }
+    .user-table-container td[data-label="Acciones"]::before {
+        flex-grow: 1; 
+    }
+}

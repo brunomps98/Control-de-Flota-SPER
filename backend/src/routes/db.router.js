@@ -98,6 +98,16 @@ router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
+router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const users = await userDao.getAllUsers();
+        res.status(200).json(users);
+    } catch (error) {
+        console.error("Error en GET /api/users:", error);
+        res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
+    }
+});
+
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {

@@ -57,6 +57,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
+
         <div className="navbar-text text-white d-lg-none user-connected-mobile">
             <span className="uc-label-mobile">Usuario conectado:</span>
             <span className="uc-name-mobile">{user.username}</span>
@@ -92,6 +93,11 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 <li className="nav-item">
                   <Link className="nav-link" to="/dashboard">Dashboard</Link>
                 </li>
+                
+                <li className="nav-item">
+                  <Link className="nav-link" to="/usuarios">Usuarios</Link>
+                </li>
+
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Unidades

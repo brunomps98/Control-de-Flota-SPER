@@ -154,4 +154,21 @@ export default class userManager {
             throw new Error('Error al actualizar la contraseña');
         }
     }
+
+    //Funcion para traer todos los usuarios desde la vista admin y poder modificar los datos 
+    getAllUsers = async () => {
+        try {
+            const users = await Usuario.findAll({
+                attributes: { 
+                    // Excluimos explícitamente los campos sensibles
+                    exclude: ['password', 'fcm_token'] 
+                },
+                order: [['username', 'ASC']] // Ordenamos alfabéticamente
+            });
+            return users;
+        } catch (error) {
+            console.error("Error al obtener todos los usuarios:", error);
+            throw new Error('Error al obtener la lista de usuarios');
+        }
+    }
 }

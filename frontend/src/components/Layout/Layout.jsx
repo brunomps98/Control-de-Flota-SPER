@@ -60,6 +60,16 @@ const Layout = () => {
     }, [navigate]);
 
     useEffect(() => {
+        // Oculta el ícono de reCAPTCHA tan pronto como se carga el Layout
+        const badge = document.querySelector('.grecaptcha-badge');
+        if (badge) {
+            badge.style.display = 'none';
+            badge.style.visibility = 'hidden';
+        }
+    }, []); 
+
+
+    useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => {
             const path = location.pathname;

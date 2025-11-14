@@ -24,6 +24,10 @@ class userRepository {
         return await this.dao.updateUserPassword(userId, newPassword);
     }
 
+    async getAllUsers() {
+        return await this.dao.getAllUsers();
+    }
+
 }
 
 export {userRepository}

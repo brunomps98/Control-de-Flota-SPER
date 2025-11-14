@@ -24,6 +24,7 @@ import VehicleDetail from './pages/VehicleDetail/VehicleDetail';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Dashboard from './pages/Dashboard/Dashboard';
+import AdminUserPage from './pages/AdminUserPage/AdminUserPage';
 
 // --- Obtenemos la clave publica de las variables de entorno ---
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -61,6 +62,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/case/:ticketId" element={<Case />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/usuarios" element={<AdminUserPage />} />
             </Route>
             
           </Route>

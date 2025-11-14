@@ -39,6 +39,33 @@ const Login = () => {
         };
     }, [navigate]);
 
+    useEffect(() => {
+        const showBadge = () => {
+            const badge = document.querySelector('.grecaptcha-badge');
+            if (badge) {
+                badge.style.display = 'block';
+                badge.style.visibility = 'visible';
+            }
+        };
+
+        const hideBadge = () => {
+            const badge = document.querySelector('.grecaptcha-badge');
+            if (badge) {
+                badge.style.display = 'none';
+                badge.style.visibility = 'hidden';
+            }
+        };
+
+        // Mostrarlo cuando la página de Login se carga
+        showBadge();
+
+        // Ocultarlo cuando el componente se desmonta (al ir a otra página)
+        return () => {
+            hideBadge();
+        };
+    }, []); // Se ejecuta solo al montar y desmontar
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
