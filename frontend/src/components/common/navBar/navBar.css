@@ -174,29 +174,6 @@
   color: #ffffff !important;   
 }
 
-.user-connected-mobile {
-    padding: 0 8px; 
-    text-align: right; 
-    max-width: 150px; 
-}
-
-.user-connected-mobile .uc-label-mobile {
-    display: block; 
-    font-size: 0.8rem; 
-    color: #aeb9c4; 
-    line-height: 1;
-    white-space: nowrap; 
-}
-
-.user-connected-mobile .uc-name-mobile {
-    display: block;
-    font-weight: 600;
-    color: #ffffff;
-    white-space: normal; 
-    word-break: break-all; 
-    line-height: 1.1; 
-    font-size: 0.9rem;
-}
 
 @media (max-width: 991.98px) { 
   
@@ -221,5 +198,28 @@
   .app-navbar .app-logo {
     width: 45px; 
     height: 45px;
+  }
+  
+  .nav-item-user-info {
+      width: 100%;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      margin-top: 1rem; 
+      border-top: 1px solid #4a5568; 
+  }
+  .nav-item-user-info .uc-label-mobile {
+      display: block;
+      font-size: 0.8rem;
+      color: #aeb9c4;
+      line-height: 1;
+      white-space: nowrap;
+  }
+  .nav-item-user-info .uc-name-mobile {
+      display: block;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.1;
+      font-size: 1rem; 
+      word-break: break-all;
   }
 }

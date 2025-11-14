@@ -58,23 +58,20 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <span>SPER</span>
         </Link>
 
-        <div className="navbar-text text-white d-lg-none user-connected-mobile">
-            <span className="uc-label-mobile">Usuario conectado:</span>
-            <span className="uc-name-mobile">{user.username}</span>
+        <div className="d-flex align-items-center d-lg-none">
+            <NotificationBell {...bellProps} extraClasses="d-lg-none" />
+            <button
+              className="navbar-toggler d-lg-none" 
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarSupportedContent"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
         </div>
 
-        <NotificationBell {...bellProps} extraClasses="d-lg-none" />
-
-        <button
-          className="navbar-toggler d-lg-none" 
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </button>
-
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <Link className="nav-link" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
@@ -93,11 +90,9 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 <li className="nav-item">
                   <Link className="nav-link" to="/dashboard">Dashboard</Link>
                 </li>
-                
                 <li className="nav-item">
                   <Link className="nav-link" to="/usuarios">Usuarios</Link>
                 </li>
-
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Unidades
@@ -124,17 +119,22 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 </li>
               </>
             )}
-            <li className="nav-item">
+
+            <li className="nav-item d-lg-none nav-item-user-info">
+                <span className="uc-label-mobile">Usuario conectado:</span>
+                <span className="uc-name-mobile">{user.username}</span>
+            </li>
+            <li className="nav-item d-lg-none">
               <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
             </li>
           </ul>
-
           <div className="d-none d-lg-flex align-items-center gap-3">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
                 <span className="uc-label">Usuario conectado:</span>
                 <span className="uc-name">{user.username}</span>
             </div>
+            <button className="nav-link btn btn-link text-nowrap" onClick={handleLogout}>LogOut</button>
           </div>
 
         </div>
