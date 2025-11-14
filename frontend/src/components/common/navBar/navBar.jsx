@@ -1,9 +1,15 @@
-import React from 'react';
+import React from 'react'; 
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo.png';
 import './navBar.css'; 
 
-const Navbar = ({ user }) => {
+const BellIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="24" height="24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.017 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+    </svg>
+);
+
+const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen }) => {
   const navigate = useNavigate();
 
   if (!user) {
@@ -92,9 +98,46 @@ const Navbar = ({ user }) => {
             </li>
           </ul>
 
-          <span className="navbar-text text-white">
-            Usuario conectado: {user.username}
-          </span>
+          <div className="d-flex align-items-center gap-3">
+            
+            {user.admin && (
+                <div className="notification-container">
+                    <div 
+                        className="notification-bell nav-link"
+                        onClick={onBellClick} // <-- Llama a la función de Layout
+                    >
+                        <BellIcon />
+                        <span 
+                            className={`notification-badge ${unreadCount > 0 ? 'show' : ''}`}
+                        ></span>
+                    </div>
+
+                    <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
+                        <div className="notification-header">
+                            Notificaciones
+                        </div>
+                        {notifications.length > 0 ? (
+                            notifications.map((notif, index) => (
+                                <div className="notification-item" key={index}>
+                                    <strong>{notif.title}</strong>
+                                    <br />
+                                    {notif.message}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="notification-empty">
+                                No hay notificaciones nuevas.
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <span className="navbar-text text-white">
+                Usuario conectado: {user.username}
+            </span>
+          </div>
+
         </div>
       </div>
     </nav>

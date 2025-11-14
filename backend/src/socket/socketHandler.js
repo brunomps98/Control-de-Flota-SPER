@@ -4,12 +4,14 @@ import Usuario from '../models/user.model.js';
 import { onlineUsers } from './onlineUsers.js';
 import { onlineAdmins } from './onlineAdmins.js';
 import { sendPushNotification } from '../services/notification.service.js';
-// --- ▲▲ -------------------------------------------- ▲▲ ---
 
+let ioInstance = null;
 
 export const initializeSocket = (io) => {
 
-    io.use((socket, next) => { 
+    ioInstance = io; // Guardamos la instancia de IO
+
+    io.use((socket, next) => {
         try {
             const token = socket.handshake.auth.token;
             if (!token) {
@@ -33,14 +35,14 @@ export const initializeSocket = (io) => {
         if (socket.user.admin) {
             socket.join('admin_room');
             userRoomName = 'admin_room';
-            
+
             // Lógica de Admin Online
             onlineAdmins.add(socket.user.id);
             if (onlineAdmins.size === 1) { // Si es el primer admin
                 io.emit('support_status_change', { isOnline: true });
             }
             console.log(`[SOCKET] 👑 ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
-            
+
         } else {
             try {
                 const [room] = await ChatRoom.findOrCreate({
@@ -132,7 +134,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-        socket.on('admin_join_room', (roomId) => { 
+        socket.on('admin_join_room', (roomId) => {
             try {
                 if (!socket.user.admin) {
                     console.warn(`[SOCKET] ⚠️ Intento no autorizado de ${socket.user.username} para unirse a sala ${roomId}`);
@@ -146,13 +148,13 @@ export const initializeSocket = (io) => {
             }
         });
 
-        
+
         // LÓGICA 'send_message'  ---
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content } = payload;
                 const senderId = socket.user.id;
-                
+
                 if (!content || content.trim() === "") {
                     return socket.emit('operation_error', { message: 'No se puede enviar un mensaje vacío.' });
                 }
@@ -191,14 +193,14 @@ export const initializeSocket = (io) => {
                         roomId: roomId
                     });
                 }
-                
+
                 // --- Lógica de Notificaciones Push  ---
                 const title = `Nuevo mensaje de ${socket.user.username}`;
                 const body = content.substring(0, 100);
-                
+
                 if (socket.user.admin) {
                     const room = await ChatRoom.findByPk(roomId);
-                    if (room && !onlineUsers[room.user_id]) { 
+                    if (room && !onlineUsers[room.user_id]) {
                         const user = await Usuario.findByPk(room.user_id);
                         if (user && user.fcm_token) {
                             sendPushNotification(user.fcm_token, title, body, { chatRoomId: String(roomId) });
@@ -207,7 +209,7 @@ export const initializeSocket = (io) => {
                 } else {
                     const admins = await Usuario.findAll({ where: { admin: true } });
                     for (const admin of admins) {
-                        if (admin.fcm_token && !onlineAdmins.has(admin.id)) { 
+                        if (admin.fcm_token && !onlineAdmins.has(admin.id)) {
                             sendPushNotification(admin.fcm_token, title, body, { chatRoomId: String(roomId) });
                         }
                     }
@@ -218,25 +220,35 @@ export const initializeSocket = (io) => {
                 socket.emit('send_message_error', { message: 'No se pudo enviar tu mensaje.' });
             }
         });
-        // --- ▲▲ --------------------------------------------- ▲▲ ---
 
 
         // --- Logica Disconnect  ---
         socket.on('disconnect', () => {
             console.log(`[SOCKET] ❌ Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
-            
+
             if (socket.user.admin && socket.user.id) {
                 onlineAdmins.delete(socket.user.id);
-                if (onlineAdmins.size === 0) { 
+                if (onlineAdmins.size === 0) {
                     io.emit('support_status_change', { isOnline: false });
                 }
                 console.log(`[SOCKET] Status update: Admin ${socket.user.username} está offline. (Admins Online: ${onlineAdmins.size})`);
             }
-            
+
             if (!socket.user.admin && socket.user.id) {
                 delete onlineUsers[socket.user.id];
                 console.log(`[SOCKET] Status update: ${socket.user.username} está offline. (Online: ${Object.keys(onlineUsers).length})`);
             }
         });
     });
+}
+
+/**
+ * Obtiene la instancia de Socket.IO para emitir eventos desde otros módulos.
+ * @returns {import('socket.io').Server}
+ */
+export const getIO = () => {
+    if (!ioInstance) {
+        console.error("Socket.IO no ha sido inicializado.");
+    }
+    return ioInstance;
 }

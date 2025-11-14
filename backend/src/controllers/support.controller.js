@@ -1,8 +1,9 @@
 import { supportRepository } from "../repository/index.js";
-import { supabase } from '../config/supabaseClient.js'; 
-import path from 'path'; 
-import { sendNewTicketEmail } from '../services/email.service.js'; 
-import Usuario from '../models/user.model.js'; 
+import { supabase } from '../config/supabaseClient.js';
+import path from 'path';
+import { sendNewTicketEmail } from '../services/email.service.js';
+import Usuario from '../models/user.model.js';
+import { getIO } from '../socket/socketHandler.js';
 
 
 class SupportController {
@@ -16,7 +17,7 @@ class SupportController {
             // 1. Buscar todos los emails de admins
             const admins = await Usuario.findAll({
                 where: { admin: true },
-                attributes: ['email'] 
+                attributes: ['email']
             });
 
             if (admins.length === 0) {
@@ -26,16 +27,24 @@ class SupportController {
 
             const adminEmails = admins.map(admin => admin.email);
 
-            // 2. Enviar el correo (sin 'await' para que se ejecute en segundo plano)
+            // Enviar el correo (sin 'await' para que se ejecute en segundo plano)
             sendNewTicketEmail(adminEmails, ticketData, fileUrls);
+
+            const io = getIO();
+            if (io) {
+                // 'admin_room' es la sala a la que se unen los admins
+                io.to('admin_room').emit('new_notification', {
+                    title: "Nuevo Ticket de Soporte",
+                    message: `De: ${ticketData.name} - ${ticketData.problem_description.substring(0, 30)}...`,
+                    type: "support_ticket"
+                });
+            }
 
         } catch (error) {
             // Este error solo se loguea en el backend, no detiene al usuario.
             console.error("[Support Controller] Error al buscar admins para notificar:", error);
         }
     };
-    // --- ▲▲ ------------------------- ▲▲ ---
-
 
     // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
     static renderSupportForm = (req, res) => {
@@ -104,7 +113,7 @@ class SupportController {
                 for (const file of req.files) {
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                     const extension = path.extname(file.originalname);
-                    const fileName = `files-${uniqueSuffix}${extension}`; 
+                    const fileName = `files-${uniqueSuffix}${extension}`;
 
                     const { error: uploadError } = await supabase.storage
                         .from('uploads')
@@ -121,21 +130,21 @@ class SupportController {
                     const { data: publicUrlData } = supabase.storage
                         .from('uploads')
                         .getPublicUrl(fileName);
-                    
+
                     if (!publicUrlData) {
                         throw new Error('No se pudo obtener la URL pública de Supabase para el archivo de soporte.');
                     }
-                    
+
                     fileUrls.push(publicUrlData.publicUrl);
                 }
             }
-            
+
             ticketData.files = fileUrls;
 
             await supportRepository.addSupportTicket(ticketData);
 
             SupportController._sendNotificationToAdmins(ticketData, fileUrls);
-            
+
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
             console.error("ERROR AL CREAR TICKET (con archivos):", error);
@@ -148,11 +157,11 @@ class SupportController {
     static createTicketNoFiles = async (req, res) => {
         try {
             const ticketData = req.body;
-            
-            ticketData.files = []; 
-            
+
+            ticketData.files = [];
+
             await supportRepository.addSupportTicket(ticketData);
-            
+
             SupportController._sendNotificationToAdmins(ticketData, []); // Pasamos un array vacío de archivos
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
