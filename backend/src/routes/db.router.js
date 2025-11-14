@@ -10,10 +10,9 @@ import { userDao } from "../repository/index.js";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
-// --- ▼▼ IMPORTS AÑADIDOS ▼▼ ---
-import Usuario from '../models/user.model.js'; // Para la nueva ruta
-import { Op } from 'sequelize'; // Para la nueva ruta
-// --- ▲▲ -------------------- ▲▲ ---
+import Usuario from '../models/user.model.js'; 
+import { Op } from 'sequelize';
+import rateLimit from 'express-rate-limit';
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -32,11 +31,19 @@ router.use((req, res, next) => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // Límite de 5 intentos de login por IP cada 15 minutos
+    message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
+    standardHeaders: true, // Devuelve la info del límite en los headers `RateLimit-*`
+    legacyHeaders: false, // Deshabilita los headers `X-RateLimit-*` (obsoletos)
+});
+
 
 // --- RUTAS DE AUTENTICACIÓN ---
 router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
 
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => { 
     const { username, password } = req.body;
     try {
         const user = await userDao.loginUser(username, password);
@@ -77,7 +84,7 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
             }
         });
 
-        // 2. Asigna el token al usuario actual
+        // Asigna el token al usuario actual
         await Usuario.update({ fcm_token: fcmToken }, {
             where: { id: userId }
         });
@@ -88,7 +95,6 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 });
-// --- ▲▲ ----------------------------------------- ▲▲ ---
 
 
 // --- RUTAS DE VEHÍCULOS (Protegidas) ---
