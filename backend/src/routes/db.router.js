@@ -13,6 +13,7 @@ import ChatController from "../controllers/chat.controller.js";
 import Usuario from '../models/user.model.js'; 
 import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
+import axios from 'axios'; 
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -35,17 +36,47 @@ const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 5, // Límite de 5 intentos de login por IP cada 15 minutos
     message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
-    standardHeaders: true, // Devuelve la info del límite en los headers `RateLimit-*`
-    legacyHeaders: false, // Deshabilita los headers `X-RateLimit-*` (obsoletos)
+    standardHeaders: true, 
+    legacyHeaders: false, 
 });
 
 
 // --- RUTAS DE AUTENTICACIÓN ---
 router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
 
+// --- RUTA DE LOGIN MODIFICADA ---
 router.post('/login', loginLimiter, async (req, res) => { 
-    const { username, password } = req.body;
+    const { username, password, recaptchaToken } = req.body;
+    
     try {
+        //  VERIFICACIÓN RECAPTCHA (SOLO SI VIENE EL TOKEN) ---
+        if (recaptchaToken) {
+            const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+            
+            // Verificamos que la clave secreta esté configurada en Render
+            if (!secretKey) {
+                console.error("RECAPTCHA_SECRET_KEY no está definida en las variables de entorno.");
+                return res.status(500).json({ message: 'Error de configuración del servidor.' });
+            }
+
+            const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
+            
+            try {
+                const response = await axios.post(verificationURL);
+                const { success, score } = response.data;
+                
+                // Si la verificación de Google falla O la puntuación es muy baja (bot)
+                if (!success || score < 0.5) { 
+                    return res.status(403).json({ message: 'Verificación de reCAPTCHA fallida. Inténtelo de nuevo.' });
+                }
+                
+            } catch (recaptchaError) {
+                console.error("Error al verificar reCAPTCHA:", recaptchaError.message);
+                return res.status(500).json({ message: 'Error del servidor durante la verificación.' });
+            }
+        }
+
+        // LÓGICA DE LOGIN (Solo se ejecuta si reCAPTCHA pasó o si era Android) ---
         const user = await userDao.loginUser(username, password);
         const { password: _, ...userPayload } = user.get({ plain: true });
 
@@ -66,7 +97,6 @@ router.get('/user/current', verifyToken, (req, res) => {
 });
 
 // Ruta para guardar token FCM
-
 router.post('/user/fcm-token', verifyToken, async (req, res) => {
     try {
         const { fcmToken } = req.body;
@@ -76,15 +106,13 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
             return res.status(400).json({ message: 'No se proporcionó token.' });
         }
         
-        // Desvincula este token de cualquier *otro* usuario
         await Usuario.update({ fcm_token: null }, {
             where: { 
                 fcm_token: fcmToken,
-                id: { [Op.ne]: userId } // [Op.ne] significa "no es igual"
+                id: { [Op.ne]: userId } 
             }
         });
 
-        // Asigna el token al usuario actual
         await Usuario.update({ fcm_token: fcmToken }, {
             where: { id: userId }
         });
@@ -119,7 +147,7 @@ router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
 
-// --- RUTAS DE SOPORTE  ---
+// --- RUTAS DE SOPORTE ---
 router.post('/support', upload.array('files'), SupportController.createTicket);
 router.post('/support-no-files', SupportController.createTicketNoFiles);
 router.get('/support-tickets', SupportController.getTickets);

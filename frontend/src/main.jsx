@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles.css';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'; 
 
 // Layout
 import Layout from './components/Layout/Layout';
@@ -21,39 +22,44 @@ import RealTimeVehicle from './pages/RealTimeVehicle/RealTimeVehicle';
 import EdditVehicle from './pages/EdditVehicle/EdditVehicle';
 import VehicleDetail from './pages/VehicleDetail/VehicleDetail';
 
+// --- Obtenemos la clave publica de las variables de entorno ---
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-    <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        theme="light" 
-      />
-      <Routes>
-        {/* --- Rutas Públicas (no usan el Layout) --- */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/support" element={<Support />} /> 
+    {/* Envolvemos la app con el Captcha de Google */}
+    <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+      <BrowserRouter>
+      <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          theme="light" 
+        />
+        <Routes>
+          {/* --- Rutas Públicas (no usan el Layout) --- */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/support" element={<Support />} /> 
 
-        {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
-        <Route element={<Layout />}>
-          
-          {/* --- Rutas para TODOS los usuarios logueados --- */}
-          <Route path="/vehicle" element={<Vehicle />} />
-          <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
-          <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
-          <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
+          {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
+          <Route element={<Layout />}>
+            
+            {/* --- Rutas para TODOS los usuarios logueados --- */}
+            <Route path="/vehicle" element={<Vehicle />} />
+            <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
+            <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
+            <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
 
-          {/* --- Rutas SÓLO PARA ADMINS --- */}
-          <Route element={<AdminRoute />}>
-            <Route path="/support-tickets" element={<SupportTickets />} />
-            <Route path="/case/:ticketId" element={<Case />} />
-            <Route path="/register" element={<Register />} />
+            {/* --- Rutas SÓLO PARA ADMINS --- */}
+            <Route element={<AdminRoute />}>
+              <Route path="/support-tickets" element={<SupportTickets />} />
+              <Route path="/case/:ticketId" element={<Case />} />
+              <Route path="/register" element={<Register />} />
+            </Route>
+            
           </Route>
-          
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </GoogleReCaptchaProvider>
   </React.StrictMode>
 );
