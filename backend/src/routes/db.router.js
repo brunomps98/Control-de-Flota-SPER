@@ -15,6 +15,7 @@ import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
 import axios from 'axios'; 
 import { sendPasswordResetEmail } from "../services/email.service.js";
+import DashboardController from "../controllers/dashboard.controller.js";
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -215,5 +216,8 @@ router.post('/support-no-files', SupportController.createTicketNoFiles);
 router.get('/support-tickets', SupportController.getTickets);
 router.get('/support/:ticketId', SupportController.getTicketById);
 router.delete('/support/:pid', SupportController.deleteTicket);
+
+// --- RUTAS DASHBOARD --- 
+router.get("/dashboard/stats", verifyToken, verifyAdmin, DashboardController.getDashboardStats);
 
 export default router;

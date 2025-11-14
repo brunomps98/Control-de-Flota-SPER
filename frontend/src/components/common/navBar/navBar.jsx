@@ -57,6 +57,10 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
 
             {user.admin && (
               <>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                </li>
+
                 <li className="nav-item dropdown">
                   <a
                     className="nav-link dropdown-toggle"
@@ -93,18 +97,16 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
               </>
             )}
 
-            <li className="nav-item">
-              <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
-            </li>
           </ul>
 
-          <div className="d-flex align-items-center gap-3">
+          {/* --- GRUPO DE LA DERECHA (SESIÓN DE USUARIO) --- */}
+          <div className="d-flex align-items-center gap-3 flex-shrink-1 right-group">
             
             {user.admin && (
                 <div className="notification-container">
                     <div 
-                        className="notification-bell nav-link"
-                        onClick={onBellClick} // <-- Llama a la función de Layout
+                        className="notification-bell" 
+                        onClick={onBellClick}
                     >
                         <BellIcon />
                         <span 
@@ -133,9 +135,15 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 </div>
             )}
 
-            <span className="navbar-text text-white">
-                Usuario conectado: {user.username}
-            </span>
+            {/* Reemplazado: ahora user-connected muestra label arriba y nombre abajo, sin romper la lógica */}
+            <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
+                <span className="uc-label">Usuario conectado:</span>
+                <span className="uc-name">{user.username}</span>
+            </div>
+
+            {/* 3. AÑADIMOS 'text-nowrap' AL BOTÓN TAMBIÉN */}
+            <button className="nav-link btn btn-link text-nowrap" onClick={handleLogout}>LogOut</button>
+            
           </div>
 
         </div>
