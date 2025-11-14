@@ -57,8 +57,8 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
-
         <div className="navbar-text text-white d-lg-none user-connected-mobile">
+            <span className="uc-label-mobile">Usuario conectado:</span>
             <span className="uc-name-mobile">{user.username}</span>
         </div>
 
@@ -97,6 +97,17 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                     Unidades
                   </a>
                   <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
+                    {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General">Direccion General</Link></li>}
+                    {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1">Unidad Penal 1</Link></li>}
+                    {user.up3 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3">Unidad Penal 3</Link></li>}
+                    {user.up4 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 4">Unidad Penal 4</Link></li>}
+                    {user.up5 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 5">Unidad Penal 5</Link></li>}
+                    {user.up6 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 6">Unidad Penal 6</Link></li>}
+                    {user.up7 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 7">Unidad Penal 7</Link></li>}
+                    {user.up8 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 8">Unidad Penal 8</Link></li>}
+                    {user.up9 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 9">Unidad Penal 9</Link></li>}
+                    {user.inst && <li><Link className="dropdown-item" to="/vehicle?title=Instituto">Instituto</Link></li>}
+                    {user.trat && <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento">Tratamiento</Link></li>}
                   </ul>
                 </li>
                 <li className="nav-item">
