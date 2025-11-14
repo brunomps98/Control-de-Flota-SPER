@@ -13,12 +13,9 @@
     gap: 12px;
 }
 
-
-
 .app-navbar .navbar-collapse {
     justify-content: space-between; 
 }
-
 
 .app-navbar .app-logo {
     width: 55px; 
@@ -93,6 +90,7 @@
 .app-navbar .navbar-toggler:focus {
     box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5); 
 }
+
 
 .notification-bell {
     position: relative;
@@ -177,21 +175,30 @@
   color: #ffffff !important;   
 }
 
+
 .user-connected-mobile {
-    padding: 0 10px;
-    font-size: 0.9rem;
-    overflow: hidden; 
-}
-.user-connected-mobile .uc-name-mobile {
-    font-weight: 600;
-    color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
-    max-width: 100px; 
+    padding: 0 8px; 
+    text-align: right; 
+    max-width: 150px; 
 }
 
+.user-connected-mobile .uc-label-mobile {
+    display: block; 
+    font-size: 0.8rem; 
+    color: #aeb9c4; 
+    line-height: 1;
+    white-space: nowrap; 
+}
+
+.user-connected-mobile .uc-name-mobile {
+    display: block;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: normal; 
+    word-break: break-all; 
+    line-height: 1.1; 
+    font-size: 0.9rem;
+}
 
 @media (max-width: 991.98px) { 
   
@@ -210,12 +217,11 @@
   .app-navbar .nav-item button.nav-link {
     display: inline-block;
     text-align: center;
-    width: auto;
+    width: auto; 
   }
 
   .app-navbar .app-logo {
     width: 45px; 
     height: 45px;
   }
-
 }
