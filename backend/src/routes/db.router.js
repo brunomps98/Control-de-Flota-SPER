@@ -14,6 +14,7 @@ import Usuario from '../models/user.model.js';
 import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
 import axios from 'axios'; 
+import { sendPasswordResetEmail } from "../services/email.service.js";
 
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
@@ -94,6 +95,66 @@ router.post('/login', loginLimiter, async (req, res) => {
 
 router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
+});
+
+router.post('/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    try {
+        const user = await userDao.findUserByEmail(email);
+
+        // Si no encontramos el email, enviamos una respuesta genérica
+        if (!user) {
+            return res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
+        }
+
+        // Se crea un token JWT especial para el reseteo
+        const resetPayload = { userId: user.id, email: user.email };
+        const resetToken = jwt.sign(resetPayload, process.env.SECRET_KEY, { expiresIn: '15m' }); // Válido por 15 minutos
+
+        const frontendUrl = process.env.FRONT_URL.split(',')[0]; // Tomamos la primera URL (Vercel)
+        const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
+
+        // Enviar el email
+        await sendPasswordResetEmail(user.email, resetLink);
+
+        res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
+
+    } catch (error) {
+        console.error("Error en /forgot-password:", error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+});
+
+// El Usuario envía la nueva contraseña con el token
+router.post('/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Faltan el token o la nueva contraseña.' });
+    }
+
+    try {
+        // Verificar el token de reseteo
+        const payload = jwt.verify(token, process.env.SECRET_KEY);
+        
+        // Si el token es válido, 'payload' contendrá { userId, email }
+        const { userId } = payload;
+
+        // Actualizar la contraseña en la base de datos
+        await userDao.updateUserPassword(userId, newPassword);
+
+        res.status(200).json({ message: 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.' });
+
+    } catch (error) {
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({ message: 'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.' });
+        }
+        if (error instanceof jwt.JsonWebTokenError) {
+            return res.status(401).json({ message: 'El enlace de recuperación no es válido.' });
+        }
+        console.error("Error en /reset-password:", error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
 });
 
 // Ruta para guardar token FCM

@@ -156,6 +156,23 @@
     padding-right: 45px;
 }
 
+.forgot-password-link-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.forgot-password-link {
+    color: #aeb9c4; 
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.forgot-password-link:hover {
+    color: #009688; 
+    text-decoration: underline;
+}
+
 @media (max-width: 768px) {
     .login-card {
         padding: 30px 25px;

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './login.css';
-import logoSper from '../../assets/images/logo.png'; 
+import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import { toast } from 'react-toastify'; 
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; 
+import { toast } from 'react-toastify';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 const EyeOpenIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
@@ -24,9 +24,9 @@ const EyeClosedIcon = () => (
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
-    const { executeRecaptcha } = useGoogleReCaptcha(); 
+    const { executeRecaptcha } = useGoogleReCaptcha();
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
@@ -41,7 +41,7 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // Comprobamos la plataforma
         const platform = Capacitor.getPlatform();
 
@@ -57,7 +57,7 @@ const Login = () => {
                 // 'login' es una etiqueta para la acción
                 recaptchaToken = await executeRecaptcha('login');
             }
-            
+
             // Construir y enviar el payload
             const payload = {
                 username,
@@ -69,7 +69,7 @@ const Login = () => {
 
             // Enviamos el payload
             const response = await apiClient.post('/api/login', payload);
-            
+
             const { user, token } = response.data;
             localStorage.setItem('token', token);
             const destinationPath = '/vehicle';
@@ -85,7 +85,7 @@ const Login = () => {
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
-                    
+
                     <h2 className="form-title">Iniciar sesión</h2>
                     <p className="form-subtitle">Bienvenido, por favor ingresa tus datos.</p>
 
@@ -101,7 +101,7 @@ const Login = () => {
                                 required
                             />
                         </div>
-                        
+
                         <div className="mb-3">
                             <label htmlFor="passwordInput" className="form-label">Contraseña</label>
                             <div className="input-wrapper">
@@ -113,9 +113,9 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
-                                <button 
-                                    type="button" 
-                                    className="password-toggle-btn" 
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
@@ -126,6 +126,11 @@ const Login = () => {
                         <button type="submit" className="login-submit-btn">
                             Iniciar sesión
                         </button>
+                        <div className="forgot-password-link-container">
+                            <Link to="/forgot-password" className="forgot-password-link">
+                                ¿Olvidaste tu contraseña?
+                            </Link>
+                        </div>
                     </form>
                 </div>
             </main>

@@ -11,7 +11,7 @@ console.log('API baseURL selected:', baseURL);
 const capacitorAdapter = async (config) => {
   try {
 
-    // 1. Manejo de FormData 
+    // Manejo de FormData 
     if (config.data instanceof FormData) {
         console.log('Detectado FormData en Capacitor, usando fetch()...');
         
@@ -41,7 +41,7 @@ const capacitorAdapter = async (config) => {
         };
     }
 
-    // --- 2. Manejo de JSON, GET, PUT, etc. (con CapacitorHttp) ---
+    // Manejo de JSON, GET, PUT, etc. (con CapacitorHttp) ---
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -85,10 +85,10 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    // 1. Obtenemos el token en CADA solicitud
+    //  Obtenemos el token en CADA solicitud
     const token = localStorage.getItem('token');
     
-    // 2. Si el token existe, lo adjuntamos SIEMPRE
+    // Si el token existe, lo adjuntamos SIEMPRE
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }

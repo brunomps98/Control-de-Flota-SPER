@@ -7,7 +7,7 @@ export default class userManager {
     regUser = async (username, unidad, email, password) => {
         try {
 
-            // 1. Inicializar todos los permisos en 'false'
+            // Inicializar todos los permisos en 'false'
             const permissions = {
                 admin: false,
                 dg: false,
@@ -23,7 +23,7 @@ export default class userManager {
                 trat: false
             };
 
-            // 2. Usar la 'unidad' (string) para setear el flag booleano correcto
+            // Usar la 'unidad' (string) para setear el flag booleano correcto
             switch (unidad) {
                 case "Direccion General":
                     permissions.dg = true;
@@ -63,7 +63,7 @@ export default class userManager {
                     console.warn(`[BACK] Unidad desconocida durante el registro: ${unidad}`);
             }
 
-            // 3. Crear el payload final para la base de datos
+            //  Crear el payload final para la base de datos
             const newUserPayload = {
                 username,
                 unidad,
@@ -73,7 +73,7 @@ export default class userManager {
             };
 
 
-            // 4. Crear el usuario
+            // Crear el usuario
             const newUser = await Usuario.create(newUserPayload);
             
             return newUser;
@@ -87,7 +87,7 @@ export default class userManager {
     }
 
     logInUser = async (username, password) => {
-        // 1. Encontrar al usuario SOLO por el username
+        // Encontrar al usuario SOLO por el username
         const user = await Usuario.findOne({ 
             where: { username },
             attributes: {
@@ -99,10 +99,10 @@ export default class userManager {
             throw new Error("Credenciales inválidas");
         }
         
-        // Buscamos al usuario de nuevo, pero ESTA VEZ pidiendo el password
+        // Buscamos al usuario de nuevo, pero esta vez pidiendo el password
         const userWithPass = await Usuario.findOne({ where: { username } });
 
-        // 2. Comparar la contraseña hasheada de la DB con la que mandó el usuario
+        // Comparar la contraseña hasheada de la DB con la que mandó el usuario
         const isPasswordValid = await bcrypt.compare(password, userWithPass.password);
 
         if (!isPasswordValid) {
@@ -110,12 +110,48 @@ export default class userManager {
             throw new Error("Credenciales inválidas");
         }
 
-        // 3. Si todo está bien, devuelve el usuario (sin el password)
+        // Si todo está bien, devuelve el usuario (sin el password)
         return user;
     }
 
     getUserByUsername = async (username) => {
         const user = await Usuario.findOne({ where: { username } });
         return user;
+    }
+
+    //  Encontrar usuario por Email 
+    findUserByEmail = async (email) => {
+        try {
+            const user = await Usuario.findOne({ 
+                where: { email },
+                attributes: { exclude: ['password'] } 
+            });
+            return user; // Devuelve el usuario (o null si no se encuentra)
+        } catch (error) {
+            console.error("Error al buscar usuario por email:", error);
+            throw new Error('Error al buscar usuario');
+        }
+    }
+
+    // Actualizar la contraseña del usuario 
+    updateUserPassword = async (userId, newPassword) => {
+        try {
+            // Hasheamos la nueva contraseña ANTES de guardarla
+            const hashedPassword = await bcrypt.hash(newPassword, 10); 
+            
+            const [affectedRows] = await Usuario.update(
+                { password: hashedPassword },
+                { where: { id: userId } }
+            );
+
+            if (affectedRows === 0) {
+                throw new Error('Usuario no encontrado para actualizar contraseña.');
+            }
+
+            return { message: 'Contraseña actualizada con éxito.' };
+        } catch (error) {
+            console.error("Error al actualizar la contraseña:", error);
+            throw new Error('Error al actualizar la contraseña');
+        }
     }
 }

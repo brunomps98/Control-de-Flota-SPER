@@ -21,6 +21,8 @@ import Case from './pages/Case/Case';
 import RealTimeVehicle from './pages/RealTimeVehicle/RealTimeVehicle';
 import EdditVehicle from './pages/EdditVehicle/EdditVehicle';
 import VehicleDetail from './pages/VehicleDetail/VehicleDetail';
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 
 // --- Obtenemos la clave publica de las variables de entorno ---
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -40,6 +42,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/support" element={<Support />} /> 
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
           <Route element={<Layout />}>

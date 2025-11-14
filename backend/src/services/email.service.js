@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// 2. Función para enviar la notificación
+// Función para enviar la notificación
 export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = []) => {
     
     // Lista de correos de admins
@@ -44,7 +44,7 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
         <p>Por favor, ingresa al panel de administración para gestionar este ticket.</p>
     `;
 
-    // 3. Opciones del correo
+    // Opciones del correo
     const mailOptions = {
         from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, // Quién envía
         to: to, // Quién recibe (los admins)
@@ -52,11 +52,46 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
         html: htmlBody // Cuerpo del correo
     };
 
-    // 4. Enviar el correo
+    // Enviar el correo
     try {
         await transporter.sendMail(mailOptions);
         console.log(`[Email Service] Notificación de ticket enviada a: ${to}`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
+    }
+};
+
+// Enviar email de reseteo de contraseña
+export const sendPasswordResetEmail = async (userEmail, resetLink) => {
+    
+    // Contenido del correo en HTML
+    const htmlBody = `
+        <h1>Restablecimiento de Contraseña</h1>
+        <p>Has solicitado restablecer tu contraseña para la aplicación Control de Flota.</p>
+        <p>Por favor, haz clic en el siguiente enlace para establecer una nueva contraseña. El enlace es válido por 15 minutos:</p>
+        <a 
+            href="${resetLink}" 
+            style="background-color: #009688; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; font-weight: bold;"
+        >
+            Restablecer Contraseña
+        </a>
+        <hr>
+        <p>Si no solicitaste esto, por favor ignora este correo.</p>
+    `;
+
+    // Opciones del correo
+    const mailOptions = {
+        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, // Quién envía
+        to: userEmail, // Quién recibe (el usuario)
+        subject: 'Restablecimiento de tu contraseña de SPER', // Asunto
+        html: htmlBody // Cuerpo del correo
+    };
+
+    // Enviar el correo
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Email de reseteo enviado a: ${userEmail}`);
+    } catch (error) {
+        console.error("[Email Service] Error al enviar correo de reseteo:", error);
     }
 };

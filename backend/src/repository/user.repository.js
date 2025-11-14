@@ -16,6 +16,14 @@ class userRepository {
         return await this.dao.getUserByUsername(username)
     }
 
+    async findUserByEmail(email){
+        return await this.dao.findUserByEmail(email);
+    }
+
+    async updateUserPassword(userId, newPassword){
+        return await this.dao.updateUserPassword(userId, newPassword);
+    }
+
 }
 
 export {userRepository}

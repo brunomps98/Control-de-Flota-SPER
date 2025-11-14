@@ -1,0 +1,88 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import apiClient from '../../api/axiosConfig';
+import { toast } from 'react-toastify';
+import logoSper from '../../assets/images/logo.png';
+import '../../pages/login/login.css'; 
+
+const ForgotPassword = () => {
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState(''); // Para mostrar el mensaje de éxito
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setMessage('');
+
+        try {
+            // Llamamos al endpoint del backend que creamos
+            const response = await apiClient.post('/api/forgot-password', { email });
+            
+            // Mostramos el mensaje genérico de éxito
+            setMessage(response.data.message);
+            toast.success(response.data.message);
+            setEmail('');
+
+        } catch (error) {
+            console.error("Error al solicitar reseteo:", error);
+            const errorMsg = error.response?.data?.message || 'Error interno del servidor.';
+            toast.error(errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="login-page">
+            <main className="login-main">
+                <div className="login-card">
+                    <img src={logoSper} alt="Logo SPER" className="login-logo" />
+                    
+                    <h2 className="form-title">Restablecer Contraseña</h2>
+                    <p className="form-subtitle">Ingresa tu email y te enviaremos un enlace de recuperación.</p>
+
+                    <form onSubmit={handleSubmit} className="login-form">
+                        
+                        {/* Si ya se envió, mostramos el mensaje */}
+                        {message ? (
+                            <div className="alert alert-success" role="alert">
+                                {message}
+                            </div>
+                        ) : (
+                            <>
+                                <div className="mb-3">
+                                    <label htmlFor="emailInput" className="form-label">Email</label>
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        id="emailInput"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                <button type="submit" className="login-submit-btn" disabled={isLoading}>
+                                    {isLoading ? 'Enviando...' : 'Enviar Enlace'}
+                                </button>
+                            </>
+                        )}
+                        
+                        <div className="forgot-password-link-container">
+                            <Link to="/login" className="forgot-password-link">
+                                Volver a Iniciar Sesión
+                            </Link>
+                        </div>
+
+                    </form>
+                </div>
+            </main>
+            <footer className="footer-bar">
+                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
+            </footer>
+        </div>
+    );
+};
+
+export default ForgotPassword;
