@@ -10,24 +10,23 @@ class DashboardController {
     static getDashboardStats = async (req, res) => {
         try {
             // 1. Vehículos por Unidad (Gráfico de Torta)
-            // [Usamos la columna 'title' como 'unidad']
             const vehiculosPorUnidad = await Vehiculo.findAll({
                 attributes: [
                     'title', // La columna de la unidad
                     [sequelize.fn('COUNT', sequelize.col('id')), 'count'] // Contar cuántos hay
                 ],
-                group: ['title'], // Agrupar por esa unidad
-                order: [['count', 'DESC']] // Ordenar de mayor a menor
+                group: ['title'], 
+                order: [['count', 'DESC']] 
             });
 
-            // 2. Vehículos por Año (Gráfico de Barras)
+            // Vehículos por Año (Gráfico de Barras)
             const vehiculosPorAnio = await Vehiculo.findAll({
                 attributes: [
                     'anio', // La columna del año
                     [sequelize.fn('COUNT', sequelize.col('id')), 'count']
                 ],
                 group: ['anio'],
-                order: [['anio', 'ASC']] // Ordenar por año, del más viejo al más nuevo
+                order: [['anio', 'ASC']] 
             });
 
             // 3. Vehículos por Tipo (Gráfico de Barras)
@@ -40,10 +39,7 @@ class DashboardController {
                 order: [['count', 'DESC']]
             });
 
-            // 4. Top 5 Vehículos por Kilometraje (Gráfico de Barras Horizontales)
-            // Esta es más compleja porque 'kilometrajes' es una tabla separada
-            
-            // Subconsulta para obtener el 'max_kilometraje' para cada 'vehiculo_id'
+            // --- 4. TOP 5 VEHÍCULOS POR KILOMETRAJE  ---
             const maxKilometrajeSubQuery = `(
                 SELECT MAX(k.kilometraje)
                 FROM kilometrajes k
@@ -55,10 +51,11 @@ class DashboardController {
                     'dominio',
                     [sequelize.literal(maxKilometrajeSubQuery), 'max_kilometraje'] // Usamos la subconsulta
                 ],
-                where: {
-                    // Asegurarnos de que solo traiga vehículos que TENGAN kilometrajes
-                    [Op.exists]: sequelize.literal(`SELECT 1 FROM kilometrajes k WHERE k.vehiculo_id = "Vehiculo"."id"`)
-                },
+                where: sequelize.literal(`EXISTS (
+                    SELECT 1 
+                    FROM kilometrajes k 
+                    WHERE k.vehiculo_id = "Vehiculo"."id"
+                )`),
                 order: [
                     [sequelize.literal('max_kilometraje'), 'DESC'] // Ordenar por el resultado
                 ],
