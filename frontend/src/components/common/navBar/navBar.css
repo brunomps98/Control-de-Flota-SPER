@@ -13,6 +13,13 @@
     gap: 12px;
 }
 
+
+
+.app-navbar .navbar-collapse {
+    justify-content: space-between; 
+}
+
+
 .app-navbar .app-logo {
     width: 55px; 
     height: 55px;
@@ -31,6 +38,7 @@
     margin: 0 4px;
     border-radius: 6px;
     transition: all 0.3s ease;
+    white-space: nowrap; 
 }
 
 .app-navbar .nav-link:hover,
@@ -93,11 +101,7 @@
     padding: 0.5rem 1rem; 
     margin: 0 4px;
 }
-
-.notification-bell:hover {
-    color: #ffffff; 
-}
-
+.notification-bell:hover { color: #ffffff; }
 .notification-badge {
     position: absolute;
     top: 10px;
@@ -109,16 +113,8 @@
     border: 2px solid #1c2836; 
     display: none; 
 }
-
-.notification-badge.show {
-    display: block; 
-}
-
-
-.notification-container {
-    position: relative;
-}
-
+.notification-badge.show { display: block; }
+.notification-container { position: relative; }
 .notification-panel {
     position: absolute;
     top: calc(100% + 15px);
@@ -133,12 +129,7 @@
     overflow-y: auto;
     display: none; 
 }
-
-.notification-panel.show {
-    display: block; 
-}
-
-
+.notification-panel.show { display: block; }
 .notification-header {
     padding: 1rem;
     font-size: 1.1rem;
@@ -146,7 +137,6 @@
     color: #ffffff;
     border-bottom: 1px solid #4a5568;
 }
-
 .notification-item {
     padding: 1rem;
     border-bottom: 1px solid #2d3a4b; 
@@ -154,76 +144,12 @@
     font-size: 0.9rem;
     line-height: 1.4;
 }
-.notification-item:last-child {
-    border-bottom: none;
-}
-.notification-item strong {
-    color: #ffffff; 
-}
-
-
+.notification-item:last-child { border-bottom: none; }
+.notification-item strong { color: #ffffff; }
 .notification-empty {
     padding: 2rem 1rem;
     text-align: center;
     color: #aeb9c4;
-}
-
-@media (max-width: 992px) {
-  .app-navbar .navbar-nav {
-    text-align: center;
-    width: 100%;
-
-    align-items: center; 
-  }
-
-  .app-navbar .nav-item {
-    margin: 10px 0;
-  }
-
-  .app-navbar .nav-item button.nav-link {
-    display: inline-block;
-    text-align: center;
-    width: 100%;
-  }
-
-  .app-navbar .navbar-text {
-    display: block;
-    text-align: center; 
-    font-size: 0.8rem;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #2d3a4b;
-    width: 100%;
-  }
-
-  .app-navbar .app-logo {
-    width: 45px; 
-    height: 45px;
-  }
-}
-
-
-
-.app-navbar .navbar-collapse {
-  flex-wrap: nowrap;      
-  align-items: center;
-}
-
-.app-navbar .navbar-nav {
-  flex-wrap: nowrap;
-}
-
-.app-navbar .nav-link,
-.app-navbar .navbar-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-width: 0; 
-}
-
-.right-group {
-  min-width: 0;       
-  flex-shrink: 1;
 }
 
 .user-connected {
@@ -232,15 +158,14 @@
   min-width: 0;      
   margin-right: 0.5rem;
 }
-
 .user-connected .uc-label {
   display: block;
   font-size: 0.82rem;
   white-space: nowrap;
   line-height: 1;
   opacity: 0.95;
+  color: #ffffff !important; 
 }
-
 .user-connected .uc-name {
   display: block;
   font-weight: 600;
@@ -249,19 +174,48 @@
   text-overflow: ellipsis;
   max-width: 160px;            
   word-break: break-word;
+  color: #ffffff !important;   
 }
 
-.notification-container,
-.right-group .nav-link,
-.right-group button {
-  min-width: 0;
+.user-connected-mobile {
+    padding: 0 10px;
+    font-size: 0.9rem;
+    overflow: hidden; 
 }
-
-.user-connected .uc-label,
-.user-connected .uc-name {
-    color: #ffffff !important;   
-}
-
-.user-connected .uc-name {
+.user-connected-mobile .uc-name-mobile {
     font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    max-width: 100px; 
+}
+
+
+@media (max-width: 991.98px) { 
+  
+  .app-navbar .navbar-nav {
+    text-align: center;
+    width: 100%;
+    align-items: center; 
+    padding-top: 1rem; 
+  }
+
+  .app-navbar .nav-item {
+    margin: 10px 0;
+    width: 100%; 
+  }
+
+  .app-navbar .nav-item button.nav-link {
+    display: inline-block;
+    text-align: center;
+    width: auto;
+  }
+
+  .app-navbar .app-logo {
+    width: 45px; 
+    height: 45px;
+  }
+
 }

@@ -9,27 +9,63 @@ const BellIcon = () => (
     </svg>
 );
 
+const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, extraClasses = '' }) => {
+    if (!user.admin) return null;
+    return (
+        <div className={`notification-container ${extraClasses}`}>
+            <div 
+                className="notification-bell" 
+                onClick={onBellClick}
+            >
+                <BellIcon />
+                <span 
+                    className={`notification-badge ${unreadCount > 0 ? 'show' : ''}`}
+                ></span>
+            </div>
+            <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
+                <div className="notification-header">Notificaciones</div>
+                {notifications.length > 0 ? (
+                    notifications.map((notif, index) => (
+                        <div className="notification-item" key={index}>
+                            <strong>{notif.title}</strong><br />{notif.message}
+                        </div>
+                    ))
+                ) : (
+                    <div className="notification-empty">No hay notificaciones nuevas.</div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen }) => {
   const navigate = useNavigate();
-
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
+  const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
       <div className="container-fluid">
-        <Link className="navbar-brand d-flex align-items-center gap-2" to="/vehicle">
+      
+        <Link className="navbar-brand d-flex align-items-center gap-2 me-auto" to="/vehicle">
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
+
+        <div className="navbar-text text-white d-lg-none user-connected-mobile">
+            <span className="uc-name-mobile">{user.username}</span>
+        </div>
+
+        <NotificationBell {...bellProps} extraClasses="d-lg-none" />
+
         <button
-          className="navbar-toggler"
+          className="navbar-toggler d-lg-none" 
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarSupportedContent"
@@ -38,13 +74,10 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            
             <li className="nav-item">
               <Link className="nav-link" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
             </li>
-
             {user.admin ? (
               <li className="nav-item">
                 <Link className="nav-link" to="/vehicle">Flota General</Link>
@@ -54,96 +87,37 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 <Link className="nav-link" to="/vehicle">Flota</Link>
               </li>
             )}
-
             {user.admin && (
               <>
                 <li className="nav-item">
                   <Link className="nav-link" to="/dashboard">Dashboard</Link>
                 </li>
-
                 <li className="nav-item dropdown">
-                  <a
-                    className="nav-link dropdown-toggle"
-                    href="#"
-                    id="navbarDropdown"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
+                  <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Unidades
                   </a>
                   <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                    {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General">Direccion General</Link></li>}
-                    {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1">Unidad Penal 1</Link></li>}
-                    {user.up3 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3">Unidad Penal 3</Link></li>}
-                    {user.up4 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 4">Unidad Penal 4</Link></li>}
-                    {user.up5 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 5">Unidad Penal 5</Link></li>}
-                    {user.up6 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 6">Unidad Penal 6</Link></li>}
-                    {user.up7 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 7">Unidad Penal 7</Link></li>}
-                    {user.up8 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 8">Unidad Penal 8</Link></li>}
-                    {user.up9 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 9">Unidad Penal 9</Link></li>}
-                    {user.inst && <li><Link className="dropdown-item" to="/vehicle?title=Instituto">Instituto</Link></li>}
-                    {user.trat && <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento">Tratamiento</Link></li>}
                   </ul>
                 </li>
-
                 <li className="nav-item">
                   <Link className="nav-link" to="/support-tickets">Tickets de Soporte</Link>
                 </li>
-                
                 <li className="nav-item">
                   <Link className="nav-link" to="/register">Registrar Usuario</Link>
                 </li>
               </>
             )}
-
+            <li className="nav-item">
+              <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
+            </li>
           </ul>
 
-          {/* --- GRUPO DE LA DERECHA (SESIÓN DE USUARIO) --- */}
-          <div className="d-flex align-items-center gap-3 flex-shrink-1 right-group">
-            
-            {user.admin && (
-                <div className="notification-container">
-                    <div 
-                        className="notification-bell" 
-                        onClick={onBellClick}
-                    >
-                        <BellIcon />
-                        <span 
-                            className={`notification-badge ${unreadCount > 0 ? 'show' : ''}`}
-                        ></span>
-                    </div>
-
-                    <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
-                        <div className="notification-header">
-                            Notificaciones
-                        </div>
-                        {notifications.length > 0 ? (
-                            notifications.map((notif, index) => (
-                                <div className="notification-item" key={index}>
-                                    <strong>{notif.title}</strong>
-                                    <br />
-                                    {notif.message}
-                                </div>
-                            ))
-                        ) : (
-                            <div className="notification-empty">
-                                No hay notificaciones nuevas.
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Reemplazado: ahora user-connected muestra label arriba y nombre abajo, sin romper la lógica */}
+          <div className="d-none d-lg-flex align-items-center gap-3">
+            <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
                 <span className="uc-label">Usuario conectado:</span>
                 <span className="uc-name">{user.username}</span>
             </div>
-
-            {/* 3. AÑADIMOS 'text-nowrap' AL BOTÓN TAMBIÉN */}
-            <button className="nav-link btn btn-link text-nowrap" onClick={handleLogout}>LogOut</button>
-            
           </div>
 
         </div>
