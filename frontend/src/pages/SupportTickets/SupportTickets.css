@@ -45,12 +45,10 @@
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
     transition: all 0.3s ease;
 }
-
 .ticket-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 }
-
 .ticket-header h2 {
     margin: 0 0 15px 0;
     color: #ffffff; 
@@ -58,21 +56,9 @@
     border-bottom: 2px solid #1c2836; 
     padding-bottom: 10px;
 }
-
-.ticket-body {
-    margin: 15px 0;
-    color: #aeb9c4; 
-}
-
-.ticket-body p {
-    margin: 8px 0;
-    line-height: 1.6;
-}
-
-.ticket-body p strong {
-    color: #ffffff; 
-    font-weight: 600;
-}
+.ticket-body { margin: 15px 0; color: #aeb9c4; }
+.ticket-body p { margin: 8px 0; line-height: 1.6; }
+.ticket-body p strong { color: #ffffff; font-weight: 600; }
 
 /* --- ESTILOS DE BOTONES DE ACCIÓN  --- */
 .ticket-actions {
@@ -81,7 +67,6 @@
     gap: 15px;
     margin-top: 20px;
 }
-
 .btn-action {
     flex: 1; 
     min-width: 150px; 
@@ -95,27 +80,21 @@
     text-decoration: none;
     text-align: center;
 }
-
-/* Botón Primario (Verde) */
 .btn-view-case {
     background-color: #009688;
     border: 2px solid #009688;
     color: white;
 }
-
 .btn-view-case:hover {
     background-color: #007a6e;
     border-color: #007a6e;
     transform: translateY(-2px);
 }
-
-/* Botón Destructivo (Rojo) */
 .btn-delete-case {
     background-color: #dc3545;
     border: 2px solid #dc3545;
     color: white;
 }
-
 .btn-delete-case:hover {
     background-color: #c82333;
     border-color: #c82333;
@@ -130,14 +109,12 @@
     padding: 40px;
     color: #ffffff;
 }
-
 .error-message {
     color: #f8d7da;
     background-color: #a93c46;
     border: 1px solid #f5c2c7;
     border-radius: 8px;
 }
-
 .no-tickets-message {
     text-align: center;
     font-size: 1.2rem;
@@ -160,18 +137,158 @@
     box-sizing: border-box;
 }
 
+
+/* --- ESTILOS DE FILTRO (CORREGIDOS PARA TEMA OSCURO) --- */
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 1.5rem 24px 24px 24px; /* Más padding arriba para el título */
+    background-color: #24303c; /* Color de tarjeta, para contrastar */
+    border-radius: 12px;
+    margin-bottom: 40px; /* Margen restaurado */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+    border: 1px solid #4a5568; /* Borde sutil */
+    width: 100%; /* Asegura que ocupe el ancho */
+    box-sizing: border-box;
+}
+
+/* Título "Filtrar" */
+.filter-title {
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #4a5568;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Permite que los inputs crezcan */
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    color: #aeb9c4; /* Color de texto claro */
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.filter-group input {
+    padding: 10px 14px;
+    border: 1px solid #4a5568; /* Borde oscuro */
+    border-radius: 8px;
+    min-width: 180px;
+    font-size: 0.9rem;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    color: #ffffff; /* Texto blanco */
+    background-color: #1c2836; /* Fondo de input oscuro */
+}
+.filter-group input::placeholder { color: #aeb9c4; }
+.filter-group input:focus {
+    outline: none;
+    border-color: #009688; 
+    box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
+    background-color: #1c2836;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    padding-bottom: 2px; 
+}
+
+.btn-filter-primary,
+.btn-filter-secondary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-filter-primary {
+    background-color: #009688;
+    color: white;
+}
+.btn-filter-primary:hover { background-color: #007a6e; }
+
+.btn-filter-secondary {
+    background-color: #4a5568; /* Color oscuro */
+    color: #ffffff; /* Texto claro */
+}
+.btn-filter-secondary:hover { background-color: #5a6b82; }
+
+
+/* Botón para mostrar/ocultar filtros en móvil */
+.btn-filter-toggle {
+    display: none; 
+}
+
 /* --- Responsive --- */
 @media (max-width: 768px) {
     .tickets-container {
         margin: 20px auto;
         padding: 15px;
     }
+    #information-title { font-size: 1.8rem; }
+    .ticket-card { padding: 20px; }
 
-    #information-title {
-        font-size: 1.8rem;
+    /* Estilos de filtro móvil */
+    .btn-filter-toggle {
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        gap: 8px; 
+        width: 100%;
+        background-color: #009688;
+        color: white;
+        padding: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        margin-bottom: 20px;
     }
 
-    .ticket-card {
-        padding: 20px;
+    .filter-container {
+        padding: 0; 
+        margin-bottom: 30px;
+        overflow: hidden;
+        max-height: 0;
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+        transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+    }
+
+    .filter-container.filter-mobile-open {
+        max-height: 1000px; 
+        padding: 20px; 
+        border: 1px solid #4a5568;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #24303c;
+    }
+    
+    .filter-group { width: 100%; }
+    .filter-group input { min-width: 0; width: 100%; }
+    .filter-buttons { width: 100%; }
+    .btn-filter-primary,
+    .btn-filter-secondary { flex: 1; }
+    
+    /* El título del filtro se oculta en el modo colapsado */
+    .filter-container:not(.filter-mobile-open) .filter-title {
+        display: none;
     }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'; 
 import apiClient from '../../api/axiosConfig';
 import './SupportTickets.css';
 import { App } from '@capacitor/app';
@@ -9,12 +9,28 @@ import withReactContent from 'sweetalert2-react-content';
 
 const MySwal = withReactContent(Swal);
 
+const FilterIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.973 1.011a.75.75 0 0 1 .472.691l1.524 8.283a.75.75 0 0 1-.472.691A18.66 18.66 0 0 1 12 15c-2.755 0-5.455-.232-7.973-1.011a.75.75 0 0 1-.472-.691l-1.524-8.283a.75.75 0 0 1 .472-.691A18.66 18.66 0 0 1 12 3Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v5.25m0 0 3-3m-3 3-3-3" />
+    </svg>
+);
+
 const SupportTickets = () => {
     const navigate = useNavigate();
     
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        name: '',
+        surname: '',
+        email: '',
+        phone: ''
+    });
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
@@ -24,10 +40,22 @@ const SupportTickets = () => {
     }, [navigate]); 
 
     useEffect(() => {
+        setFilters({
+            name: searchParams.get('name') || '',
+            surname: searchParams.get('surname') || '',
+            email: searchParams.get('email') || '',
+            phone: searchParams.get('phone') || ''
+        });
+    }, [searchParams]);
+
+    useEffect(() => {
         const fetchTickets = async () => {
+            setLoading(true);
             setError(null);
             try {
-                const response = await apiClient.get('/api/support-tickets');
+                const response = await apiClient.get('/api/support-tickets', {
+                    params: Object.fromEntries(searchParams)
+                });
                 setTickets(response.data.tickets || []);
             } catch (err) {
                 setError(err.response?.data?.message || 'No se pudieron cargar los tickets.');
@@ -36,28 +64,70 @@ const SupportTickets = () => {
             }
         };
         fetchTickets();
-    }, []);
+    }, [searchParams]); 
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const query = {};
+            let paramsChanged = false;
+            for (const key in filters) {
+                const urlValue = searchParams.get(key) || '';
+                if (filters[key] !== urlValue) {
+                    paramsChanged = true;
+                }
+                if (filters[key]) {
+                    query[key] = filters[key];
+                }
+            }
+            if (paramsChanged || Object.keys(query).length === 0) {
+                setSearchParams(query);
+            }
+        }, 400); 
+        return () => clearTimeout(timer);
+    }, [filters, setSearchParams, searchParams]);
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({ ...prev, [name]: value }));
+    };
+    const handleFilterSubmit = (e) => {
+        e.preventDefault();
+        const query = {};
+        for (const key in filters) {
+            if (filters[key]) query[key] = filters[key];
+        }
+        setSearchParams(query);
+    };
+    const handleClearFilters = () => {
+        setFilters({ name: '', surname: '', email: '', phone: '' });
+    };
 
     const handleDelete = (ticketId) => {
         MySwal.fire({
             title: '¿Estás seguro?',
-            text: "¡Vas a eliminar este caso de soporte!",
+            text: "¡No podrás revertir esto!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#dc3545', 
-            cancelButtonColor: '#009688', 
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
             confirmButtonText: 'Sí, ¡eliminar!',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
-                setError(null);
                 try {
                     await apiClient.delete(`/api/support/${ticketId}`);
-                    setTickets(prevTickets => prevTickets.filter(ticket => ticket.id !== ticketId));
-                    MySwal.fire('¡Eliminado!', 'El caso de soporte ha sido eliminado.', 'success');
+                    setTickets(prevTickets => prevTickets.filter(t => t.id !== ticketId));
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        'El ticket ha sido eliminado.',
+                        'success'
+                    );
                 } catch (err) {
-                    const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
-                    MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
+                    MySwal.fire(
+                        'Error',
+                        err.response?.data?.message || 'No se pudo eliminar el ticket.',
+                        'error'
+                    );
                 }
             }
         });
@@ -67,10 +137,47 @@ const SupportTickets = () => {
     return (
         <div className="login-page">
             
-
             <main>
                 <div className="tickets-container">
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
+
+                    <button
+                        className="btn-filter-toggle"
+                        onClick={() => setIsFilterOpen(prev => !prev)}
+                    >
+                        <FilterIcon />
+                        {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+                    </button>
+
+                    <form
+                        className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
+                        onSubmit={handleFilterSubmit}
+                    >
+                        {/* --- TÍTULO AÑADIDO --- */}
+                        <h3 className="filter-title">Filtrar Casos</h3>
+
+                        <div className="filter-group">
+                            <label htmlFor="name">Nombre:</label>
+                            <input type="text" id="name" name="name" value={filters.name} onChange={handleFilterChange} placeholder="John" />
+                        </div>
+                        <div className="filter-group">
+                            <label htmlFor="surname">Apellido:</label>
+                            <input type="text" id="surname" name="surname" value={filters.surname} onChange={handleFilterChange} placeholder="Doe" />
+                        </div>
+                        <div className="filter-group">
+                            <label htmlFor="email">Email:</label>
+                            <input type="text" id="email" name="email" value={filters.email} onChange={handleFilterChange} placeholder="ejemplo@mail.com" />
+                        </div>
+                        <div className="filter-group">
+                            <label htmlFor="phone">Teléfono:</label>
+                            <input type="text" id="phone" name="phone" value={filters.phone} onChange={handleFilterChange} placeholder="343..." />
+                        </div>
+                        <div className="filter-buttons">
+                            <button type="submit" className="btn-filter-primary">Filtrar</button>
+                            <button type="button" className="btn-filter-secondary" onClick={handleClearFilters}>Limpiar</button>
+                        </div>
+                    </form>
+
 
                     {loading && <p className="loading-message">Cargando tickets...</p>}
                     {error && <p className="error-message">Error: {error}</p>}
@@ -79,8 +186,7 @@ const SupportTickets = () => {
                         <>
                             {tickets.length === 0 ? (
                                 <div className="no-tickets-message">
-                                    <p>Aún no hay casos de soporte para mostrar.</p>
-                                    <p>Puedes crear uno nuevo desde la sección de Soporte.</p>
+                                    <p>No se encontraron casos de soporte con esos filtros.</p>
                                 </div>
                             ) : (
                                 tickets.map(ticket => (

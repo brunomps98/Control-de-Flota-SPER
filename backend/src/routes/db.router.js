@@ -102,6 +102,11 @@ router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
+
+
+// --- RUTAS DE GESTIÓN DE USUARIOS (CRUD) ---
+
+// Obtener todos los usuarios
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const users = await userDao.getAllUsers();
@@ -109,6 +114,53 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     } catch (error) {
         console.error("Error en GET /api/users:", error);
         res.status(500).json({ message: 'Error al obtener los usuarios', error: error.message });
+    }
+});
+
+// Actualizar un usuario
+router.put('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const userIdToUpdate = req.params.id;
+        const userData = req.body;
+
+        // Un admin no puede quitarse su propio permiso de admin
+        if (req.user.id == userIdToUpdate && userData.admin === false) {
+            return res.status(403).json({ message: 'No puedes revocar tu propio permiso de administrador.' });
+        }
+        
+        if (userIdToUpdate == 6 && req.user.id != 6) {
+             return res.status(403).json({ message: 'No se puede editar al usuario Administrador principal.' });
+        }
+
+        const updatedUser = await userDao.updateUser(userIdToUpdate, userData);
+        res.status(200).json(updatedUser);
+
+    } catch (error) {
+        console.error("Error en PUT /api/users/:id:", error);
+        res.status(500).json({ message: 'Error al actualizar el usuario', error: error.message });
+    }
+});
+
+// Ruta para eliminar un usuario
+router.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const userIdToDelete = req.params.id;
+
+        // Protección: No te puedes eliminar a ti mismo
+        if (req.user.id == userIdToDelete) {
+            return res.status(400).json({ message: 'No puedes eliminarte a ti mismo.' });
+        }
+        
+        if (userIdToDelete == 6) {
+             return res.status(403).json({ message: 'No se puede eliminar al usuario Administrador principal.' });
+        }
+
+        const result = await userDao.deleteUser(userIdToDelete);
+        res.status(200).json(result);
+
+    } catch (error) {
+        console.error("Error en DELETE /api/users/:id:", error);
+        res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
     }
 });
 

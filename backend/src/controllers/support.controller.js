@@ -79,13 +79,16 @@ class SupportController {
     // Obtiene TODOS los tickets
     static getTickets = async (req, res) => {
         try {
-            const tickets = await supportRepository.getAllSupportTickets();
+            const filters = req.query; 
+            
+            const tickets = await supportRepository.getAllSupportTickets(filters);
+            
             res.status(200).json({ tickets: tickets });
         } catch (error) {
             res.status(500).json({ message: 'Error al obtener los tickets' });
         }
     };
-
+    
     // Obtiene UN ticket por su ID
     static getTicketById = async (req, res) => {
         try {

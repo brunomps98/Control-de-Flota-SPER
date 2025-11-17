@@ -11,6 +11,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     gap: 12px;
+    flex-shrink: 0; /* El logo nunca se encoge */
 }
 
 .app-navbar .navbar-collapse {
@@ -36,6 +37,11 @@
     border-radius: 6px;
     transition: all 0.3s ease;
     white-space: nowrap; 
+    
+    /* --- CORRECCIÓN --- */
+    /* Le decimos a los links que pueden encogerse */
+    flex-shrink: 1;
+    flex-basis: auto; 
 }
 
 .app-navbar .nav-link:hover,
@@ -91,6 +97,7 @@
     box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5); 
 }
 
+/* --- ESTILOS DE NOTIFICACIÓN --- */
 .notification-bell {
     position: relative;
     cursor: pointer;
@@ -149,11 +156,14 @@
     color: #aeb9c4;
 }
 
+/* --- ESTILOS DE USUARIO ESCRITORIO --- */
 .user-connected {
   display: inline-block;
   text-align: left;
   min-width: 0;      
   margin-right: 0.5rem;
+  /* Le decimos que no se encoja */
+  flex-shrink: 0; 
 }
 .user-connected .uc-label {
   display: block;
@@ -166,15 +176,38 @@
 .user-connected .uc-name {
   display: block;
   font-weight: 600;
-  white-space: normal;           
+  white-space: nowrap; /* <-- CORRECCIÓN: Evitamos el salto de línea */
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;            
-  word-break: break-word;
+  max-width: 160px; /* Se cortará si es muy largo */
   color: #ffffff !important;   
 }
 
+/* --- ESTILOS DE USUARIO MÓVIL --- */
+.user-connected-mobile {
+    padding: 0 8px; 
+    text-align: right; 
+    max-width: 150px; 
+}
+.user-connected-mobile .uc-label-mobile {
+    display: block;
+    font-size: 0.8rem; 
+    color: #aeb9c4; 
+    line-height: 1;
+    white-space: nowrap; 
+}
+.user-connected-mobile .uc-name-mobile {
+    display: block;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: normal; 
+    word-break: break-all; 
+    line-height: 1.1; 
+    font-size: 0.9rem;
+}
 
+
+/* --- MEDIA QUERY PARA MÓVIL --- */
 @media (max-width: 991.98px) { 
   
   .app-navbar .navbar-nav {

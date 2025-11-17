@@ -53,12 +53,18 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
     <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
       <div className="container-fluid">
       
-        <Link className="navbar-brand d-flex align-items-center gap-2 me-auto" to="/vehicle">
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/vehicle">
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
 
+        {/* Grupo de botones móviles (Campana + Toggler) */}
         <div className="d-flex align-items-center d-lg-none">
+            {/* Texto de Usuario (SOLO MÓVIL) */}
+            <div className="navbar-text text-white d-lg-none user-connected-mobile">
+                <span className="uc-label-mobile">Usuario conectado:</span>
+                <span className="uc-name-mobile">{user.username}</span>
+            </div>
             <NotificationBell {...bellProps} extraClasses="d-lg-none" />
             <button
               className="navbar-toggler d-lg-none" 
@@ -70,9 +76,11 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             </button>
         </div>
 
+        {/* Menú Colapsable */}
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            {/* ... (Todos tus links: Cargar, Flota, Dashboard, etc.) ... */}
             <li className="nav-item">
               <Link className="nav-link" aria-current="page" to="/real-time-vehicle">Cargar Vehiculo</Link>
             </li>
@@ -119,7 +127,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 </li>
               </>
             )}
-
+            {/* Info de usuario y Logout (MÓVIL) */}
             <li className="nav-item d-lg-none nav-item-user-info">
                 <span className="uc-label-mobile">Usuario conectado:</span>
                 <span className="uc-name-mobile">{user.username}</span>
@@ -128,7 +136,10 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
               <button className="nav-link btn btn-link" onClick={handleLogout}>LogOut</button>
             </li>
           </ul>
-          <div className="d-none d-lg-flex align-items-center gap-3">
+
+          {/* --- GRUPO DE LA DERECHA (SOLO ESCRITORIO) --- */}
+          {/* Cambiamos 'flex-shrink-0' por 'flex-shrink-1' */}
+          <div className="d-none d-lg-flex align-items-center gap-3 flex-shrink-1">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
                 <span className="uc-label">Usuario conectado:</span>

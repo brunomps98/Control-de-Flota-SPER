@@ -48,6 +48,74 @@
     min-width: 160px; 
 }
 
+.table-edit-input {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff; 
+    background-color: #1c2836; 
+    background-clip: padding-box;
+    border: 1px solid #4a5568; 
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.table-edit-input:focus {
+    color: #fff;
+    background-color: #1c2836;
+    border-color: #009688; 
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5);
+}
+
+.table-edit-select {
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #fff;
+    background-color: #1c2836;
+    border: 1px solid #4a5568;
+    border-radius: 0.25rem;
+}
+.table-edit-select:focus {
+    border-color: #009688;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5);
+}
+
+
+.table-edit-check {
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.table-edit-actions {
+    display: flex;
+    gap: 0.5rem; 
+}
+
+
+@media (max-width: 992px) {
+    .table-edit-input,
+    .table-edit-select {
+        width: 100%;
+        max-width: 200px; 
+        text-align: right; 
+    }
+    
+    .table-edit-check {
+        margin-left: auto;
+    }
+}
+
+.password-placeholder-cell {
+    text-align: center;
+    vertical-align: middle;
+}
 
 @media (max-width: 992px) {
     .dashboard-container {
@@ -102,7 +170,7 @@
         content: attr(data-label); 
         font-weight: bold;
         text-align: left; 
-        padding-right: 1rem;
+        padding-right: 3rem;
         color: #aeb9c4;
         white-space: nowrap;
     }
@@ -118,4 +186,15 @@
     .user-table-container td[data-label="Acciones"]::before {
         flex-grow: 1; 
     }
+    .user-table-container td[data-label="Nueva Contraseña"] {
+        justify-content: flex-end; 
+    }
+    .user-table-container td[data-label="Es Admin"] {
+        justify-content: flex-end; 
+    }
+    
+    .table-edit-check {
+        margin-left: 0; 
+    }
 }
+

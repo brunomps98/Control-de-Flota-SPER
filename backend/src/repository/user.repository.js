@@ -28,6 +28,14 @@ class userRepository {
         return await this.dao.getAllUsers();
     }
 
+    async deleteUser(userId) {
+        return await this.dao.deleteUser(userId);
+    }
+
+    async updateUser(userId, userData) {
+        return await this.dao.updateUser(userId, userData);
+    }
+
 }
 
 export {userRepository}

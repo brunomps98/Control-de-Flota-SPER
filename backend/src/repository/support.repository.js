@@ -11,11 +11,9 @@ class SupportRepository {
         return await this.dao.deleteTicket(id);
     }
 
-
-    async getAllSupportTickets() {
-        return await this.dao.getAllTickets();
+    async getAllSupportTickets(filters) { 
+        return await this.dao.getAllTickets(filters); 
     }
-
 
     async getSupportTicketById(id) {
         return await this.dao.getTicketById(id);
