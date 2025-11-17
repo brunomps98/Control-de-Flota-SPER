@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import apiClient from '../../api/axiosConfig';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom'; 
+import { App } from '@capacitor/app'; 
+import { Capacitor } from '@capacitor/core'; 
 import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
 import '../../pages/login/login.css'; 
@@ -9,6 +10,14 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState(''); // Para mostrar el mensaje de éxito
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+        const handleBackButton = () => navigate('/login');
+        const listener = App.addListener('backButton', handleBackButton);
+        return () => listener.remove();
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

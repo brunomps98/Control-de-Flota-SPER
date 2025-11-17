@@ -125,10 +125,6 @@ const Case = () => {
                     </div>
                 )}
             </main>
-
-            <footer className="footer-bar-darker">
-                <p>© 2025 SPER - Departamento de Seguridad Informática</p>
-            </footer>
         </div>
     );
 }

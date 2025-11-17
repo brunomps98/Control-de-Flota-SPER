@@ -34,10 +34,10 @@ const SupportTickets = () => {
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-        const handleBackButton = () => navigate('/support');
+        const handleBackButton = () => navigate('/vehicle'); 
         const listener = App.addListener('backButton', handleBackButton);
         return () => listener.remove();
-    }, [navigate]); 
+    }, [navigate]);
 
     useEffect(() => {
         setFilters({

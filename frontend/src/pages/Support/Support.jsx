@@ -23,11 +23,11 @@ const Support = () => {
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/');
-        const addListenerAsync = async () => {
-            await App.addListener('backButton', handleBackButton);
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
+        return () => {
+            listenerPromise.then(listener => listener.remove());
         };
-        addListenerAsync();
-        return () => {};
     }, [navigate]);
 
     const handleChange = (e) => {

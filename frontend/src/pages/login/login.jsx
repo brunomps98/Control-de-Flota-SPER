@@ -31,11 +31,10 @@ const Login = () => {
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/');
-        const addListenerAsync = async () => {
-            await App.addListener('backButton', handleBackButton);
-        };
-        addListenerAsync();
+        const listenerPromise = App.addListener('backButton', handleBackButton);
+
         return () => {
+            listenerPromise.then(listener => listener.remove());
         };
     }, [navigate]);
 

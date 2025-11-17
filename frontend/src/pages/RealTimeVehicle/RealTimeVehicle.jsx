@@ -20,6 +20,13 @@ const RealTimeVehicle = () => {
     const navigate = useNavigate(); 
 
     useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+        const handleBackButton = () => navigate('/vehicle');
+        const listener = App.addListener('backButton', handleBackButton);
+        return () => listener.remove();
+    }, [navigate]);
+
+    useEffect(() => {
         const fetchUserData = async () => {
             try {
                 const response = await apiClient.get('/api/user/current');

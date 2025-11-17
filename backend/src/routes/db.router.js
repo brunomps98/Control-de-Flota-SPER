@@ -50,7 +50,7 @@ router.get("/health", (req, res) => {
 // --- RUTAS DE AUTENTICACIÓN ---
 router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
 
-// --- RUTA DE LOGIN MODIFICADA ---
+// --- RUTA DE LOGIN ---
 router.post('/login', loginLimiter, async (req, res) => { 
     const { username, password, recaptchaToken } = req.body;
     
@@ -109,7 +109,8 @@ router.get('/user/current', verifyToken, (req, res) => {
 // Obtener todos los usuarios
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const users = await userDao.getAllUsers();
+        const filters = req.query; // <-- 1. Leemos los filtros de la URL
+        const users = await userDao.getAllUsers(filters); // <-- 2. Pasamos los filtros
         res.status(200).json(users);
     } catch (error) {
         console.error("Error en GET /api/users:", error);

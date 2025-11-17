@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import apiClient from '../../api/axiosConfig';
+import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import './Dashboard.css';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -10,6 +13,23 @@ const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Primero, chequear si el plugin 'App' de Capacitor está disponible
+        if (Capacitor.isPluginAvailable('App')) {
+
+            // Si está disponible, añadimos el listener
+            const handleBackButton = () => navigate('/vehicle');
+            const listenerPromise = App.addListener('backButton', handleBackButton);
+
+            return () => {
+                // Limpiamos el listener al desmontar
+                listenerPromise.then(listener => listener.remove());
+            };
+        }
+        // Si no está disponible (ej. en web 'npm run dev'), no hacemos nada.
+    }, [navigate]);
 
     // Llamar al endpoint del backend al cargar
     useEffect(() => {
@@ -71,7 +91,7 @@ const Dashboard = () => {
             }]
         };
     };
-    
+
     // Gráfico 4: Top 5 KM
     const getTopKmChartData = () => {
         if (!stats?.top5KmVehiculos) return null;
@@ -90,7 +110,7 @@ const Dashboard = () => {
         scales: { y: { beginAtZero: true } },
         plugins: { legend: { display: false } }
     };
-    
+
     const pieOptions = {
         plugins: { legend: { position: 'right' } }
     };
@@ -122,13 +142,13 @@ const Dashboard = () => {
     return (
         <div className="login-page">
             <div className="dashboard-container">
-                
+
                 <div className="dashboard-header-block">
                     <h1 className="dashboard-title">Dashboard de la Flota</h1>
                 </div>
-                
+
                 <div className="dashboard-grid">
-                    
+
                     {/* Gráfico 1 */}
                     <div className="chart-card">
                         <h3>Vehículos por Unidad</h3>

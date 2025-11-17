@@ -24,8 +24,8 @@ class userRepository {
         return await this.dao.updateUserPassword(userId, newPassword);
     }
 
-    async getAllUsers() {
-        return await this.dao.getAllUsers();
+    async getAllUsers(filters) { 
+        return await this.dao.getAllUsers(filters);
     }
 
     async deleteUser(userId) {

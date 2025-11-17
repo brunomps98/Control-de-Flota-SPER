@@ -1,6 +1,6 @@
 import Usuario from "../models/user.model.js"; 
 import bcrypt from 'bcryptjs';
-import { UniqueConstraintError } from 'sequelize';
+import { UniqueConstraintError, Op } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 
@@ -158,14 +158,37 @@ export default class userManager {
     }
 
     //Funcion para traer todos los usuarios desde la vista admin y poder modificar los datos 
-    getAllUsers = async () => {
+    getAllUsers = async (filters = {}) => {
         try {
+            const whereClause = {};
+
+            // Construimos la consulta dinámicamente
+           if (filters.id) {
+                whereClause.id = sequelize.where(
+                    sequelize.cast(sequelize.col('id'), 'TEXT'), 
+                    { [Op.iLike]: `%${filters.id}%` }
+                );
+            }
+            if (filters.username) {
+                whereClause.username = { [Op.iLike]: `%${filters.username}%` };
+            }
+            if (filters.email) {
+                whereClause.email = { [Op.iLike]: `%${filters.email}%` };
+            }
+            if (filters.unidad) {
+                whereClause.unidad = filters.unidad;
+            }
+            // El frontend envía 'true' como string
+            if (filters.admin === 'true') {
+                whereClause.admin = true;
+            }
+
             const users = await Usuario.findAll({
+                where: whereClause, // <-- Aplicamos los filtros
                 attributes: { 
-                    // Excluimos explícitamente los campos sensibles
                     exclude: ['password', 'fcm_token'] 
                 },
-                order: [['username', 'ASC']] // Ordenamos alfabéticamente
+                order: [['username', 'ASC']] 
             });
             return users;
         } catch (error) {
