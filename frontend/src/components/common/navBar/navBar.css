@@ -11,8 +11,7 @@
     font-size: 1.25rem;
     font-weight: 700;
     gap: 12px;
-    flex-shrink: 0; /* El logo nunca se encoge */
-}
+    flex-shrink: 0; }
 
 .app-navbar .navbar-collapse {
     justify-content: space-between; 
@@ -37,9 +36,6 @@
     border-radius: 6px;
     transition: all 0.3s ease;
     white-space: nowrap; 
-    
-    /* --- CORRECCIÓN --- */
-    /* Le decimos a los links que pueden encogerse */
     flex-shrink: 1;
     flex-basis: auto; 
 }
@@ -97,7 +93,6 @@
     box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5); 
 }
 
-/* --- ESTILOS DE NOTIFICACIÓN --- */
 .notification-bell {
     position: relative;
     cursor: pointer;
@@ -156,13 +151,11 @@
     color: #aeb9c4;
 }
 
-/* --- ESTILOS DE USUARIO ESCRITORIO --- */
 .user-connected {
   display: inline-block;
   text-align: left;
   min-width: 0;      
   margin-right: 0.5rem;
-  /* Le decimos que no se encoja */
   flex-shrink: 0; 
 }
 .user-connected .uc-label {
@@ -176,14 +169,13 @@
 .user-connected .uc-name {
   display: block;
   font-weight: 600;
-  white-space: nowrap; /* <-- CORRECCIÓN: Evitamos el salto de línea */
+  white-space: nowrap; 
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px; /* Se cortará si es muy largo */
+  max-width: 160px; 
   color: #ffffff !important;   
 }
 
-/* --- ESTILOS DE USUARIO MÓVIL --- */
 .user-connected-mobile {
     padding: 0 8px; 
     text-align: right; 
@@ -207,7 +199,6 @@
 }
 
 
-/* --- MEDIA QUERY PARA MÓVIL --- */
 @media (max-width: 991.98px) { 
   
   .app-navbar .navbar-nav {

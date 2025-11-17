@@ -1,56 +1,43 @@
-/* --- 1. CONTENEDOR DE PÁGINA (Fondo) --- */
-/* (Usamos el mismo que en vehicle.css) */
-.vehicle-page-container {
-    background-color: #f4f7f6;
-    padding: 30px 40px; 
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-}
-
-/* Contenedor principal para centrar */
 .vehicle-detail-main {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 30px 40px; 
 }
 
-/* --- Títulos Principales --- */
 .vehicle-main-title {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #1a202c;
+    color: #ffffff; 
     margin: 0;
 }
 .vehicle-main-subtitle {
     font-size: 1.1rem;
-    color: #4a5568;
+    color: #aeb9c4; 
     margin-bottom: 30px;
 }
 
-/* --- 2. LAYOUT DE 2 COLUMNAS (Galería + Info) --- */
 .detail-header-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr; /* Columna izquierda más ancha */
+    grid-template-columns: 2fr 1fr; 
     gap: 30px;
     align-items: flex-start;
 }
 
-/* --- 3. COLUMNA IZQUIERDA (Galería) --- */
 .gallery-container {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    /* Para que no se mueva al cargar */
     min-height: 400px; 
 }
 
 .main-image-wrapper {
     width: 100%;
     aspect-ratio: 16 / 10;
-    background-color: #ffffff;
+    background-color: #24303c; 
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #4a5568; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .main-image {
@@ -83,45 +70,43 @@
 
 .thumbnail-image.selected {
     opacity: 1;
-    border-color: #009688; /* Tu color de acento */
+    border-color: #009688; 
 }
 
-/* --- 4. COLUMNA DERECHA (Info + Acciones) --- */
 .info-actions-container {
     display: flex;
     flex-direction: column;
     gap: 25px;
 }
 
-/* Tarjeta de Información */
 .info-card {
-    background-color: #ffffff;
+    background-color: #24303c; 
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #4a5568; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .info-card h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #1a202c;
+    color: #ffffff; 
     margin: 0 0 20px 0;
     padding-bottom: 15px;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #4a5568; 
 }
 
 .info-card p {
     display: flex;
     justify-content: space-between;
     font-size: 0.95rem;
-    color: #4a5568;
+    color: #aeb9c4; 
     margin: 0 0 12px 0;
     line-height: 1.5;
 }
 
 .info-card p strong {
-    color: #1a202c;
+    color: #ffffff; 
     font-weight: 600;
     padding-right: 10px;
 }
@@ -133,28 +118,27 @@
 .info-card hr {
     border: 0;
     height: 1px;
-    background-color: #e2e8f0;
+    background-color: #4a5568; 
     margin: 15px 0;
 }
 
-/* Tarjeta de Acciones */
 .actions-card {
-    background-color: #ffffff;
+    background-color: #24303c; 
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #4a5568; 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .actions-card h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #1a202c;
+    color: #ffffff; 
     margin: 0 0 20px 0;
 }
 
 .actions-card .btn-action {
-    display: block; /* Ocupan todo el ancho */
+    display: block; 
     width: 100%;
     text-align: center;
     margin-bottom: 12px;
@@ -164,7 +148,6 @@
 }
 
 
-/* --- 5. ESTILOS DE BOTONES (Consistentes) --- */
 .btn-action {
     padding: 12px 20px;
     font-size: 1rem;
@@ -185,12 +168,12 @@
 }
 
 .btn-action.btn-secondary {
-    background-color: #e2e8f0;
-    color: #4a5568;
-    border-color: #e2e8f0;
+    background-color: #4a5568; 
+    color: #ffffff; 
+    border-color: #4a5568;
 }
 .btn-action.btn-secondary:hover {
-    background-color: #cbd5e0;
+    background-color: #5a6b82; 
 }
 
 .btn-action.btn-destructive {
@@ -201,34 +184,30 @@
     background-color: #c82333;
 }
 
-
-/* --- 6. SECCIÓN DE HISTORIALES (Grilla) --- */
 .history-grid-title {
     margin-top: 50px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #e2e8f0;
+    border-bottom: 2px solid #4a5568; 
 }
 .history-grid-title h2 {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #1a202c;
+    color: #ffffff; 
 }
 
 .history-grid {
     display: grid;
-    /* Dos columnas para los historiales */
     grid-template-columns: 1fr 1fr;
     gap: 30px;
     margin-top: 30px;
 }
 
-/* Estilo de Tarjeta para cada Historial */
 .history-section-placeholder,
 .history-section {
-    background-color: #ffffff;
+    background-color: #24303c; 
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #4a5568; 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     min-height: 150px;
     display: flex;
@@ -240,7 +219,7 @@
     align-items: center;
     gap: 15px;
     font-size: 1rem;
-    color: #4a5568;
+    color: #aeb9c4; 
     font-weight: 600;
 }
 
@@ -255,7 +234,7 @@
 .history-section.error p {
     text-align: center;
     font-size: 1rem;
-    color: #4a5568;
+    color: #aeb9c4; 
 }
 
 .btn-load-history {
@@ -273,25 +252,24 @@
     background-color: #007a6e;
 }
 
-/* Cabecera del Historial */
 .history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #4a5568; 
     padding-bottom: 12px;
     margin-bottom: 15px;
 }
 .history-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #1a202c;
+    color: #ffffff; 
     margin: 0;
 }
 
 .btn-history-delete-all {
-    background-color: #fef0f0;
-    color: #dc3545;
+    background-color: #dc3545;
+    color: #fef0f0;
     border: none;
     padding: 6px 10px;
     border-radius: 6px;
@@ -301,11 +279,10 @@
     transition: all 0.3s ease;
 }
 .btn-history-delete-all:hover {
-    background-color: #dc3545;
+    background-color: #c82333;
     color: white;
 }
 
-/* Tabla de Historial */
 .history-section table {
     width: 100%;
     border-collapse: collapse;
@@ -315,16 +292,16 @@
 .history-section td {
     padding: 10px 8px;
     text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid #4a5568; 
 }
 .history-section th {
     font-weight: 600;
-    color: #4a5568;
+    color: #aeb9c4; 
     font-size: 0.8rem;
     text-transform: uppercase;
 }
 .history-section td {
-    color: #2D3748;
+    color: #f0f4f8; 
 }
 .history-section tr:last-child td {
     border-bottom: none;
@@ -348,34 +325,30 @@
     transform: scale(1.1);
 }
 
-/* --- MENSAJES DE CARGA/ERROR PRINCIPAL --- */
+/* --- 7. MENSAJES DE CARGA/ERROR PRINCIPAL (CORREGIDO) --- */
 .detail-loading-message,
 .detail-error-message {
     text-align: center;
     font-size: 1.2rem;
     padding: 60px 20px;
-    color: #4a5568;
+    color: #aeb9c4; 
 }
 .detail-error-message {
-    color: #dc3545;
-    background-color: #fff;
+    color: #f8d7da;
+    background-color: #a93c46;
     border: 1px solid #f5c2c7;
     border-radius: 8px;
 }
 
 
-/* --- 7. RESPONSIVE --- */
+/* --- 8. RESPONSIVE --- */
 @media (max-width: 960px) {
-    .vehicle-page-container {
+    .vehicle-detail-main {
         padding: 20px 15px;
     }
-
-    /* Se apila la grilla principal */
     .detail-header-grid {
         grid-template-columns: 1fr;
     }
-
-    /* Se apila la grilla de historiales */
     .history-grid {
         grid-template-columns: 1fr;
     }
@@ -394,24 +367,50 @@
     }
 }
 
-/* --- 8. ESTILOS DE IMPRESIÓN --- */
+/* --- 9. ESTILOS DE IMPRESIÓN --- */
 @media print {
-    body, .vehicle-page-container {
+    body, .login-page { 
         background-color: #ffffff !important;
         padding: 0;
+        color: #000; 
     }
-    .navbar-container, .footer-bar, .actions-card {
+    
+    .app-navbar, .footer-bar, .actions-card, .btn-filter-toggle, .filter-container, .chat-wrapper-container {
         display: none !important;
     }
-    .vehicle-detail-main, .info-card, .history-section {
+
+    .vehicle-detail-main, .info-card, .history-section, .chart-card {
         box-shadow: none;
-        border: 1px solid #000;
+        border: 1px solid #ddd;
         margin: 10px 0;
+        color: #000;
     }
+
+    /* Ajustes de color para impresión */
+    .vehicle-main-title, .vehicle-main-subtitle, .info-card h2, .info-card p,
+    .info-card p strong, .history-grid-title h2, .history-header h3,
+    .history-section th, .history-section td {
+        color: #000 !important;
+    }
+
     .detail-header-grid, .history-grid {
         grid-template-columns: 1fr;
+        page-break-inside: avoid;
     }
+
     .gallery-container, .history-header button {
         display: none;
+    }
+    
+    .info-card, .history-section {
+        page-break-inside: avoid;
+    }
+    
+    .thumbnail-list {
+        display: none;
+    }
+    .main-image-wrapper {
+        display: block;
+        border: 1px solid #ccc;
     }
 }

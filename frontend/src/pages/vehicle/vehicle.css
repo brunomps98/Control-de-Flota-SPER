@@ -1,64 +1,72 @@
-/* --- 1. CONTENEDOR DE PÁGINA  --- */
-.vehicle-page-container {
-    background-color: #f4f7f6;
-    padding: 30px 40px; 
-    font-family: 'Inter', sans-serif;
-}
-
-/* Título Principal de la Página */
 .titulo-products h1 {
     margin-top: 0;
     margin-bottom: 30px;
-    color: #1a202c; 
+    color: #ffffff; 
     text-align: center;
     font-weight: 700;
 }
 
-/* --- 2. FORMULARIO DE FILTROS  --- */
 .filter-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-end;
     gap: 16px;
-    padding: 24px;
-    background-color: #ffffff; 
+    padding: 1.5rem 24px 24px 24px;
+    background-color: #24303c; 
     border-radius: 12px;
     margin-bottom: 40px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); 
-    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+    border: 1px solid #4a5568; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-title {
+    width: 100%;
+    text-align: center;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #4a5568;
 }
 
 .filter-group {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
 }
 
 .filter-group label {
     font-size: 0.875rem;
-    color: #4a5568;
+    color: #aeb9c4;
     margin-bottom: 6px;
     font-weight: 600;
 }
 
 .filter-group input {
     padding: 10px 14px;
-    border: 1px solid #cbd5e0;
+    border: 1px solid #4a5568; 
     border-radius: 8px;
     min-width: 180px;
     font-size: 0.9rem;
     font-family: 'Inter', sans-serif;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    color: #ffffff; 
+    background-color: #1c2836;
 }
 
 .filter-group input::placeholder {
-    color: #a0aec0;
+    color: #aeb9c4; 
 }
 
 .filter-group input:focus {
     outline: none;
     border-color: #009688; 
     box-shadow: 0 0 0 2px rgba(0, 150, 136, 0.2);
+    background-color: #1c2836; 
 }
 
 .filter-buttons {
@@ -67,7 +75,6 @@
     padding-bottom: 2px; 
 }
 
-/* --- 3. BOTONES DE FILTRO  --- */
 .btn-filter-primary,
 .btn-filter-secondary {
     padding: 10px 20px;
@@ -80,7 +87,6 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* Botón primario (Inspirado en tu color verde) */
 .btn-filter-primary {
     background-color: #009688;
     color: white;
@@ -89,26 +95,26 @@
     background-color: #007a6e;
 }
 
-/* Botón secundario (Limpiar) */
 .btn-filter-secondary {
-    background-color: #e2e8f0;
-    color: #4a5568;
+    background-color: #4a5568; 
+    color: #ffffff;
 }
 .btn-filter-secondary:hover {
-    background-color: #cbd5e0;
+    background-color: #5a6b82; 
 }
 
 
-/* --- 4. GRILLA DE VEHÍCULOS  --- */
 .vehicle-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
+    padding: 0 2rem; 
 }
+
 
 .no-vehicles-message {
     text-align: center;
-    color: #4a5568;
+    color: #aeb9c4; 
     font-size: 1.1rem;
     grid-column: 1 / -1; 
     padding: 40px;
@@ -163,7 +169,7 @@
 }
 
 .vehicle-card-skeleton {
-    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%);
+    background: linear-gradient(90deg, #2d3a4b 25%, #4a5568 50%, #2d3a4b 75%); 
     background-size: 200% 100%;
     animation: loading 1.5s infinite;
     border-radius: 10px;
@@ -201,27 +207,29 @@
         cursor: pointer;
         margin-bottom: 20px;
     }
-
+    
     .filter-container {
         padding: 0; 
         margin-bottom: 30px;
         
         overflow: hidden;
         max-height: 0;
-        padding: 0;
         border: none;
         box-shadow: none;
         background-color: transparent;
         transition: max-height 0.4s ease-out, padding 0.4s ease-out;
     }
 
-    /* --- CUANDO ESTÁ ABIERTO --- */
     .filter-container.filter-mobile-open {
         max-height: 1000px; 
         padding: 20px; 
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        background-color: #ffffff;
+        border: 1px solid #4a5568; 
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        background-color: #24303c; 
+    }
+
+    .filter-container:not(.filter-mobile-open) .filter-title {
+        display: none;
     }
     
     .filter-group {
@@ -241,5 +249,6 @@
 
     .vehicle-grid {
         grid-template-columns: 1fr;
+        padding:0;
     }
 }

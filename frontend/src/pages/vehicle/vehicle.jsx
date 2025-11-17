@@ -26,7 +26,6 @@ const Vehicle = () => {
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
-    // Efecto para el Toast de Bienvenida
     useEffect(() => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
@@ -38,20 +37,16 @@ const Vehicle = () => {
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-
         const listenerPromise = App.addListener('backButton', (event) => {
             if (location.pathname === '/vehicle') {
                 event.preventDefault();
                 App.exitApp(); 
             }
         });
-
         return () => {
             listenerPromise.then(listener => listener.remove());
         };
     }, [location.pathname]);
-
-
 
     useEffect(() => {
         setFilters({
@@ -84,8 +79,6 @@ const Vehicle = () => {
         fetchVehicles();
     }, [searchParams]);
 
-
-    // Efecto para Debouncing de filtros (ESTADO -> URL)
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
@@ -124,10 +117,8 @@ const Vehicle = () => {
         });
     };
 
-    // --- RENDERIZADO ---
     return (
-
-        <div className="vehicle-page-container">
+        <div className="login-page" style={{ padding: '30px 40px' }}>
             <div className="titulo-products">
                 <h1>Flota de Vehículos</h1>
             </div>
@@ -144,6 +135,7 @@ const Vehicle = () => {
                 className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
                 onSubmit={handleFilterSubmit}
             >
+                <h3 className="filter-title">Filtrar Vehículos</h3>
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} placeholder="AA-123-BB" />
@@ -173,7 +165,6 @@ const Vehicle = () => {
                     <button type="button" className="btn-filter-secondary" onClick={handleClearFilters}>Limpiar</button>
                 </div>
             </form>
-
             <div className="vehicle-grid">
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
@@ -186,7 +177,6 @@ const Vehicle = () => {
                 )}
             </div>
         </div>
-
     );
 }
 

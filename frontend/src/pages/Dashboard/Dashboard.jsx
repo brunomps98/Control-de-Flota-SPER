@@ -4,7 +4,6 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import { Pie, Bar } from 'react-chartjs-2';
 import './Dashboard.css';
 
-// Registrar los componentes de Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Dashboard = () => {
@@ -30,8 +29,7 @@ const Dashboard = () => {
         fetchStats();
     }, []);
 
-    // 3. Funciones para preparar los datos para los gráficos
-    
+
     // Gráfico 1: Vehículos por Unidad
     const getUnidadChartData = () => {
         if (!stats?.vehiculosPorUnidad) return null;
@@ -87,18 +85,7 @@ const Dashboard = () => {
         };
     };
 
-    // --- Renderizado ---
-    if (loading) {
-        return <div className="dashboard-container"><h2>Cargando estadísticas...</h2></div>;
-    }
-    if (error) {
-        return <div className="dashboard-container"><div className="alert alert-danger">{error}</div></div>;
-    }
-    if (!stats) {
-        return <div className="dashboard-container"><h2>No se encontraron datos.</h2></div>;
-    }
-
-    // Opciones para los gráficos de barras 
+    // Opciones para los gráficos
     const barOptions = {
         scales: { y: { beginAtZero: true } },
         plugins: { legend: { display: false } }
@@ -108,44 +95,73 @@ const Dashboard = () => {
         plugins: { legend: { position: 'right' } }
     };
 
+
+    // --- Renderizado ---
+    if (loading) {
+        return (
+            <div className="login-page">
+                <div className="dashboard-container"><h2>Cargando estadísticas...</h2></div>
+            </div>
+        );
+    }
+    if (error) {
+        return (
+            <div className="login-page">
+                <div className="dashboard-container"><div className="alert alert-danger">{error}</div></div>
+            </div>
+        );
+    }
+    if (!stats) {
+        return (
+            <div className="login-page">
+                <div className="dashboard-container"><h2>No se encontraron datos.</h2></div>
+            </div>
+        );
+    }
+
     return (
-        <div className="dashboard-container">
-            <h1 className="dashboard-title">Dashboard de la Flota</h1>
-            
-            <div className="dashboard-grid">
+        <div className="login-page">
+            <div className="dashboard-container">
                 
-                {/* Gráfico 1 */}
-                <div className="chart-card">
-                    <h3>Vehículos por Unidad</h3>
-                    <div className="chart-wrapper pie-chart">
-                        {getUnidadChartData() && <Pie data={getUnidadChartData()} options={pieOptions} />}
-                    </div>
+                <div className="dashboard-header-block">
+                    <h1 className="dashboard-title">Dashboard de la Flota</h1>
                 </div>
-
-                {/* Gráfico 2 */}
-                <div className="chart-card">
-                    <h3>Top 5 por Kilometraje</h3>
-                    <div className="chart-wrapper">
-                        {getTopKmChartData() && <Bar data={getTopKmChartData()} options={barOptions} />}
+                
+                <div className="dashboard-grid">
+                    
+                    {/* Gráfico 1 */}
+                    <div className="chart-card">
+                        <h3>Vehículos por Unidad</h3>
+                        <div className="chart-wrapper pie-chart">
+                            {getUnidadChartData() && <Pie data={getUnidadChartData()} options={pieOptions} />}
+                        </div>
                     </div>
-                </div>
 
-                {/* Gráfico 3 */}
-                <div className="chart-card">
-                    <h3>Vehículos por Año</h3>
-                    <div className="chart-wrapper">
-                        {getAnioChartData() && <Bar data={getAnioChartData()} options={barOptions} />}
+                    {/* Gráfico 2 */}
+                    <div className="chart-card">
+                        <h3>Top 5 por Kilometraje</h3>
+                        <div className="chart-wrapper">
+                            {getTopKmChartData() && <Bar data={getTopKmChartData()} options={barOptions} />}
+                        </div>
                     </div>
-                </div>
 
-                {/* Gráfico 4 */}
-                <div className="chart-card">
-                    <h3>Vehículos por Tipo</h3>
-                    <div className="chart-wrapper">
-                        {getTipoChartData() && <Bar data={getTipoChartData()} options={barOptions} />}
+                    {/* Gráfico 3 */}
+                    <div className="chart-card">
+                        <h3>Vehículos por Año</h3>
+                        <div className="chart-wrapper">
+                            {getAnioChartData() && <Bar data={getAnioChartData()} options={barOptions} />}
+                        </div>
                     </div>
-                </div>
 
+                    {/* Gráfico 4 */}
+                    <div className="chart-card">
+                        <h3>Vehículos por Tipo</h3>
+                        <div className="chart-wrapper">
+                            {getTipoChartData() && <Bar data={getTipoChartData()} options={barOptions} />}
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </div>
     );

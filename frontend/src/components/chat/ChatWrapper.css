@@ -33,7 +33,10 @@
     right: 0;
     width: 350px;
     height: 450px;
-    background: white;
+    background: #1c2836;
+    /* <-- MODIFICADO (Fondo principal) */
+    border: 1px solid #4a5568;
+    /* <-- MODIFICADO (Borde) */
     border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
     display: flex;
@@ -56,13 +59,15 @@
 
 /*  Partes de la Ventana (Header, Body, Footer)  */
 .chat-header {
-    background: #009688;
+    background: #24303c;
+    /* <-- MODIFICADO (Fondo cabecera) */
     color: white;
     padding: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #007a6e;
+    border-bottom: 1px solid #4a5568;
+    /* <-- MODIFICADO (Borde) */
 }
 
 .chat-header h3 {
@@ -87,21 +92,31 @@
     flex-grow: 1;
     padding: 15px;
     overflow-y: auto;
+    /* Mensaje "Inicia la conversación..." */
+    color: #aeb9c4;
+    /* <-- MODIFICADO */
 }
 
 .chat-footer {
     padding: 10px;
-    border-top: 1px solid #ddd;
+    /* <-- MODIFICADO (Borde) */
     display: flex;
     gap: 10px;
+    background: #24303c;
+    /* <-- MODIFICADO (Fondo footer) */
 }
 
 .chat-footer input {
     flex-grow: 1;
-    border: 1px solid #ccc;
+    border: 1px solid #4a5568;
+    /* <-- MODIFICADO (Borde input) */
     border-radius: 20px;
     padding: 8px 12px;
     font-size: 0.9rem;
+    background-color: #1c2836;
+    /* <-- MODIFICADO (Fondo input) */
+    color: #ffffff;
+    /* <-- MODIFICADO (Texto input) */
 }
 
 .chat-footer button {
@@ -149,8 +164,10 @@
 }
 
 .message-row.received .message-bubble {
-    background-color: #f0f0f0;
-    color: #333;
+    background-color: #2d3a4b;
+    /* <-- MODIFICADO (Gris oscuro) */
+    color: #f0f4f8;
+    /* <-- MODIFICADO (Texto claro) */
     border-bottom-left-radius: 4px;
 }
 
@@ -184,11 +201,11 @@
 }
 
 .message-bubble.sent .message-timestamp {
-    color: #e0e0e0;
+    color: #aeb9c4;
 }
 
 .message-bubble.received .message-sender {
-    color: #007bff;
+    color: #36A2EB;
 }
 
 /* Estilos de Bandeja de Entrada (Admin)  */
@@ -201,13 +218,13 @@
 .admin-room-item {
     position: relative;
     padding: 12px 15px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #4a5568;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .admin-room-item:hover {
-    background-color: #f9f9f9;
+    background-color: #2d3a4b;
 }
 
 .admin-room-item:last-child {
@@ -217,12 +234,12 @@
 .room-item-user {
     font-weight: bold;
     font-size: 0.95rem;
-    color: #333;
+    color: #ffffff;
 }
 
 .room-item-preview {
     font-size: 0.9rem;
-    color: #555;
+    color: #aeb9c4;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -231,7 +248,7 @@
 
 .room-item-unit {
     font-size: 0.8rem;
-    color: #888;
+    color: #aeb9c4;
     margin-top: 4px;
 }
 
@@ -240,7 +257,7 @@
     top: 12px;
     right: 15px;
     font-size: 0.75rem;
-    color: #888;
+    color: #aeb9c4;
 }
 
 /* Estilo del Botón "Atrás" (Admin) */
@@ -250,13 +267,13 @@
     cursor: pointer;
     padding: 0;
     margin-right: 10px;
-    color: #555;
+    color: #aeb9c4;
     display: flex;
     align-items: center;
 }
 
 .chat-back-btn:hover {
-    color: #000;
+    color: #ffffff;
 }
 
 /* Estilos del Menú de Opciones (3 puntos)  */
@@ -278,12 +295,12 @@
     border-radius: 50%;
     cursor: pointer;
     padding: 4px;
-    color: #555;
+    color: #aeb9c4;
     line-height: 0;
 }
 
 .message-options-btn:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .message-menu {
@@ -291,13 +308,14 @@
     top: 28px;
     left: 50%;
     transform: translateX(-50%);
-    background: white;
+    background: #2d3a4b;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 10;
     overflow: hidden;
     padding: 4px 0;
     min-width: 100px;
+    border: 1px solid #4a5568;
 }
 
 .message-row.sent .message-menu {
@@ -315,11 +333,11 @@
     padding: 8px 12px;
     font-size: 0.9rem;
     cursor: pointer;
-    color: #333;
+    color: #f0f4f8;
 }
 
 .message-menu button:hover {
-    background-color: #f0f0f0;
+    background-color: #4a5568;
 }
 
 .message-menu-delete {
@@ -327,7 +345,7 @@
 }
 
 .message-menu-delete:hover {
-    background-color: #FFF5F5 !important;
+    background-color: rgba(220, 53, 69, 0.2) !important;
 }
 
 /* --- Estilos para el Menú del Cabezal --- */
@@ -369,13 +387,14 @@
     position: absolute;
     top: 40px;
     right: 0;
-    background: white;
+    background: #2d3a4b;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 20;
     overflow: hidden;
     padding: 4px 0;
     min-width: 160px;
+    border: 1px solid #4a5568;
 }
 
 .chat-header-menu button {
@@ -387,11 +406,11 @@
     padding: 8px 12px;
     font-size: 0.9rem;
     cursor: pointer;
-    color: #333;
+    color: #f0f4f8;
 }
 
 .chat-header-menu button:hover {
-    background-color: #f0f0f0;
+    background-color: #4a5568;
 }
 
 .chat-close-btn-simple {
@@ -410,39 +429,39 @@
 }
 
 .chat-footer-wrapper {
-    position: relative; 
+    position: relative;
 }
 
 .chat-footer {
-    padding: 10px; 
-    border-top: 1px solid #ddd; 
-    display: flex; 
+    padding: 10px;
+    border-top: none;
+    display: flex;
     align-items: center;
-    gap: 10px; 
+    gap: 10px;
 }
 
 .chat-input-wrapper {
     position: relative;
     display: flex;
-    flex-grow: 1; 
+    flex-grow: 1;
 }
 
 
 .chat-footer .chat-text-input {
-    flex-grow: 1; 
-    border: 1px solid #ccc; 
-    border-radius: 20px; 
-    padding: 8px 12px; 
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 8px 12px;
     font-size: 0.9rem;
-    padding-left: 38px; 
+    padding-left: 38px;
 }
 
 .chat-btn-attach {
-    position: absolute; 
-    left: 6px; 
+    position: absolute;
+    left: 6px;
     top: 50%;
-    transform: translateY(-50%); 
-    
+    transform: translateY(-50%);
+
     background: none;
     border: none;
     border-radius: 50%;
@@ -453,11 +472,13 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s ease;
-    z-index: 1; 
+    z-index: 1;
 }
+
 .chat-btn-attach:hover {
     background-color: #e0e0e0;
 }
+
 .chat-btn-attach:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -556,20 +577,20 @@
     align-items: center;
     font-weight: bold;
     font-size: 0.95rem;
-    color: #333;
+    color: #ffffff;
 }
 
 .online-indicator {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ccc; 
+    background-color: #ccc;
     margin-right: 8px;
     border: 1px solid #bbb;
 }
 
 .online-indicator.online {
-    background-color: #4CAF50; 
+    background-color: #4CAF50;
     border: 1px solid #388E3C;
     box-shadow: 0 0 5px #4CAF50;
 }
@@ -577,27 +598,29 @@
 .chat-header-title-with-status {
     display: flex;
     align-items: center;
-    gap: 8px; 
-    color: white; 
+    gap: 8px;
+    color: white;
 }
 
 .chat-header-title-with-status .online-indicator {
     width: 12px;
     height: 12px;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
+
 .chat-header-title-with-status .online-indicator.online {
-    background-color: #32CD32; 
+    background-color: #32CD32;
     border: 1px solid white;
     box-shadow: 0 0 5px #32CD32;
 }
+
 .chat-header-title-with-status .online-indicator {
     background-color: #9E9E9E;
     border: 1px solid white;
 }
 
 .message-bubble.typing-indicator {
-    padding: 12px 15px; 
+    padding: 12px 15px;
     display: flex;
     gap: 5px;
     align-items: center;
@@ -615,18 +638,24 @@
 .typing-indicator .dot:nth-of-type(1) {
     animation-delay: -0.3s;
 }
+
 .typing-indicator .dot:nth-of-type(2) {
     animation-delay: -0.15s;
 }
+
 .typing-indicator .dot:nth-of-type(3) {
     animation-delay: 0s;
 }
 
 @keyframes typing-bounce {
-    0%, 80%, 100% {
+
+    0%,
+    80%,
+    100% {
         transform: scale(0.8);
         opacity: 0.5;
     }
+
     40% {
         transform: scale(1);
         opacity: 1;
@@ -639,24 +668,24 @@
 
 .chat-unread-badge {
     position: absolute;
-    top: -5px;  
-    right: -5px; 
-    
-    background-color: #d33; 
+    top: -5px;
+    right: -5px;
+
+    background-color: #d33;
     color: white;
     font-weight: bold;
-    
+
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
-    
+
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-    
+
     transform: scale(1);
     transition: transform 0.2s ease-out;
 }
@@ -671,14 +700,17 @@
 }
 
 .chat-list-header {
-    background-color: #f0f0f0;
-    color: #555;
+    background-color: #1c2836;
+    /* <-- MODIFICADO (Fondo) */
+    color: #aeb9c4;
+    /* <-- MODIFICADO (Texto) */
     font-weight: bold;
     font-size: 0.8rem;
     padding: 6px 15px;
     text-transform: uppercase;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #4a5568;
+    /* <-- MODIFICADO (Borde) */
+    border-bottom: 1px solid #4a5568;
     position: sticky;
     top: 0;
     z-index: 1;
@@ -694,13 +726,13 @@
     align-items: center;
     gap: 12px;
     padding: 12px 15px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #4a5568;
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
 .new-chat-item:hover {
-    background-color: #f9f9f9;
+    background-color: #2d3a4b;
 }
 
 .new-chat-item .user-info {
@@ -710,25 +742,25 @@
 .new-chat-item .user-name {
     font-weight: bold;
     font-size: 0.95rem;
-    color: #333;
+    color: #ffffff;
 }
 
 .new-chat-item .user-unit {
     font-size: 0.8rem;
-    color: #888;
+    color: #aeb9c4;
 }
 
 .new-chat-item .online-indicator {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #ccc; 
-    margin-right: 0; 
+    background-color: #ccc;
+    margin-right: 0;
     border: 1px solid #bbb;
 }
 
 .new-chat-item .online-indicator.online {
-    background-color: #4CAF50; 
+    background-color: #4CAF50;
     border: 1px solid #388E3C;
     box-shadow: 0 0 5px #4CAF50;
 }

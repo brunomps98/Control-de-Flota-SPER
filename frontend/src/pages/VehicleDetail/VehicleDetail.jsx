@@ -9,7 +9,6 @@ import { Capacitor } from '@capacitor/core';
 
 const MySwal = withReactContent(Swal);
 
-// --- COMPONENTE DE HISTORIAL  ---
 const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType, onDeleteAll, fetchHistory, labelName }) => {
     
     const formatDate = (dateString) => {
@@ -101,7 +100,6 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
 
 
 const VehicleDetail = () => {
-    // --- ESTADOS ---
     const { cid } = useParams();
     const navigate = useNavigate();
     const location = useLocation(); 
@@ -117,7 +115,7 @@ const VehicleDetail = () => {
     const [rodados, setRodados] = useState({ data: null, loading: false, error: null });
     const [descripciones, setDescripciones] = useState({ data: null, loading: false, error: null });
 
-
+    // --- FUNCIONES ---
     const fetchVehicleData = async () => {
         setErrorVehicle(null);
         setLoadingVehicle(true);
@@ -167,7 +165,6 @@ const VehicleDetail = () => {
         }
     };
 
-    // Al montar / al volver a esta ruta, cargamos los historiales
     useEffect(() => {
         if (!cid) return;
         fetchHistory('kilometrajes');
@@ -178,8 +175,6 @@ const VehicleDetail = () => {
         fetchHistory('rodados');
     }, [cid, location.key]);
 
-
-    // --- LÓGICA DE BOTONES ---
     const handleEdit = () => navigate(`/eddit-vehicle/${cid}`);
 
     const handleDeleteVehicle = () => {
@@ -257,25 +252,54 @@ const VehicleDetail = () => {
     }, [navigate]);
 
 
-    if (loadingVehicle) return <div className="vehicle-page-container"><p className="detail-loading-message">Cargando información del vehículo...</p></div>;
-    if (errorVehicle && !vehicle) return <div className="vehicle-page-container"><p className="detail-error-message">Error al cargar: {errorVehicle}</p></div>;
-    if (!vehicle) return <div className="vehicle-page-container"><p className="detail-loading-message">No se encontró el vehículo.</p></div>;
-
-    const allImages = vehicle.thumbnails || [];
-        
-    // Función helper para obtener el último registro
     const getLatestValue = (historyState, fieldName, fallbackValue) => {
         if (historyState.data && historyState.data.length > 0) {
-            return historyState.data[0][fieldName];
+            return historyState.data[historyState.data.length - 1][fieldName];
         }
 
         const vehicleHistory = vehicle[historyState.historyKey]; 
         if (vehicleHistory && vehicleHistory.length > 0) {
-            return vehicleHistory[0][fieldName];
+            return vehicleHistory[vehicleHistory.length - 1][fieldName];
         }
 
         return fallbackValue || 'N/A';
     };
+    
+    if (loadingVehicle) {
+        return (
+            <div className="login-page">
+                <div className="vehicle-detail-main">
+                    <p className="detail-loading-message">Cargando información del vehículo...</p>
+                </div>
+            </div>
+        );
+    }
+    
+    if (errorVehicle && !vehicle) {
+        return (
+            <div className="login-page">
+                <div className="vehicle-detail-main">
+                    <p className="detail-error-message">Error al cargar: {errorVehicle}</p>
+                </div>
+            </div>
+        );
+    }
+    
+    if (!vehicle) {
+        return (
+            <div className="login-page">
+                <div className="vehicle-detail-main">
+                    <p className="detail-loading-message">No se encontró el vehículo.</p>
+                </div>
+            </div>
+        );
+    }
+
+    const allImages = vehicle.thumbnails || [];
+
+    kilometrajes.historyKey = 'kilometrajes';
+    descripciones.historyKey = 'descripciones';
+    destinos.historyKey = 'destinos';
     
     const latestChofer = getLatestValue(descripciones, 'descripcion', vehicle.chofer);
     const latestKilometraje = getLatestValue(kilometrajes, 'kilometraje', vehicle.kilometros);
@@ -283,7 +307,7 @@ const VehicleDetail = () => {
 
 
     return (
-        <div className="vehicle-page-container">
+        <div className="login-page">
             <main className="vehicle-detail-main">
                 
                 <h1 className="vehicle-main-title">{vehicle.marca} {vehicle.modelo}</h1>

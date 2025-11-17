@@ -1,22 +1,6 @@
-/* --- Importación de Fuente --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
-/* --- Contenedor de Página Completa (Estilo Base) --- */
-.login-page {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    width: 100%;
-    font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #2a3a4e 0%, #1c2836 100%);
-    color: #aeb9c4;
-}
 
-.login-page main {
-    flex-grow: 1;
-}
-
-/* --- CONTENEDOR PRINCIPAL Y TÍTULO DE LA LISTA --- */
 .tickets-container {
     max-width: 900px;
     margin: 30px auto;
@@ -36,7 +20,6 @@
     border-bottom: 1px solid #4a5568;
 }
 
-/* --- ESTILOS DE LAS TARJETAS DE TICKET (Tema Oscuro) --- */
 .ticket-card {
     background-color: #24303c; 
     border: 1px solid #4a5568;
@@ -60,7 +43,6 @@
 .ticket-body p { margin: 8px 0; line-height: 1.6; }
 .ticket-body p strong { color: #ffffff; font-weight: 600; }
 
-/* --- ESTILOS DE BOTONES DE ACCIÓN  --- */
 .ticket-actions {
     display: flex;
     flex-wrap: wrap; 
@@ -101,7 +83,6 @@
     transform: translateY(-2px);
 }
 
-/* --- MENSAJES (Carga, Error, Vacío) --- */
 .loading-message,
 .error-message {
     text-align: center;
@@ -125,7 +106,6 @@
     border-radius: 8px;
 }
 
-/* --- FOOTER  --- */
 .footer-bar {
     background-color: #24303c;
     color: #aeb9c4;
@@ -138,24 +118,22 @@
 }
 
 
-/* --- ESTILOS DE FILTRO (CORREGIDOS PARA TEMA OSCURO) --- */
 .filter-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-end;
     gap: 16px;
-    padding: 1.5rem 24px 24px 24px; /* Más padding arriba para el título */
-    background-color: #24303c; /* Color de tarjeta, para contrastar */
+    padding: 1.5rem 24px 24px 24px; 
+    background-color: #24303c; 
     border-radius: 12px;
-    margin-bottom: 40px; /* Margen restaurado */
+    margin-bottom: 40px; 
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
-    border: 1px solid #4a5568; /* Borde sutil */
-    width: 100%; /* Asegura que ocupe el ancho */
+    border: 1px solid #4a5568; 
+    width: 100%; 
     box-sizing: border-box;
 }
 
-/* Título "Filtrar" */
 .filter-title {
     width: 100%;
     text-align: center;
@@ -170,26 +148,26 @@
 .filter-group {
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Permite que los inputs crezcan */
+    flex-grow: 1; 
 }
 
 .filter-group label {
     font-size: 0.875rem;
-    color: #aeb9c4; /* Color de texto claro */
+    color: #aeb9c4; 
     margin-bottom: 6px;
     font-weight: 600;
 }
 
 .filter-group input {
     padding: 10px 14px;
-    border: 1px solid #4a5568; /* Borde oscuro */
+    border: 1px solid #4a5568; 
     border-radius: 8px;
     min-width: 180px;
     font-size: 0.9rem;
     font-family: 'Inter', sans-serif;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    color: #ffffff; /* Texto blanco */
-    background-color: #1c2836; /* Fondo de input oscuro */
+    color: #ffffff; 
+    background-color: #1c2836; 
 }
 .filter-group input::placeholder { color: #aeb9c4; }
 .filter-group input:focus {
@@ -224,18 +202,16 @@
 .btn-filter-primary:hover { background-color: #007a6e; }
 
 .btn-filter-secondary {
-    background-color: #4a5568; /* Color oscuro */
-    color: #ffffff; /* Texto claro */
+    background-color: #4a5568; 
+    color: #ffffff; 
 }
 .btn-filter-secondary:hover { background-color: #5a6b82; }
 
 
-/* Botón para mostrar/ocultar filtros en móvil */
 .btn-filter-toggle {
     display: none; 
 }
 
-/* --- Responsive --- */
 @media (max-width: 768px) {
     .tickets-container {
         margin: 20px auto;
@@ -244,7 +220,6 @@
     #information-title { font-size: 1.8rem; }
     .ticket-card { padding: 20px; }
 
-    /* Estilos de filtro móvil */
     .btn-filter-toggle {
         display: flex; 
         align-items: center;
@@ -287,7 +262,6 @@
     .btn-filter-primary,
     .btn-filter-secondary { flex: 1; }
     
-    /* El título del filtro se oculta en el modo colapsado */
     .filter-container:not(.filter-mobile-open) .filter-title {
         display: none;
     }
