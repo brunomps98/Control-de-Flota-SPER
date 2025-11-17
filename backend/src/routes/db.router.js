@@ -42,6 +42,10 @@ const loginLimiter = rateLimit({
     legacyHeaders: false, 
 });
 
+// --- RUTA PARA QUE FUNCIONE UPTIMEROBOT ---
+router.get("/health", (req, res) => {
+    res.status(200).send("OK");
+});
 
 // --- RUTAS DE AUTENTICACIÓN ---
 router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
