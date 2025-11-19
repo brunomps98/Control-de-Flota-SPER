@@ -40,6 +40,7 @@ const loginLimiter = rateLimit({
     message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
     standardHeaders: true, 
     legacyHeaders: false, 
+    skip: (req, res) => process.env.NODE_ENV === 'development',
 });
 
 // --- RUTA PARA QUE FUNCIONE UPTIMEROBOT ---

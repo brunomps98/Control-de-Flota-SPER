@@ -54,8 +54,8 @@ const ChatWindow = ({ onClose, user }) => {
     const [guestRoom, setGuestRoom] = useState(null);
     const [guestMessages, setGuestMessages] = useState([]);
     // Estados de admin
-    const [activeRooms, setActiveRooms] = useState([]); 
-    const [newChatUsers, setNewChatUsers] = useState([]); 
+    const [activeRooms, setActiveRooms] = useState([]);
+    const [newChatUsers, setNewChatUsers] = useState([]);
     const [currentView, setCurrentView] = useState('inbox');
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [adminMessages, setAdminMessages] = useState([]);
@@ -113,11 +113,11 @@ const ChatWindow = ({ onClose, user }) => {
         const handleAdminNotification = ({ message, roomId }) => {
             if (user.admin) {
                 // Mueve la sala actualizada al principio de 'activeRooms'
-                setActiveRooms(prevRooms => 
-                    prevRooms.map(room => 
-                        room.id === roomId 
-                        ? { ...room, last_message: message.content.substring(0, 30), updated_at: message.created_at } 
-                        : room
+                setActiveRooms(prevRooms =>
+                    prevRooms.map(room =>
+                        room.id === roomId
+                            ? { ...room, last_message: message.content.substring(0, 30), updated_at: message.created_at }
+                            : room
                     ).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
                 );
             }
@@ -201,15 +201,15 @@ const ChatWindow = ({ onClose, user }) => {
     const handleStartNewChat = async (targetUser) => {
         try {
             setIsChatLoading(true); // Mostramos "Cargando..." en la vista de chat
-            
+
             // Llamamos a la nueva ruta del backend
-            const response = await apiClient.post('/api/chat/find-or-create-room', { 
-                userId: targetUser.id 
+            const response = await apiClient.post('/api/chat/find-or-create-room', {
+                userId: targetUser.id
             });
 
             // El backend nos devuelve la sala 
             const room = response.data;
-        
+
             handleSelectRoom(room);
             setActiveRooms(prev => [room, ...prev.filter(r => r.user_id !== targetUser.id)]);
             setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
@@ -238,7 +238,7 @@ const ChatWindow = ({ onClose, user }) => {
         }
         setOpenMenuId(null);
     };
-    
+
     const handleDelete = (messageId) => {
         setOpenMenuId(null);
         Swal.fire({
@@ -256,7 +256,7 @@ const ChatWindow = ({ onClose, user }) => {
             }
         });
     };
-    
+
     const handleClearHistory = () => {
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!targetRoomId) return;
@@ -356,18 +356,18 @@ const ChatWindow = ({ onClose, user }) => {
     // ---  FUNCIÓN renderChatBody ---
     const renderChatBody = () => {
         if (isLoading) { return <p>Cargando...</p>; }
-        
+
         // --- LÓGICA DE ADMIN  ---
         if (user.admin) {
             // --- VISTA BANDEJA DE ENTRADA ---
             if (currentView === 'inbox') {
                 return (
                     <div className="admin-inbox">
-                        
+
                         {/* SECCIÓN CHATS ACTIVOS */}
                         <div className="chat-list-header">Chats Activos</div>
                         {activeRooms.length === 0 && (
-                            <p style={{padding: '10px 15px', fontSize: '0.9rem', color: '#777'}}>
+                            <p style={{ padding: '10px 15px', fontSize: '0.9rem', color: '#777' }}>
                                 No hay conversaciones activas.
                             </p>
                         )}
@@ -387,7 +387,7 @@ const ChatWindow = ({ onClose, user }) => {
                         <div className="chat-list-header">Iniciar Nuevo Chat</div>
                         <div className="new-chat-list">
                             {newChatUsers.length === 0 && (
-                                <p style={{padding: '10px 15px', fontSize: '0.9rem', color: '#777'}}>
+                                <p style={{ padding: '10px 15px', fontSize: '0.9rem', color: '#777' }}>
                                     No hay más usuarios para contactar.
                                 </p>
                             )}
@@ -410,7 +410,7 @@ const ChatWindow = ({ onClose, user }) => {
                 return renderMessageList(adminMessages);
             }
         }
-        
+
         // LÓGICA DE INVITADO 
         if (guestMessages.length === 0 && !isLoading) {
             return <p>Inicia la conversación. Un administrador te responderá.</p>;
@@ -498,7 +498,7 @@ const ChatWindow = ({ onClose, user }) => {
 
 
 // El Componente Principal (Wrapper) 
-const ChatWrapper = ({ user, isChatOpen, unreadChatCount, onToggleChat }) => {
+const ChatWrapper = ({ user, isChatOpen, unreadChatCount, onToggleChat, hideButton }) => {
     // Estado para la animación de "pop"
     const [popping, setPopping] = useState(false);
 
@@ -516,16 +516,22 @@ const ChatWrapper = ({ user, isChatOpen, unreadChatCount, onToggleChat }) => {
         }
     }, [unreadChatCount]);
 
+    const shouldHideMyButton = hideButton;
+
     return (
         <div className="chat-wrapper-container">
-            {/* Usamos el prop 'isChatOpen' para mostrar/ocultar */}
+            {/* Ventana del Chat */}
             {isChatOpen && <ChatWindow onClose={onToggleChat} user={user} />}
 
-            {/* Usamos el prop 'onToggleChat' para el click */}
-            <button className="chat-bubble-button" onClick={onToggleChat}>
+            {/* Botón Flotante (UNO SOLO) */}
+            <button 
+                className={`chat-bubble-button ${shouldHideMyButton ? 'hide' : ''}`} 
+                onClick={onToggleChat}
+            >
+                {/* Icono: Cambia entre X y Chat */}
                 {isChatOpen ? <CloseIcon /> : <ChatIcon />}
 
-                {/* Mostramos el globo contador si hay mensajes no leídos */}
+                {/* Globo contador (Badge) */}
                 {unreadChatCount > 0 && (
                     <span className={`chat-unread-badge ${popping ? 'pop' : ''}`}>
                         {unreadChatCount > 9 ? '9+' : unreadChatCount}

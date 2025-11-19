@@ -1,0 +1,97 @@
+{
+  "inicio": {
+    "mensaje": "¡Hola! 👋 Bienvenido al Asistente Virtual del Sistema de Control de Flota SPER. Estoy aquí para agilizar tus consultas. ¿Qué deseas realizar hoy?",
+    "opciones": [
+      { "texto": "🚚 Gestión de Vehículos y Flota", "siguienteId": "gestion_flota" },
+      { "texto": "🛠️ Soporte Técnico y Accesos", "siguienteId": "soporte_tecnico" },
+      { "texto": "📊 Consultas sobre el Dashboard", "siguienteId": "info_dashboard" },
+      { "texto": "👤 Hablar con un Administrador", "accion": "transferir_admin" }
+    ]
+  },
+
+  "gestion_flota": {
+    "mensaje": "Entendido. Respecto a la flota, ¿qué operación necesitas realizar?",
+    "opciones": [
+      { "texto": "🔍 Buscar o filtrar un móvil", "siguienteId": "buscar_vehiculo" },
+      { "texto": "➕ Cargar un nuevo vehículo", "siguienteId": "cargar_vehiculo" },
+      { "texto": "📝 Editar datos o historial", "siguienteId": "editar_vehiculo" },
+      { "texto": "🔙 Volver al menú principal", "siguienteId": "inicio" }
+    ]
+  },
+
+  "buscar_vehiculo": {
+    "mensaje": "Para localizar un móvil específico, dirígete a la sección 'Flota General'.\n\nPuedes utilizar los filtros avanzados para buscar por:\n• Dominio (Patente)\n• Unidad (Destino)\n• Modelo o Marca\n• Estado actual.",
+    "opciones": [
+      { "texto": "Entendido, gracias", "siguienteId": "despedida" },
+      { "texto": "Quiero ver otra opción", "siguienteId": "gestion_flota" }
+    ]
+  },
+
+  "cargar_vehiculo": {
+    "mensaje": "⚠️ Importante: Esta acción requiere permisos de Administrador.\n\n1. Ve a la pestaña 'Cargar Vehículo'.\n2. Completa el formulario con la Cédula Verde en mano.\n3. Asegúrate de subir fotos del estado actual.\n\nSi no ves la pestaña, no tienes permisos suficientes.",
+    "opciones": [
+      { "texto": "Perfecto, gracias", "siguienteId": "despedida" },
+      { "texto": "🔙 Volver atrás", "siguienteId": "gestion_flota" }
+    ]
+  },
+
+  "editar_vehiculo": {
+    "mensaje": "Para actualizar el kilometraje, service o chofer de un móvil:\n\n1. Busca el vehículo en 'Flota'.\n2. Ingresa al detalle del mismo.\n3. Presiona el botón 'Añadir Historial' para actualizar su estado o 'Editar' para datos fijos.",
+    "opciones": [
+      { "texto": "Entendido", "siguienteId": "despedida" },
+      { "texto": "Necesito ayuda humana", "accion": "transferir_admin" }
+    ]
+  },
+
+  "info_dashboard": {
+    "mensaje": "El Dashboard muestra estadísticas en tiempo real para la toma de decisiones:\n\n• Cantidad de vehículos por Unidad Penal.\n• Vehículos con mayor kilometraje.\n• Gráficos de distribución por año y tipo.\n\nEs una herramienta exclusiva para visualización gerencial.",
+    "opciones": [
+      { "texto": "Volver al menú", "siguienteId": "inicio" }
+    ]
+  },
+
+  "soporte_tecnico": {
+    "mensaje": "Lamento que tengas inconvenientes. Vamos a solucionarlo. Selecciona el tipo de problema:",
+    "opciones": [
+      { "texto": "🔑 Problemas de Contraseña/Login", "siguienteId": "pass" },
+      { "texto": "🎫 Generar Ticket de Soporte", "siguienteId": "crear_ticket" },
+      { "texto": "🐞 Reportar error del sistema", "siguienteId": "reportar_bug" },
+      { "texto": "🔙 Volver al menú principal", "siguienteId": "inicio" }
+    ]
+  },
+
+  "pass": {
+    "mensaje": "Si olvidaste tu clave:\n1. Ve a la pantalla de Login.\n2. Haz clic en '¿Olvidaste tu contraseña?'.\n3. Ingresa tu email institucional.\n\nRecibirás un enlace seguro para restablecerla.",
+    "opciones": [
+      { "texto": "Gracias", "siguienteId": "despedida" }
+    ]
+  },
+
+  "crear_ticket": {
+    "mensaje": "Para seguimientos formales, te recomiendo crear un Ticket:\n\nVe a la sección 'Soporte' (en el Login o Menú) > Completa el formulario detallando el problema y adjunta capturas si es necesario. Un técnico revisará tu caso.",
+    "opciones": [
+      { "texto": "Entendido", "siguienteId": "despedida" },
+      { "texto": "Prefiero hablar ahora", "accion": "transferir_admin" }
+    ]
+  },
+
+  "reportar_bug": {
+    "mensaje": "Si el sistema presenta fallas críticas (pantalla blanca, errores 500, datos incorrectos), por favor contacta inmediatamente con el área de Seguridad Informática o Administración.",
+    "opciones": [
+      { "texto": "Hablar con un Representante", "accion": "transferir_admin" },
+      { "texto": "Volver al inicio", "siguienteId": "inicio" }
+    ]
+  },
+
+  "despedida": {
+    "mensaje": "¡Excelente! Me alegra haber sido de ayuda. El equipo de SPER sigue a tu disposición. 👋",
+    "opciones": [
+      { "texto": "Hacer otra consulta", "siguienteId": "inicio" },
+      { "texto": "Cerrar chat", "siguienteId": "fin_chat" }
+    ]
+  },
+  "fin_chat": {
+    "mensaje": "Conversación finalizada. Puedes volver a abrirme cuando lo necesites.",
+    "opciones": []
+  }
+}

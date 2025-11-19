@@ -6,7 +6,6 @@ import cors from "cors";
 
 dotenv.config();
 const app = express();
-
 console.log('\n');
 
 app.use((req, res, next) => {

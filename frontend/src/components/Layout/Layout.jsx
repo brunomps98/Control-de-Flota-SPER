@@ -10,6 +10,7 @@ import ChatWrapper from '../chat/ChatWrapper';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { toast } from 'react-toastify';
+import ChatBot from '../ChatBot/ChatBot'
 
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
@@ -23,6 +24,7 @@ const Layout = () => {
     const [unreadCount, setUnreadCount] = useState(0);
     // Notificaciones de Chat
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isBotOpen, setIsBotOpen] = useState(false);
     const [unreadChatCount, setUnreadChatCount] = useState(0);
 
     const navigate = useNavigate();
@@ -66,7 +68,7 @@ const Layout = () => {
             badge.style.display = 'none';
             badge.style.visibility = 'hidden';
         }
-    }, []); 
+    }, []);
 
 
     useEffect(() => {
@@ -94,7 +96,7 @@ const Layout = () => {
     }, []);
 
     useEffect(() => {
-        if (!user) return; 
+        if (!user) return;
         const events = [
             'mousemove',
             'keydown',
@@ -127,17 +129,17 @@ const Layout = () => {
             window.removeEventListener('click', handleClickOutside);
         };
     }, [isNotificationOpen]);
-    
+
     // --- Componentes "Oyentes" de Sockets ---
 
     // Oyente para la Campana  (Solo Admins)
     const NotificationsListener = () => {
-        const socket = useSocket(); 
+        const socket = useSocket();
         useEffect(() => {
-            if (!socket) return; 
+            if (!socket) return;
             const handleNewNotification = (data) => {
                 console.log("Nueva notificación recibida:", data);
-                setNotifications(prev => [data, ...prev.slice(0, 9)]); 
+                setNotifications(prev => [data, ...prev.slice(0, 9)]);
                 setUnreadCount(prev => prev + 1);
                 toast.info(`🔔 ${data.message}`, { icon: false });
             };
@@ -145,8 +147,8 @@ const Layout = () => {
             return () => {
                 socket.off('new_notification', handleNewNotification);
             };
-        }, [socket]); 
-        return null; 
+        }, [socket]);
+        return null;
     };
 
     // Oyente para el Globo de Chat  (Todos los Usuarios)
@@ -213,9 +215,9 @@ const Layout = () => {
                     setIsNotificationOpen(false);
                 }
             }}>
-                <Navbar 
-                    user={user} 
-                    unreadCount={unreadCount} 
+                <Navbar
+                    user={user}
+                    unreadCount={unreadCount}
                     onBellClick={handleBellClick}
                     notifications={notifications}
                     isNotificationOpen={isNotificationOpen}
@@ -224,16 +226,29 @@ const Layout = () => {
                     <Outlet context={{ user }} />
                 </main>
                 <Footer />
-                
+
+                {/* Solo lo mostramos si el usuario NO es admin  */}
+                {/* ChatBot */}
+                {!user.admin && (
+                    <ChatBot
+                        isChatOpen={isChatOpen} // Para que el Bot sepa si el otro está abierto
+                        onToggle={(state) => setIsBotOpen(state)} // Para que el Layout sepa si el Bot está abierto
+                        onOpenAdminChat={() => {
+                            if (!isChatOpen) handleToggleChat();
+                        }}
+                    />
+                )}
+
                 {/* Pasamos los props de estado al ChatWrapper */}
-                <ChatWrapper 
+                <ChatWrapper
                     user={user}
                     isChatOpen={isChatOpen}
                     unreadChatCount={unreadChatCount}
                     onToggleChat={handleToggleChat}
+                    hideButton={isBotOpen}
                 />
             </div>
-            
+
             {/* Montamos AMBOS oyentes */}
             {user.admin && <NotificationsListener />}
             {user && <ChatListener />}

@@ -1,0 +1,125 @@
+import React, { useState, useEffect, useRef } from 'react';
+import './ChatBot.css';
+import chatFlow from './chatFlow.json';
+
+// Icono
+const BotIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" width="28" height="28">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12h15m-15 3.75h15m-1.5 3.75h1.5m-1.5 0v1.5m-9-1.5v1.5m-3-1.5v1.5M9.75 20.25v1.5m3-1.5v1.5M4.5 5.25h15a2.25 2.25 0 012.25 2.25v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V7.5a2.25 2.25 0 012.25-2.25z" />
+    </svg>
+);
+
+const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => { 
+    const [isOpen, setIsOpen] = useState(false);
+    const [currentStep, setCurrentStep] = useState('inicio');
+    const [history, setHistory] = useState([]);
+    const chatBodyRef = useRef(null);
+
+    // Cargar mensaje inicial al abrir
+    useEffect(() => {
+        if (isOpen && history.length === 0) {
+            const stepData = chatFlow['inicio'];
+            setHistory([{ sender: 'bot', text: stepData.mensaje, options: stepData.opciones }]);
+        }
+    }, [isOpen]);
+
+    // Auto-scroll al fondo
+    useEffect(() => {
+        if (chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        }
+    }, [history, isOpen]);
+
+    const handleOptionClick = (option) => {
+        const newHistory = [...history, { sender: 'user', text: option.texto }];
+
+        // Verificar si es transferencia a humano
+        if (option.accion === 'transferir_admin') {
+            setHistory([...newHistory, { sender: 'bot', text: 'Te estoy transfiriendo con un administrador... aguarda un momento.' }]);
+
+            setTimeout(() => {
+                setIsOpen(false);
+                if (onToggle) onToggle(false); 
+                if (onOpenAdminChat) onOpenAdminChat(); 
+                setCurrentStep('inicio');
+                setHistory([]);
+            }, 1500);
+            return;
+        }
+
+        // Navegación normal del bot
+        const nextStepId = option.siguienteId;
+        const nextStepData = chatFlow[nextStepId];
+
+        if (nextStepData) {
+            setTimeout(() => {
+                setHistory(prev => [
+                    ...prev,
+                    { sender: 'bot', text: nextStepData.mensaje, options: nextStepData.opciones }
+                ]);
+                setCurrentStep(nextStepId);
+            }, 500);
+        }
+
+        setHistory(newHistory);
+    };
+
+    const toggleChat = () => {
+        const newState = !isOpen;
+        setIsOpen(newState);
+        if (onToggle) onToggle(newState); 
+    };
+
+    const shouldHideButton = isChatOpen;
+
+    const isSoloMode = isOpen;
+
+    return (
+        <div className={`chatbot-wrapper ${isSoloMode ? 'solo' : ''}`}>
+            {/* Botón Flotante Circular */}
+            <button
+                className={`chatbot-toggle ${shouldHideButton ? 'hide' : ''}`}
+                onClick={toggleChat}
+                title="Asistente Virtual" // Tooltip al pasar el mouse
+            >
+                <BotIcon />
+            </button>
+
+            {/* Ventana del Chat */}
+            <div className={`chatbot-window ${isOpen ? 'open' : ''}`}>
+                <div className="chatbot-header">
+                    <div className="header-title">
+                        <BotIcon />
+                        <span>Asistente Virtual</span>
+                    </div>
+                    <button className="close-btn" onClick={toggleChat}>×</button>
+                </div>
+
+                <div className="chatbot-body" ref={chatBodyRef}>
+                    {history.map((msg, index) => (
+                        <div key={index} className={`chat-message ${msg.sender}`}>
+                            <div className="message-bubble">
+                                {msg.text}
+                            </div>
+                            {msg.sender === 'bot' && msg.options && index === history.length - 1 && (
+                                <div className="options-container">
+                                    {msg.options.map((opt, idx) => (
+                                        <button
+                                            key={idx}
+                                            className="option-btn"
+                                            onClick={() => handleOptionClick(opt)}
+                                        >
+                                            {opt.texto}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default ChatBot;
