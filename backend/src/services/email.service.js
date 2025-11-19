@@ -14,13 +14,11 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Función para enviar la notificación
+// Función para enviar la notificación de nuevo ticket
 export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = []) => {
     
-    // Lista de correos de admins
     const to = adminEmails.join(', '); 
 
-    // Creamos el contenido del correo en HTML
     let filesHtml = '<p>No se adjuntaron archivos.</p>';
     if (fileUrls.length > 0) {
         filesHtml = '<ul>' + fileUrls.map(url => `<li><a href="${url}">Ver Archivo Adjunto</a></li>`).join('') + '</ul>';
@@ -44,15 +42,13 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
         <p>Por favor, ingresa al panel de administración para gestionar este ticket.</p>
     `;
 
-    // Opciones del correo
     const mailOptions = {
-        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, // Quién envía
-        to: to, // Quién recibe (los admins)
-        subject: `Nuevo Ticket de Soporte: ${ticketData.problem_description.substring(0, 30)}...`, // Asunto
-        html: htmlBody // Cuerpo del correo
+        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, 
+        to: to, 
+        subject: `Nuevo Ticket de Soporte: ${ticketData.problem_description.substring(0, 30)}...`, 
+        html: htmlBody 
     };
 
-    // Enviar el correo
     try {
         await transporter.sendMail(mailOptions);
         console.log(`[Email Service] Notificación de ticket enviada a: ${to}`);
@@ -64,7 +60,6 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
 // Enviar email de reseteo de contraseña
 export const sendPasswordResetEmail = async (userEmail, resetLink) => {
     
-    // Contenido del correo en HTML
     const htmlBody = `
         <h1>Restablecimiento de Contraseña</h1>
         <p>Has solicitado restablecer tu contraseña para la aplicación Control de Flota.</p>
@@ -79,19 +74,85 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
         <p>Si no solicitaste esto, por favor ignora este correo.</p>
     `;
 
-    // Opciones del correo
     const mailOptions = {
-        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, // Quién envía
-        to: userEmail, // Quién recibe (el usuario)
-        subject: 'Restablecimiento de tu contraseña de SPER', // Asunto
-        html: htmlBody // Cuerpo del correo
+        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`, 
+        to: userEmail, 
+        subject: 'Restablecimiento de tu contraseña de SPER', 
+        html: htmlBody 
     };
 
-    // Enviar el correo
     try {
         await transporter.sendMail(mailOptions);
         console.log(`[Email Service] Email de reseteo enviado a: ${userEmail}`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo de reseteo:", error);
+    }
+};
+
+
+// Notificación de Acción en Vehículo (Carga o Edición)
+export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehicleData) => {
+    const to = adminEmails.join(', ');
+
+    const subjectAction = actionType === 'CREATE' ? 'Nuevo Vehículo Cargado' : 'Vehículo Actualizado';
+    const color = actionType === 'CREATE' ? '#4CAF50' : '#2196F3'; // Verde o Azul
+
+    const htmlBody = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h1 style="color: ${color};">${subjectAction}</h1>
+            <p>El usuario <strong>${user.username}</strong> (${user.unidad}) ha realizado una acción.</p>
+            <hr>
+            <h3>Detalles del Vehículo:</h3>
+            <ul>
+                <li><strong>Dominio:</strong> ${vehicleData.dominio || 'N/A'}</li>
+                <li><strong>Marca/Modelo:</strong> ${vehicleData.marca} ${vehicleData.modelo}</li>
+                <li><strong>Unidad Asignada:</strong> ${vehicleData.title}</li>
+            </ul>
+            <p>Ingresa a la plataforma para ver más detalles.</p>
+        </div>
+    `;
+
+    const mailOptions = {
+        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`,
+        to: to,
+        subject: `📢 ${subjectAction}: ${vehicleData.dominio} - ${user.unidad}`,
+        html: htmlBody
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Vehículo (${actionType}) notificado a: ${to}`);
+    } catch (error) {
+        console.error("[Email Service] Error al enviar correo de vehículo:", error);
+    }
+};
+
+// Notificación de Nuevo Mensaje de Chat
+export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, messageContent) => {
+    const to = adminEmails.join(', ');
+
+    const htmlBody = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+            <h1 style="color: #009688;">Nuevo Mensaje de Chat</h1>
+            <p>Tienes un nuevo mensaje de soporte del usuario <strong>${senderName}</strong> (${senderUnit}).</p>
+            <div style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <p style="font-style: italic;">"${messageContent}"</p>
+            </div>
+            <p>Ingresa al Chat de Soporte para responder.</p>
+        </div>
+    `;
+
+    const mailOptions = {
+        from: `"Notificaciones SPER" <${process.env.EMAIL_USER}>`,
+        to: to,
+        subject: `💬 Nuevo mensaje de ${senderName}`,
+        html: htmlBody
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`[Email Service] Notificación de chat enviada a: ${to}`);
+    } catch (error) {
+        console.error("[Email Service] Error al enviar correo de chat:", error);
     }
 };

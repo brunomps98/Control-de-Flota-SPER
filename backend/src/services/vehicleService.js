@@ -5,13 +5,15 @@ import {
 import Usuario from '../models/user.model.js';
 import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
+import { sendVehicleActionEmail } from './email.service.js';
+import { getIO } from '../socket/socketHandler.js';
+import { sendPushNotification } from './notification.service.js';
 
 const checkPermission = (user, vehicleTitle) => {
     if (user.admin) {
-        return true; // El Admin siempre tiene permiso
+        return true; 
     }
     
-    // Mapeo de 'title' (string) a la clave de permiso booleana
     const unitMap = {
         "Direccion General": "dg",
         "Unidad Penal 1": "up1",
@@ -28,12 +30,52 @@ const checkPermission = (user, vehicleTitle) => {
 
     const requiredPermission = unitMap[vehicleTitle];
     
-    // Si la unidad no existe en el map O el usuario no tiene ese flag en true
     if (!requiredPermission || !user[requiredPermission]) {
         return false;
     }
     
     return true;
+};
+
+
+const notifyAdmins = async (actionType, user, vehicleData) => {
+    try {
+        // Buscar todos los admins
+        const admins = await Usuario.findAll({ where: { admin: true } });
+        if (!admins.length) return;
+
+        const adminEmails = admins.map(a => a.email);
+        
+        // Enviar Correo
+        sendVehicleActionEmail(adminEmails, actionType, user, vehicleData);
+
+        // Preparar datos para notificaciones en tiempo real
+        const title = actionType === 'CREATE' ? 'Nuevo Vehículo' : 'Vehículo Actualizado';
+        const body = `El usuario ${user.username} (${user.unidad}) ha ${actionType === 'CREATE' ? 'cargado' : 'actualizado'} el vehículo ${vehicleData.dominio}.`;
+        
+        const notificationData = {
+            title,
+            message: body,
+            timestamp: new Date(),
+            type: 'vehicle_update'
+        };
+
+        // Enviar Socket (Campanita) a la sala de admins
+        const io = getIO();
+        if (io) {
+            io.to('admin_room').emit('new_notification', notificationData);
+        }
+
+        // Enviar Push Notification (Firebase) a admins
+        for (const admin of admins) {
+            if (admin.fcm_token) {
+                sendPushNotification(admin.fcm_token, title, body, { type: 'vehicle' });
+            }
+        }
+
+    } catch (error) {
+        console.error('[VehicleService] Error notificando admins:', error);
+    }
 };
 
 
@@ -168,7 +210,7 @@ export default class VehicleManager {
             const createsHijos = [];
 
             if (usuario) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: usuario }, { transaction: t }));
-            if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: description }, { transaction: t })); // Mantenemos la descripción por si acaso
+            if (description) createsHijos.push(Descripcion.create({ vehiculo_id: vehiculoId, descripcion: description }, { transaction: t })); 
             
             if (kilometros) createsHijos.push(Kilometraje.create({ vehiculo_id: vehiculoId, kilometraje: parseInt(kilometros) }, { transaction: t }));
             if (destino) createsHijos.push(Destino.create({ vehiculo_id: vehiculoId, descripcion: destino }, { transaction: t }));
@@ -184,6 +226,10 @@ export default class VehicleManager {
             await Promise.all(createsHijos);
             await t.commit();
 
+            if (!user.admin) {
+                notifyAdmins('CREATE', user, newVehicle);
+            }
+
             return newVehicle;
         } catch (err) {
             await t.rollback();
@@ -191,23 +237,19 @@ export default class VehicleManager {
         }
     }
 
-    // --- FUNCIÓN DE ACTUALIZACIÓN ---
     updateVehicle = async (id, updateData, user) => { 
         const t = await sequelize.transaction();
         try {
             const vehicle = await Vehiculo.findByPk(id, { transaction: t });
             if (!vehicle) throw new Error("Vehículo no encontrado");
 
-            // --- VALIDACIÓN DE PERMISO  ---
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado. No puede modificar este vehículo.');
             }
 
-            const setFields = {}; 
             const pushCreates = []; 
             const arrayFields = ['kilometros', 'service', 'rodado', 'reparaciones', 'description', 'destino'];
 
-            // 1. Clasificamos los datos
             for (const key in updateData) {
                 if (updateData[key] && updateData[key] !== '') {
                     if (arrayFields.includes(key)) {
@@ -228,12 +270,16 @@ export default class VehicleManager {
                 }
             }
 
-            // 3. Creamos los nuevos registros de historial
             if (pushCreates.length > 0) {
                 await Promise.all(pushCreates);
             }
 
             await t.commit();
+
+            if (!user.admin) {
+                notifyAdmins('UPDATE', user, vehicle);
+            }
+
             return vehicle;
 
         } catch (err) {
@@ -242,17 +288,13 @@ export default class VehicleManager {
         }
     }
 
-    
     deleteVehicle = async (id, user) => { 
         try {
             const vehicle = await Vehiculo.findByPk(id);
             if (!vehicle) throw new Error("Vehículo no encontrado");
-
-            // ---  VALIDACIÓN DE PERMISO  ---
             if (!checkPermission(user, vehicle.title)) {
                  throw new Error('Permiso denegado. No puede eliminar este vehículo.');
             }
-
             await vehicle.destroy();
             return { success: true };
         } catch (err) {
@@ -262,7 +304,6 @@ export default class VehicleManager {
     
     deleteAllHistory = async (cid, fieldName, user) => { 
         try {
-            // Primero, verificamos el permiso sobre el vehículo padre
             const vehicle = await Vehiculo.findByPk(cid);
             if (!vehicle) throw new Error("Vehículo no encontrado");
             if (!checkPermission(user, vehicle.title)) {
@@ -291,7 +332,6 @@ export default class VehicleManager {
 
     deleteOneHistoryEntry = async (cid, fieldName, historyId, user) => { 
         try {
-            // Primero, verificamos el permiso sobre el vehículo padre
             const vehicle = await Vehiculo.findByPk(cid);
             if (!vehicle) throw new Error("Vehículo no encontrado");
             if (!checkPermission(user, vehicle.title)) {
@@ -325,10 +365,9 @@ export default class VehicleManager {
     
     getHistoryForVehicle = async (vehiculoId, historyModel, orderField) => {
         try {
-            // Función genérica para buscar historial
             return await historyModel.findAll({
                 where: { vehiculo_id: vehiculoId },
-                order: [[orderField, 'DESC']] // Ordenamos siempre el más nuevo primero
+                order: [[orderField, 'DESC']] 
             });
         } catch (err) {
             throw err;

@@ -2,14 +2,15 @@ import jwt from 'jsonwebtoken';
 import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import { onlineUsers } from './onlineUsers.js';
-import { onlineAdmins } from './onlineAdmins.js';
+export const onlineAdmins = new Set(); 
 import { sendPushNotification } from '../services/notification.service.js';
+import { sendNewMessageEmail } from '../services/email.service.js'; 
 
 let ioInstance = null;
 
 export const initializeSocket = (io) => {
 
-    ioInstance = io; // Guardamos la instancia de IO
+    ioInstance = io; 
 
     io.use((socket, next) => {
         try {
@@ -71,7 +72,6 @@ export const initializeSocket = (io) => {
                     return socket.emit('operation_error', { message: 'La sala no existe.' });
                 }
 
-                
                 //  Si el usuario es ADMIN, se borra todo para todos.
                 if (socket.user.admin) {
                     await room.destroy(); // Borra de la DB
@@ -87,13 +87,10 @@ export const initializeSocket = (io) => {
                 } else if (room.user_id === socket.user.id) {
                     
                     // NO borramos la sala de la DB.
-                    // Solo le decimos AL INVITADO que la sala fue "borrada".
-                    // Su frontend (ChatWrapper) reaccionará a 'room_deleted' y cerrará su vista.
                     socket.emit('room_deleted', {
                         roomId: roomId
                     });
                     
-                    // Le mandamos un success solo a él.
                     socket.emit('operation_success', { message: 'Has salido del chat.' });
                     
                     // Actualizamos el 'last_message' para que el admin vea
@@ -142,7 +139,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-        //  LÓGICA "ESCRIBIENDO... 
+        //  LÓGICA "ESCRIBIENDO..." 
         socket.on('typing_start', (payload) => {
             try {
                 const { roomId } = payload;
@@ -179,7 +176,7 @@ export const initializeSocket = (io) => {
         });
 
 
-        // LÓGICA 'send_message'  ---
+        // LÓGICA 'send_message' (CON NOTIFICACIÓN DE EMAIL AGREGADA)
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content } = payload;
@@ -216,31 +213,42 @@ export const initializeSocket = (io) => {
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
-                // --- Lógica de Notificación de Bandeja de Entrada  ---
+                // --- Lógica de Notificaciones  ---
+                
+                // Si el remitente NO es admin (es un usuario consultando)...
                 if (!socket.user.admin) {
+                    
+                    // Notificación visual en Dashboard (Bandeja de entrada admin)
                     io.to('admin_room').emit('new_message_notification', {
                         message: messageWithSender,
                         roomId: roomId
                     });
-                }
 
-                // --- Lógica de Notificaciones Push  ---
-                const title = `Nuevo mensaje de ${socket.user.username}`;
-                const body = content.substring(0, 100);
-
-                if (socket.user.admin) {
-                    const room = await ChatRoom.findByPk(roomId);
-                    if (room && !onlineUsers[room.user_id]) {
-                        const user = await Usuario.findByPk(room.user_id);
-                        if (user && user.fcm_token) {
-                            sendPushNotification(user.fcm_token, title, body, { chatRoomId: String(roomId) });
-                        }
-                    }
-                } else {
+                    // Buscar todos los admins
                     const admins = await Usuario.findAll({ where: { admin: true } });
+                    const adminEmails = admins.map(a => a.email);
+
+                    // ENVIAR EMAIL AL ADMIN (LÓGICA NUEVA)
+                    sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, content);
+
+                    // Enviar Notificaciones Push (Firebase) a los admins
+                    const title = `Nuevo mensaje de ${socket.user.username}`;
+                    const body = content.substring(0, 100);
+
                     for (const admin of admins) {
                         if (admin.fcm_token && !onlineAdmins.has(admin.id)) {
                             sendPushNotification(admin.fcm_token, title, body, { chatRoomId: String(roomId) });
+                        }
+                    }
+                } else {
+                    // Si el remitente ES admin, notificar push al usuario si está desconectado
+                    const room = await ChatRoom.findByPk(roomId);
+                    if (room && !onlineUsers[room.user_id]) {
+                        const user = await Usuario.findByPk(room.user_id);
+                        const title = `Nuevo mensaje de Soporte`;
+                        const body = content.substring(0, 100);
+                        if (user && user.fcm_token) {
+                            sendPushNotification(user.fcm_token, title, body, { chatRoomId: String(roomId) });
                         }
                     }
                 }
