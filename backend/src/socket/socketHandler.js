@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
+import Notification from '../models/notification.model.js';
 import { onlineUsers } from './onlineUsers.js';
 export const onlineAdmins = new Set(); 
 import { sendPushNotification } from '../services/notification.service.js';
@@ -12,6 +13,7 @@ export const initializeSocket = (io) => {
 
     ioInstance = io; 
 
+    // Middleware de autenticación para Socket.IO
     io.use((socket, next) => {
         try {
             const token = socket.handshake.auth.token;
@@ -39,12 +41,13 @@ export const initializeSocket = (io) => {
 
             // Lógica de Admin Online
             onlineAdmins.add(socket.user.id);
-            if (onlineAdmins.size === 1) { // Si es el primer admin
+            if (onlineAdmins.size === 1) { // Si es el primer admin en conectarse
                 io.emit('support_status_change', { isOnline: true });
             }
             console.log(`[SOCKET] 👑 ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
 
         } else {
+            // Lógica de Usuario Normal
             try {
                 const [room] = await ChatRoom.findOrCreate({
                     where: { user_id: socket.user.id },
@@ -60,7 +63,7 @@ export const initializeSocket = (io) => {
             }
         }
 
-        // --- LÓGICA DE BORRADO  ---
+        // --- LÓGICA DE BORRADO DE SALA ---
         socket.on('delete_room', async (payload) => {
             try {
                 const { roomId } = payload;
@@ -112,6 +115,7 @@ export const initializeSocket = (io) => {
             }
         });
 
+        // --- LÓGICA DE BORRADO DE MENSAJE ---
         socket.on('delete_message', async (payload) => {
             try {
                 const { messageId } = payload;
@@ -122,6 +126,7 @@ export const initializeSocket = (io) => {
                 if (!message) {
                     return socket.emit('operation_error', { message: 'El mensaje no existe.' });
                 }
+                // Admin puede borrar todo, usuario solo sus mensajes
                 if (socket.user.admin || message.sender_id === socket.user.id) {
                     const roomId = message.room_id;
                     await message.destroy();
@@ -145,6 +150,7 @@ export const initializeSocket = (io) => {
                 const { roomId } = payload;
                 if (!roomId) return;
                 const roomName = `room_${roomId}`;
+                // Emitir a todos en la sala MENOS al que envía
                 socket.to(roomName).emit('show_typing', { userId: socket.user.id, username: socket.user.username });
             } catch (error) {
                 console.error("[SOCKET] Error en 'typing_start':", error);
@@ -161,6 +167,7 @@ export const initializeSocket = (io) => {
             }
         });
 
+        // EVENTO PARA QUE EL ADMIN ENTRE A ESCUCHAR UNA SALA
         socket.on('admin_join_room', (roomId) => {
             try {
                 if (!socket.user.admin) {
@@ -176,7 +183,7 @@ export const initializeSocket = (io) => {
         });
 
 
-        // LÓGICA 'send_message' (CON NOTIFICACIÓN DE EMAIL AGREGADA)
+        // --- LÓGICA 'send_message' (EMAIL + DB + PUSH) ---
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content } = payload;
@@ -186,6 +193,7 @@ export const initializeSocket = (io) => {
                     return socket.emit('operation_error', { message: 'No se puede enviar un mensaje vacío.' });
                 }
 
+                // Validación de seguridad: si no es admin, solo puede escribir en SU sala
                 if (!socket.user.admin && userRoomName !== `room_${roomId}`) {
                     console.warn(`[SOCKET] ⚠️ Intento de escritura no autorizado...`);
                     return;
@@ -213,35 +221,48 @@ export const initializeSocket = (io) => {
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
-                // --- Lógica de Notificaciones  ---
+                // --- SISTEMA DE NOTIFICACIONES INTEGRADO ---
                 
-                // Si el remitente NO es admin (es un usuario consultando)...
+                // Si el remitente NO es admin (es un usuario haciendo una consulta)...
                 if (!socket.user.admin) {
                     
-                    // Notificación visual en Dashboard (Bandeja de entrada admin)
+                    // Notificación visual en Dashboard (Bandeja de entrada admin) - SOCKET
                     io.to('admin_room').emit('new_message_notification', {
                         message: messageWithSender,
                         roomId: roomId
                     });
 
-                    // Buscar todos los admins
+                    // Buscar todos los admins para notificar
                     const admins = await Usuario.findAll({ where: { admin: true } });
                     const adminEmails = admins.map(a => a.email);
 
-                    // ENVIAR EMAIL AL ADMIN (LÓGICA NUEVA)
+                    // ENVIAR EMAIL AL ADMIN
                     sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, content);
 
-                    // Enviar Notificaciones Push (Firebase) a los admins
+                    // GUARDAR NOTIFICACIÓN EN BASE DE DATOS (PERSISTENCIA)
                     const title = `Nuevo mensaje de ${socket.user.username}`;
                     const body = content.substring(0, 100);
 
+                    const notificationsToCreate = admins.map(admin => ({
+                        user_id: admin.id,
+                        title: title,
+                        message: body,
+                        type: 'chat_message',
+                        resource_id: roomId, // ID de la sala para que al hacer clic se abra el chat
+                        is_read: false
+                    }));
+                    await Notification.bulkCreate(notificationsToCreate);
+
+                    // Enviar Notificaciones Push (Firebase) a los admins
                     for (const admin of admins) {
+                        // Solo notificamos push si el admin NO está online en el chat ahora mismo
                         if (admin.fcm_token && !onlineAdmins.has(admin.id)) {
                             sendPushNotification(admin.fcm_token, title, body, { chatRoomId: String(roomId) });
                         }
                     }
+
                 } else {
-                    // Si el remitente ES admin, notificar push al usuario si está desconectado
+                    // Si el remitente ES admin (respondiendo), notificar al usuario si está desconectado
                     const room = await ChatRoom.findByPk(roomId);
                     if (room && !onlineUsers[room.user_id]) {
                         const user = await Usuario.findByPk(room.user_id);

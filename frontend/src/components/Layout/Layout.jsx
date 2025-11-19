@@ -53,7 +53,7 @@ const Layout = () => {
         // Navegamos según el tipo
         if (notif.type === 'vehicle_update' && notif.resourceId) {
             navigate(`/vehicle-detail/${notif.resourceId}`);
-        } 
+        }
         else if (notif.type === 'new_ticket' && notif.resourceId) {
             navigate(`/case/${notif.resourceId}`);
         }
@@ -75,6 +75,28 @@ const Layout = () => {
         };
         fetchUserSession();
     }, [navigate]);
+
+    useEffect(() => {
+        if (user && user.admin) {
+            const fetchNotifications = async () => {
+                try {
+                    const response = await apiClient.get('/api/notifications');
+
+                    if (Array.isArray(response.data)) {
+                        const notifs = response.data;
+                        setNotifications(notifs);
+
+                        // Calculamos cuántas no están leídas localmente
+                        const unread = notifs.filter(n => !n.is_read).length;
+                        setUnreadCount(unread);
+                    }
+                } catch (error) {
+                    console.error("Error cargando notificaciones:", error);
+                }
+            };
+            fetchNotifications();
+        }
+    }, [user]);
 
     useEffect(() => {
         // Oculta el ícono de reCAPTCHA
@@ -154,7 +176,8 @@ const Layout = () => {
             if (!socket) return;
             const handleNewNotification = (data) => {
                 console.log("Nueva notificación recibida:", data);
-                setNotifications(prev => [data, ...prev.slice(0, 9)]);
+                // Agregamos la nueva al inicio y mantenemos las recientes
+                setNotifications(prev => [data, ...prev].slice(0, 10));
                 setUnreadCount(prev => prev + 1);
                 toast.info(`🔔 ${data.message}`, { icon: false });
             };
@@ -183,14 +206,14 @@ const Layout = () => {
                 }
             };
 
-            socket.on('new_message', handleGuestMessage); 
-            socket.on('new_message_notification', handleAdminNotification); 
+            socket.on('new_message', handleGuestMessage);
+            socket.on('new_message_notification', handleAdminNotification);
 
             return () => {
                 socket.off('new_message', handleGuestMessage);
                 socket.off('new_message_notification', handleAdminNotification);
             };
-        }, [socket, user, isChatOpen]); 
+        }, [socket, user, isChatOpen]);
 
         return null;
     };
@@ -204,17 +227,26 @@ const Layout = () => {
     }
 
     // --- Funciones Handler ---
-    const handleBellClick = (event) => {
+    const handleBellClick = async (event) => {
         event.stopPropagation();
-        setIsNotificationOpen(prev => !prev);
-        if (!isNotificationOpen) {
+        const opening = !isNotificationOpen;
+        setIsNotificationOpen(opening);
+
+        // Si abrimos y hay no leídas, las marcamos como leídas en DB y local
+        if (opening && unreadCount > 0) {
             setUnreadCount(0);
+            try {
+                // Llamada al backend para marcar como leídas
+                await apiClient.put('/api/notifications/mark-as-read');
+            } catch (error) {
+                console.error("Error al marcar notificaciones como leídas:", error);
+            }
         }
     };
 
     const handleToggleChat = () => {
         if (!isChatOpen) {
-            setUnreadChatCount(0); 
+            setUnreadChatCount(0);
         }
         setIsChatOpen(prev => !prev);
     };
@@ -243,8 +275,8 @@ const Layout = () => {
                 {/* Solo lo mostramos si el usuario NO es admin  */}
                 {!user.admin && (
                     <ChatBot
-                        isChatOpen={isChatOpen} 
-                        onToggle={(state) => setIsBotOpen(state)} 
+                        isChatOpen={isChatOpen}
+                        onToggle={(state) => setIsBotOpen(state)}
                         onOpenAdminChat={() => {
                             if (!isChatOpen) handleToggleChat();
                         }}

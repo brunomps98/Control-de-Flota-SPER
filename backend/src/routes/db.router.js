@@ -11,6 +11,7 @@ import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
 import Usuario from '../models/user.model.js'; 
+import Notification from '../models/notification.model.js'; // <--- IMPORT NUEVO
 import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
 import axios from 'axios'; 
@@ -56,11 +57,10 @@ router.post('/login', loginLimiter, async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
     
     try {
-        //  VERIFICACIÓN RECAPTCHA (SOLO SI VIENE EL TOKEN) ---
+        //  VERIFICACIÓN RECAPTCHA 
         if (recaptchaToken) {
             const secretKey = process.env.RECAPTCHA_SECRET_KEY;
             
-            // Verificamos que la clave secreta esté configurada en Render
             if (!secretKey) {
                 console.error("RECAPTCHA_SECRET_KEY no está definida en las variables de entorno.");
                 return res.status(500).json({ message: 'Error de configuración del servidor.' });
@@ -72,7 +72,6 @@ router.post('/login', loginLimiter, async (req, res) => {
                 const response = await axios.post(verificationURL);
                 const { success, score } = response.data;
                 
-                // Si la verificación de Google falla O la puntuación es muy baja (bot)
                 if (!success || score < 0.5) { 
                     return res.status(403).json({ message: 'Verificación de reCAPTCHA fallida. Inténtelo de nuevo.' });
                 }
@@ -83,7 +82,6 @@ router.post('/login', loginLimiter, async (req, res) => {
             }
         }
 
-        // LÓGICA DE LOGIN (Solo se ejecuta si reCAPTCHA pasó o si era Android) ---
         const user = await userDao.loginUser(username, password);
         const { password: _, ...userPayload } = user.get({ plain: true });
 
@@ -103,15 +101,11 @@ router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
-
-
 // --- RUTAS DE GESTIÓN DE USUARIOS (CRUD) ---
-
-// Obtener todos los usuarios
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const filters = req.query; // <-- 1. Leemos los filtros de la URL
-        const users = await userDao.getAllUsers(filters); // <-- 2. Pasamos los filtros
+        const filters = req.query; 
+        const users = await userDao.getAllUsers(filters); 
         res.status(200).json(users);
     } catch (error) {
         console.error("Error en GET /api/users:", error);
@@ -119,13 +113,11 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-// Actualizar un usuario
 router.put('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const userIdToUpdate = req.params.id;
         const userData = req.body;
 
-        // Un admin no puede quitarse su propio permiso de admin
         if (req.user.id == userIdToUpdate && userData.admin === false) {
             return res.status(403).json({ message: 'No puedes revocar tu propio permiso de administrador.' });
         }
@@ -143,12 +135,10 @@ router.put('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-// Ruta para eliminar un usuario
 router.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const userIdToDelete = req.params.id;
 
-        // Protección: No te puedes eliminar a ti mismo
         if (req.user.id == userIdToDelete) {
             return res.status(400).json({ message: 'No puedes eliminarte a ti mismo.' });
         }
@@ -170,50 +160,32 @@ router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         const user = await userDao.findUserByEmail(email);
-
-        // Si no encontramos el email, enviamos una respuesta genérica
         if (!user) {
             return res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
         }
-
-        // Se crea un token JWT especial para el reseteo
         const resetPayload = { userId: user.id, email: user.email };
-        const resetToken = jwt.sign(resetPayload, process.env.SECRET_KEY, { expiresIn: '15m' }); // Válido por 15 minutos
-
-        const frontendUrl = process.env.FRONT_URL.split(',')[0]; // Tomamos la primera URL (Vercel)
+        const resetToken = jwt.sign(resetPayload, process.env.SECRET_KEY, { expiresIn: '15m' }); 
+        const frontendUrl = process.env.FRONT_URL.split(',')[0]; 
         const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
 
-        // Enviar el email
         await sendPasswordResetEmail(user.email, resetLink);
-
         res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
-
     } catch (error) {
         console.error("Error en /forgot-password:", error);
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 });
 
-// El Usuario envía la nueva contraseña con el token
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
-
     if (!token || !newPassword) {
         return res.status(400).json({ message: 'Faltan el token o la nueva contraseña.' });
     }
-
     try {
-        // Verificar el token de reseteo
         const payload = jwt.verify(token, process.env.SECRET_KEY);
-        
-        // Si el token es válido, 'payload' contendrá { userId, email }
         const { userId } = payload;
-
-        // Actualizar la contraseña en la base de datos
         await userDao.updateUserPassword(userId, newPassword);
-
         res.status(200).json({ message: 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.' });
-
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({ message: 'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.' });
@@ -226,27 +198,19 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
-// Ruta para guardar token FCM
 router.post('/user/fcm-token', verifyToken, async (req, res) => {
     try {
         const { fcmToken } = req.body;
         const userId = req.user.id;
-
         if (!fcmToken) {
             return res.status(400).json({ message: 'No se proporcionó token.' });
         }
-        
         await Usuario.update({ fcm_token: null }, {
-            where: { 
-                fcm_token: fcmToken,
-                id: { [Op.ne]: userId } 
-            }
+            where: { fcm_token: fcmToken, id: { [Op.ne]: userId } }
         });
-
         await Usuario.update({ fcm_token: fcmToken }, {
             where: { id: userId }
         });
-
         res.status(200).json({ message: 'Token FCM actualizado.' });
     } catch (error) {
         console.error("Error al guardar FCM token:", error);
@@ -284,6 +248,33 @@ router.post('/support-no-files', SupportController.createTicketNoFiles);
 router.get('/support-tickets', SupportController.getTickets);
 router.get('/support/:ticketId', SupportController.getTicketById);
 router.delete('/support/:pid', SupportController.deleteTicket);
+
+// --- RUTAS DE NOTIFICACIONES (NUEVAS) ---
+router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const notifications = await Notification.findAll({
+            where: { user_id: userId },
+            order: [['created_at', 'DESC']],
+            limit: 50 
+        });
+        res.status(200).json(notifications);
+    } catch (error) {
+        console.error("Error al obtener notificaciones:", error);
+        res.status(500).json({ message: "Error al cargar notificaciones" });
+    }
+});
+
+router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        await Notification.update({ is_read: true }, {
+            where: { id: req.params.id, user_id: req.user.id }
+        });
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar notificación" });
+    }
+});
 
 // --- RUTAS DASHBOARD --- 
 router.get("/dashboard/stats", verifyToken, verifyAdmin, DashboardController.getDashboardStats);

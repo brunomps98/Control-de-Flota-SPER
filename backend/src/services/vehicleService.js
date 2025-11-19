@@ -3,6 +3,7 @@ import {
     Destino, Rodado, Thumbnail, Descripcion
 } from '../models/vehicle.model.js';
 import Usuario from '../models/user.model.js';
+import Notification from '../models/notification.model.js'; 
 import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
 import { sendVehicleActionEmail } from './email.service.js';
@@ -57,9 +58,20 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
             title,
             message: body,
             timestamp: new Date(),
-            type: 'vehicle_update',    // <--- Tipo para identificar la acción
-            resourceId: vehicleData.id // <--- ID para navegar
+            type: 'vehicle_update',    
+            resourceId: vehicleData.id 
         };
+
+        // PERSISTENCIA EN BASE DE DATOS 
+        const notificationsToCreate = admins.map(admin => ({
+            user_id: admin.id,
+            title: title,
+            message: body,
+            type: 'vehicle_update',
+            resource_id: vehicleData.id,
+            is_read: false
+        }));
+        await Notification.bulkCreate(notificationsToCreate); // <--- GUARDADO MASIVO
 
         // Enviar Socket (Campanita) a la sala de admins
         const io = getIO();

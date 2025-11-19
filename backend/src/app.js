@@ -14,7 +14,7 @@ app.use((req, res, next) => {
 });
 
 
-// 1. Definimos las opciones de CORS 
+// Definimos las opciones de CORS 
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
   .split(',')

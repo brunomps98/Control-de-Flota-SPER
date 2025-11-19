@@ -3,6 +3,7 @@ import { supabase } from '../config/supabaseClient.js';
 import path from 'path';
 import { sendNewTicketEmail } from '../services/email.service.js';
 import Usuario from '../models/user.model.js';
+import Notification from '../models/notification.model.js'; 
 import { getIO } from '../socket/socketHandler.js';
 import { sendPushNotification } from '../services/notification.service.js'; 
 
@@ -26,22 +27,36 @@ class SupportController {
 
             const adminEmails = admins.map(admin => admin.email);
 
+            //  Enviar el correo (sin 'await' para que se ejecute en segundo plano)
             sendNewTicketEmail(adminEmails, newTicket, fileUrls);
 
+            const title = "Nuevo Ticket de Soporte";
+            const body = `De: ${newTicket.name} - ${newTicket.problem_description.substring(0, 30)}...`;
+
+            // 2. Guardar en Base de Datos (PERSISTENCIA)
+            const notificationsToCreate = admins.map(admin => ({
+                user_id: admin.id,
+                title: title,
+                message: body,
+                type: 'new_ticket',
+                resource_id: newTicket.id,
+                is_read: false
+            }));
+            await Notification.bulkCreate(notificationsToCreate); // <--- GUARDADO MASIVO
+
+            // Enviar Socket (Campanita)
             const io = getIO();
             if (io) {
                 // 'admin_room' es la sala a la que se unen los admins
                 io.to('admin_room').emit('new_notification', {
-                    title: "Nuevo Ticket de Soporte",
-                    message: `De: ${newTicket.name} - ${newTicket.problem_description.substring(0, 30)}...`,
-                    type: "new_ticket",       
-                    resourceId: newTicket.id  
+                    title: title,
+                    message: body,
+                    type: "new_ticket",       // <--- Tipo para navegar
+                    resourceId: newTicket.id  // <--- ID para navegar
                 });
             }
 
-            // (Enviar Push Notification a los admins
-            const title = "Nuevo Ticket de Soporte";
-            const body = `De: ${newTicket.name}`;
+            // Enviar Push Notification a los admins
             for (const admin of admins) {
                 if (admin.fcm_token) {
                     sendPushNotification(admin.fcm_token, title, body, { 
