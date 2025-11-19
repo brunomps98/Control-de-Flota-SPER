@@ -9,8 +9,8 @@ const BellIcon = () => (
   </svg>
 );
 
-// Modificamos para recibir onNotificationClick
-const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, extraClasses = '' }) => {
+// Recibimos onDeleteOne y onClearAll
+const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll, extraClasses = '' }) => {
   if (!user.admin) return null;
   return (
     <div className={`notification-container ${extraClasses}`}>
@@ -24,14 +24,33 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
         ></span>
       </div>
       <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
-        <div className="notification-header">Notificaciones</div>
+        
+        {/* Header con Flexbox y Botón "Borrar todo" */}
+        <div className="notification-header">
+            <span>Notificaciones</span>
+            {notifications.length > 0 && (
+                <button className="btn-clear-all" onClick={onClearAll}>
+                    Borrar todas
+                </button>
+            )}
+        </div>
+
         {notifications.length > 0 ? (
           notifications.map((notif, index) => (
             <div 
               className="notification-item clickable" 
-              key={index}
-              onClick={() => onNotificationClick(notif)} // Ejecutamos la navegación
+              key={index} // Idealmente usar notif.id si existe, sino index
+              onClick={() => onNotificationClick(notif)} 
             >
+              {/* Botón "X" para eliminar individualmente */}
+              <button 
+                className="btn-delete-item"
+                onClick={(e) => onDeleteOne(notif.id, e)} // Pasamos ID y Evento
+                title="Eliminar notificación"
+              >
+                &times;
+              </button>
+
               <strong>{notif.title}</strong><br />{notif.message}
             </div>
           ))
@@ -43,8 +62,8 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
   );
 };
 
-// Navbar recibe y pasa la función
-const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick }) => {
+// Recibimos onDeleteOne y onClearAll también aquí
+const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll }) => {
   const navigate = useNavigate();
   if (!user) return null;
 
@@ -53,7 +72,8 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
     navigate('/login');
   };
 
-  const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick };
+  // Los agregamos al objeto de props para pasarlos al Bell
+  const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll };
 
   const handleMobileLinkClick = () => {
     const toggler = document.querySelector('.navbar-toggler');

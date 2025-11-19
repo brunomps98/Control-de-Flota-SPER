@@ -232,15 +232,52 @@ const Layout = () => {
         const opening = !isNotificationOpen;
         setIsNotificationOpen(opening);
 
-        // Si abrimos y hay no leídas, las marcamos como leídas en DB y local
+        // Si abrimos y hay no leídas...
         if (opening && unreadCount > 0) {
+            // Actualización visual inmediata (Optimistic UI)
             setUnreadCount(0);
+
             try {
-                // Llamada al backend para marcar como leídas
-                await apiClient.put('/api/notifications/mark-as-read');
+                //  Actualización REAL en Base de Datos
+                await apiClient.put('/api/notifications/mark-all-read');
+                setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+
             } catch (error) {
                 console.error("Error al marcar notificaciones como leídas:", error);
             }
+        }
+    };
+
+
+    // Función para eliminar UNA sola notificación
+    const handleDeleteOne = async (id, event) => {
+        if (event) event.stopPropagation();
+
+        // Actualización Optimista (Visual inmediata)
+        setNotifications(prev => prev.filter(n => n.id !== id));
+
+        // Si borramos una no leída, bajamos el contador
+        setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
+
+        try {
+            // Petición al Backend
+            await apiClient.delete(`/api/notifications/${id}`);
+        } catch (error) {
+            console.error("Error eliminando notificación:", error);
+        }
+    };
+
+    // Función para eliminar TODAS
+    const handleClearAll = async () => {
+        // Visual inmediata
+        setNotifications([]);
+        setUnreadCount(0);
+
+        try {
+            // 2. Petición al Backend
+            await apiClient.delete('/api/notifications/clear-all');
+        } catch (error) {
+            console.error("Error vaciando notificaciones:", error);
         }
     };
 
@@ -265,7 +302,9 @@ const Layout = () => {
                     onBellClick={handleBellClick}
                     notifications={notifications}
                     isNotificationOpen={isNotificationOpen}
-                    onNotificationClick={handleNotificationClick} // PASAMOS LA FUNCIÓN
+                    onNotificationClick={handleNotificationClick}
+                    onDeleteOne={handleDeleteOne}
+                    onClearAll={handleClearAll}
                 />
                 <main>
                     <Outlet context={{ user }} />

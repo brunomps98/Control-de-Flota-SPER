@@ -265,6 +265,26 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
+router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        // Actualizamos TODAS las notificaciones de este usuario que no estén leídas
+        await Notification.update(
+            { is_read: true }, 
+            { 
+                where: { 
+                    user_id: userId,
+                    is_read: false 
+                } 
+            }
+        );
+        res.status(200).json({ success: true, message: "Todas las notificaciones marcadas como leídas" });
+    } catch (error) {
+        console.error("Error al marcar todas como leídas:", error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
+});
+
 router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.update({ is_read: true }, {
@@ -273,6 +293,46 @@ router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res)
         res.status(200).json({ success: true });
     } catch (error) {
         res.status(500).json({ message: "Error al actualizar notificación" });
+    }
+});
+
+router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+        const userId = req.user.id;
+
+        // Eliminamos solo si el ID coincide y pertenece al usuario actual
+        const result = await Notification.destroy({
+            where: {
+                id: notificationId,
+                user_id: userId
+            }
+        });
+
+        if (result === 0) {
+            return res.status(404).json({ message: "Notificación no encontrada o no te pertenece." });
+        }
+
+        res.status(200).json({ success: true, message: "Notificación eliminada." });
+    } catch (error) {
+        console.error("Error al eliminar notificación:", error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
+});
+
+// --- BORRAR TODAS LAS NOTIFICACIONES ---
+router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        await Notification.destroy({
+            where: { user_id: userId }
+        });
+
+        res.status(200).json({ success: true, message: "Bandeja vaciada." });
+    } catch (error) {
+        console.error("Error al vaciar notificaciones:", error);
+        res.status(500).json({ message: "Error del servidor" });
     }
 });
 

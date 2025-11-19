@@ -207,6 +207,59 @@
     background-color: #f0f8ff; 
 }
 
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-clear-all {
+    background: transparent;
+    border: none;
+    color: #ff6b6b; 
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.btn-clear-all:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: #ff4c4c;
+}
+
+.notification-item {
+    position: relative; 
+    padding-right: 30px; 
+}
+
+.btn-delete-item {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #6c757d; 
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.btn-delete-item:hover {
+    color: #ff6b6b; 
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 
 @media (max-width: 991.98px) { 
   
