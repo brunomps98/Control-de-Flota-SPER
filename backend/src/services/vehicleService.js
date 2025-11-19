@@ -37,7 +37,7 @@ const checkPermission = (user, vehicleTitle) => {
     return true;
 };
 
-
+// --- HELPER PARA NOTIFICAR ADMINS ---
 const notifyAdmins = async (actionType, user, vehicleData) => {
     try {
         // Buscar todos los admins
@@ -57,7 +57,8 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
             title,
             message: body,
             timestamp: new Date(),
-            type: 'vehicle_update'
+            type: 'vehicle_update',    // <--- Tipo para identificar la acción
+            resourceId: vehicleData.id // <--- ID para navegar
         };
 
         // Enviar Socket (Campanita) a la sala de admins
@@ -69,7 +70,11 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
         // Enviar Push Notification (Firebase) a admins
         for (const admin of admins) {
             if (admin.fcm_token) {
-                sendPushNotification(admin.fcm_token, title, body, { type: 'vehicle' });
+                // Enviamos data para navegación en móvil también
+                sendPushNotification(admin.fcm_token, title, body, { 
+                    type: 'vehicle',
+                    id: String(vehicleData.id) 
+                });
             }
         }
 
@@ -226,6 +231,7 @@ export default class VehicleManager {
             await Promise.all(createsHijos);
             await t.commit();
 
+            // --- NOTIFICAR A ADMINS SI EL CREADOR NO ES ADMIN ---
             if (!user.admin) {
                 notifyAdmins('CREATE', user, newVehicle);
             }
@@ -276,6 +282,7 @@ export default class VehicleManager {
 
             await t.commit();
 
+            // --- NOTIFICAR A ADMINS SI EL EDITOR NO ES ADMIN ---
             if (!user.admin) {
                 notifyAdmins('UPDATE', user, vehicle);
             }

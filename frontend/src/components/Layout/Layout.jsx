@@ -15,7 +15,7 @@ import ChatBot from '../ChatBot/ChatBot'
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
 const Layout = () => {
-    // --- Hooks de Estado (Sección de Hooks) ---
+    // --- Hooks de Estado ---
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     // Notificaciones de Campana
@@ -45,6 +45,21 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
+    // ---  MANEJAR CLIC EN NOTIFICACIÓN ---
+    const handleNotificationClick = (notif) => {
+        // Cerramos el panel de notificaciones
+        setIsNotificationOpen(false);
+
+        // Navegamos según el tipo
+        if (notif.type === 'vehicle_update' && notif.resourceId) {
+            navigate(`/vehicle-detail/${notif.resourceId}`);
+        } 
+        else if (notif.type === 'new_ticket' && notif.resourceId) {
+            navigate(`/case/${notif.resourceId}`);
+        }
+        // Si es otro tipo (o no tiene ID), solo se cierra el panel y no navega
+    };
+
     // --- UseEffects ---
     useEffect(() => {
         const fetchUserSession = async () => {
@@ -62,7 +77,7 @@ const Layout = () => {
     }, [navigate]);
 
     useEffect(() => {
-        // Oculta el ícono de reCAPTCHA tan pronto como se carga el Layout
+        // Oculta el ícono de reCAPTCHA
         const badge = document.querySelector('.grecaptcha-badge');
         if (badge) {
             badge.style.display = 'none';
@@ -157,27 +172,25 @@ const Layout = () => {
         useEffect(() => {
             if (!socket || !user) return;
 
-            // Handler para cuando SOY INVITADO y recibo un mensaje
             const handleGuestMessage = (message) => {
                 if (!isChatOpen && !user.admin) {
                     setUnreadChatCount(prev => prev + 1);
                 }
             };
-            // Handler para cuando SOY ADMIN y me notifican de un mensaje
             const handleAdminNotification = (data) => {
                 if (!isChatOpen && user.admin) {
                     setUnreadChatCount(prev => prev + 1);
                 }
             };
 
-            socket.on('new_message', handleGuestMessage); // Para invitados
-            socket.on('new_message_notification', handleAdminNotification); // Para admins
+            socket.on('new_message', handleGuestMessage); 
+            socket.on('new_message_notification', handleAdminNotification); 
 
             return () => {
                 socket.off('new_message', handleGuestMessage);
                 socket.off('new_message_notification', handleAdminNotification);
             };
-        }, [socket, user, isChatOpen]); // Depende de isChatOpen
+        }, [socket, user, isChatOpen]); 
 
         return null;
     };
@@ -199,10 +212,9 @@ const Layout = () => {
         }
     };
 
-    // Handler para ABRIR/CERRAR el chat
     const handleToggleChat = () => {
         if (!isChatOpen) {
-            setUnreadChatCount(0); // Resetea el contador al ABRIR
+            setUnreadChatCount(0); 
         }
         setIsChatOpen(prev => !prev);
     };
@@ -221,6 +233,7 @@ const Layout = () => {
                     onBellClick={handleBellClick}
                     notifications={notifications}
                     isNotificationOpen={isNotificationOpen}
+                    onNotificationClick={handleNotificationClick} // PASAMOS LA FUNCIÓN
                 />
                 <main>
                     <Outlet context={{ user }} />
@@ -228,11 +241,10 @@ const Layout = () => {
                 <Footer />
 
                 {/* Solo lo mostramos si el usuario NO es admin  */}
-                {/* ChatBot */}
                 {!user.admin && (
                     <ChatBot
-                        isChatOpen={isChatOpen} // Para que el Bot sepa si el otro está abierto
-                        onToggle={(state) => setIsBotOpen(state)} // Para que el Layout sepa si el Bot está abierto
+                        isChatOpen={isChatOpen} 
+                        onToggle={(state) => setIsBotOpen(state)} 
                         onOpenAdminChat={() => {
                             if (!isChatOpen) handleToggleChat();
                         }}

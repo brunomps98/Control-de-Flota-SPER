@@ -198,6 +198,15 @@
     font-size: 0.9rem;
 }
 
+.notification-item.clickable {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.notification-item.clickable:hover {
+    background-color: #f0f8ff; 
+}
+
 
 @media (max-width: 991.98px) { 
   

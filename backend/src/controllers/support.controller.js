@@ -4,7 +4,7 @@ import path from 'path';
 import { sendNewTicketEmail } from '../services/email.service.js';
 import Usuario from '../models/user.model.js';
 import { getIO } from '../socket/socketHandler.js';
-
+import { sendPushNotification } from '../services/notification.service.js'; 
 
 class SupportController {
 
@@ -12,12 +12,11 @@ class SupportController {
      * @summary Busca a todos los admins y les envía el email de notificación.
      * Se ejecuta "fire-and-forget" para no hacer esperar al usuario.
      */
-    static _sendNotificationToAdmins = async (ticketData, fileUrls) => {
+    static _sendNotificationToAdmins = async (newTicket, fileUrls) => {
         try {
             // Buscamos todos los emails de admins
             const admins = await Usuario.findAll({
-                where: { admin: true },
-                attributes: ['email']
+                where: { admin: true }
             });
 
             if (admins.length === 0) {
@@ -27,17 +26,29 @@ class SupportController {
 
             const adminEmails = admins.map(admin => admin.email);
 
-            // Enviar el correo (sin 'await' para que se ejecute en segundo plano)
-            sendNewTicketEmail(adminEmails, ticketData, fileUrls);
+            sendNewTicketEmail(adminEmails, newTicket, fileUrls);
 
             const io = getIO();
             if (io) {
                 // 'admin_room' es la sala a la que se unen los admins
                 io.to('admin_room').emit('new_notification', {
                     title: "Nuevo Ticket de Soporte",
-                    message: `De: ${ticketData.name} - ${ticketData.problem_description.substring(0, 30)}...`,
-                    type: "support_ticket"
+                    message: `De: ${newTicket.name} - ${newTicket.problem_description.substring(0, 30)}...`,
+                    type: "new_ticket",       
+                    resourceId: newTicket.id  
                 });
+            }
+
+            // (Enviar Push Notification a los admins
+            const title = "Nuevo Ticket de Soporte";
+            const body = `De: ${newTicket.name}`;
+            for (const admin of admins) {
+                if (admin.fcm_token) {
+                    sendPushNotification(admin.fcm_token, title, body, { 
+                        type: 'new_ticket', 
+                        id: String(newTicket.id) 
+                    });
+                }
             }
 
         } catch (error) {
@@ -144,9 +155,11 @@ class SupportController {
 
             ticketData.files = fileUrls;
 
-            await supportRepository.addSupportTicket(ticketData);
+            // Capturamos el ticket creado (con su ID)
+            const newTicket = await supportRepository.addSupportTicket(ticketData);
 
-            SupportController._sendNotificationToAdmins(ticketData, fileUrls);
+            // Pasamos el objeto newTicket completo
+            SupportController._sendNotificationToAdmins(newTicket, fileUrls);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
@@ -163,9 +176,11 @@ class SupportController {
 
             ticketData.files = [];
 
-            await supportRepository.addSupportTicket(ticketData);
+            // Capturamos el ticket creado (con su ID)
+            const newTicket = await supportRepository.addSupportTicket(ticketData);
 
-            SupportController._sendNotificationToAdmins(ticketData, []); // Pasamos un array vacío de archivos
+            // Pasamos el objeto newTicket completo y array vacío de archivos
+            SupportController._sendNotificationToAdmins(newTicket, []); 
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
