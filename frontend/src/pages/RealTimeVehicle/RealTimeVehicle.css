@@ -155,6 +155,15 @@
     cursor: not-allowed;
 }
 
+.form-control:disabled {
+    background-color: #24303c; 
+    color: #ffffff;            
+    opacity: 1;              
+    cursor: not-allowed;      
+    border-color: #4a5568;     
+    border-style: dashed; 
+}
+
 @media (max-width: 960px) {
     .vehicle-form-grid {
         grid-template-columns: 1fr 1fr;

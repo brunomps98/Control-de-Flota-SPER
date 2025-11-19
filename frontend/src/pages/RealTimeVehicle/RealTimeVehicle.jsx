@@ -43,7 +43,9 @@ const RealTimeVehicle = () => {
                     };
                     
                     let initialTitle = "";
-                    const userPermissionKey = unitMap[userData.unidad]; // ej: "up6"
+                    // Si es Admin, no preseleccionamos nada obligatoriamente (o lo dejamos vacio para que elija)
+                    // Si es Invitado, buscamos su unidad
+                    const userPermissionKey = unitMap[userData.unidad]; 
                     
                     if (userPermissionKey && userData[userPermissionKey]) { 
                         initialTitle = userData.unidad;
@@ -95,6 +97,7 @@ const RealTimeVehicle = () => {
             const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
             toast.success(response.data.message);
 
+            // Reset form pero manteniendo la unidad si es invitado
             const resetForm = (initialTitle = "") => {
                  setFormData({
                      title: initialTitle, description: '', dominio: '', kilometros: '', destino: '',
@@ -106,7 +109,9 @@ const RealTimeVehicle = () => {
                  if (fileInput) fileInput.value = '';
             }
             
-            resetForm(formData.title);
+            // Si no es admin, mantenemos el título fijo. Si es admin, se limpia.
+            const titleToKeep = !user.admin ? formData.title : "";
+            resetForm(titleToKeep);
 
         } catch (error) {
             if (error.response && error.response.status === 403) {
@@ -146,6 +151,8 @@ const RealTimeVehicle = () => {
                                 value={formData.title}
                                 onChange={handleChange}
                                 required
+                                // --- LÓGICA DE BLOQUEO: Si no es admin, se deshabilita ---
+                                disabled={!user.admin}
                             >
                                 <option value="">-- Seleccione --</option>
                                 {(user.admin || user.dg) && <option value="Direccion General">Dirección General</option>}
@@ -165,7 +172,6 @@ const RealTimeVehicle = () => {
                             <label htmlFor="description" className="form-label">Descripción de estado</label>
                             <input id="description" className="form-control" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Descripción y utilización específica" required />
                         </div>
-                        
                         <div className="form-group span-1">
                             <label htmlFor="dominio" className="form-label">Patente</label>
                             <input id="dominio" className="form-control" type="text" name="dominio" value={formData.dominio} onChange={handleChange} placeholder="Ingrese el dominio" required />

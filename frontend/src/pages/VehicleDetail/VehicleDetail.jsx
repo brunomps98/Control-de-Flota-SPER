@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation, useOutletContext } from 'react-router-dom'; 
 import apiClient from '../../api/axiosConfig';
 import './VehicleDetail.css'; 
 import Swal from 'sweetalert2';
@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
 
 const MySwal = withReactContent(Swal);
 
-const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType, onDeleteAll, fetchHistory, labelName }) => {
+const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType, onDeleteAll, fetchHistory, labelName, isAdmin }) => {
     
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A'; 
@@ -43,7 +43,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
         <div className="history-section loaded">
             <div className="history-header">
                 <h3>{title}</h3>
-                {historyData && historyData.length > 0 && (
+                {isAdmin && historyData && historyData.length > 0 && (
                     <button className="btn-history-delete-all" onClick={() => onDeleteAll(historyType)}>
                         Eliminar Todo
                     </button>
@@ -58,7 +58,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                         
                         {historyType !== 'descripciones' && historyType !== 'services' && historyType !== 'rodados' && <th>Fecha</th>}
                         
-                        <th className="action-col">Borrar</th>
+                        {isAdmin && <th className="action-col">Borrar</th>}
                     </tr>
                 </thead>
                 <tbody>
@@ -80,16 +80,17 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                                     }
                                 </td>
                             )}
-
-                            <td className="action-col">
-                                <button
-                                    className="btn-history-delete-one"
-                                    onClick={() => onDelete(item.id, historyType)}
-                                    title="Eliminar este registro"
-                                >
-                                    🗑️
-                                </button>
-                            </td>
+                            {isAdmin && (
+                                <td className="action-col">
+                                    <button
+                                        className="btn-history-delete-one"
+                                        onClick={() => onDelete(item.id, historyType)}
+                                        title="Eliminar este registro"
+                                    >
+                                        🗑️
+                                    </button>
+                                </td>
+                            )}
                         </tr>
                     ))}
                 </tbody>
@@ -102,7 +103,10 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
 const VehicleDetail = () => {
     const { cid } = useParams();
     const navigate = useNavigate();
-    const location = useLocation(); 
+    const location = useLocation();
+
+    const { user } = useOutletContext(); 
+
     const [vehicle, setVehicle] = useState(null);
     const [loadingVehicle, setLoadingVehicle] = useState(true);
     const [errorVehicle, setErrorVehicle] = useState(null);
@@ -358,8 +362,12 @@ const VehicleDetail = () => {
                             <h2>Acciones</h2>
                             <Link to="/vehicle" className="btn-action btn-secondary">Volver a Lista</Link>
                             <button className="btn-action btn-secondary" onClick={() => window.print()}>Imprimir</button>
+                            
                             <button className="btn-action btn-primary" onClick={handleEdit}>Añadir Historial</button>
-                            <button className="btn-action btn-destructive" onClick={handleDeleteVehicle}>Eliminar Vehículo</button>
+                            
+                            {user && user.admin && (
+                                <button className="btn-action btn-destructive" onClick={handleDeleteVehicle}>Eliminar Vehículo</button>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -378,6 +386,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory} 
+                        isAdmin={user?.admin}
                     />
                     <HistorySection
                         title="Services"
@@ -390,6 +399,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory}
+                        isAdmin={user?.admin}
                     />
                     <HistorySection
                         title="Reparaciones"
@@ -401,6 +411,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory}
+                        isAdmin={user?.admin}
                     />
                     <HistorySection
                         title="Destinos"
@@ -412,6 +423,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory}
+                        isAdmin={user?.admin}
                     />
                      <HistorySection
                         title="Rodados"
@@ -424,6 +436,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory}
+                        isAdmin={user?.admin}
                     />
                     <HistorySection
                         title="Historial de Choferes"
@@ -436,6 +449,7 @@ const VehicleDetail = () => {
                         onDelete={handleDeleteOneHistoryEntry}
                         onDeleteAll={handleDeleteAllHistory}
                         fetchHistory={fetchHistory}
+                        isAdmin={user?.admin}
                     />
                 </div>
             </main>
