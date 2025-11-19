@@ -93,6 +93,7 @@
     box-shadow: 0 0 0 0.25rem rgba(0, 150, 136, 0.5); 
 }
 
+
 .notification-bell {
     position: relative;
     cursor: pointer;
@@ -129,19 +130,27 @@
     display: none; 
 }
 .notification-panel.show { display: block; }
+
+
 .notification-header {
     padding: 1rem;
     font-size: 1.1rem;
     font-weight: 600;
     color: #ffffff;
     border-bottom: 1px solid #4a5568;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
+
 .notification-item {
     padding: 1rem;
     border-bottom: 1px solid #2d3a4b; 
     color: #aeb9c4;
     font-size: 0.9rem;
     line-height: 1.4;
+    position: relative; 
+    padding-right: 30px; 
 }
 .notification-item:last-child { border-bottom: none; }
 .notification-item strong { color: #ffffff; }
@@ -149,6 +158,59 @@
     padding: 2rem 1rem;
     text-align: center;
     color: #aeb9c4;
+}
+
+.notification-item.clickable {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.notification-item.clickable:hover {
+    background-color: #f0f8ff;
+    color: #1c2836;
+}
+.notification-item.clickable:hover strong {
+    color: #1c2836;
+}
+
+/* Botón 'Borrar todas' */
+.btn-clear-all {
+    background: transparent;
+    border: none;
+    color: #ff6b6b; 
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.btn-clear-all:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    color: #ff4c4c;
+}
+
+.btn-delete-item {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #6c757d; 
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+.btn-delete-item:hover {
+    color: #ff6b6b; 
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .user-connected {
@@ -177,92 +239,48 @@
 }
 
 .user-connected-mobile {
-    padding: 0 8px; 
-    text-align: right; 
-    max-width: 150px; 
+    padding: 0;
+    text-align: center; 
+    max-width: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.2;
 }
 .user-connected-mobile .uc-label-mobile {
     display: block;
-    font-size: 0.8rem; 
+    font-size: 0.75rem; 
     color: #aeb9c4; 
-    line-height: 1;
+    margin-bottom: 2px;
     white-space: nowrap; 
 }
 .user-connected-mobile .uc-name-mobile {
     display: block;
     font-weight: 600;
     color: #ffffff;
-    white-space: normal; 
-    word-break: break-all; 
-    line-height: 1.1; 
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 0.9rem;
 }
 
-.notification-item.clickable {
-    cursor: pointer;
-    transition: background-color 0.2s;
+.nav-item-user-info {
+    width: 100%;
+    text-align: center;
+    padding: 0.5rem 1rem;
+    margin-top: 1rem; 
+    border-top: 1px solid #4a5568; 
 }
-
-.notification-item.clickable:hover {
-    background-color: #f0f8ff; 
+.nav-item-user-info .uc-label-mobile {
+    font-size: 0.8rem;
 }
-
-.notification-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.nav-item-user-info .uc-name-mobile {
+    font-size: 1rem; 
+    word-break: break-all;
+    white-space: normal;
 }
-
-.btn-clear-all {
-    background: transparent;
-    border: none;
-    color: #ff6b6b; 
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s;
-}
-
-.btn-clear-all:hover {
-    background-color: rgba(255, 107, 107, 0.1);
-    color: #ff4c4c;
-}
-
-.notification-item {
-    position: relative; 
-    padding-right: 30px; 
-}
-
-.btn-delete-item {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: transparent;
-    border: none;
-    color: #6c757d; 
-    font-size: 1.2rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    transition: all 0.2s;
-}
-
-.btn-delete-item:hover {
-    color: #ff6b6b; 
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
 
 @media (max-width: 991.98px) { 
-  
   .app-navbar .navbar-nav {
     text-align: center;
     width: 100%;
@@ -284,28 +302,5 @@
   .app-navbar .app-logo {
     width: 45px; 
     height: 45px;
-  }
-  
-  .nav-item-user-info {
-      width: 100%;
-      text-align: center;
-      padding: 0.5rem 1rem;
-      margin-top: 1rem; 
-      border-top: 1px solid #4a5568; 
-  }
-  .nav-item-user-info .uc-label-mobile {
-      display: block;
-      font-size: 0.8rem;
-      color: #aeb9c4;
-      line-height: 1;
-      white-space: nowrap;
-  }
-  .nav-item-user-info .uc-name-mobile {
-      display: block;
-      font-weight: 600;
-      color: #ffffff;
-      line-height: 1.1;
-      font-size: 1rem; 
-      word-break: break-all;
   }
 }

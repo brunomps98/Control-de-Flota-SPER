@@ -9,7 +9,7 @@ const BellIcon = () => (
   </svg>
 );
 
-// Recibimos onDeleteOne y onClearAll
+
 const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll, extraClasses = '' }) => {
   if (!user.admin) return null;
   return (
@@ -25,7 +25,7 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
       </div>
       <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
         
-        {/* Header con Flexbox y Botón "Borrar todo" */}
+
         <div className="notification-header">
             <span>Notificaciones</span>
             {notifications.length > 0 && (
@@ -39,13 +39,12 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
           notifications.map((notif, index) => (
             <div 
               className="notification-item clickable" 
-              key={index} // Idealmente usar notif.id si existe, sino index
+              key={index} 
               onClick={() => onNotificationClick(notif)} 
             >
-              {/* Botón "X" para eliminar individualmente */}
               <button 
                 className="btn-delete-item"
-                onClick={(e) => onDeleteOne(notif.id, e)} // Pasamos ID y Evento
+                onClick={(e) => onDeleteOne(notif.id, e)} 
                 title="Eliminar notificación"
               >
                 &times;
@@ -62,7 +61,6 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
   );
 };
 
-// Recibimos onDeleteOne y onClearAll también aquí
 const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll }) => {
   const navigate = useNavigate();
   if (!user) return null;
@@ -72,7 +70,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
     navigate('/login');
   };
 
-  // Los agregamos al objeto de props para pasarlos al Bell
+  // Props agrupados para pasar a ambas campanas (móvil y desktop)
   const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll };
 
   const handleMobileLinkClick = () => {
@@ -92,14 +90,15 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <span>SPER</span>
         </Link>
 
-        <div className="d-flex align-items-center d-lg-none">
-          <div className="navbar-text text-white d-lg-none user-connected-mobile">
+        <div className="navbar-text text-white d-lg-none user-connected-mobile mx-auto">
             <span className="uc-label-mobile">Usuario conectado:</span>
             <span className="uc-name-mobile">{user.username}</span>
-          </div>
+        </div>
+
+        <div className="d-flex align-items-center d-lg-none gap-2">
           <NotificationBell {...bellProps} extraClasses="d-lg-none" />
           <button
-            className="navbar-toggler d-lg-none"
+            className="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent"
@@ -134,7 +133,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                     Unidades
                     </a>
                     <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  
                         {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General" onClick={handleMobileLinkClick}>Direccion General</Link></li>}
                         {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1" onClick={handleMobileLinkClick}>Unidad Penal 1</Link></li>}
                         {user.up3 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3" onClick={handleMobileLinkClick}>Unidad Penal 3</Link></li>}
@@ -167,6 +165,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
               </>
             )}
 
+            {/* Info de usuario dentro del menú desplegable móvil  */}
             <li className="nav-item d-lg-none nav-item-user-info">
               <span className="uc-label-mobile">Usuario conectado:</span>
               <span className="uc-name-mobile">{user.username}</span>
@@ -179,6 +178,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             </li>
           </ul>
 
+          {/* VISTA ESCRITORIO (Desktop) */}
           <div className="d-none d-lg-flex align-items-center gap-3 flex-shrink-1">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
