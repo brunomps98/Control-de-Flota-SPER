@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useLocation, useNavigate, useOutletContext } from 'react-router-dom'; // 1. Importar useOutletContext
 import apiClient from '../../api/axiosConfig';
 import './vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 import { toast } from 'react-toastify';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+
+const MySwal = withReactContent(Swal);
 
 const FilterIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
@@ -15,6 +19,9 @@ const FilterIcon = () => (
 );
 
 const Vehicle = () => {
+    // Obtener usuario del contexto (Layout)
+    const { user } = useOutletContext() || {}; 
+    
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,6 +33,7 @@ const Vehicle = () => {
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
+    
     useEffect(() => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
@@ -117,6 +125,42 @@ const Vehicle = () => {
         });
     };
 
+    // Manejar eliminación desde la Card
+    const handleDeleteVehicle = (vehicleId) => {
+        MySwal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Vas a eliminar este vehículo! Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, ¡eliminar!',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await apiClient.delete(`/api/vehicle/${vehicleId}`);
+                    
+                    // Actualizamos el estado local filtrando el vehículo eliminado
+                    setVehicles(prev => prev.filter(v => v.id !== vehicleId));
+                    
+                    MySwal.fire(
+                        '¡Eliminado!',
+                        'El vehículo ha sido eliminado correctamente.',
+                        'success'
+                    );
+                } catch (err) {
+                    console.error(err);
+                    MySwal.fire(
+                        'Error',
+                        'Hubo un problema al eliminar el vehículo.',
+                        'error'
+                    );
+                }
+            }
+        });
+    };
+
     return (
         <div className="login-page" style={{ padding: '30px 40px' }}>
             <div className="titulo-products">
@@ -135,7 +179,7 @@ const Vehicle = () => {
                 className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
                 onSubmit={handleFilterSubmit}
             >
-                <h3 className="filter-title">Filtrar Vehículos</h3>
+               <h3 className="filter-title">Filtrar Vehículos</h3>
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} placeholder="AA-123-BB" />
@@ -165,13 +209,22 @@ const Vehicle = () => {
                     <button type="button" className="btn-filter-secondary" onClick={handleClearFilters}>Limpiar</button>
                 </div>
             </form>
+
             <div className="vehicle-grid">
                 {loading ? (
                     Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="vehicle-card-skeleton"></div>
                     ))
                 ) : vehicles.length > 0 ? (
-                    vehicles.map(vehicle => <VehicleCard key={vehicle.id} vehicle={vehicle} />)
+                    vehicles.map(vehicle => (
+                        // Pasamos props isAdmin y onDelete
+                        <VehicleCard 
+                            key={vehicle.id} 
+                            vehicle={vehicle} 
+                            isAdmin={user?.admin}
+                            onDelete={handleDeleteVehicle} 
+                        />
+                    ))
                 ) : (
                     <p className="no-vehicles-message">{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}

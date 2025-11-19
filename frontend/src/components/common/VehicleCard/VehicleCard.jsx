@@ -2,12 +2,19 @@ import { Link } from 'react-router-dom';
 import './VehicleCard.css';
 import Tilt from 'react-parallax-tilt'; 
 
-const VehicleCard = ({ vehicle }) => {
+// Recibir props nuevos
+const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
     
     const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
     ? vehicle.thumbnail[0] 
     : "https://via.placeholder.com/400x300.png?text=Sin+Imagen"; 
 
+    // Handler para el botón de eliminar
+    const handleDeleteClick = (e) => {
+        e.preventDefault();    // Evita que el Link navegue
+        e.stopPropagation();   // Evita que el evento burbujee
+        onDelete(vehicle.id);
+    };
 
     return (
         <Tilt
@@ -24,6 +31,19 @@ const VehicleCard = ({ vehicle }) => {
                 
                 <div className="vehicle-card-image">
                     <img src={imageUrl} alt={`${vehicle.marca} ${vehicle.modelo}`} />
+                    
+                    {/* Botón de eliminar SOLO para admins */}
+                    {isAdmin && (
+                        <div 
+                            className="vehicle-delete-btn" 
+                            onClick={handleDeleteClick}
+                            title="Eliminar Vehículo"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" width="20" height="20">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                    )}
                 </div>
 
                 <div className="vehicle-card-content">

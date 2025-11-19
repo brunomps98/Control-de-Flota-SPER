@@ -78,6 +78,52 @@
     background-color: #007a6e;
 }
 
+.vehicle-card-image {
+    position: relative; 
+    width: 100%;
+    aspect-ratio: 16 / 10; 
+    overflow: hidden;
+}
+
+.vehicle-delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(220, 53, 69, 0.9); 
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0; 
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10; 
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.vehicle-delete-btn:hover {
+    background-color: #c82333; 
+    transform: scale(1.1) !important; 
+}
+
+.tilt-wrapper:hover .vehicle-delete-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .vehicle-delete-btn {
+        opacity: 1; 
+        top: 8px;
+        right: 8px;
+        width: 36px; 
+        height: 36px;
+    }
+}
 
 @media (max-width: 768px) {
     .vehicle-card-content {
