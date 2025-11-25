@@ -240,7 +240,8 @@ router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripcion
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
-router.post("/chat/upload", verifyToken, upload.single('file'), ChatController.uploadChatFile);
+router.post("/chat/upload", verifyToken, upload.array('files', 10), ChatController.uploadChatFile);
+router.post("/chat/find-or-create-room", verifyToken, verifyAdmin, ChatController.findOrCreateRoomForUser);
 
 
 // --- RUTAS DE SOPORTE ---

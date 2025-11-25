@@ -2,71 +2,75 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import { Op } from 'sequelize';
 import { onlineUsers } from '../socket/onlineUsers.js';
-import { supabase } from '../config/supabaseClient.js'; 
-import path from 'path'; 
+import { supabase } from '../config/supabaseClient.js';
+import path from 'path';
 
 class ChatController {
 
     /**
-     * @summary Sube un archivo a Supabase y devuelve la URL pública
+     * @summary Sube MÚLTIPLES archivos a Supabase y devuelve un array de resultados
      */
     static uploadChatFile = async (req, res) => {
         try {
-            if (!req.file) {
-                return res.status(400).json({ message: "No se ha subido ningún archivo." });
+            const files = req.files;
+
+            if (!files || files.length === 0) {
+                return res.status(400).json({ message: "No se han subido archivos." });
             }
 
-            const file = req.file;
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-            const extension = path.extname(file.originalname);
-            // Organizamos en carpeta 'chat' dentro del bucket
-            const fileName = `chat/${uniqueSuffix}${extension}`;
+            // Procesamos todos los archivos en paralelo
+            const uploadPromises = files.map(async (file) => {
+                const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+                const extension = path.extname(file.originalname);
+                const fileName = `chat/${uniqueSuffix}${extension}`;
 
-            // Subimos a Supabase Storage
-            const { error: uploadError } = await supabase.storage
-                .from('uploads') 
-                .upload(fileName, file.buffer, {
-                    contentType: file.mimetype,
-                    cacheControl: '3600',
-                    upsert: false
-                });
+                // Subir a Supabase
+                const { error: uploadError } = await supabase.storage
+                    .from('uploads')
+                    .upload(fileName, file.buffer, {
+                        contentType: file.mimetype,
+                        cacheControl: '3600',
+                        upsert: false
+                    });
 
-            if (uploadError) {
-                throw new Error('Error Supabase: ' + uploadError.message);
-            }
+                if (uploadError) throw new Error('Error Supabase: ' + uploadError.message);
 
-            // Obtener URL Pública
-            const { data: publicUrlData } = supabase.storage
-                .from('uploads')
-                .getPublicUrl(fileName);
+                // Obtener URL
+                const { data: publicUrlData } = supabase.storage
+                    .from('uploads')
+                    .getPublicUrl(fileName);
 
-            if (!publicUrlData) {
-                throw new Error('No se pudo obtener la URL pública.');
-            }
+                // Determinar Tipo
+                let fileType = 'file';
+                if (file.mimetype.startsWith('image/')) fileType = 'image';
+                else if (file.mimetype.startsWith('video/')) fileType = 'video';
+                else if (file.mimetype.startsWith('audio/')) fileType = 'audio';
 
-            // Determinar el tipo de archivo basado en el mimetype
-            let fileType = 'file';
-            if (file.mimetype.startsWith('image/')) fileType = 'image';
-            else if (file.mimetype.startsWith('video/')) fileType = 'video';
-            else if (file.mimetype.startsWith('audio/')) fileType = 'audio';
+                return {
+                    fileUrl: publicUrlData.publicUrl,
+                    fileType: fileType,
+                    originalName: file.originalname
+                };
+            });
 
-            // Devolvemos la data al frontend para que él emita el socket
+            // Esperamos a que todos se suban
+            const results = await Promise.all(uploadPromises);
+
             res.status(200).json({
-                fileUrl: publicUrlData.publicUrl,
-                fileType: fileType,
-                originalName: file.originalname
+                message: "Archivos subidos correctamente",
+                files: results
             });
 
         } catch (error) {
             console.error('[CHAT] Error en uploadChatFile:', error);
-            res.status(500).json({ message: 'Error al subir el archivo.', error: error.message });
+            res.status(500).json({ message: 'Error al subir archivos.', error: error.message });
         }
     }
 
-    
+
     static getMyRoom = async (req, res) => {
         try {
-            const userId = req.user.id; 
+            const userId = req.user.id;
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
                 defaults: {
@@ -119,7 +123,7 @@ class ChatController {
             const adminUsers = await Usuario.findAll({ where: { admin: true }, attributes: ['id'] });
             const adminIds = adminUsers.map(admin => admin.id);
             const allExcludedIds = [...userIdsWithRooms, ...adminIds];
-            
+
             const newChatUsers = await Usuario.findAll({
                 where: { id: { [Op.notIn]: allExcludedIds } },
                 attributes: ['id', 'username', 'email', 'unidad'],

@@ -13,38 +13,21 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
   if (!user.admin) return null;
   return (
     <div className={`notification-container ${extraClasses}`}>
-      <div
-        className="notification-bell"
-        onClick={onBellClick}
-      >
+      <div className="notification-bell" onClick={onBellClick}>
         <BellIcon />
-        <span
-          className={`notification-badge ${unreadCount > 0 ? 'show' : ''}`}
-        ></span>
+        <span className={`notification-badge ${unreadCount > 0 ? 'show' : ''}`}></span>
       </div>
       <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
         <div className="notification-header">
             <span>Notificaciones</span>
             {notifications.length > 0 && (
-                <button className="btn-clear-all" onClick={onClearAll}>
-                    Borrar todas
-                </button>
+                <button className="btn-clear-all" onClick={onClearAll}>Borrar todas</button>
             )}
         </div>
         {notifications.length > 0 ? (
           notifications.map((notif, index) => (
-            <div 
-              className="notification-item clickable" 
-              key={index} 
-              onClick={() => onNotificationClick(notif)} 
-            >
-              <button 
-                className="btn-delete-item"
-                onClick={(e) => onDeleteOne(notif.id, e)} 
-                title="Eliminar notificación"
-              >
-                &times;
-              </button>
+            <div className="notification-item clickable" key={index} onClick={() => onNotificationClick(notif)}>
+              <button className="btn-delete-item" onClick={(e) => onDeleteOne(notif.id, e)} title="Eliminar notificación">&times;</button>
               <strong>{notif.title}</strong><br />{notif.message}
             </div>
           ))
@@ -84,10 +67,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <span>SPER</span>
         </Link>
 
-        <div className="navbar-text text-white d-lg-none user-connected-mobile">
-            <span className="uc-label-mobile">Usuario conectado:</span>
-            <span className="uc-name-mobile">{user.username}</span>
-        </div>
+
 
         <div className="d-flex align-items-center d-lg-none gap-2">
           <NotificationBell {...bellProps} extraClasses="d-lg-none" />
@@ -153,19 +133,23 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 </li>
               </>
             )}
-            
-            <li className="nav-item d-lg-none nav-item-user-info">
-              <span className="uc-label-mobile">Usuario conectado:</span>
-              <span className="uc-name-mobile">{user.username}</span>
+
+            <li className="nav-item d-lg-none border-top border-secondary my-2"></li>
+
+            <li className="nav-item d-lg-none text-center py-2 text-white-50">
+               <small>Usuario conectado:</small><br/>
+               <strong>{user.username}</strong>
             </li>
+
             <li className="nav-item d-lg-none">
-              <button className="nav-link btn btn-link" onClick={() => {
+              <button className="nav-link btn btn-link w-100 text-center" onClick={() => {
                 handleMobileLinkClick();
                 handleLogout();
               }}>LogOut</button>
             </li>
           </ul>
 
+          {/* VISTA DESKTOP */}
           <div className="d-none d-lg-flex align-items-center gap-3 flex-shrink-1">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>

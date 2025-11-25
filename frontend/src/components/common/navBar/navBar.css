@@ -305,3 +305,19 @@
     height: 45px;
   }
 }
+
+.navbar-collapse.show ~ .user-connected-mobile {
+    display: none !important;
+}
+
+.navbar-toggler:not(.collapsed) ~ .navbar-collapse {
+}
+
+
+.text-white-50 small {
+    color: #aeb9c4;
+}
+.text-white-50 strong {
+    color: white;
+    font-size: 1rem;
+}
