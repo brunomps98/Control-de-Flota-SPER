@@ -9,7 +9,6 @@ const BellIcon = () => (
   </svg>
 );
 
-
 const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll, extraClasses = '' }) => {
   if (!user.admin) return null;
   return (
@@ -24,8 +23,6 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
         ></span>
       </div>
       <div className={`notification-panel ${isNotificationOpen ? 'show' : ''}`}>
-        
-
         <div className="notification-header">
             <span>Notificaciones</span>
             {notifications.length > 0 && (
@@ -34,7 +31,6 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
                 </button>
             )}
         </div>
-
         {notifications.length > 0 ? (
           notifications.map((notif, index) => (
             <div 
@@ -49,7 +45,6 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
               >
                 &times;
               </button>
-
               <strong>{notif.title}</strong><br />{notif.message}
             </div>
           ))
@@ -70,7 +65,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
     navigate('/login');
   };
 
-  // Props agrupados para pasar a ambas campanas (móvil y desktop)
   const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll };
 
   const handleMobileLinkClick = () => {
@@ -83,18 +77,21 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
-      <div className="container-fluid">
+      <div className="container-fluid position-relative">
 
+        {/* IZQUIERDA: Logo */}
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/vehicle">
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
 
-        <div className="navbar-text text-white d-lg-none user-connected-mobile mx-auto">
+        {/* CENTRO (MÓVIL): Usuario Conectado */}
+        <div className="navbar-text text-white d-lg-none user-connected-mobile">
             <span className="uc-label-mobile">Usuario conectado:</span>
             <span className="uc-name-mobile">{user.username}</span>
         </div>
 
+        {/* DERECHA (MÓVIL): Botones */}
         <div className="d-flex align-items-center d-lg-none gap-2">
           <NotificationBell {...bellProps} extraClasses="d-lg-none" />
           <button
@@ -107,26 +104,23 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           </button>
         </div>
 
+        {/* MENU DESPLEGABLE Y DESKTOP */}
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
 
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            
             {user.admin && (
               <li className="nav-item">
                 <Link className="nav-link" to="/vehicle" onClick={handleMobileLinkClick}>Flota General</Link>
               </li>
             )}
-
             {!user.admin && (
                <li className="nav-item">
                  <Link className="nav-link" to="/vehicle" onClick={handleMobileLinkClick}>Flota</Link>
                </li>
             )}
-
             <li className="nav-item">
                <Link className="nav-link" aria-current="page" to="/real-time-vehicle" onClick={handleMobileLinkClick}>Cargar Vehículo</Link>
             </li>
-
             {user.admin && (
                 <li className="nav-item dropdown">
                     <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -147,7 +141,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                     </ul>
                 </li>
             )}
-
             {user.admin && (
               <>
                 <li className="nav-item">
@@ -164,8 +157,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                 </li>
               </>
             )}
-
-            {/* Info de usuario dentro del menú desplegable móvil  */}
+            
             <li className="nav-item d-lg-none nav-item-user-info">
               <span className="uc-label-mobile">Usuario conectado:</span>
               <span className="uc-name-mobile">{user.username}</span>
@@ -178,7 +170,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             </li>
           </ul>
 
-          {/* VISTA ESCRITORIO (Desktop) */}
           <div className="d-none d-lg-flex align-items-center gap-3 flex-shrink-1">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
