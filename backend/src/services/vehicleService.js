@@ -38,7 +38,7 @@ const checkPermission = (user, vehicleTitle) => {
     return true;
 };
 
-// --- HELPER PARA NOTIFICAR ADMINS ---
+// Helper para notificar admins
 const notifyAdmins = async (actionType, user, vehicleData) => {
     try {
         // Buscar todos los admins
@@ -62,7 +62,7 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
             resourceId: vehicleData.id 
         };
 
-        // PERSISTENCIA EN BASE DE DATOS 
+        // Persistencia en la base de datos
         const notificationsToCreate = admins.map(admin => ({
             user_id: admin.id,
             title: title,
@@ -71,7 +71,7 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
             resource_id: vehicleData.id,
             is_read: false
         }));
-        await Notification.bulkCreate(notificationsToCreate); // <--- GUARDADO MASIVO
+        await Notification.bulkCreate(notificationsToCreate); // Guardado masivo
 
         // Enviar Socket (Campanita) a la sala de admins
         const io = getIO();
@@ -243,7 +243,7 @@ export default class VehicleManager {
             await Promise.all(createsHijos);
             await t.commit();
 
-            // --- NOTIFICAR A ADMINS SI EL CREADOR NO ES ADMIN ---
+            // Notificar a admins si el creador no es admin
             if (!user.admin) {
                 notifyAdmins('CREATE', user, newVehicle);
             }
@@ -294,7 +294,7 @@ export default class VehicleManager {
 
             await t.commit();
 
-            // --- NOTIFICAR A ADMINS SI EL EDITOR NO ES ADMIN ---
+            // Notificar a admins si el editor no es admin
             if (!user.admin) {
                 notifyAdmins('UPDATE', user, vehicle);
             }

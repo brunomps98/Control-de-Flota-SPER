@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo.png';
-import './navBar.css';
+import './NavBar.css';
 
 const BellIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="24" height="24">
@@ -79,19 +79,16 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
     <nav className="navbar navbar-expand-lg navbar-dark app-navbar">
       <div className="container-fluid position-relative">
 
-        {/* IZQUIERDA: Logo */}
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/vehicle">
           <img src={logo} alt="Logo SPER" className="app-logo" />
           <span>SPER</span>
         </Link>
 
-        {/* CENTRO (MÓVIL): Usuario Conectado */}
         <div className="navbar-text text-white d-lg-none user-connected-mobile">
             <span className="uc-label-mobile">Usuario conectado:</span>
             <span className="uc-name-mobile">{user.username}</span>
         </div>
 
-        {/* DERECHA (MÓVIL): Botones */}
         <div className="d-flex align-items-center d-lg-none gap-2">
           <NotificationBell {...bellProps} extraClasses="d-lg-none" />
           <button
@@ -104,7 +101,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           </button>
         </div>
 
-        {/* MENU DESPLEGABLE Y DESKTOP */}
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
 
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">

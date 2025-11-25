@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 import Usuario from './user.model.js'; 
 
-// --- 1. Modelo Principal: Vehiculo ---
+// Modelo Principal: Vehiculo 
 const Vehiculo = sequelize.define('Vehiculo', {
     id: {
         type: DataTypes.INTEGER,
@@ -33,7 +33,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
     updatedAt: 'updated_at'
 });
 
-// --- 2. Modelos "Hijos" (para los arrays) ---
+// Modelos Hijos para los arrays
 
 const Kilometraje = sequelize.define('Kilometraje', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -84,7 +84,7 @@ const Descripcion = sequelize.define('Descripcion', {
 
 
 
-// B) Relaciones Vehiculo -> Sus "Arrays"
+// Relaciones Vehiculo y sus "Arrays"
 // "Un Vehículo TIENE MUCHOS..."
 Vehiculo.hasMany(Kilometraje, { foreignKey: 'vehiculo_id', as: 'kilometrajes' });
 Vehiculo.hasMany(Service, { foreignKey: 'vehiculo_id', as: 'services' });
@@ -104,7 +104,7 @@ Thumbnail.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Descripcion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 
 
-// --- 4. Exportación de TODOS los modelos ---
+// Exportación de TODOS los modelos
 export {
     Vehiculo,
     Kilometraje,

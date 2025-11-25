@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { __dirname } from '../utils.js'; 
 
-// 1. Determinamos dónde leer la clave
+// Determinamos dónde leer la clave
 const isProduction = process.env.NODE_ENV === 'production';
 
 const serviceAccountPath = isProduction 
@@ -17,10 +17,10 @@ try {
         credential: admin.credential.cert(serviceAccount)
     });
 
-    console.log('✅ Firebase Admin SDK inicializado correctamente.');
+    console.log('Firebase Admin SDK inicializado correctamente.');
 
 } catch (error) {
-    console.error('❌ Error al inicializar Firebase Admin SDK:', error.message);
+    console.error('Error al inicializar Firebase Admin SDK:', error.message);
     if (!isProduction) {
         console.warn('Asegúrate de tener el archivo "firebase-service-account.json" en la carpeta "src/config/" para pruebas locales.');
     }

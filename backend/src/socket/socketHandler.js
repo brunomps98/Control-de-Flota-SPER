@@ -183,14 +183,14 @@ export const initializeSocket = (io) => {
         });
 
 
-        // --- LÓGICA 'send_message' (EMAIL + DB + PUSH) ---
+        // --- LÓGICA 'send_message' (MULTIMEDIA + EMAIL + DB + PUSH) ---
         socket.on('send_message', async (payload) => {
             try {
-                const { roomId, content } = payload;
+                const { roomId, content, type, file_url } = payload;
                 const senderId = socket.user.id;
 
-                if (!content || content.trim() === "") {
-                    return socket.emit('operation_error', { message: 'No se puede enviar un mensaje vacío.' });
+                if ((!content || content.trim() === "") && !file_url) {
+                    return socket.emit('operation_error', { message: 'El mensaje no puede estar vacío.' });
                 }
 
                 // Validación de seguridad: si no es admin, solo puede escribir en SU sala
@@ -199,17 +199,27 @@ export const initializeSocket = (io) => {
                     return;
                 }
 
+                // Creamos el mensaje en DB con los nuevos campos
                 const newMessage = await ChatMessage.create({
                     room_id: roomId,
                     sender_id: senderId,
-                    content: content
+                    content: content || null, 
+                    type: type || 'text',     
+                    file_url: file_url || null
                 });
 
+                // Preparamos el texto de vista previa para la sala
+                // Si es texto, mostramos el texto. Si es archivo, mostramos un indicador.
+                const previewText = type === 'text' 
+                    ? content 
+                    : `📎 [${type === 'image' ? 'Imagen' : type}]`;
+
                 await ChatRoom.update(
-                    { last_message: content.substring(0, 50) },
+                    { last_message: previewText.substring(0, 50) },
                     { where: { id: roomId } }
                 );
 
+                // Obtenemos el mensaje completo con datos del usuario para devolverlo
                 const messageWithSender = await ChatMessage.findByPk(newMessage.id, {
                     include: [{
                         model: Usuario,
@@ -218,12 +228,13 @@ export const initializeSocket = (io) => {
                     }]
                 });
 
+                // Emitimos a la sala en tiempo real
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
-                // --- SISTEMA DE NOTIFICACIONES INTEGRADO ---
+                // --- SISTEMA DE NOTIFICACIONES ---
                 
-                // Si el remitente NO es admin (es un usuario haciendo una consulta)...
+                // Si el remitente NO es admin 
                 if (!socket.user.admin) {
                     
                     // Notificación visual en Dashboard (Bandeja de entrada admin) - SOCKET
@@ -234,32 +245,31 @@ export const initializeSocket = (io) => {
 
                     // Buscar todos los admins para notificar
                     const admins = await Usuario.findAll({ where: { admin: true } });
-                    const adminEmails = admins.map(a => a.email);
-
-                    // ENVIAR EMAIL AL ADMIN
-                    sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, content);
-
-                    // GUARDAR NOTIFICACIÓN EN BASE DE DATOS (PERSISTENCIA)
+                    
+                    // NOTIFICACION DB
+                    const notifBody = previewText.substring(0, 100); // Usamos el previewText para que no salga vacío si es foto
                     const title = `Nuevo mensaje de ${socket.user.username}`;
-                    const body = content.substring(0, 100);
 
                     const notificationsToCreate = admins.map(admin => ({
                         user_id: admin.id,
                         title: title,
-                        message: body,
+                        message: notifBody,
                         type: 'chat_message',
-                        resource_id: roomId, // ID de la sala para que al hacer clic se abra el chat
+                        resource_id: roomId, 
                         is_read: false
                     }));
                     await Notification.bulkCreate(notificationsToCreate);
 
-                    // Enviar Notificaciones Push (Firebase) a los admins
+                    // NOTIFICACION PUSH
                     for (const admin of admins) {
-                        // Solo notificamos push si el admin NO está online en el chat ahora mismo
                         if (admin.fcm_token && !onlineAdmins.has(admin.id)) {
-                            sendPushNotification(admin.fcm_token, title, body, { chatRoomId: String(roomId) });
+                            sendPushNotification(admin.fcm_token, title, notifBody, { chatRoomId: String(roomId) });
                         }
                     }
+                    
+                    const emailContent = content || "📎 El usuario ha enviado un archivo adjunto.";
+                    const adminEmails = admins.map(a => a.email);
+                    sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, emailContent);
 
                 } else {
                     // Si el remitente ES admin (respondiendo), notificar al usuario si está desconectado
@@ -267,9 +277,9 @@ export const initializeSocket = (io) => {
                     if (room && !onlineUsers[room.user_id]) {
                         const user = await Usuario.findByPk(room.user_id);
                         const title = `Nuevo mensaje de Soporte`;
-                        const body = content.substring(0, 100);
+                        const notifBody = previewText.substring(0, 100);
                         if (user && user.fcm_token) {
-                            sendPushNotification(user.fcm_token, title, body, { chatRoomId: String(roomId) });
+                            sendPushNotification(user.fcm_token, title, notifBody, { chatRoomId: String(roomId) });
                         }
                     }
                 }

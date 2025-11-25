@@ -72,7 +72,7 @@ const startServer = async () => {
             console.log(`🚀 Servidor HTTP y Sockets escuchando en http://localhost:${PORT}/\n`);
         });
     } catch (err) {
-        console.error("❌ Error al iniciar el servidor:", err);
+        console.error("Error al iniciar el servidor:", err);
     }
 };
 

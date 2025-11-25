@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './login.css';
+import './Login.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
@@ -80,7 +80,6 @@ const Login = () => {
                     toast.error('El verificador reCAPTCHA no se ha cargado.');
                     return;
                 }
-                // 'login' es una etiqueta para la acción
                 recaptchaToken = await executeRecaptcha('login');
             }
 

@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import Navbar from '../common/navBar/navBar';
-import Footer from '../common/footer/footer';
+import Navbar from '../common/NavBar/NavBar';
+import Footer from '../common/Footer/Footer';
 import '../Layout/Layout.css';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import ChatWrapper from '../chat/ChatWrapper';
+import ChatWrapper from '../Chat/ChatWrapper';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { toast } from 'react-toastify';
@@ -15,7 +15,7 @@ import ChatBot from '../ChatBot/ChatBot'
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
 const Layout = () => {
-    // --- Hooks de Estado ---
+    // Hooks de Estado 
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     // Notificaciones de Campana
@@ -31,7 +31,7 @@ const Layout = () => {
     const location = useLocation();
     const timerRef = useRef(null);
 
-    // --- Callbacks ---
+    // Callbacks
     const handleInactivityLogout = useCallback(() => {
         localStorage.removeItem('token');
         toast.info('Tu sesión se cerró automáticamente por inactividad.');
@@ -45,7 +45,7 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
-    // ---  MANEJAR CLIC EN NOTIFICACIÓN ---
+    // Manejar click en la notificación
     const handleNotificationClick = (notif) => {
         // Cerramos el panel de notificaciones
         setIsNotificationOpen(false);
@@ -57,10 +57,9 @@ const Layout = () => {
         else if (notif.type === 'new_ticket' && notif.resourceId) {
             navigate(`/case/${notif.resourceId}`);
         }
-        // Si es otro tipo (o no tiene ID), solo se cierra el panel y no navega
     };
 
-    // --- UseEffects ---
+    // UseEffects
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
@@ -167,7 +166,7 @@ const Layout = () => {
         };
     }, [isNotificationOpen]);
 
-    // --- Componentes "Oyentes" de Sockets ---
+    // Componentes "Oyentes" de Sockets
 
     // Oyente para la Campana  (Solo Admins)
     const NotificationsListener = () => {
@@ -218,7 +217,7 @@ const Layout = () => {
         return null;
     };
 
-    // --- Early Returns ---
+    // Early Returns 
     if (loading) {
         return <div>Cargando...</div>;
     }
@@ -226,15 +225,15 @@ const Layout = () => {
         return null;
     }
 
-    // --- Funciones Handler ---
+    // Funciones Handler 
     const handleBellClick = async (event) => {
         event.stopPropagation();
         const opening = !isNotificationOpen;
         setIsNotificationOpen(opening);
 
-        // Si abrimos y hay no leídas...
+        // Si abrimos y hay no leídas
         if (opening && unreadCount > 0) {
-            // Actualización visual inmediata (Optimistic UI)
+            // Actualización visual inmediata 
             setUnreadCount(0);
 
             try {
@@ -249,7 +248,7 @@ const Layout = () => {
     };
 
 
-    // Función para eliminar UNA sola notificación
+    // Función para eliminar una sola notificación
     const handleDeleteOne = async (id, event) => {
         if (event) event.stopPropagation();
 
@@ -274,7 +273,7 @@ const Layout = () => {
         setUnreadCount(0);
 
         try {
-            // 2. Petición al Backend
+            // Petición al Backend
             await apiClient.delete('/api/notifications/clear-all');
         } catch (error) {
             console.error("Error vaciando notificaciones:", error);
@@ -288,7 +287,7 @@ const Layout = () => {
         setIsChatOpen(prev => !prev);
     };
 
-    // --- Renderizado ---
+    // Renderizado
     return (
         <SocketProvider>
             <div className="layout-container" onClick={(e) => {
@@ -332,7 +331,7 @@ const Layout = () => {
                 />
             </div>
 
-            {/* Montamos AMBOS oyentes */}
+            {/* Montamos ambos oyentes */}
             {user.admin && <NotificationsListener />}
             {user && <ChatListener />}
         </SocketProvider>

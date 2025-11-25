@@ -9,7 +9,7 @@ import '../../pages/login/login.css';
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState(''); // Para mostrar el mensaje de éxito
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {

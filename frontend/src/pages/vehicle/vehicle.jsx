@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate, useOutletContext } from 'react-router-dom'; // 1. Importar useOutletContext
 import apiClient from '../../api/axiosConfig';
-import './vehicle.css';
+import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
 import { toast } from 'react-toastify';
 import { App } from '@capacitor/app';

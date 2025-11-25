@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import './VehicleCard.css';
 import Tilt from 'react-parallax-tilt'; 
 
-// Recibir props nuevos
+// Recibe props 
 const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
     
     const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
@@ -45,7 +45,7 @@ const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
                         </div>
                     )}
                 </div>
-
+                    {/* Botón de ver ficha de vehiculos */}
                 <div className="vehicle-card-content">
                     <h3>{vehicle.marca} {vehicle.modelo}</h3>
                     <p className="vehicle-card-details">

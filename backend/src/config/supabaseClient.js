@@ -7,7 +7,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-    console.error('❌ Error: Faltan las variables de entorno SUPABASE_URL o SUPABASE_SERVICE_KEY.');
+    console.error(' Error: Faltan las variables de entorno SUPABASE_URL o SUPABASE_SERVICE_KEY, por favor agregarlas.');
     process.exit(1);
 }
 

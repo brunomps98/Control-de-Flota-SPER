@@ -7,6 +7,6 @@ export const createHash = (password) => {
 
 // Función para validar la contraseña en el login
 export const isValidatePassword = (password, hashedPassword) => {
-    // 2. Usamos compareSync para que devuelva true o false directamente
+    // Usamos compareSync para que devuelva true o false directamente
     return bcrypt.compareSync(password, hashedPassword);
 }

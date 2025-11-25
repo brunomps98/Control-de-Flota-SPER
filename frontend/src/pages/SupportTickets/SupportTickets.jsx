@@ -153,7 +153,6 @@ const SupportTickets = () => {
                         className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
                         onSubmit={handleFilterSubmit}
                     >
-                        {/* --- TÍTULO AÑADIDO --- */}
                         <h3 className="filter-title">Filtrar Casos</h3>
 
                         <div className="filter-group">

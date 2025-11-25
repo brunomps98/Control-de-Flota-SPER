@@ -30,7 +30,7 @@ const Soporte = sequelize.define('Soporte', {
 });
 
 
-// --- 2. Modelo "Hijo": SoporteArchivo ---
+// Modelo "Hijo": SoporteArchivo 
 const SoporteArchivo = sequelize.define('SoporteArchivo', {
     id: {
         type: DataTypes.INTEGER,
@@ -51,7 +51,7 @@ const SoporteArchivo = sequelize.define('SoporteArchivo', {
 });
 
 
-// --- 3. Definición de la Relación ---
+// Definición de la Relación 
 Soporte.hasMany(SoporteArchivo, {
     foreignKey: 'soporte_id', 
     as: 'archivos'           

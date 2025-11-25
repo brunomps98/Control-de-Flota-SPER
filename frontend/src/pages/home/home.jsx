@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import './home.css';
+import './Home.css';
 import logoSper from '../../assets/images/logo.png';
 import { useEffect } from 'react';
 import { App } from '@capacitor/app';
@@ -10,7 +10,6 @@ const Home = () => {
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
 
-    //En Home, salir de la app
     const handleBackButton = () => {
         App.exitApp();
     };

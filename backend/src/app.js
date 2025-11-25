@@ -8,6 +8,7 @@ dotenv.config();
 const app = express();
 console.log('\n');
 
+// Mensaje log de petición recibida
 app.use((req, res, next) => {
   console.log(`[BACK] --> Petición recibida: ${req.method} ${req.originalUrl}`);
   next();
@@ -21,6 +22,8 @@ const allowedFromEnv = rawFront
   .map(s => s.trim())
   .filter(Boolean);
 
+
+// Todas las URL permitidas ademas de la que contiene FRONT_URL
 const extras = [
   "capacitor://localhost",
   "ionic://localhost",
@@ -44,7 +47,7 @@ const corsOptions = {
       }
     }
     
-    // Permitir si está en la lista O si coincide con el Regex de Vercel
+    // Si está en la lista o si coincide con el Regex de Vercel, permitir
     if (allowedOrigins.includes(origin) || vercelRegex.test(origin)) {
       return callback(null, true);
     }

@@ -158,6 +158,7 @@ export default class userManager {
     }
 
     //Funcion para traer todos los usuarios desde la vista admin y poder modificar los datos 
+    
     getAllUsers = async (filters = {}) => {
         try {
             const whereClause = {};
@@ -178,13 +179,13 @@ export default class userManager {
             if (filters.unidad) {
                 whereClause.unidad = filters.unidad;
             }
-            // El frontend envía 'true' como string
+            // El frontend envía true como string
             if (filters.admin === 'true') {
                 whereClause.admin = true;
             }
 
             const users = await Usuario.findAll({
-                where: whereClause, // <-- Aplicamos los filtros
+                where: whereClause, // Aplicamos los filtros
                 attributes: { 
                     exclude: ['password', 'fcm_token'] 
                 },
@@ -234,12 +235,12 @@ export default class userManager {
         }
     }
 
-    // --- Función actualizar un usuario ---
+    // Función actualizar un usuario
     updateUser = async (userId, userData) => {
         try {
             const { username, email, unidad, admin, password } = userData;
 
-            // --- Lógica de permisos  ---
+            // Lógica de permisos
             const permissions = {
                 admin: admin, // Tomamos el valor de admin que nos llega
                 dg: false, up1: false, up3: false, up4: false, up5: false,
@@ -258,7 +259,6 @@ export default class userManager {
                 case "Unidad Penal 9": permissions.up9 = true; break;
                 case "Instituto": permissions.inst = true; break;
                 case "Tratamiento": permissions.trat = true; break;
-                // Si la unidad es "ADMIN" (como tu usuario 6), no asigna permiso de unidad
                 case "ADMIN": break; 
                 default:
                     console.warn(`[BACK] Unidad desconocida durante la actualización: ${unidad}`);

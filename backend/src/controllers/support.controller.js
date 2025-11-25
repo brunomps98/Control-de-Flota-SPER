@@ -27,13 +27,13 @@ class SupportController {
 
             const adminEmails = admins.map(admin => admin.email);
 
-            //  Enviar el correo (sin 'await' para que se ejecute en segundo plano)
+            //  Enviar el correo 
             sendNewTicketEmail(adminEmails, newTicket, fileUrls);
 
             const title = "Nuevo Ticket de Soporte";
             const body = `De: ${newTicket.name} - ${newTicket.problem_description.substring(0, 30)}...`;
 
-            // 2. Guardar en Base de Datos (PERSISTENCIA)
+            // Guardar en Base de Datos 
             const notificationsToCreate = admins.map(admin => ({
                 user_id: admin.id,
                 title: title,
@@ -42,17 +42,16 @@ class SupportController {
                 resource_id: newTicket.id,
                 is_read: false
             }));
-            await Notification.bulkCreate(notificationsToCreate); // <--- GUARDADO MASIVO
+            await Notification.bulkCreate(notificationsToCreate); // Guardado masivo
 
             // Enviar Socket (Campanita)
             const io = getIO();
             if (io) {
-                // 'admin_room' es la sala a la que se unen los admins
                 io.to('admin_room').emit('new_notification', {
                     title: title,
                     message: body,
-                    type: "new_ticket",       // <--- Tipo para navegar
-                    resourceId: newTicket.id  // <--- ID para navegar
+                    type: "new_ticket",       // Tipo para navegar
+                    resourceId: newTicket.id  // ID para navegar
                 });
             }
 
@@ -67,42 +66,13 @@ class SupportController {
             }
 
         } catch (error) {
-            // Este error solo se loguea en el backend, no detiene al usuario.
+            // Este error solo se loguea en el backend, no detiene al usuario
             console.error("[Support Controller] Error al buscar admins para notificar:", error);
         }
     };
 
-    // --- MÉTODOS PARA RENDERIZAR VISTAS (LEGACY) ---
-    static renderSupportForm = (req, res) => {
-        res.render('support');
-    };
 
-    static renderSupportTicketsPage = async (req, res) => {
-        try {
-            const tickets = await supportRepository.getAllSupportTickets();
-            res.render('support-tickets', { tickets });
-        } catch (error) {
-            res.status(500).render('error', { message: 'Error al cargar los tickets' });
-        }
-    };
-
-    static renderCasePage = async (req, res) => {
-        try {
-            const ticketId = req.params.tid;
-            const ticket = await supportRepository.getSupportTicketById(ticketId);
-            if (!ticket) {
-                return res.status(404).render('error', { message: 'Ticket no encontrado' });
-            }
-            res.render('case', { ticket });
-        } catch (error) {
-            res.status(500).render('error', { message: 'Error al cargar el caso' });
-        }
-    };
-
-
-    // --- MÉTODOS PARA REACT ---
-
-    // Obtiene TODOS los tickets
+    // Obtiene todos los tickets
     static getTickets = async (req, res) => {
         try {
             const filters = req.query; 
@@ -115,7 +85,7 @@ class SupportController {
         }
     };
     
-    // Obtiene UN ticket por su ID
+    // Obtiene un ticket por su ID
     static getTicketById = async (req, res) => {
         try {
             const { ticketId } = req.params;
@@ -130,7 +100,7 @@ class SupportController {
         }
     };
 
-
+    // Crear un ticket con archivos usando una ID
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
@@ -184,14 +154,14 @@ class SupportController {
     };
 
 
-    // Crea un nuevo ticket (SIN ARCHIVOS, desde JSON)
+    // Crea un nuevo ticket sin archivos 
     static createTicketNoFiles = async (req, res) => {
         try {
             const ticketData = req.body;
 
             ticketData.files = [];
 
-            // Capturamos el ticket creado (con su ID)
+            // Capturamos el ticket creado con su ID
             const newTicket = await supportRepository.addSupportTicket(ticketData);
 
             // Pasamos el objeto newTicket completo y array vacío de archivos

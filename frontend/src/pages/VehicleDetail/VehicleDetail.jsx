@@ -119,7 +119,7 @@ const VehicleDetail = () => {
     const [rodados, setRodados] = useState({ data: null, loading: false, error: null });
     const [descripciones, setDescripciones] = useState({ data: null, loading: false, error: null });
 
-    // --- FUNCIONES ---
+    // Funciones
     const fetchVehicleData = async () => {
         setErrorVehicle(null);
         setLoadingVehicle(true);

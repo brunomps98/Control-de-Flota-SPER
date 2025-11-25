@@ -62,7 +62,7 @@ class SupportDao {
         }
 
         return await Soporte.findAll({
-            where: whereClause, // Aplicar filtros (estará vacío si no hay)
+            where: whereClause, // Aplicar filtros 
             include: [{
                 model: SoporteArchivo,
                 as: 'archivos'

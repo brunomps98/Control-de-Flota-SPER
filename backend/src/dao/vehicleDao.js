@@ -203,11 +203,9 @@ class VehicleDao {
     }
 
     static deleteAllHistory = async (req, res) => {
-        // --- SOLUCIÓN: Mover la declaración fuera del try ---
         const { cid, fieldName } = req.params;
 
         try {
-            // La línea de req.params ya no es necesaria aquí
 
             const result = await vehicleDao.deleteAllHistory(cid, fieldName, req.user);
 

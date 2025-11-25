@@ -11,9 +11,9 @@ import Layout from './components/Layout/Layout';
 import AdminRoute from './components/common/AdminRoute/AdminRoute'; 
 
 // Paginas
-import Home from './pages/home/home';
-import Login from './pages/login/login';
-import Vehicle from './pages/vehicle/vehicle';
+import Home from './pages/Home/Home';
+import Login from './pages/Login/Login';
+import Vehicle from './pages/Vehicle/Vehicle';
 import Register from './pages/Register/Register'; 
 import Support from './pages/Support/Support';
 import SupportTickets from './pages/SupportTickets/SupportTickets';
@@ -26,7 +26,7 @@ import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AdminUserPage from './pages/AdminUserPage/AdminUserPage';
 
-// --- Obtenemos la clave publica de las variables de entorno ---
+// Obtenemos la clave publica de las variables de entorno
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -64,7 +64,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/usuarios" element={<AdminUserPage />} />
             </Route>
-            
           </Route>
         </Routes>
       </BrowserRouter>

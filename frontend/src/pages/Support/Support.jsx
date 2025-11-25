@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 const Support = () => {
     const navigate = useNavigate();
     
+    // Campos de formulario 
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -69,6 +70,7 @@ const Support = () => {
         }
     };
 
+    // Vaciado de formulario
     const handleReset = () => {
         const initialFormData = {
             name: '', surname: '', email: '', phone: '',

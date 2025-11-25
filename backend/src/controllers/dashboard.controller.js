@@ -9,7 +9,7 @@ class DashboardController {
      */
     static getDashboardStats = async (req, res) => {
         try {
-            // 1. Vehículos por Unidad (Gráfico de Torta)
+            // Vehículos por Unidad (Gráfico de Torta)
             const vehiculosPorUnidad = await Vehiculo.findAll({
                 attributes: [
                     'title', // La columna de la unidad
@@ -22,14 +22,14 @@ class DashboardController {
             // Vehículos por Año (Gráfico de Barras)
             const vehiculosPorAnio = await Vehiculo.findAll({
                 attributes: [
-                    'anio', // La columna del año
+                    'anio',
                     [sequelize.fn('COUNT', sequelize.col('id')), 'count']
                 ],
                 group: ['anio'],
                 order: [['anio', 'ASC']] 
             });
 
-            // 3. Vehículos por Tipo (Gráfico de Barras)
+            // Vehículos por Tipo (Gráfico de Barras)
             const vehiculosPorTipo = await Vehiculo.findAll({
                 attributes: [
                     'tipo', // La columna del tipo
@@ -39,7 +39,7 @@ class DashboardController {
                 order: [['count', 'DESC']]
             });
 
-            // --- 4. TOP 5 VEHÍCULOS POR KILOMETRAJE  ---
+            // Top 5 vehiculos por kilometraje 
             const maxKilometrajeSubQuery = `(
                 SELECT MAX(k.kilometraje)
                 FROM kilometrajes k

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { App } from '@capacitor/app'; 
 import { Capacitor } from '@capacitor/core'; 
 
-// --- DATOS ESTÁTICOS PARA LISTAS DESPLEGABLES ---
+// Datos estaticos para la lista de opciones (para mantener consistencia en los datos ingresados)
 
 const TIPOS_VEHICULO = [
     "Automóvil", "Camioneta 4x2", "Camioneta 4x4", "Utilitario", 
@@ -15,9 +15,9 @@ const TIPOS_VEHICULO = [
 
 // Generador de años (Del actual hacia atrás)
 const currentYear = new Date().getFullYear() + 1; // +1 por si sale modelo 2026 a fin de año
-const YEARS = Array.from({ length: 46 }, (_, i) => currentYear - i); // Hasta 1980 aprox
+const YEARS = Array.from({ length: 46 }, (_, i) => currentYear - i); 
 
-// Base de datos de Marcas y Modelos (Argentina)
+// Base de datos de Marcas y Modelos 
 const VEHICLE_DATA = {
     "Toyota": ["Hilux", "Corolla", "Etios", "Yaris", "SW4", "RAV4", "Hiace", "Corolla Cross"],
     "Volkswagen": ["Amarok", "Gol Trend", "Saveiro", "Vento", "Virtus", "Polo", "Taos", "Tiguan", "Master"],
@@ -91,7 +91,7 @@ const RealTimeVehicle = () => {
     const handleChange = (e) => {
         const { name, value, files } = e.target;
 
-        // Lógica especial para la Marca (actualizar modelos)
+        // Lógica especial para la Marca
         if (name === 'marca') {
             const selectedBrand = value;
             const models = VEHICLE_DATA[selectedBrand] || [];
@@ -187,7 +187,7 @@ const RealTimeVehicle = () => {
 
                     <form onSubmit={handleSubmit} className="vehicle-form-grid">
 
-                        {/* --- FILA 1: Establecimiento y Descripción --- */}
+                        {/* FILA 1: Establecimiento y Descripción  */}
                         <div className="form-group span-1">
                             <label htmlFor="title" className="form-label">Establecimiento</label>
                             <select
@@ -218,7 +218,7 @@ const RealTimeVehicle = () => {
                             <input id="description" className="form-control" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Ej: Operativo, En taller..." required />
                         </div>
 
-                        {/* --- FILA 2: MARCA, MODELO, AÑO --- */}
+                        {/* FILA 2: MARCA, MODELO, AÑO */}
                         <div className="form-group span-1">
                             <label htmlFor="marca" className="form-label">Marca</label>
                             <select id="marca" className="form-control" name="marca" value={formData.marca} onChange={handleChange} required>
@@ -253,7 +253,7 @@ const RealTimeVehicle = () => {
                             </select>
                         </div>
 
-                        {/* --- FILA 3: TIPO, DOMINIO, KILOMETROS --- */}
+                        {/* FILA 3: TIPO, DOMINIO, KILOMETROS */}
                         <div className="form-group span-1">
                             <label htmlFor="tipo" className="form-label">Tipo</label>
                             <select id="tipo" className="form-control" name="tipo" value={formData.tipo} onChange={handleChange} required>
@@ -284,7 +284,7 @@ const RealTimeVehicle = () => {
                             <input id="kilometros" className="form-control" type="number" min="0" name="kilometros" value={formData.kilometros} onChange={handleChange} placeholder="0" required />
                         </div>
 
-                        {/* --- FILA 4: DATOS TÉCNICOS (NUMEROS Y ALFANUMERICOS) --- */}
+                        {/* FILA 4: DATOS TÉCNICOS (NUMEROS Y ALFANUMERICOS) */}
                         <div className="form-group span-1">
                             <label htmlFor="chasis" className="form-label">N° Chasis (VIN)</label>
                             <input id="chasis" className="form-control" type="text" name="chasis" value={formData.chasis} onChange={handleChange} placeholder="Alfanumérico" required style={{textTransform: 'uppercase'}}/>
@@ -298,7 +298,7 @@ const RealTimeVehicle = () => {
                             <input id="cedula" className="form-control" type="number" name="cedula" value={formData.cedula} onChange={handleChange} placeholder="Solo números" required />
                         </div>
 
-                        {/* --- FILA 5: FECHAS Y DESTINO --- */}
+                        {/*  FILA 5: FECHAS Y DESTINO */}
                         <div className="form-group span-1">
                             <label htmlFor="service" className="form-label">Venc. Service</label>
                             <input id="service" className="form-control" type="date" name="service" value={formData.service} onChange={handleChange} required />
@@ -312,7 +312,7 @@ const RealTimeVehicle = () => {
                             <input id="destino" className="form-control" type="text" name="destino" value={formData.destino} onChange={handleChange} placeholder="Unidad asignada" required style={{textTransform: 'uppercase'}} />
                         </div>
 
-                        {/* --- FILA 6: CHOFER Y REPARACIONES --- */}
+                        {/* FILA 6: CHOFER Y REPARACIONES */}
                         <div className="form-group span-1">
                             <label htmlFor="usuario" className="form-label">Chofer</label>
                             <input id="usuario" className="form-control" type="text" name="usuario" value={formData.usuario} onChange={handleChange} placeholder="Apellido y Nombre" required />
@@ -322,7 +322,7 @@ const RealTimeVehicle = () => {
                             <input id="reparaciones" className="form-control" type="text" name="reparaciones" value={formData.reparaciones} onChange={handleChange} placeholder="Ninguna / Detalle" required />
                         </div>
 
-                        {/* --- IMAGENES Y BOTON --- */}
+                        {/* IMAGENES Y BOTON */}
                         <div className="form-group span-3">
                             <label htmlFor="thumbnail" className="form-label">Imágenes</label>
                             <input id="thumbnail" className="form-control" type="file" name="thumbnail" onChange={handleChange} multiple title="Seleccione imágenes..." />

@@ -41,7 +41,7 @@ const capacitorAdapter = async (config) => {
         };
     }
 
-    // Manejo de JSON, GET, PUT, etc. (con CapacitorHttp) ---
+    // Manejo de JSON, GET, PUT, etc.
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,
@@ -77,7 +77,7 @@ const capacitorAdapter = async (config) => {
   }
 };
 
-// --- CREACIÓN DEL CLIENTE ---
+// Creación del cliente
 const apiClient = axios.create({
     baseURL: baseURL,
     adapter: platform === 'web' ? undefined : capacitorAdapter,

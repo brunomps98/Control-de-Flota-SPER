@@ -2,8 +2,6 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js'; 
 import bcrypt from 'bcryptjs';
 
-// Definimos el modelo 'Usuario' que se mapea a la tabla 'usuarios'
-
 const Usuario = sequelize.define('Usuario', {
     id: {
         type: DataTypes.INTEGER,

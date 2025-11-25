@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 import Usuario from './user.model.js'; 
 
-// 1. Definición del Modelo ChatRoom
+// Definición del Modelo ChatRoom
 const ChatRoom = sequelize.define('ChatRoom', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     user_id: {
@@ -19,7 +19,7 @@ const ChatRoom = sequelize.define('ChatRoom', {
     updatedAt: 'updated_at'
 });
 
-// 2. Definición del Modelo ChatMessage
+// Definición del Modelo ChatMessage
 const ChatMessage = sequelize.define('ChatMessage', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     room_id: {
@@ -34,9 +34,16 @@ const ChatMessage = sequelize.define('ChatMessage', {
     },
     content: {
         type: DataTypes.TEXT,
-        allowNull: false 
+        allowNull: true 
     },
-    // Columnas 'image_url' y 'image_urls' eliminadas
+    type: {
+        type: DataTypes.STRING,
+        defaultValue: 'text' // 'text', 'image', 'video', 'audio', 'file'
+    },
+    file_url: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
     read: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
     tableName: 'chat_messages',
@@ -45,7 +52,7 @@ const ChatMessage = sequelize.define('ChatMessage', {
     updatedAt: false
 });
 
-// --- 3. ASOCIACIONES CONSOLIDADAS ---
+// ASOCIACIONES 
 ChatRoom.belongsTo(Usuario, { foreignKey: 'user_id', as: 'user' });
 ChatMessage.belongsTo(Usuario, { foreignKey: 'sender_id', as: 'sender' });
 ChatMessage.belongsTo(ChatRoom, { foreignKey: 'room_id', as: 'room' });

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
 
-/* --- RESETEO Y ESTILOS BASE GLOBALES --- */
+/* Reset de CSS */
 * {
     margin: 0;
     padding: 0;
@@ -44,7 +44,7 @@ h4 {
     margin: 0 auto;
 }
 
-/* --- ESTILOS COMPARTIDOS Y GLOBALES --- */
+/* Estilos globales */
 
 #list-products {
     position: relative;
@@ -192,7 +192,7 @@ footer div h3 {
 
 /* Login y Registro */
 .login { width: 50vh; padding-top: 10vh; }
-.register { width: 50vh; padding-top: 45px; } /* Nota: height fue removido por ser problemático */
+.register { width: 50vh; padding-top: 45px; } 
 .title-r { font-size: 0.5em; color: rgb(0, 0, 0); font-weight: bold; margin: 0; }
 .container.login { text-align: left; max-width: 450px; padding: 40px; border-radius: 8px; }
 .signup-btn1 { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; background-color: #000; color: #fff; border: none; border-radius: 50px; cursor: pointer; }
@@ -223,15 +223,13 @@ footer div h3 {
 .no-tickets-message { text-align: center; font-size: 1.2rem; color: #777; padding: 50px; background-color: #f9f9f9; border: 2px dashed #ddd; border-radius: 8px; }
 .main-case-view { display: flex; justify-content: center; align-items: center; padding: 40px 20px; background-color: #f4f7f6; }
 .case-container { width: 100%; max-width: 900px; margin: 0; padding: 40px; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
-
-/* Detalle de Vehículo (Information) */
 .history-card { background-color: #f9f9f9; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 15px 2%; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 .delete-history-btn { background: none; border: none; color: #dc3545; cursor: pointer; font-size: 1.2em; margin-left: auto; padding-left: 15px; }
 .buttons-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; padding: 20px 0; width: 100%; }
 .destructive-btn, .signup-btn3.destructive-btn { background-color: #dc3545 !important; color: white !important; }
 .destructive-btn:hover, .signup-btn3.destructive-btn:hover { background-color: #c82333 !important; }
 
-/* Ocultar por defecto el captcha en todas las paginas salvo login */
+/* Ocultar captcha */
 .grecaptcha-badge {
     display: none !important;
     visibility: hidden;
@@ -247,21 +245,20 @@ footer div h3 {
     color: #aeb9c4; 
 }
 
+/* Estilos de Swal2 */
+
 .swal2-popup {
     background-color: #24303c !important; 
     border: 1px solid #4a5568 !important; 
 }
 
-/* Título */
 .swal2-title {
     color: #ffffff !important; 
 }
 
-/* Contenido / Texto */
 .swal2-html-container {
     color: #aeb9c4 !important; }
 
-/* Iconos (Success, Warning, Error) */
 .swal2-icon.swal2-success .swal2-success-ring {
     border: .25em solid #009688 !important;
 }
@@ -314,6 +311,8 @@ footer div h3 {
     flex-grow: 1;
 }
 
+/* Estilos de Toastisfy */
+
 .Toastify__toast {
     background: #24303c !important; 
     color: #ffffff !important; 
@@ -359,7 +358,7 @@ footer div h3 {
 .Toastify__toast--warning {
     color: #FF9F40 !important; 
 }
-/* --- ESTILOS RESPONSIVE --- */
+
 @media (max-width: 768px) {
     .content-p { flex-direction: column; align-items: center; }
     .vehicle-image-p, .vehicle-info-p { width: 100%; margin-left: 0; text-align: center; }

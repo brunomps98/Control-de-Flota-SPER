@@ -7,7 +7,6 @@ import { Capacitor } from '@capacitor/core';
 import apiClient from '../../api/axiosConfig'; 
 import { toast } from 'react-toastify'; 
 
-// --- 1. AÑADIR COMPONENTES DE ÍCONOS ---
 const EyeOpenIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
@@ -20,7 +19,7 @@ const EyeClosedIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.225 10.225c.53.53.948 1.19 1.225 1.937M17.25 10.5c.09.43.146.874.146 1.328 0 1.5-.432 2.87-1.16 4.028m-1.742 1.742A9.01 9.01 0 0 1 12 17.668c-5.904 0-9.226-3.72-9.964-5.351.48-1.02.99-1.98 1.57-2.868m4.314-1.921A9.009 9.009 0 0 1 12 6.332c4.71 0 8.577 3.892 9.964 5.351.041.052.082.103.123.154l-3.32 3.32m-3.98-3.98-.4-1.292" />
     </svg>
 );
-// --- FIN DE ÍCONOS ---
+
 
 const Register = () => {
     const navigate = useNavigate();
@@ -32,7 +31,7 @@ const Register = () => {
         passw: ''
     });
     const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false); // <-- 2. AÑADIR ESTADO
+    const [showPassword, setShowPassword] = useState(false); 
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
@@ -142,7 +141,6 @@ const Register = () => {
                             <div id="emailHelp" className="form-text">El email no será compartido.</div>
                         </div>
 
-                        {/* --- 3. MODIFICAR DIV DE CONTRASEÑA --- */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputPassword1" className="form-label">Contraseña</label>
                             <div className="input-wrapper">
@@ -164,7 +162,6 @@ const Register = () => {
                                 </button>
                             </div>
                         </div>
-                        {/* --- FIN DE MODIFICACIÓN --- */}
 
                         <div className="button-container">
                             <button type="submit" className="login-submit-btn">Registrar Usuario</button> 

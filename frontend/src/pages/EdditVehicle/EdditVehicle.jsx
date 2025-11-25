@@ -23,7 +23,7 @@ const EdditVehicle = () => {
         return () => listener.remove();
     }, [navigate, productId]);
 
-    // --- LÓGICA DE CARGA ---
+    // Lógica de carga
     useEffect(() => {
         setFormData({
             description: '',

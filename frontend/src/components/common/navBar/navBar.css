@@ -259,15 +259,12 @@
     display: block;
     font-weight: 600;
     color: #ffffff;
-    
-    /* Truncamos si es excesivamente largo para que no rompa */
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 0.9rem;
 }
 
-/* Estilo Legacy dentro del menú */
 .nav-item-user-info {
     width: 100%;
     text-align: center;

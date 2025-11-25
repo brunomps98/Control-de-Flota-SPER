@@ -95,7 +95,7 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
     const to = adminEmails.join(', ');
 
     const subjectAction = actionType === 'CREATE' ? 'Nuevo Vehículo Cargado' : 'Vehículo Actualizado';
-    const color = actionType === 'CREATE' ? '#4CAF50' : '#2196F3'; // Verde o Azul
+    const color = actionType === 'CREATE' ? '#4CAF50' : '#2196F3'; 
 
     const htmlBody = `
         <div style="font-family: Arial, sans-serif; color: #333;">

@@ -2,6 +2,8 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 import Usuario from './user.model.js';
 
+// Tabla con modelo de notificacion con sus atributos
+
 export const Notification = sequelize.define('Notification', {
     id: {
         type: DataTypes.INTEGER,

@@ -24,9 +24,9 @@ const sequelize = new Sequelize(databaseUrl, {
 const connectToDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log(`✅ Conectado exitosamente a PostgreSQL (Supabase)`);
+        console.log(` Conectado exitosamente a PostgreSQL (Supabase)`);
     } catch (error) {
-        console.error('❌ No se pudo conectar a la base de datos:', error);
+        console.error(' No se pudo conectar a la base de datos:', error);
         throw error;
     }
 };

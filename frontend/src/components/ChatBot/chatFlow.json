@@ -4,7 +4,6 @@
     "opciones": [
       { "texto": "🚚 Gestión de Vehículos y Flota", "siguienteId": "gestion_flota" },
       { "texto": "🛠️ Soporte Técnico y Accesos", "siguienteId": "soporte_tecnico" },
-      { "texto": "📊 Consultas sobre el Dashboard", "siguienteId": "info_dashboard" },
       { "texto": "👤 Hablar con un Administrador", "accion": "transferir_admin" }
     ]
   },
@@ -28,7 +27,7 @@
   },
 
   "cargar_vehiculo": {
-    "mensaje": "⚠️ Importante: Esta acción requiere permisos de Administrador.\n\n1. Ve a la pestaña 'Cargar Vehículo'.\n2. Completa el formulario con la Cédula Verde en mano.\n3. Asegúrate de subir fotos del estado actual.\n\nSi no ves la pestaña, no tienes permisos suficientes.",
+    "mensaje": "Para realizar esto, ve a la pestaña 'Cargar Vehículo'.\n2. Completa el formulario con la Cédula Verde en mano.\n3. Asegúrate de subir fotos del estado actual.\n\n Recuerda que solo puedes cargar vehiculos correspondientes a tu unidad.",
     "opciones": [
       { "texto": "Perfecto, gracias", "siguienteId": "despedida" },
       { "texto": "🔙 Volver atrás", "siguienteId": "gestion_flota" }
@@ -43,12 +42,6 @@
     ]
   },
 
-  "info_dashboard": {
-    "mensaje": "El Dashboard muestra estadísticas en tiempo real para la toma de decisiones:\n\n• Cantidad de vehículos por Unidad Penal.\n• Vehículos con mayor kilometraje.\n• Gráficos de distribución por año y tipo.\n\nEs una herramienta exclusiva para visualización gerencial.",
-    "opciones": [
-      { "texto": "Volver al menú", "siguienteId": "inicio" }
-    ]
-  },
 
   "soporte_tecnico": {
     "mensaje": "Lamento que tengas inconvenientes. Vamos a solucionarlo. Selecciona el tipo de problema:",

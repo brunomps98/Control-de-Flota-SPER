@@ -435,11 +435,11 @@
 }
 
 .chat-footer {
-    padding: 10px;
+    padding: 10px 12px;
     border-top: none;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .chat-input-wrapper {
@@ -450,34 +450,43 @@
 
 
 .chat-footer .chat-text-input {
-    flex-grow: 1;
-    border: 1px solid #ccc;
+    flex-grow: 1;  
+    height: 40px;    
+    border: 1px solid #4a5568;
     border-radius: 20px;
-    padding: 8px 12px;
-    font-size: 0.9rem;
-    padding-left: 38px;
+    padding: 0 15px;  
+    font-size: 0.95rem;
+    background-color: #1c2836;
+    color: #ffffff;
+    margin: 0;     
+}
+
+.chat-footer .chat-text-input:focus {
+    outline: none;
+    border-color: #009688;
 }
 
 .chat-btn-attach {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
+    position: static; 
+    transform: none;  
+    background-color: #1c2836; 
+    border: 1px solid #4a5568;
     border-radius: 50%;
-    padding: 6px;
-    cursor: pointer;
-    color: #555;
+    width: 40px;      
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease;
-    z-index: 1;
+    cursor: pointer;
+    color: #aeb9c4;
+    flex-shrink: 0;   
+    transition: all 0.2s ease;
 }
 
 .chat-btn-attach:hover {
-    background-color: #e0e0e0;
+    background-color: #2d3a4b;
+    color: #009688;
+    border-color: #009688;
 }
 
 .chat-btn-attach:disabled {
@@ -486,14 +495,16 @@
 }
 
 .chat-btn-send {
+    height: 40px;  
     background: #009688;
     color: white;
     border: none;
     border-radius: 20px;
-    padding: 8px 15px;
+    padding: 0 20px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 600;
     transition: background-color 0.2s ease;
+    flex-shrink: 0;
 }
 
 .chat-btn-send:hover {
@@ -501,6 +512,7 @@
 }
 
 .chat-btn-send:disabled {
+    background-color: #4a5568;
     opacity: 0.6;
     cursor: not-allowed;
 }
@@ -765,4 +777,118 @@
     transform: scale(0);
     opacity: 0;
     pointer-events: none;
+}
+
+.chat-btn-attach {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #aeb9c4;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+.chat-btn-attach:hover {
+    color: #009688;
+}
+.chat-btn-attach:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.chat-text-input {
+    flex-grow: 1;
+    border: 1px solid #4a5568;
+    border-radius: 20px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    background-color: #1c2836;
+    color: #ffffff;
+    margin: 0 5px; 
+}
+
+.image-preview-container {
+    position: absolute;
+    bottom: 60px; 
+    left: 10px;
+    background-color: #2d3a4b;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #4a5568;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 20;
+}
+
+.image-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.file-preview-icon {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+.remove-image-btn {
+    background: #d33;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 2px;
+}
+
+.media-container {
+    margin-bottom: 5px;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.message-image {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    display: block;
+    cursor: pointer;
+}
+
+.message-video {
+    max-width: 100%;
+    border-radius: 8px;
+}
+
+.message-audio {
+    max-width: 200px;
+}
+
+.message-file-link {
+    display: inline-block;
+    background-color: rgba(0,0,0,0.2);
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: inherit;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+.message-file-link:hover {
+    text-decoration: underline;
+}
+
+.message-text {
+    margin: 0;
+    white-space: pre-wrap;
 }
