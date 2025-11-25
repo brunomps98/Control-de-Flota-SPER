@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatWrapper.css';
-import { useSocket } from '../../context/SocketContext';
+import { useChat } from '../../context/ChatContext'; // IMPORTAR CONTEXTO
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// --- ICONOS SVG ---
+// --- ICONOS (IGUAL QUE ANTES) ---
 const ThreeDotIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" /></svg>);
 const ChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="32" height="32"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>);
 const CloseIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="24" height="24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
@@ -19,7 +19,6 @@ const CancelIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" vi
 const SendIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12Zm0 0h7.5" /></svg>);
 const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="60" height="60"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
 
-// --- FORMATO FECHA ---
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
     try {
@@ -30,240 +29,109 @@ const formatTimestamp = (isoDateString) => {
     } catch (error) { return ''; }
 };
 
-// --- COMPONENTE CHAT WINDOW ---
-const ChatWindow = ({ onClose, user }) => {
-    const socket = useSocket();
+const ChatWindow = ({ onClose }) => {
+    // CONSUMIMOS EL CONTEXTO
+    const { 
+        user, socket,
+        guestRoom, guestMessages, setGuestMessages,
+        activeRooms, setActiveRooms,
+        newChatUsers, setNewChatUsers,
+        currentView, setCurrentView,
+        selectedRoom, setSelectedRoom,
+        adminMessages, setAdminMessages,
+        isLoading, isChatLoading,
+        selectRoom, startNewChat
+    } = useChat();
+
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // --- Estados Generales ---
-    const [isLoading, setIsLoading] = useState(true);
+    // Estados locales de UI (Input, Archivos, Grabación)
     const [newMessage, setNewMessage] = useState("");
-    
-    // --- Estados Archivos y Audio ---
     const [selectedFiles, setSelectedFiles] = useState([]); 
     const [isUploading, setIsUploading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
-
-    // --- Estados de Chat y Navegación ---
-    const [guestRoom, setGuestRoom] = useState(null);
-    const [guestMessages, setGuestMessages] = useState([]);
-    const [activeRooms, setActiveRooms] = useState([]);
-    const [newChatUsers, setNewChatUsers] = useState([]);
-    const [currentView, setCurrentView] = useState('inbox'); // 'inbox', 'chat', 'info'
-    const [selectedRoom, setSelectedRoom] = useState(null);
-    const [adminMessages, setAdminMessages] = useState([]);
     
-    const [isChatLoading, setIsChatLoading] = useState(false);
     const [openMenuId, setOpenMenuId] = useState(null);
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
     const typingTimerRef = useRef(null);
 
-    // Limpieza de URLs de preview para evitar memory leaks
+    // Limpieza de URLs de preview
     useEffect(() => {
-        return () => {
-            selectedFiles.forEach(file => {
-                if (file.preview) URL.revokeObjectURL(file.preview);
-            });
-        };
+        return () => { selectedFiles.forEach(file => { if (file.preview) URL.revokeObjectURL(file.preview); }); };
     }, [selectedFiles]);
 
-    // Carga inicial de datos
-    useEffect(() => {
-        if (!user) return;
-        if (user.admin) {
-            const fetchAdminRooms = async () => {
-                try {
-                    setIsLoading(true);
-                    const response = await apiClient.get('/api/chat/rooms');
-                    setActiveRooms(response.data.activeRooms);
-                    setNewChatUsers(response.data.newChatUsers);
-                } catch (error) { console.error(error); } 
-                finally { setIsLoading(false); }
-            };
-            fetchAdminRooms();
-        } else {
-            const fetchGuestRoom = async () => {
-                try {
-                    setIsLoading(true);
-                    const response = await apiClient.get('/api/chat/myroom');
-                    setGuestRoom(response.data.room);
-                    setGuestMessages(response.data.messages);
-                } catch (error) { console.error(error); } 
-                finally { setIsLoading(false); }
-            };
-            fetchGuestRoom();
-        }
-    }, [user]);
-
-    // Configuración de Sockets
+    // LISTENERS DE TIPIADO Y EVENTOS LOCALES (NO DE DATOS)
     useEffect(() => {
         if (!socket) return;
-
-        const handleNewMessage = (message) => {
-            const guestRoomId = guestRoom?.id;
-            const adminSelectedRoomId = selectedRoom?.id;
-            if (!user.admin && message.room_id === guestRoomId) {
-                setGuestMessages((prev) => [...prev, message]);
-            } else if (user.admin && message.room_id === adminSelectedRoomId) {
-                setAdminMessages((prev) => [...prev, message]);
-            }
-        };
-
         const handleShowTyping = () => setIsOtherUserTyping(true);
         const handleHideTyping = () => setIsOtherUserTyping(false);
-
-        const handleAdminNotification = ({ message, roomId }) => {
-            if (user.admin) {
-                setActiveRooms(prevRooms =>
-                    prevRooms.map(room =>
-                        room.id === roomId
-                            ? { 
-                                ...room, 
-                                last_message: message.type === 'text' ? message.content.substring(0, 30) : `📎 [${message.type}]`, 
-                                updated_at: message.created_at 
-                              }
-                            : room
-                    ).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-                );
-            }
-        };
-
-        const handleMessageDeleted = ({ messageId, roomId }) => {
-            if (user.admin && selectedRoom?.id === roomId) {
-                setAdminMessages(prev => prev.filter(m => m.id !== messageId));
-            }
-            if (!user.admin && guestRoom?.id === roomId) {
-                setGuestMessages(prev => prev.filter(m => m.id !== messageId));
-            }
-        };
-
-        const handleRoomDeleted = ({ roomId }) => {
-            if (user.admin) {
-                setActiveRooms(prev => prev.filter(r => r.id !== roomId));
-                if (selectedRoom?.id === roomId) handleBackToInbox();
-            }
-            if (!user.admin && guestRoom?.id === roomId) {
-                setGuestMessages([]);
-                setGuestRoom(null);
-            }
-        };
-
-        socket.on('new_message', handleNewMessage);
-        socket.on('new_message_notification', handleAdminNotification);
-        socket.on('message_deleted', handleMessageDeleted);
-        socket.on('room_deleted', handleRoomDeleted);
+        
         socket.on('show_typing', handleShowTyping);
         socket.on('hide_typing', handleHideTyping);
-
+        
         return () => {
-            socket.off('new_message', handleNewMessage);
-            socket.off('new_message_notification', handleAdminNotification);
-            socket.off('message_deleted', handleMessageDeleted);
-            socket.off('room_deleted', handleRoomDeleted);
             socket.off('show_typing', handleShowTyping);
             socket.off('hide_typing', handleHideTyping);
         };
-    }, [socket, user, guestRoom, selectedRoom]);
+    }, [socket]);
 
-    // Scroll al fondo al recibir mensajes
+    // Scroll al fondo
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [guestMessages, adminMessages, selectedFiles]); 
 
-    // Manejo de audios
+    // --- HANDLERS ARCHIVOS ---
     const handleFileSelect = (e) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
             const newFiles = [];
             files.forEach(file => {
-                if (file.size > 50 * 1024 * 1024) {
-                    toast.error(`El archivo ${file.name} es demasiado grande (Max 50MB)`);
-                } else {
-                    file.preview = URL.createObjectURL(file);
-                    newFiles.push(file);
-                }
+                if (file.size > 50 * 1024 * 1024) toast.error(`El archivo ${file.name} es demasiado grande (Max 50MB)`);
+                else { file.preview = URL.createObjectURL(file); newFiles.push(file); }
             });
             setSelectedFiles(prev => [...prev, ...newFiles]);
         }
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
+    const handleRemoveFile = (index) => setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    const handleClearFiles = () => { setSelectedFiles([]); if (fileInputRef.current) fileInputRef.current.value = ""; };
 
-    const handleRemoveFile = (indexToRemove) => {
-        setSelectedFiles(prev => prev.filter((_, index) => index !== indexToRemove));
-    };
-
-    const handleClearFiles = () => {
-        setSelectedFiles([]);
-        if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-
-    // Manejo de grabacion de audio
+    // --- HANDLERS AUDIO ---
     const startRecording = async () => {
         try {
             handleClearFiles(); 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const recorder = new MediaRecorder(stream);
             const chunks = [];
-
-            recorder.ondataavailable = (e) => {
-                if (e.data.size > 0) chunks.push(e.data);
-            };
-
+            recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'audio/webm' });
                 const file = new File([blob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
                 file.preview = URL.createObjectURL(file);
-                
                 setSelectedFiles([file]);
-                
                 stream.getTracks().forEach(track => track.stop());
                 setIsRecording(false);
                 setRecordingTime(0);
             };
-
             recorder.start();
             setMediaRecorder(recorder);
             setIsRecording(true);
             setRecordingTime(0);
-            recordingInterval.current = setInterval(() => {
-                setRecordingTime(prev => prev + 1);
-            }, 1000);
-
+            recordingInterval.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
         } catch (error) {
-            console.error("Error mic:", error);
             toast.error(window.location.protocol !== 'https:' ? "Requiere HTTPS o localhost." : "Error de micrófono.");
         }
     };
+    const stopRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); } };
+    const cancelRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); setMediaRecorder(null); setIsRecording(false); setRecordingTime(0); } };
+    const formatTime = (seconds) => { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins}:${secs < 10 ? '0' : ''}${secs}`; };
 
-    const stopRecording = () => {
-        if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            if (recordingInterval.current) clearInterval(recordingInterval.current);
-        }
-    };
-
-    const cancelRecording = () => {
-        if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            if (recordingInterval.current) clearInterval(recordingInterval.current);
-            setMediaRecorder(null);
-            setIsRecording(false);
-            setRecordingTime(0);
-        }
-    };
-
-    const formatTime = (seconds) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    };
-
-    // Envio de mensajes
+    // --- ENVIO ---
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
@@ -271,52 +139,22 @@ const ChatWindow = ({ onClose, user }) => {
         if (!newMessage.trim() && selectedFiles.length === 0) return;
 
         setIsUploading(true);
-
         try {
-            // Subir archivos si existen
             if (selectedFiles.length > 0) {
                 const formData = new FormData();
-                selectedFiles.forEach(file => {
-                    formData.append('files', file); 
-                });
-
-                const response = await apiClient.post('/api/chat/upload', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-
-                const uploadedFiles = response.data.files; 
-
-                // Emitir un socket por CADA archivo
-                uploadedFiles.forEach(fileData => {
-                    socket.emit('send_message', {
-                        roomId: targetRoomId,
-                        content: null,
-                        type: fileData.fileType,
-                        file_url: fileData.fileUrl
-                    });
+                selectedFiles.forEach(file => formData.append('files', file));
+                const response = await apiClient.post('/api/chat/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+                response.data.files.forEach(fileData => {
+                    socket.emit('send_message', { roomId: targetRoomId, content: null, type: fileData.fileType, file_url: fileData.fileUrl });
                 });
             }
-
-            // Enviar texto si existe
             if (newMessage.trim()) {
-                socket.emit('send_message', {
-                    roomId: targetRoomId,
-                    content: newMessage.trim(),
-                    type: 'text',
-                    file_url: null
-                });
+                socket.emit('send_message', { roomId: targetRoomId, content: newMessage.trim(), type: 'text', file_url: null });
             }
-
-            // Limpiar
             setNewMessage("");
             handleClearFiles();
-
-        } catch (error) {
-            console.error("Error enviando:", error);
-            toast.error("Error al enviar mensajes.");
-        } finally {
-            setIsUploading(false);
-        }
+        } catch (error) { toast.error("Error al enviar."); } 
+        finally { setIsUploading(false); }
     };
 
     const handleTypingChange = (e) => {
@@ -325,109 +163,45 @@ const ChatWindow = ({ onClose, user }) => {
         if (!socket || !targetRoomId) return;
         if (!typingTimerRef.current) socket.emit('typing_start', { roomId: targetRoomId });
         if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
-        typingTimerRef.current = setTimeout(() => {
-            socket.emit('typing_stop', { roomId: targetRoomId });
-            typingTimerRef.current = null;
-        }, 2000);
+        typingTimerRef.current = setTimeout(() => { socket.emit('typing_stop', { roomId: targetRoomId }); typingTimerRef.current = null; }, 2000);
     };
 
-    // Navegacion y acciones de las salas
-    const handleSelectRoom = async (room) => {
-        try {
-            setIsChatLoading(true);
-            setCurrentView('chat');
-            setSelectedRoom(room);
-            const response = await apiClient.get(`/api/chat/room/${room.id}/messages`);
-            setAdminMessages(response.data.messages);
-            socket.emit('admin_join_room', room.id);
-        } catch (error) { console.error(error); } 
-        finally { setIsChatLoading(false); }
-    };
-
-    const handleStartNewChat = async (targetUser) => {
-        try {
-            setIsChatLoading(true);
-            const response = await apiClient.post('/api/chat/find-or-create-room', { userId: targetUser.id });
-            handleSelectRoom(response.data);
-            setActiveRooms(prev => [response.data, ...prev.filter(r => r.user_id !== targetUser.id)]);
-            setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
-        } catch (error) { toast.error("Error al iniciar chat."); setIsChatLoading(false); }
-    };
-
+    // --- ACCIONES UI ---
     const handleBack = () => {
-        if (currentView === 'info') {
-            setCurrentView('chat');
-        } else {
-            setCurrentView('inbox');
-            setSelectedRoom(null);
-            setAdminMessages([]);
-            setIsOtherUserTyping(false);
-        }
+        if (currentView === 'info') setCurrentView('chat');
+        else { setCurrentView('inbox'); setSelectedRoom(null); setAdminMessages([]); setIsOtherUserTyping(false); }
     };
-
-    const handleOpenUserInfo = () => {
-        if (user.admin && selectedRoom) {
-            setCurrentView('info');
-        }
-    };
-
+    const handleOpenUserInfo = () => { if (user.admin && selectedRoom) setCurrentView('info'); };
+    
     const handleDelete = (messageId) => {
         setOpenMenuId(null);
-        Swal.fire({
-            title: '¿Borrar mensaje?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'Sí'
-        }).then((result) => {
+        Swal.fire({ title: '¿Borrar mensaje?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí' }).then((result) => {
             if (result.isConfirmed) socket.emit('delete_message', { messageId });
         });
     };
-
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false); 
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!targetRoomId) return;
-
-        Swal.fire({
-            title: user.admin ? '¿Eliminar chat?' : '¿Salir del chat?',
-            text: user.admin ? "Se borrará el historial." : "Se vaciará tu historial local.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: user.admin ? 'Eliminar' : 'Salir'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                socket.emit('delete_room', { roomId: targetRoomId });
-            }
+        Swal.fire({ title: user.admin ? '¿Eliminar chat?' : '¿Salir del chat?', text: user.admin ? "Se borrará el historial." : "Se vaciará tu historial.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: user.admin ? 'Eliminar' : 'Salir' }).then((result) => {
+            if (result.isConfirmed) socket.emit('delete_room', { roomId: targetRoomId });
         });
     };
 
-    // --- RENDERIZADO ---
-    const renderMessageContent = (msg) => {
-        return (
-            <div className="message-content-wrapper">
-                {msg.file_url && (
-                    <div className="media-container">
-                        {msg.type === 'image' ? (
-                            <a href={msg.file_url} target="_blank" rel="noopener noreferrer">
-                                <img src={msg.file_url} alt="Adjunto" className="message-image" />
-                            </a>
-                        ) : msg.type === 'video' ? (
-                            <video src={msg.file_url} controls className="message-video" />
-                        ) : msg.type === 'audio' ? (
-                            <audio src={msg.file_url} controls className="message-audio" />
-                        ) : (
-                            <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="message-file-link">
-                                📎 Descargar Archivo
-                            </a>
-                        )}
-                    </div>
-                )}
-                {msg.content && <p className="message-text">{msg.content}</p>}
-            </div>
-        );
-    };
+    // --- RENDER ---
+    const renderMessageContent = (msg) => (
+        <div className="message-content-wrapper">
+            {msg.file_url && (
+                <div className="media-container">
+                    {msg.type === 'image' ? <a href={msg.file_url} target="_blank" rel="noopener noreferrer"><img src={msg.file_url} alt="Adjunto" className="message-image" /></a> 
+                    : msg.type === 'video' ? <video src={msg.file_url} controls className="message-video" />
+                    : msg.type === 'audio' ? <audio src={msg.file_url} controls className="message-audio" />
+                    : <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="message-file-link">📎 Descargar Archivo</a>}
+                </div>
+            )}
+            {msg.content && <p className="message-text">{msg.content}</p>}
+        </div>
+    );
 
     const renderMessageList = (messages) => (
         <div className="message-list">
@@ -435,17 +209,13 @@ const ChatWindow = ({ onClose, user }) => {
                 <div key={msg.id} className={`message-row ${msg.sender_id === user.id ? 'sent' : 'received'}`}>
                     <div className="message-bubble">
                         <div className="message-header">
-                            <span className="message-sender">
-                                {msg.sender_id === user.id ? (user.admin ? 'Tú (Admin)' : 'Tú') : (msg.sender?.admin ? 'Admin' : msg.sender?.username)}
-                            </span>
+                            <span className="message-sender">{msg.sender_id === user.id ? (user.admin ? 'Tú (Admin)' : 'Tú') : (msg.sender?.admin ? 'Admin' : msg.sender?.username)}</span>
                             <span className="message-timestamp">{formatTimestamp(msg.created_at)}</span>
                         </div>
                         {renderMessageContent(msg)}
                     </div>
                     <div className="message-options-wrapper">
-                        <button className="message-options-btn" onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}>
-                            <ThreeDotIcon />
-                        </button>
+                        <button className="message-options-btn" onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}><ThreeDotIcon /></button>
                         {openMenuId === msg.id && (
                             <div className="message-menu">
                                 {msg.content && <button onClick={() => {navigator.clipboard.writeText(msg.content); setOpenMenuId(null);}}>Copiar</button>}
@@ -455,49 +225,26 @@ const ChatWindow = ({ onClose, user }) => {
                     </div>
                 </div>
             ))}
-            {isOtherUserTyping && (
-                <div className="message-row received">
-                    <div className="message-bubble typing-indicator">
-                        <span className="dot"></span><span className="dot"></span><span className="dot"></span>
-                    </div>
-                </div>
-            )}
+            {isOtherUserTyping && <div className="message-row received"><div className="message-bubble typing-indicator"><span className="dot"></span><span className="dot"></span><span className="dot"></span></div></div>}
             <div ref={messagesEndRef} />
         </div>
     );
 
-    // Vista info usuario con carrusel
     const renderUserInfo = () => {
         const targetUser = selectedRoom?.user;
         if (!targetUser) return <p>Cargando...</p>;
-
-        // Filtramos las imágenes del chat actual
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
-
         return (
             <div className="user-info-view">
                 <div className="user-info-header-section">
-                    <div className="user-info-avatar-large">
-                        <UserIcon />
-                    </div>
+                    <div className="user-info-avatar-large"><UserIcon /></div>
                     <h2 className="user-info-name">{targetUser.username}</h2>
                     <span className="user-info-subtitle">{targetUser.admin ? 'Administrador' : 'Usuario'}</span>
                 </div>
                 <div className="user-info-body">
-                    <div className="info-item">
-                        <label>Unidad</label>
-                        <p>{targetUser.unidad}</p>
-                    </div>
-                    <div className="info-item">
-                        <label>Email</label>
-                        <p>{targetUser.email}</p>
-                    </div>
-                    <div className="info-item">
-                        <label>ID Usuario</label>
-                        <p>{targetUser.id}</p>
-                    </div>
-
-                    {/* Sección de Multimedia */}
+                    <div className="info-item"><label>Unidad</label><p>{targetUser.unidad}</p></div>
+                    <div className="info-item"><label>Email</label><p>{targetUser.email}</p></div>
+                    <div className="info-item"><label>ID Usuario</label><p>{targetUser.id}</p></div>
                     <div className="user-info-media-section">
                         <h4>Archivos Multimedia</h4>
                         {chatImages.length > 0 ? (
@@ -508,9 +255,7 @@ const ChatWindow = ({ onClose, user }) => {
                                     </div>
                                 ))}
                             </div>
-                        ) : (
-                            <p className="no-media-text">No hay imágenes compartidas.</p>
-                        )}
+                        ) : <p className="no-media-text">No hay imágenes compartidas.</p>}
                     </div>
                 </div>
             </div>
@@ -525,20 +270,16 @@ const ChatWindow = ({ onClose, user }) => {
                     <div className="chat-list-header">Chats Activos</div>
                     {activeRooms.length === 0 && <p style={{padding:'10px', color:'#777'}}>Sin chats activos.</p>}
                     {activeRooms.map(room => (
-                        <div key={room.id} className="admin-room-item" onClick={() => handleSelectRoom(room)}>
-                            <div className="room-item-user">
-                                <div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>
-                                {room.user.username}
-                            </div>
+                        <div key={room.id} className="admin-room-item" onClick={() => selectRoom(room)}>
+                            <div className="room-item-user"><div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>{room.user.username}</div>
                             <div className="room-item-preview">{room.last_message}</div>
                             <div className="room-item-timestamp">{formatTimestamp(room.updated_at)}</div>
                         </div>
                     ))}
                     <div className="chat-list-header">Iniciar Nuevo Chat</div>
                     {newChatUsers.map(chatUser => (
-                        <div key={chatUser.id} className="new-chat-item" onClick={() => handleStartNewChat(chatUser)}>
-                            <div className={`online-indicator ${chatUser.isOnline ? 'online' : ''}`}></div>
-                            <div className="user-name">{chatUser.username}</div>
+                        <div key={chatUser.id} className="new-chat-item" onClick={() => startNewChat(chatUser)}>
+                            <div className={`online-indicator ${chatUser.isOnline ? 'online' : ''}`}></div><div className="user-name">{chatUser.username}</div>
                         </div>
                     ))}
                 </div>
@@ -550,148 +291,69 @@ const ChatWindow = ({ onClose, user }) => {
     };
 
     const renderChatFooter = () => {
-        // Ocultar footer en Inbox y en Info
         if (user.admin && (currentView === 'inbox' || currentView === 'info')) return null;
-        
         const showSendButton = newMessage.trim().length > 0 || selectedFiles.length > 0;
         return (
             <div className="chat-footer-wrapper">
-                {/* Preview Carrusel */}
                 {selectedFiles.length > 0 && (
                     <div className="preview-list-container">
                         {selectedFiles.map((file, index) => (
                             <div key={index} className="preview-item">
-                                {file.type.startsWith('image') ? (
-                                    <img src={file.preview} alt="Preview" className="preview-img" />
-                                ) : file.type.startsWith('audio') ? (
-                                    <div className="preview-icon audio">🎤</div>
-                                ) : (
-                                    <div className="preview-icon file">📄</div>
-                                )}
-                                <button className="remove-preview-btn" onClick={() => handleRemoveFile(index)}>
-                                    <CloseIcon />
-                                </button>
+                                {file.type.startsWith('image') ? <img src={file.preview} alt="Preview" className="preview-img" /> 
+                                : file.type.startsWith('audio') ? <div className="preview-icon audio">🎤</div> 
+                                : <div className="preview-icon file">📄</div>}
+                                <button className="remove-preview-btn" onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
                             </div>
                         ))}
                     </div>
                 )}
-
                 {isRecording ? (
                     <div className="chat-footer recording-mode">
-                        <button type="button" className="chat-btn-cancel-record" onClick={cancelRecording}>
-                            <CancelIcon />
-                        </button>
-                        <div className="recording-indicator">
-                            <span className="record-dot"></span>
-                            <span>Grabando... {formatTime(recordingTime)}</span>
-                        </div>
-                        <button type="button" className="chat-btn-send" onClick={stopRecording}>
-                            <SendIcon /> 
-                        </button>
+                        <button type="button" className="chat-btn-cancel-record" onClick={cancelRecording}><CancelIcon /></button>
+                        <div className="recording-indicator"><span className="record-dot"></span><span>Grabando... {formatTime(recordingTime)}</span></div>
+                        <button type="button" className="chat-btn-send" onClick={stopRecording}><SendIcon /></button>
                     </div>
                 ) : (
                     <form className="chat-footer" onSubmit={handleSendMessage}>
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            onChange={handleFileSelect} 
-                            style={{display: 'none'}} 
-                            multiple
-                            accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
-                        />
-                        
-                        <button 
-                            type="button" 
-                            className="chat-btn-round chat-btn-attach" 
-                            onClick={() => fileInputRef.current.click()}
-                            disabled={isUploading || isLoading}
-                            title="Adjuntar archivos"
-                        >
-                            <AttachIcon />
-                        </button>
-
-                        <input
-                            type="text"
-                            className="chat-text-input"
-                            placeholder={isUploading ? "Enviando..." : "Escribe un mensaje..."}
-                            value={newMessage}
-                            onChange={handleTypingChange}
-                            disabled={isLoading || isUploading}
-                        />
-                        
-                        {showSendButton ? (
-                            <button
-                                type="submit"
-                                className="chat-btn-round chat-btn-send"
-                                disabled={isLoading || isUploading}
-                            >
-                                {isUploading ? '...' : <SendIcon />}
-                            </button>
-                        ) : (
-                            <button
-                                type="button"
-                                className="chat-btn-round chat-btn-mic"
-                                onClick={startRecording}
-                                disabled={isUploading || isLoading}
-                                title="Grabar audio"
-                            >
-                                <MicIcon />
-                            </button>
-                        )}
+                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{display: 'none'}} multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
+                        <button type="button" className="chat-btn-round chat-btn-attach" onClick={() => fileInputRef.current.click()} disabled={isUploading || isLoading} title="Adjuntar archivos"><AttachIcon /></button>
+                        <input type="text" className="chat-text-input" placeholder={isUploading ? "Enviando..." : "Escribe un mensaje..."} value={newMessage} onChange={handleTypingChange} disabled={isLoading || isUploading} />
+                        {showSendButton ? 
+                            <button type="submit" className="chat-btn-round chat-btn-send" disabled={isLoading || isUploading}>{isUploading ? '...' : <SendIcon />}</button> : 
+                            <button type="button" className="chat-btn-round chat-btn-mic" onClick={startRecording} disabled={isUploading || isLoading} title="Grabar audio"><MicIcon /></button>
+                        }
                     </form>
                 )}
             </div>
         );
     };
 
-    // Título Dinámico
     let headerTitle = 'Soporte';
     if (user.admin) {
         if (currentView === 'inbox') headerTitle = 'Bandeja';
         else if (currentView === 'info') headerTitle = 'Info. del Usuario';
         else headerTitle = selectedRoom?.user?.username;
     }
-
     const showOptions = !(user.admin && (currentView === 'inbox' || currentView === 'info'));
 
     return (
         <div className="chat-window">
             <div className="chat-header">
-                {/* Botón Atrás: Visible si es admin y no está en Inbox */}
-                {user.admin && currentView !== 'inbox' && (
-                    <button onClick={handleBack} className="chat-back-btn"><BackIcon/></button>
-                )}
-                
-                {/* Título Clickable */}
-                <h3 
-                    className={user.admin && currentView === 'chat' ? 'clickable-header-name' : ''}
-                    onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}
-                >
-                    {headerTitle}
-                </h3>
-
-                {/* Espaciador invisible para centrar título en 'Info' */}
+                {user.admin && currentView !== 'inbox' && <button onClick={handleBack} className="chat-back-btn"><BackIcon/></button>}
+                <h3 className={user.admin && currentView === 'chat' ? 'clickable-header-name' : ''} onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}>{headerTitle}</h3>
                 {currentView === 'info' && <div style={{width: '34px'}}></div>}
-
-                {/* Menú de 3 puntos */}
                 {showOptions && (
                     <div className="chat-header-options">
                         <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}><ThreeDotIcon/></button>
                         {isHeaderMenuOpen && (
                             <div className="chat-header-menu">
                                 <button onClick={onClose}>Cerrar Ventana</button>
-                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">
-                                    {user.admin ? 'Eliminar Chat' : 'Salir del Chat'}
-                                </button>
+                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">{user.admin ? 'Eliminar Chat' : 'Salir del Chat'}</button>
                             </div>
                         )}
                     </div>
                 )}
-                
-                {/* Botón Cerrar (X) simple en las vistas donde no hay menú */}
-                {((user.admin && currentView === 'inbox') || !user.admin) && (
-                    <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon/></button>
-                )}
+                {((user.admin && currentView === 'inbox') || !user.admin) && <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon/></button>}
             </div>
             <div className="chat-body">{renderChatBody()}</div>
             {renderChatFooter()}
@@ -699,14 +361,15 @@ const ChatWindow = ({ onClose, user }) => {
     );
 };
 
-const ChatWrapper = ({ user, isChatOpen, unreadChatCount, onToggleChat, hideButton }) => {
+const ChatWrapper = ({ hideButton }) => {
+    const { user, isChatOpen, unreadChatCount, toggleChat } = useChat(); // Usar contexto
     const [popping, setPopping] = useState(false);
     useEffect(() => { if (unreadChatCount > 0) { setPopping(true); setTimeout(() => setPopping(false), 200); } }, [unreadChatCount]);
     if (!user) return null;
     return (
         <div className="chat-wrapper-container">
-            {isChatOpen && <ChatWindow onClose={onToggleChat} user={user} />}
-            <button className={`chat-bubble-button ${hideButton ? 'hide' : ''}`} onClick={onToggleChat}>
+            {isChatOpen && <ChatWindow onClose={toggleChat} user={user} />}
+            <button className={`chat-bubble-button ${hideButton ? 'hide' : ''}`} onClick={toggleChat}>
                 {isChatOpen ? <CloseIcon /> : <ChatIcon />}
                 {unreadChatCount > 0 && <span className={`chat-unread-badge ${popping ? 'pop' : ''}`}>{unreadChatCount > 9 ? '9+' : unreadChatCount}</span>}
             </button>
