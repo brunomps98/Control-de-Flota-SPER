@@ -67,7 +67,6 @@
     color: white;
 }
 
-/* --- SCROLLBAR ESTILO WHATSAPP (MODIFICADO) --- */
 .chat-body {
     flex-grow: 1;
     padding: 15px;
@@ -79,19 +78,19 @@
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
-/* Webkit (Chrome, Edge, Safari) */
+
 .chat-body::-webkit-scrollbar {
-    width: 6px; /* Más fina */
+    width: 6px; 
 }
 .chat-body::-webkit-scrollbar-track {
-    background: transparent; /* Fondo invisible */
+    background: transparent; 
 }
 .chat-body::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.15); /* Muy sutil */
+    background-color: rgba(255, 255, 255, 0.15); 
     border-radius: 3px;
 }
 .chat-body:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3); /* Visible al pasar el mouse */
+    background-color: rgba(255, 255, 255, 0.3); 
 }
 
 .chat-footer-wrapper {
@@ -112,16 +111,14 @@
     box-sizing: border-box;
 }
 
-/* --- BOTONES Y INPUTS AGRANDADOS (MODIFICADO) --- */
 
-/* Input de texto */
 .chat-footer .chat-text-input {
     flex-grow: 1;
-    height: 50px; /* Aumentado de 40/45 a 50px */
+    height: 50px; 
     border: 1px solid #4a5568;
     border-radius: 25px;
     padding: 0 15px;
-    font-size: 1rem; /* Letra más legible */
+    font-size: 1rem; 
     background-color: #1c2836;
     color: #ffffff;
     margin: 0;
@@ -132,7 +129,6 @@
     border-color: #009688;
 }
 
-/* Estilo base para botones redondos (Enviar, Mic, etc) */
 .chat-btn-round, 
 .chat-btn-send, 
 .chat-btn-attach {
@@ -140,8 +136,8 @@
     transform: none;
     border: none;
     border-radius: 50%;
-    width: 50px;      /* Aumentado a 50px */
-    height: 50px;     /* Aumentado a 50px */
+    width: 50px;     
+    height: 50px;    
     display: flex;
     align-items: center;
     justify-content: center;
@@ -151,7 +147,7 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* Colores específicos */
+
 .chat-btn-attach {
     background-color: #1c2836;
     border: 1px solid #4a5568;
@@ -174,12 +170,12 @@
     transform: scale(1.05);
 }
 
-/* ÍCONOS INTERNOS MÁS GRANDES */
+
 .chat-btn-round svg,
 .chat-btn-attach svg,
 .chat-btn-send svg {
-    width: 26px !important; /* Aumentado */
-    height: 26px !important; /* Aumentado */
+    width: 26px !important; 
+    height: 26px !important; 
 }
 
 .chat-btn-round:disabled,
@@ -191,7 +187,6 @@
     transform: none;
 }
 
-/* --- MENSAJES --- */
 .message-list {
     display: flex;
     flex-direction: column;
@@ -328,7 +323,6 @@
     white-space: pre-wrap;
 }
 
-/* --- OPCIONES Y MENÚS --- */
 .message-options-wrapper {
     position: relative;
     visibility: hidden;
@@ -468,7 +462,6 @@
     display: none;
 }
 
-/* --- PREVIEW DE MÚLTIPLES ARCHIVOS (CARRUSEL) --- */
 .preview-list-container {
     position: relative;
     background-color: #2d3a4b;
@@ -548,7 +541,7 @@
     to { height: 90px; opacity: 1; }
 }
 
-/* --- MODO GRABACIÓN --- */
+
 .recording-mode {
     justify-content: space-between;
     background-color: #2d3a4b;
@@ -590,13 +583,11 @@
     100% { opacity: 1; }
 }
 
-/* --- ADMIN INBOX Y LISTAS --- */
 .admin-inbox {
     flex: 1;
     overflow-y: auto;
     background-color: #1a222c;
     
-    /* Scrollbar igual al chat */
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
@@ -647,7 +638,7 @@
 }
 
 .admin-room-item {
-    display: block; /* Para permitir layout custom dentro */
+    display: block; 
 }
 
 .admin-room-item:hover,
@@ -705,7 +696,6 @@
     box-shadow: 0 0 5px #4CAF50;
 }
 
-/* Indicador de no leídos burbuja flotante */
 .chat-unread-badge {
     position: absolute;
     top: -5px;
@@ -729,15 +719,13 @@
     transform: scale(1.1);
 }
 
-/* --- CORRECCIÓN HEADER BUTTONS --- */
 
-/* Forzar color blanco y tamaño para botones del header */
 .chat-back-btn,
 .chat-header-menu-btn,
 .chat-close-btn-simple {
-    color: white !important; /* Asegura que se vean */
+    color: white !important; 
     opacity: 0.9;
-    padding: 8px; /* Un poco más de área de click */
+    padding: 8px; 
 }
 
 .chat-back-btn:hover,
@@ -756,29 +744,170 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #009688 !important; /* Color Verde Principal */
+    color: #009688 !important; 
     transition: all 0.2s ease;
-    margin-right: 5px; /* Un poco de aire con el título */
+    margin-right: 5px; 
 }
 
 .chat-back-btn:hover {
-    background-color: rgba(0, 150, 136, 0.15); /* Fondo verde suave al hover */
+    background-color: rgba(0, 150, 136, 0.15); 
     border-radius: 50%;
-    transform: translateX(-3px); /* Pequeña animación hacia la izquierda */
+    transform: translateX(-3px); 
 }
 
-/* Forzamos el tamaño para que sea igual de visible que los de abajo */
 .chat-back-btn svg {
     width: 28px !important;
     height: 28px !important;
-    stroke-width: 2.5; /* Trazo más grueso para que se vea bien el verde */
+    stroke-width: 2.5; 
 }
 
-/* --- ESTILO BOTÓN ELIMINAR CHAT EN MENU --- */
 .chat-delete-chat-btn {
-    color: #E53E3E !important; /* Rojo */
+    color: #E53E3E !important; 
 }
 
 .chat-delete-chat-btn:hover {
-    background-color: rgba(229, 62, 62, 0.1) !important; /* Fondo rojo suave al hover */
+    background-color: rgba(229, 62, 62, 0.1) !important; 
+}
+
+.clickable-header-name {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.clickable-header-name:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.user-info-view {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #1a222c;
+    animation: fadeIn 0.3s ease;
+}
+
+.user-info-header-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    background-color: #24303c;
+    border-bottom: 1px solid #4a5568;
+}
+
+.user-info-avatar-large {
+    color: #aeb9c4;
+    margin-bottom: 15px;
+    background: #1a222c;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #4a5568;
+}
+
+.user-info-avatar-large svg {
+    width: 60px;
+    height: 60px;
+}
+
+.user-info-name {
+    margin: 0;
+    color: white;
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.user-info-subtitle {
+    color: #009688;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.user-info-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.info-item {
+    background-color: #24303c;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #4a5568;
+}
+
+.info-item label {
+    display: block;
+    color: #009688;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.info-item p {
+    margin: 0;
+    color: #f0f0f0;
+    font-size: 1rem;
+    word-break: break-all;
+}
+
+.user-info-media-section {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #4a5568;
+}
+
+.user-info-media-section h4 {
+    color: #aeb9c4;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.media-gallery-carousel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px; 
+}
+
+.media-gallery-carousel::-webkit-scrollbar {
+    height: 6px;
+}
+.media-gallery-carousel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+}
+
+.media-gallery-item {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid #4a5568;
+    transition: transform 0.2s;
+}
+
+.media-gallery-item:hover {
+    transform: scale(1.05);
+    border-color: #009688;
+}
+
+.media-gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.no-media-text {
+    font-size: 0.85rem;
+    color: #718096;
+    font-style: italic;
 }

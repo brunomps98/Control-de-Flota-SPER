@@ -7,7 +7,7 @@ import Swal from 'sweetalert2';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// --- ICONOS ---
+// --- ICONOS SVG ---
 const ThreeDotIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" /></svg>);
 const ChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="32" height="32"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>);
 const CloseIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="24" height="24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
@@ -17,7 +17,9 @@ const MicIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 const StopIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" width="20" height="20"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>);
 const CancelIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
 const SendIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12Zm0 0h7.5" /></svg>);
+const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="60" height="60"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
 
+// --- FORMATO FECHA ---
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
     try {
@@ -28,28 +30,30 @@ const formatTimestamp = (isoDateString) => {
     } catch (error) { return ''; }
 };
 
+// --- COMPONENTE CHAT WINDOW ---
 const ChatWindow = ({ onClose, user }) => {
     const socket = useSocket();
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    // --- Estados Generales ---
     const [isLoading, setIsLoading] = useState(true);
     const [newMessage, setNewMessage] = useState("");
     
+    // --- Estados Archivos y Audio ---
     const [selectedFiles, setSelectedFiles] = useState([]); 
     const [isUploading, setIsUploading] = useState(false);
-
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
 
+    // --- Estados de Chat y Navegación ---
     const [guestRoom, setGuestRoom] = useState(null);
     const [guestMessages, setGuestMessages] = useState([]);
-    
     const [activeRooms, setActiveRooms] = useState([]);
     const [newChatUsers, setNewChatUsers] = useState([]);
-    const [currentView, setCurrentView] = useState('inbox');
+    const [currentView, setCurrentView] = useState('inbox'); // 'inbox', 'chat', 'info'
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [adminMessages, setAdminMessages] = useState([]);
     
@@ -59,6 +63,7 @@ const ChatWindow = ({ onClose, user }) => {
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
     const typingTimerRef = useRef(null);
 
+    // Limpieza de URLs de preview para evitar memory leaks
     useEffect(() => {
         return () => {
             selectedFiles.forEach(file => {
@@ -67,6 +72,7 @@ const ChatWindow = ({ onClose, user }) => {
         };
     }, [selectedFiles]);
 
+    // Carga inicial de datos
     useEffect(() => {
         if (!user) return;
         if (user.admin) {
@@ -94,6 +100,7 @@ const ChatWindow = ({ onClose, user }) => {
         }
     }, [user]);
 
+    // Configuración de Sockets
     useEffect(() => {
         if (!socket) return;
 
@@ -163,10 +170,12 @@ const ChatWindow = ({ onClose, user }) => {
         };
     }, [socket, user, guestRoom, selectedRoom]);
 
+    // Scroll al fondo al recibir mensajes
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [guestMessages, adminMessages, selectedFiles]); 
 
+    // Manejo de audios
     const handleFileSelect = (e) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
@@ -193,24 +202,30 @@ const ChatWindow = ({ onClose, user }) => {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    // Manejo de grabacion de audio
     const startRecording = async () => {
         try {
             handleClearFiles(); 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const recorder = new MediaRecorder(stream);
             const chunks = [];
+
             recorder.ondataavailable = (e) => {
                 if (e.data.size > 0) chunks.push(e.data);
             };
+
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'audio/webm' });
                 const file = new File([blob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
                 file.preview = URL.createObjectURL(file);
+                
                 setSelectedFiles([file]);
+                
                 stream.getTracks().forEach(track => track.stop());
                 setIsRecording(false);
                 setRecordingTime(0);
             };
+
             recorder.start();
             setMediaRecorder(recorder);
             setIsRecording(true);
@@ -218,6 +233,7 @@ const ChatWindow = ({ onClose, user }) => {
             recordingInterval.current = setInterval(() => {
                 setRecordingTime(prev => prev + 1);
             }, 1000);
+
         } catch (error) {
             console.error("Error mic:", error);
             toast.error(window.location.protocol !== 'https:' ? "Requiere HTTPS o localhost." : "Error de micrófono.");
@@ -247,6 +263,7 @@ const ChatWindow = ({ onClose, user }) => {
         return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     };
 
+    // Envio de mensajes
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
@@ -254,16 +271,22 @@ const ChatWindow = ({ onClose, user }) => {
         if (!newMessage.trim() && selectedFiles.length === 0) return;
 
         setIsUploading(true);
+
         try {
+            // Subir archivos si existen
             if (selectedFiles.length > 0) {
                 const formData = new FormData();
                 selectedFiles.forEach(file => {
                     formData.append('files', file); 
                 });
+
                 const response = await apiClient.post('/api/chat/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
+
                 const uploadedFiles = response.data.files; 
+
+                // Emitir un socket por CADA archivo
                 uploadedFiles.forEach(fileData => {
                     socket.emit('send_message', {
                         roomId: targetRoomId,
@@ -273,6 +296,8 @@ const ChatWindow = ({ onClose, user }) => {
                     });
                 });
             }
+
+            // Enviar texto si existe
             if (newMessage.trim()) {
                 socket.emit('send_message', {
                     roomId: targetRoomId,
@@ -281,8 +306,11 @@ const ChatWindow = ({ onClose, user }) => {
                     file_url: null
                 });
             }
+
+            // Limpiar
             setNewMessage("");
             handleClearFiles();
+
         } catch (error) {
             console.error("Error enviando:", error);
             toast.error("Error al enviar mensajes.");
@@ -303,6 +331,7 @@ const ChatWindow = ({ onClose, user }) => {
         }, 2000);
     };
 
+    // Navegacion y acciones de las salas
     const handleSelectRoom = async (room) => {
         try {
             setIsChatLoading(true);
@@ -325,11 +354,21 @@ const ChatWindow = ({ onClose, user }) => {
         } catch (error) { toast.error("Error al iniciar chat."); setIsChatLoading(false); }
     };
 
-    const handleBackToInbox = () => {
-        setCurrentView('inbox');
-        setSelectedRoom(null);
-        setAdminMessages([]);
-        setIsOtherUserTyping(false);
+    const handleBack = () => {
+        if (currentView === 'info') {
+            setCurrentView('chat');
+        } else {
+            setCurrentView('inbox');
+            setSelectedRoom(null);
+            setAdminMessages([]);
+            setIsOtherUserTyping(false);
+        }
+    };
+
+    const handleOpenUserInfo = () => {
+        if (user.admin && selectedRoom) {
+            setCurrentView('info');
+        }
     };
 
     const handleDelete = (messageId) => {
@@ -345,7 +384,6 @@ const ChatWindow = ({ onClose, user }) => {
         });
     };
 
-    // FUNCIÓN PARA BORRAR/SALIR DEL CHAT 
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false); 
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
@@ -353,7 +391,7 @@ const ChatWindow = ({ onClose, user }) => {
 
         Swal.fire({
             title: user.admin ? '¿Eliminar chat?' : '¿Salir del chat?',
-            text: user.admin ? "Se borrará el historial." : "Se vaciará tu historial.",
+            text: user.admin ? "Se borrará el historial." : "Se vaciará tu historial local.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -365,6 +403,7 @@ const ChatWindow = ({ onClose, user }) => {
         });
     };
 
+    // --- RENDERIZADO ---
     const renderMessageContent = (msg) => {
         return (
             <div className="message-content-wrapper">
@@ -427,6 +466,57 @@ const ChatWindow = ({ onClose, user }) => {
         </div>
     );
 
+    // Vista info usuario con carrusel
+    const renderUserInfo = () => {
+        const targetUser = selectedRoom?.user;
+        if (!targetUser) return <p>Cargando...</p>;
+
+        // Filtramos las imágenes del chat actual
+        const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
+
+        return (
+            <div className="user-info-view">
+                <div className="user-info-header-section">
+                    <div className="user-info-avatar-large">
+                        <UserIcon />
+                    </div>
+                    <h2 className="user-info-name">{targetUser.username}</h2>
+                    <span className="user-info-subtitle">{targetUser.admin ? 'Administrador' : 'Usuario'}</span>
+                </div>
+                <div className="user-info-body">
+                    <div className="info-item">
+                        <label>Unidad</label>
+                        <p>{targetUser.unidad}</p>
+                    </div>
+                    <div className="info-item">
+                        <label>Email</label>
+                        <p>{targetUser.email}</p>
+                    </div>
+                    <div className="info-item">
+                        <label>ID Usuario</label>
+                        <p>{targetUser.id}</p>
+                    </div>
+
+                    {/* Sección de Multimedia */}
+                    <div className="user-info-media-section">
+                        <h4>Archivos Multimedia</h4>
+                        {chatImages.length > 0 ? (
+                            <div className="media-gallery-carousel">
+                                {chatImages.map((img) => (
+                                    <div key={img.id} className="media-gallery-item" onClick={() => window.open(img.file_url, '_blank')}>
+                                        <img src={img.file_url} alt="media" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="no-media-text">No hay imágenes compartidas.</p>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     const renderChatBody = () => {
         if (isLoading) return <p>Cargando...</p>;
         if (user.admin && currentView === 'inbox') {
@@ -454,15 +544,19 @@ const ChatWindow = ({ onClose, user }) => {
                 </div>
             );
         }
+        if (user.admin && currentView === 'info') return renderUserInfo();
         if (user.admin && currentView === 'chat') return isChatLoading ? <p>Cargando...</p> : renderMessageList(adminMessages);
         return guestMessages.length === 0 ? <p style={{padding:'15px', color:'#bbb'}}>Inicia la conversación...</p> : renderMessageList(guestMessages);
     };
 
     const renderChatFooter = () => {
-        if (user.admin && currentView === 'inbox') return null;
+        // Ocultar footer en Inbox y en Info
+        if (user.admin && (currentView === 'inbox' || currentView === 'info')) return null;
+        
         const showSendButton = newMessage.trim().length > 0 || selectedFiles.length > 0;
         return (
             <div className="chat-footer-wrapper">
+                {/* Preview Carrusel */}
                 {selectedFiles.length > 0 && (
                     <div className="preview-list-container">
                         {selectedFiles.map((file, index) => (
@@ -550,12 +644,37 @@ const ChatWindow = ({ onClose, user }) => {
         );
     };
 
+    // Título Dinámico
+    let headerTitle = 'Soporte';
+    if (user.admin) {
+        if (currentView === 'inbox') headerTitle = 'Bandeja';
+        else if (currentView === 'info') headerTitle = 'Info. del Usuario';
+        else headerTitle = selectedRoom?.user?.username;
+    }
+
+    const showOptions = !(user.admin && (currentView === 'inbox' || currentView === 'info'));
+
     return (
         <div className="chat-window">
             <div className="chat-header">
-                {user.admin && currentView === 'chat' && <button onClick={handleBackToInbox} className="chat-back-btn"><BackIcon/></button>}
-                <h3>{user.admin ? (currentView === 'inbox' ? 'Bandeja' : selectedRoom?.user?.username) : 'Soporte'}</h3>
-                {!(user.admin && currentView === 'inbox') && (
+                {/* Botón Atrás: Visible si es admin y no está en Inbox */}
+                {user.admin && currentView !== 'inbox' && (
+                    <button onClick={handleBack} className="chat-back-btn"><BackIcon/></button>
+                )}
+                
+                {/* Título Clickable */}
+                <h3 
+                    className={user.admin && currentView === 'chat' ? 'clickable-header-name' : ''}
+                    onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}
+                >
+                    {headerTitle}
+                </h3>
+
+                {/* Espaciador invisible para centrar título en 'Info' */}
+                {currentView === 'info' && <div style={{width: '34px'}}></div>}
+
+                {/* Menú de 3 puntos */}
+                {showOptions && (
                     <div className="chat-header-options">
                         <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}><ThreeDotIcon/></button>
                         {isHeaderMenuOpen && (
@@ -568,7 +687,11 @@ const ChatWindow = ({ onClose, user }) => {
                         )}
                     </div>
                 )}
-                {user.admin && currentView === 'inbox' && <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon/></button>}
+                
+                {/* Botón Cerrar (X) simple en las vistas donde no hay menú */}
+                {((user.admin && currentView === 'inbox') || !user.admin) && (
+                    <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon/></button>
+                )}
             </div>
             <div className="chat-body">{renderChatBody()}</div>
             {renderChatFooter()}
