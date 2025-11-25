@@ -28,17 +28,12 @@ export const ChatProvider = ({ children, user }) => {
     const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
 
-    // Referencia para saber si ya cargamos los datos de este usuario
     const loadedUserIdRef = useRef(null);
 
-    // CARGA INICIAL DE DATOS 
+    // --- CARGA INICIAL ---
     useEffect(() => {
         if (!user) return;
-
-        // EVITAR RECARGA: Si ya cargamos datos para este ID de usuario, no hacemos nada.
-        if (loadedUserIdRef.current === user.id) {
-            return; 
-        }
+        if (loadedUserIdRef.current === user.id) return;
 
         const loadInitialData = async () => {
             setIsLoading(true);
@@ -52,7 +47,6 @@ export const ChatProvider = ({ children, user }) => {
                     setGuestRoom(response.data.room);
                     setGuestMessages(response.data.messages);
                 }
-                // Marcamos este usuario como cargado
                 loadedUserIdRef.current = user.id;
             } catch (error) {
                 console.error("Error cargando chat:", error);
@@ -60,42 +54,32 @@ export const ChatProvider = ({ children, user }) => {
                 setIsLoading(false);
             }
         };
-
         loadInitialData();
-        
-    }, [user?.id]); 
+    }, [user?.id]);
 
-    // --- LISTENERS DE SOCKETS ---
+    // --- LISTENERS ---
     useEffect(() => {
         if (!socket || !user) return;
 
         const handleNewMessage = (message) => {
-            // Invitado
             if (!user.admin && message.room_id === guestRoom?.id) {
                 setGuestMessages((prev) => [...prev, message]);
                 if (!isChatOpen) setUnreadChatCount(prev => prev + 1);
             } 
-            // Admin
             else if (user.admin) {
                 if (selectedRoom?.id === message.room_id) {
                     setAdminMessages((prev) => [...prev, message]);
                 } else {
                     if (!isChatOpen) setUnreadChatCount(prev => prev + 1);
-                    
-                    // Actualizar lista de salas (subir la sala al tope)
                     setActiveRooms(prevRooms => {
                         const roomIndex = prevRooms.findIndex(r => r.id === message.room_id);
-                        if (roomIndex === -1) return prevRooms; 
-
+                        if (roomIndex === -1) return prevRooms;
                         const updatedRooms = [...prevRooms];
                         const roomToUpdate = { ...updatedRooms[roomIndex] };
-                        
                         roomToUpdate.last_message = message.type === 'text' ? message.content.substring(0, 30) : `📎 [${message.type}]`;
                         roomToUpdate.updated_at = message.created_at;
-
                         updatedRooms.splice(roomIndex, 1);
                         updatedRooms.unshift(roomToUpdate);
-                        
                         return updatedRooms;
                     });
                 }
@@ -105,21 +89,14 @@ export const ChatProvider = ({ children, user }) => {
         const handleAdminNotification = ({ message, roomId }) => {
             if (user.admin) {
                 setActiveRooms(prevRooms => {
-                    // Si la sala ya existe, la actualizamos
                     const roomExists = prevRooms.some(r => r.id === roomId);
-                    
                     if (roomExists) {
                         return prevRooms.map(room =>
                             room.id === roomId
-                                ? { 
-                                    ...room, 
-                                    last_message: message.type === 'text' ? message.content?.substring(0, 30) : `📎 [${message.type}]`, 
-                                    updated_at: message.created_at 
-                                  }
+                                ? { ...room, last_message: message.type === 'text' ? message.content?.substring(0, 30) : `📎 [${message.type}]`, updated_at: message.created_at }
                                 : room
                         ).sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
                     } else {
-                        // Si es una sala NUEVA (ej: usuario nuevo escribe), recargamos la lista silenciosamente
                         apiClient.get('/api/chat/rooms').then(res => {
                             setActiveRooms(res.data.activeRooms);
                             setNewChatUsers(res.data.newChatUsers);
@@ -127,7 +104,6 @@ export const ChatProvider = ({ children, user }) => {
                         return prevRooms;
                     }
                 });
-                
                 if (!isChatOpen) setUnreadChatCount(prev => prev + 1);
             }
         };
@@ -146,8 +122,7 @@ export const ChatProvider = ({ children, user }) => {
                 }
             }
             if (!user.admin && guestRoom?.id === roomId) {
-                setGuestMessages([]);
-                setGuestRoom(null);
+                setGuestMessages([]); 
             }
         };
 
@@ -163,7 +138,6 @@ export const ChatProvider = ({ children, user }) => {
             socket.off('room_deleted', handleRoomDeleted);
         };
     }, [socket, user, guestRoom, selectedRoom, isChatOpen]);
-
 
     // --- ACCIONES ---
     const selectRoom = async (room) => {

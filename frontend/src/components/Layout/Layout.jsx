@@ -162,6 +162,7 @@ const Layout = () => {
 
     // --- Componentes "Oyentes" de Sockets ---
 
+    // Oyente para la Campana (Solo Admins)
     const NotificationsListener = () => {
         const socket = useSocket();
         useEffect(() => {
@@ -253,14 +254,13 @@ const Layout = () => {
                     {/* Solo lo mostramos si el usuario NO es admin  */}
                     {!user.admin && (
                         <ChatBot
-                            isChatOpen={false} 
+                            // El bot se gestiona solo con el contexto, solo avisa si se abre/cierra
+                            // para ajustar la posición del otro botón si fuera necesario
                             onToggle={(state) => setIsBotOpen(state)}
-                            onOpenAdminChat={() => {
-
-                            }}
                         />
                     )}
 
+                    {/* ChatWrapper consume contexto, solo pasamos si debe ocultarse por el bot */}
                     <ChatWrapper
                         hideButton={isBotOpen}
                     />

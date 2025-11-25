@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatWrapper.css';
-import { useChat } from '../../context/ChatContext'; // IMPORTAR CONTEXTO
+import { useChat } from '../../context/ChatContext';
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// --- ICONOS (IGUAL QUE ANTES) ---
+// --- ICONOS ---
 const ThreeDotIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" /></svg>);
 const ChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="32" height="32"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>);
 const CloseIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="24" height="24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
@@ -30,8 +30,7 @@ const formatTimestamp = (isoDateString) => {
 };
 
 const ChatWindow = ({ onClose }) => {
-    // CONSUMIMOS EL CONTEXTO
-    const { 
+    const {
         user, socket,
         guestRoom, guestMessages, setGuestMessages,
         activeRooms, setActiveRooms,
@@ -46,46 +45,39 @@ const ChatWindow = ({ onClose }) => {
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    // Estados locales de UI (Input, Archivos, Grabación)
     const [newMessage, setNewMessage] = useState("");
-    const [selectedFiles, setSelectedFiles] = useState([]); 
+    const [selectedFiles, setSelectedFiles] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
-    
+
     const [openMenuId, setOpenMenuId] = useState(null);
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
     const typingTimerRef = useRef(null);
 
-    // Limpieza de URLs de preview
     useEffect(() => {
         return () => { selectedFiles.forEach(file => { if (file.preview) URL.revokeObjectURL(file.preview); }); };
     }, [selectedFiles]);
 
-    // LISTENERS DE TIPIADO Y EVENTOS LOCALES (NO DE DATOS)
     useEffect(() => {
         if (!socket) return;
         const handleShowTyping = () => setIsOtherUserTyping(true);
         const handleHideTyping = () => setIsOtherUserTyping(false);
-        
         socket.on('show_typing', handleShowTyping);
         socket.on('hide_typing', handleHideTyping);
-        
         return () => {
             socket.off('show_typing', handleShowTyping);
             socket.off('hide_typing', handleHideTyping);
         };
     }, [socket]);
 
-    // Scroll al fondo
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [guestMessages, adminMessages, selectedFiles]); 
+    }, [guestMessages, adminMessages, selectedFiles]);
 
-    // --- HANDLERS ARCHIVOS ---
     const handleFileSelect = (e) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
@@ -101,10 +93,9 @@ const ChatWindow = ({ onClose }) => {
     const handleRemoveFile = (index) => setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     const handleClearFiles = () => { setSelectedFiles([]); if (fileInputRef.current) fileInputRef.current.value = ""; };
 
-    // --- HANDLERS AUDIO ---
     const startRecording = async () => {
         try {
-            handleClearFiles(); 
+            handleClearFiles();
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const recorder = new MediaRecorder(stream);
             const chunks = [];
@@ -131,7 +122,6 @@ const ChatWindow = ({ onClose }) => {
     const cancelRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); setMediaRecorder(null); setIsRecording(false); setRecordingTime(0); } };
     const formatTime = (seconds) => { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins}:${secs < 10 ? '0' : ''}${secs}`; };
 
-    // --- ENVIO ---
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
@@ -153,7 +143,7 @@ const ChatWindow = ({ onClose }) => {
             }
             setNewMessage("");
             handleClearFiles();
-        } catch (error) { toast.error("Error al enviar."); } 
+        } catch (error) { toast.error("Error al enviar."); }
         finally { setIsUploading(false); }
     };
 
@@ -166,37 +156,52 @@ const ChatWindow = ({ onClose }) => {
         typingTimerRef.current = setTimeout(() => { socket.emit('typing_stop', { roomId: targetRoomId }); typingTimerRef.current = null; }, 2000);
     };
 
-    // --- ACCIONES UI ---
     const handleBack = () => {
         if (currentView === 'info') setCurrentView('chat');
         else { setCurrentView('inbox'); setSelectedRoom(null); setAdminMessages([]); setIsOtherUserTyping(false); }
     };
     const handleOpenUserInfo = () => { if (user.admin && selectedRoom) setCurrentView('info'); };
-    
+
     const handleDelete = (messageId) => {
         setOpenMenuId(null);
         Swal.fire({ title: '¿Borrar mensaje?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí' }).then((result) => {
             if (result.isConfirmed) socket.emit('delete_message', { messageId });
         });
     };
+
+    // --- FUNCIÓN ELIMINAR CHAT CON TEXTOS CORREGIDOS ---
     const handleDeleteChat = () => {
-        setIsHeaderMenuOpen(false); 
+        setIsHeaderMenuOpen(false);
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!targetRoomId) return;
-        Swal.fire({ title: user.admin ? '¿Eliminar chat?' : '¿Salir del chat?', text: user.admin ? "Se borrará el historial." : "Se vaciará tu historial.", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: user.admin ? 'Eliminar' : 'Salir' }).then((result) => {
-            if (result.isConfirmed) socket.emit('delete_room', { roomId: targetRoomId });
+
+        // Textos personalizados según rol
+        const title = user.admin ? '¿Eliminar este chat?' : '¿Eliminar este chat?';
+        const text = user.admin ? "Esta acción es irreversible y afectará a ambos." : "Se vaciará tu historial.";
+        const confirmText = user.admin ? 'Eliminar' : 'Eliminar chat';
+
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: confirmText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                socket.emit('delete_room', { roomId: targetRoomId });
+            }
         });
     };
 
-    // --- RENDER ---
     const renderMessageContent = (msg) => (
         <div className="message-content-wrapper">
             {msg.file_url && (
                 <div className="media-container">
-                    {msg.type === 'image' ? <a href={msg.file_url} target="_blank" rel="noopener noreferrer"><img src={msg.file_url} alt="Adjunto" className="message-image" /></a> 
-                    : msg.type === 'video' ? <video src={msg.file_url} controls className="message-video" />
-                    : msg.type === 'audio' ? <audio src={msg.file_url} controls className="message-audio" />
-                    : <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="message-file-link">📎 Descargar Archivo</a>}
+                    {msg.type === 'image' ? <a href={msg.file_url} target="_blank" rel="noopener noreferrer"><img src={msg.file_url} alt="Adjunto" className="message-image" /></a>
+                        : msg.type === 'video' ? <video src={msg.file_url} controls className="message-video" />
+                            : msg.type === 'audio' ? <audio src={msg.file_url} controls className="message-audio" />
+                                : <a href={msg.file_url} target="_blank" rel="noopener noreferrer" className="message-file-link">📎 Descargar Archivo</a>}
                 </div>
             )}
             {msg.content && <p className="message-text">{msg.content}</p>}
@@ -218,7 +223,7 @@ const ChatWindow = ({ onClose }) => {
                         <button className="message-options-btn" onClick={() => setOpenMenuId(openMenuId === msg.id ? null : msg.id)}><ThreeDotIcon /></button>
                         {openMenuId === msg.id && (
                             <div className="message-menu">
-                                {msg.content && <button onClick={() => {navigator.clipboard.writeText(msg.content); setOpenMenuId(null);}}>Copiar</button>}
+                                {msg.content && <button onClick={() => { navigator.clipboard.writeText(msg.content); setOpenMenuId(null); }}>Copiar</button>}
                                 <button className="message-menu-delete" onClick={() => handleDelete(msg.id)}>Eliminar</button>
                             </div>
                         )}
@@ -268,7 +273,7 @@ const ChatWindow = ({ onClose }) => {
             return (
                 <div className="admin-inbox">
                     <div className="chat-list-header">Chats Activos</div>
-                    {activeRooms.length === 0 && <p style={{padding:'10px', color:'#777'}}>Sin chats activos.</p>}
+                    {activeRooms.length === 0 && <p style={{ padding: '10px', color: '#777' }}>Sin chats activos.</p>}
                     {activeRooms.map(room => (
                         <div key={room.id} className="admin-room-item" onClick={() => selectRoom(room)}>
                             <div className="room-item-user"><div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>{room.user.username}</div>
@@ -287,7 +292,7 @@ const ChatWindow = ({ onClose }) => {
         }
         if (user.admin && currentView === 'info') return renderUserInfo();
         if (user.admin && currentView === 'chat') return isChatLoading ? <p>Cargando...</p> : renderMessageList(adminMessages);
-        return guestMessages.length === 0 ? <p style={{padding:'15px', color:'#bbb'}}>Inicia la conversación...</p> : renderMessageList(guestMessages);
+        return guestMessages.length === 0 ? <p style={{ padding: '15px', color: '#bbb' }}>Inicia la conversación...</p> : renderMessageList(guestMessages);
     };
 
     const renderChatFooter = () => {
@@ -299,9 +304,9 @@ const ChatWindow = ({ onClose }) => {
                     <div className="preview-list-container">
                         {selectedFiles.map((file, index) => (
                             <div key={index} className="preview-item">
-                                {file.type.startsWith('image') ? <img src={file.preview} alt="Preview" className="preview-img" /> 
-                                : file.type.startsWith('audio') ? <div className="preview-icon audio">🎤</div> 
-                                : <div className="preview-icon file">📄</div>}
+                                {file.type.startsWith('image') ? <img src={file.preview} alt="Preview" className="preview-img" />
+                                    : file.type.startsWith('audio') ? <div className="preview-icon audio">🎤</div>
+                                        : <div className="preview-icon file">📄</div>}
                                 <button className="remove-preview-btn" onClick={() => handleRemoveFile(index)}><CloseIcon /></button>
                             </div>
                         ))}
@@ -315,11 +320,11 @@ const ChatWindow = ({ onClose }) => {
                     </div>
                 ) : (
                     <form className="chat-footer" onSubmit={handleSendMessage}>
-                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{display: 'none'}} multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
+                        <input type="file" ref={fileInputRef} onChange={handleFileSelect} style={{ display: 'none' }} multiple accept="image/*,video/*,audio/*,.pdf,.doc,.docx" />
                         <button type="button" className="chat-btn-round chat-btn-attach" onClick={() => fileInputRef.current.click()} disabled={isUploading || isLoading} title="Adjuntar archivos"><AttachIcon /></button>
                         <input type="text" className="chat-text-input" placeholder={isUploading ? "Enviando..." : "Escribe un mensaje..."} value={newMessage} onChange={handleTypingChange} disabled={isLoading || isUploading} />
-                        {showSendButton ? 
-                            <button type="submit" className="chat-btn-round chat-btn-send" disabled={isLoading || isUploading}>{isUploading ? '...' : <SendIcon />}</button> : 
+                        {showSendButton ?
+                            <button type="submit" className="chat-btn-round chat-btn-send" disabled={isLoading || isUploading}>{isUploading ? '...' : <SendIcon />}</button> :
                             <button type="button" className="chat-btn-round chat-btn-mic" onClick={startRecording} disabled={isUploading || isLoading} title="Grabar audio"><MicIcon /></button>
                         }
                     </form>
@@ -328,32 +333,40 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
+    // Lógica Título Header
     let headerTitle = 'Soporte';
     if (user.admin) {
         if (currentView === 'inbox') headerTitle = 'Bandeja';
         else if (currentView === 'info') headerTitle = 'Info. del Usuario';
         else headerTitle = selectedRoom?.user?.username;
     }
-    const showOptions = !(user.admin && (currentView === 'inbox' || currentView === 'info'));
+
+    // Lógica Menú 3 Puntos
+    const showOptions = (!user.admin) || (user.admin && currentView === 'chat');
 
     return (
         <div className="chat-window">
             <div className="chat-header">
-                {user.admin && currentView !== 'inbox' && <button onClick={handleBack} className="chat-back-btn"><BackIcon/></button>}
+                {user.admin && currentView !== 'inbox' && <button onClick={handleBack} className="chat-back-btn"><BackIcon /></button>}
                 <h3 className={user.admin && currentView === 'chat' ? 'clickable-header-name' : ''} onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}>{headerTitle}</h3>
-                {currentView === 'info' && <div style={{width: '34px'}}></div>}
+                {currentView === 'info' && <div style={{ width: '34px' }}></div>}
                 {showOptions && (
                     <div className="chat-header-options">
-                        <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}><ThreeDotIcon/></button>
+                        <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}><ThreeDotIcon /></button>
                         {isHeaderMenuOpen && (
                             <div className="chat-header-menu">
                                 <button onClick={onClose}>Cerrar Ventana</button>
-                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">{user.admin ? 'Eliminar Chat' : 'Salir del Chat'}</button>
+                                {/* MENÚ CORREGIDO: Eliminar Chat */}
+                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">
+                                    {user.admin ? 'Eliminar Chat' : 'Eliminar chat'}
+                                </button>
                             </div>
                         )}
                     </div>
                 )}
-                {((user.admin && currentView === 'inbox') || !user.admin) && <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon/></button>}
+                {user.admin && currentView === 'inbox' && (
+                    <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon /></button>
+                )}
             </div>
             <div className="chat-body">{renderChatBody()}</div>
             {renderChatFooter()}
@@ -362,7 +375,7 @@ const ChatWindow = ({ onClose }) => {
 };
 
 const ChatWrapper = ({ hideButton }) => {
-    const { user, isChatOpen, unreadChatCount, toggleChat } = useChat(); // Usar contexto
+    const { user, isChatOpen, unreadChatCount, toggleChat } = useChat();
     const [popping, setPopping] = useState(false);
     useEffect(() => { if (unreadChatCount > 0) { setPopping(true); setTimeout(() => setPopping(false), 200); } }, [unreadChatCount]);
     if (!user) return null;

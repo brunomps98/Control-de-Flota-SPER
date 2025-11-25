@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './ChatBot.css';
 import chatFlow from './chatFlow.json';
+import { useChat } from '../../context/ChatContext'; 
 
 // Icono
 const BotIcon = () => (
@@ -9,7 +10,10 @@ const BotIcon = () => (
     </svg>
 );
 
-const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => { 
+const ChatBot = ({ onToggle }) => { 
+    // Consumimos el estado del chat principal directamente
+    const { isChatOpen, toggleChat } = useChat();
+
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState('inicio');
     const [history, setHistory] = useState([]);
@@ -38,9 +42,14 @@ const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => {
             setHistory([...newHistory, { sender: 'bot', text: 'Te estoy transfiriendo con un administrador... aguarda un momento.' }]);
 
             setTimeout(() => {
-                setIsOpen(false);
-                if (onToggle) onToggle(false); 
-                if (onOpenAdminChat) onOpenAdminChat(); 
+                setIsOpen(false); // Cierra el bot visualmente
+                if (onToggle) onToggle(false); // Avisa al layout que el bot se cerró
+                
+                // Abre el chat principal si no está abierto
+                if (!isChatOpen) {
+                    toggleChat();
+                }
+                
                 setCurrentStep('inicio');
                 setHistory([]);
             }, 1500);
@@ -64,12 +73,13 @@ const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => {
         setHistory(newHistory);
     };
 
-    const toggleChat = () => {
+    const toggleBotChat = () => {
         const newState = !isOpen;
         setIsOpen(newState);
         if (onToggle) onToggle(newState); 
     };
 
+    // Lógica de ocultamiento: Se oculta si el chat principal está abierto
     const shouldHideButton = isChatOpen;
 
     const isSoloMode = isOpen;
@@ -79,8 +89,8 @@ const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => {
             {/* Botón Flotante Circular */}
             <button
                 className={`chatbot-toggle ${shouldHideButton ? 'hide' : ''}`}
-                onClick={toggleChat}
-                title="Asistente Virtual" // Tooltip al pasar el mouse
+                onClick={toggleBotChat}
+                title="Asistente Virtual" 
             >
                 <BotIcon />
             </button>
@@ -92,7 +102,7 @@ const ChatBot = ({ onOpenAdminChat, isChatOpen, onToggle }) => {
                         <BotIcon />
                         <span>Asistente Virtual</span>
                     </div>
-                    <button className="close-btn" onClick={toggleChat}>×</button>
+                    <button className="close-btn" onClick={toggleBotChat}>×</button>
                 </div>
 
                 <div className="chatbot-body" ref={chatBodyRef}>
