@@ -3,15 +3,15 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import Notification from '../models/notification.model.js';
 import { onlineUsers } from './onlineUsers.js';
-export const onlineAdmins = new Set();
+export const onlineAdmins = new Set(); 
 import { sendPushNotification } from '../services/notification.service.js';
-import { sendNewMessageEmail } from '../services/email.service.js';
+import { sendNewMessageEmail } from '../services/email.service.js'; 
 
 let ioInstance = null;
 
 export const initializeSocket = (io) => {
 
-    ioInstance = io;
+    ioInstance = io; 
 
     // Middleware de autenticación para Socket.IO
     io.use((socket, next) => {
@@ -39,15 +39,13 @@ export const initializeSocket = (io) => {
             socket.join('admin_room');
             userRoomName = 'admin_room';
 
-            // Lógica de Admin Online
             onlineAdmins.add(socket.user.id);
-            if (onlineAdmins.size === 1) { // Si es el primer admin en conectarse
+            if (onlineAdmins.size === 1) { 
                 io.emit('support_status_change', { isOnline: true });
             }
             console.log(`[SOCKET] 👑 ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
 
         } else {
-            // Lógica de Usuario Normal
             try {
                 const [room] = await ChatRoom.findOrCreate({
                     where: { user_id: socket.user.id },
@@ -67,44 +65,24 @@ export const initializeSocket = (io) => {
         socket.on('delete_room', async (payload) => {
             try {
                 const { roomId } = payload;
-                if (!roomId) {
-                    return socket.emit('operation_error', { message: 'ID de sala no válido.' });
-                }
+                if (!roomId) return socket.emit('operation_error', { message: 'ID de sala no válido.' });
+                
                 const room = await ChatRoom.findByPk(roomId);
-                if (!room) {
-                    return socket.emit('operation_error', { message: 'La sala no existe.' });
-                }
+                if (!room) return socket.emit('operation_error', { message: 'La sala no existe.' });
 
-                //  Si el usuario es ADMIN, se borra todo para todos.
                 if (socket.user.admin) {
-                    await room.destroy(); // Borra de la DB
-
-                    // Notifica a todos en la sala (incluido el invitado)
-                    io.to(`room_${roomId}`).emit('room_deleted', {
-                        roomId: roomId
-                    });
-
+                    await room.destroy(); 
+                    io.to(`room_${roomId}`).emit('room_deleted', { roomId: roomId });
                     socket.emit('operation_success', { message: 'Chat eliminado permanentemente' });
-
-                    // Si el usuario es el INVITADO (dueño de la sala)
+                
                 } else if (room.user_id === socket.user.id) {
-
-                    // NO borramos la sala de la DB.
-                    socket.emit('room_deleted', {
-                        roomId: roomId
-                    });
-
+                    socket.emit('room_deleted', { roomId: roomId });
                     socket.emit('operation_success', { message: 'Has salido del chat.' });
-
-                    // Actualizamos el 'last_message' para que el admin vea
                     await room.update({ last_message: "El usuario ha abandonado el chat." });
-
-                    // Notificamos al admin que la bandeja de entrada debe refrescarse
                     io.to('admin_room').emit('new_message_notification', {
                         message: { content: "El usuario ha abandonado el chat.", created_at: new Date().toISOString() },
                         roomId: roomId
                     });
-
                 } else {
                     socket.emit('operation_error', { message: 'No tienes permiso para esta acción.' });
                 }
@@ -115,25 +93,59 @@ export const initializeSocket = (io) => {
             }
         });
 
-        // --- LÓGICA DE BORRADO DE MENSAJE ---
+        // --- LÓGICA DE BORRADO DE MENSAJE  ---
         socket.on('delete_message', async (payload) => {
             try {
                 const { messageId } = payload;
-                if (!messageId) {
-                    return socket.emit('operation_error', { message: 'ID de mensaje no válido.' });
-                }
+                if (!messageId) return socket.emit('operation_error', { message: 'ID de mensaje no válido.' });
+                
                 const message = await ChatMessage.findByPk(messageId);
-                if (!message) {
-                    return socket.emit('operation_error', { message: 'El mensaje no existe.' });
-                }
-                // Admin puede borrar todo, usuario solo sus mensajes
+                if (!message) return socket.emit('operation_error', { message: 'El mensaje no existe.' });
+                
                 if (socket.user.admin || message.sender_id === socket.user.id) {
                     const roomId = message.room_id;
+                    
+                    // Borramos el mensaje
                     await message.destroy();
+
+                    // Recalcular el 'last_message' de la sala 
+                    const previousMessage = await ChatMessage.findOne({
+                        where: { room_id: roomId },
+                        order: [['created_at', 'DESC']] // Buscamos el último mensaje que queda
+                    });
+
+                    let newLastMessageText = null;
+                    let newUpdatedAt = new Date();
+
+                    if (previousMessage) {
+                        newLastMessageText = previousMessage.type === 'text' 
+                            ? previousMessage.content 
+                            : `📎 [${previousMessage.type === 'image' ? 'Imagen' : previousMessage.type}]`;
+                        newUpdatedAt = previousMessage.created_at;
+                    }
+
+                    // Actualizamos la sala con el mensaje anterior (o null si se vació)
+                    await ChatRoom.update(
+                        { last_message: newLastMessageText, updated_at: newUpdatedAt },
+                        { where: { id: roomId } }
+                    );
+
+                    // Notificar a la sala que el mensaje se borró
                     io.to(`room_${roomId}`).emit('message_deleted', {
                         messageId: messageId,
                         roomId: roomId
                     });
+
+                    io.to('admin_room').emit('new_message_notification', {
+                        // Enviamos un objeto fake para que el front sepa que actualizar
+                        message: { 
+                            content: newLastMessageText, 
+                            type: previousMessage ? previousMessage.type : 'text',
+                            created_at: newUpdatedAt 
+                        },
+                        roomId: roomId
+                    });
+
                     socket.emit('operation_success', { message: 'Mensaje eliminado' });
                 } else {
                     socket.emit('operation_error', { message: 'No tienes permiso para borrar este mensaje.' });
@@ -150,7 +162,6 @@ export const initializeSocket = (io) => {
                 const { roomId } = payload;
                 if (!roomId) return;
                 const roomName = `room_${roomId}`;
-                // Emitir a todos en la sala MENOS al que envía
                 socket.to(roomName).emit('show_typing', { userId: socket.user.id, username: socket.user.username });
             } catch (error) {
                 console.error("[SOCKET] Error en 'typing_start':", error);
@@ -167,7 +178,6 @@ export const initializeSocket = (io) => {
             }
         });
 
-        // EVENTO PARA QUE EL ADMIN ENTRE A ESCUCHAR UNA SALA
         socket.on('admin_join_room', (roomId) => {
             try {
                 if (!socket.user.admin) {
@@ -183,7 +193,6 @@ export const initializeSocket = (io) => {
         });
 
 
-        // --- LÓGICA 'send_message' (MULTIMEDIA + EMAIL + DB + PUSH) ---
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content, type, file_url } = payload;
@@ -193,25 +202,21 @@ export const initializeSocket = (io) => {
                     return socket.emit('operation_error', { message: 'El mensaje no puede estar vacío.' });
                 }
 
-                // Validación de seguridad: si no es admin, solo puede escribir en SU sala
                 if (!socket.user.admin && userRoomName !== `room_${roomId}`) {
                     console.warn(`[SOCKET] ⚠️ Intento de escritura no autorizado...`);
                     return;
                 }
 
-                // Creamos el mensaje en DB con los nuevos campos
                 const newMessage = await ChatMessage.create({
                     room_id: roomId,
                     sender_id: senderId,
-                    content: content || null,
-                    type: type || 'text',
+                    content: content || null, 
+                    type: type || 'text',     
                     file_url: file_url || null
                 });
 
-                // Preparamos el texto de vista previa para la sala
-                // Si es texto, mostramos el texto. Si es archivo, mostramos un indicador.
-                const previewText = type === 'text'
-                    ? content
+                const previewText = type === 'text' 
+                    ? content 
                     : `📎 [${type === 'image' ? 'Imagen' : type}]`;
 
                 await ChatRoom.update(
@@ -219,7 +224,6 @@ export const initializeSocket = (io) => {
                     { where: { id: roomId } }
                 );
 
-                // Obtenemos el mensaje completo con datos del usuario para devolverlo
                 const messageWithSender = await ChatMessage.findByPk(newMessage.id, {
                     include: [{
                         model: Usuario,
@@ -228,51 +232,44 @@ export const initializeSocket = (io) => {
                     }]
                 });
 
-                // Emitimos a la sala en tiempo real
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
-                // --- SISTEMA DE NOTIFICACIONES ---
-
-                // Si el remitente NO es admin 
+                // --- NOTIFICACIONES ---
                 if (!socket.user.admin) {
-
-                    // Notificación visual en Dashboard (Bandeja de entrada admin) - SOCKET
+                    
                     io.to('admin_room').emit('new_message_notification', {
                         message: messageWithSender,
                         roomId: roomId
                     });
 
-                    // Buscar todos los admins para notificar
                     const admins = await Usuario.findAll({ where: { admin: true } });
-
-                    // NOTIFICACION DB
+                    
+                    // Personalización de la notificación
                     const title = `💬 Mensaje nuevo de ${socket.user.username}`;
-                    const notifBody = `${previewText.substring(0, 100)}`; // Muestra el contenido del mensaje
+                    const notifBody = `${previewText.substring(0, 100)}`;
 
                     const notificationsToCreate = admins.map(admin => ({
                         user_id: admin.id,
                         title: title,
                         message: notifBody,
                         type: 'chat_message',
-                        resource_id: roomId,
+                        resource_id: roomId, 
                         is_read: false
                     }));
                     await Notification.bulkCreate(notificationsToCreate);
 
-                    // NOTIFICACION PUSH
                     for (const admin of admins) {
                         if (admin.fcm_token && !onlineAdmins.has(admin.id)) {
                             sendPushNotification(admin.fcm_token, title, notifBody, { chatRoomId: String(roomId) });
                         }
                     }
-
+                    
                     const emailContent = content || "📎 El usuario ha enviado un archivo adjunto.";
                     const adminEmails = admins.map(a => a.email);
                     sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, emailContent);
 
                 } else {
-                    // Si el remitente ES admin (respondiendo), notificar al usuario si está desconectado
                     const room = await ChatRoom.findByPk(roomId);
                     if (room && !onlineUsers[room.user_id]) {
                         const user = await Usuario.findByPk(room.user_id);
@@ -291,7 +288,6 @@ export const initializeSocket = (io) => {
         });
 
 
-        // --- Logica Disconnect  ---
         socket.on('disconnect', () => {
             console.log(`[SOCKET] ❌ Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
 
@@ -311,10 +307,6 @@ export const initializeSocket = (io) => {
     });
 }
 
-/**
- * Obtiene la instancia de Socket.IO para emitir eventos desde otros módulos.
- * @returns {import('socket.io').Server}
- */
 export const getIO = () => {
     if (!ioInstance) {
         console.error("Socket.IO no ha sido inicializado.");
