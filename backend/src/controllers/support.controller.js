@@ -3,9 +3,9 @@ import { supabase } from '../config/supabaseClient.js';
 import path from 'path';
 import { sendNewTicketEmail } from '../services/email.service.js';
 import Usuario from '../models/user.model.js';
-import Notification from '../models/notification.model.js'; 
+import Notification from '../models/notification.model.js';
 import { getIO } from '../socket/socketHandler.js';
-import { sendPushNotification } from '../services/notification.service.js'; 
+import { sendPushNotification } from '../services/notification.service.js';
 
 class SupportController {
 
@@ -30,8 +30,8 @@ class SupportController {
             //  Enviar el correo 
             sendNewTicketEmail(adminEmails, newTicket, fileUrls);
 
-            const title = "Nuevo Ticket de Soporte";
-            const body = `De: ${newTicket.name} - ${newTicket.problem_description.substring(0, 30)}...`;
+            const title = `🎫 Nuevo Ticket de Soporte`;
+            const body = `Creado por: ${creatorName}\nProblema: ${newTicket.problem_description.substring(0, 40)}...`;
 
             // Guardar en Base de Datos 
             const notificationsToCreate = admins.map(admin => ({
@@ -58,9 +58,9 @@ class SupportController {
             // Enviar Push Notification a los admins
             for (const admin of admins) {
                 if (admin.fcm_token) {
-                    sendPushNotification(admin.fcm_token, title, body, { 
-                        type: 'new_ticket', 
-                        id: String(newTicket.id) 
+                    sendPushNotification(admin.fcm_token, title, body, {
+                        type: 'new_ticket',
+                        id: String(newTicket.id)
                     });
                 }
             }
@@ -75,16 +75,16 @@ class SupportController {
     // Obtiene todos los tickets
     static getTickets = async (req, res) => {
         try {
-            const filters = req.query; 
-            
+            const filters = req.query;
+
             const tickets = await supportRepository.getAllSupportTickets(filters);
-            
+
             res.status(200).json({ tickets: tickets });
         } catch (error) {
             res.status(500).json({ message: 'Error al obtener los tickets' });
         }
     };
-    
+
     // Obtiene un ticket por su ID
     static getTicketById = async (req, res) => {
         try {
@@ -141,10 +141,10 @@ class SupportController {
             ticketData.files = fileUrls;
 
             // Capturamos el ticket creado (con su ID)
-            const newTicket = await supportRepository.addSupportTicket(ticketData);
+            const creatorName = req.user ? req.user.username : ticketData.name;
 
-            // Pasamos el objeto newTicket completo
-            SupportController._sendNotificationToAdmins(newTicket, fileUrls);
+
+            SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
@@ -161,11 +161,10 @@ class SupportController {
 
             ticketData.files = [];
 
-            // Capturamos el ticket creado con su ID
-            const newTicket = await supportRepository.addSupportTicket(ticketData);
+            const creatorName = req.user ? req.user.username : ticketData.name;
 
-            // Pasamos el objeto newTicket completo y array vacío de archivos
-            SupportController._sendNotificationToAdmins(newTicket, []); 
+
+            SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {

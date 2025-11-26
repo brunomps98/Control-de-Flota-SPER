@@ -119,14 +119,87 @@ const Layout = () => {
     }, [navigate, location]);
 
     useEffect(() => {
+        // Solo ejecutar si estamos en una app nativa (Android/iOS)
         if (Capacitor.getPlatform() === 'web') return;
+
         const registerForNotifications = async () => {
+            try {
+                // Pedir permiso al usuario
+                let permStatus = await PushNotifications.checkPermissions();
+
+                if (permStatus.receive === 'prompt') {
+                    permStatus = await PushNotifications.requestPermissions();
+                }
+
+                if (permStatus.receive !== 'granted') {
+                    console.warn('[FCM] Permiso de notificaciones denegado.');
+                    return;
+                }
+
+                // Registrar el dispositivo en FCM
+                await PushNotifications.register();
+
+                // Escuchar el evento de registro exitoso para obtener el token
+                PushNotifications.addListener('registration', async (token) => {
+                    console.log('[FCM] Token obtenido:', token.value);
+                    // Enviamos el token al backend para guardarlo en la tabla de usuarios
+                    try {
+                        await apiClient.post('/api/user/fcm-token', { fcmToken: token.value });
+                    } catch (error) {
+                        console.error('[FCM] Error al guardar token en backend:', error);
+                    }
+                });
+
+                // Manejar errores de registro
+                PushNotifications.addListener('registrationError', (error) => {
+                    console.error('[FCM] Error en registro:', error);
+                });
+
+                // Manejar recepción de notificaciones en primer plano
+                PushNotifications.addListener('pushNotificationReceived', (notification) => {
+                    console.log('[FCM] Notificación recibida en primer plano:', notification);
+                    toast.info(notification.title || 'Nueva notificación');
+                    setUnreadCount(prev => prev + 1); // Actualizar campanita
+                });
+
+                PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
+                    const data = notification.notification.data;
+                    console.log('[FCM] Click en notificación:', data);
+
+                    if (data.chatRoomId) {
+                        if (user && user.admin) navigate('/dashboard');
+                        else navigate('/chat');
+                    }
+                    else if (data.vehicleId) {
+                        navigate(`/vehicle-detail/${data.vehicleId}`);
+                    }
+                    else if (data.type === 'new_ticket') {
+                        if (data.id) {
+                            navigate(`/case/${data.id}`);
+                        } else {
+                            navigate('/support-tickets');
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('[FCM] Error general en setup:', error);
+            }
         };
+
         registerForNotifications();
-    }, []);
+
+        // Limpieza de listeners al desmontar
+        return () => {
+            PushNotifications.removeAllListeners();
+        };
+    }, [user, navigate]); // Dependencias
 
     useEffect(() => {
         if (!user) return;
+
+        if (Capacitor.getPlatform() !== 'web') return;
+
         const events = [
             'mousemove',
             'keydown',

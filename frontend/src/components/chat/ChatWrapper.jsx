@@ -18,7 +18,7 @@ const StopIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="currentCol
 const CancelIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
 const SendIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12Zm0 0h7.5" /></svg>);
 const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="60" height="60"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
-const NewChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821C21.068 3.789 20.037 3.175 19.005 3.175ZM14.016 11.5H11.5v2.5h-1v-2.5H8v-1h2.5V8h1v2.5h2.516v1Z"/></svg>);
+const NewChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821C21.068 3.789 20.037 3.175 19.005 3.175ZM14.016 11.5H11.5v2.5h-1v-2.5H8v-1h2.5V8h1v2.5h2.516v1Z" /></svg>);
 
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
@@ -54,7 +54,7 @@ const ChatWindow = ({ onClose }) => {
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
-    
+
     // --- ESTADO PARA EL BOTÓN FLOTANTE ---
     const [showContactList, setShowContactList] = useState(false);
 
@@ -196,13 +196,13 @@ const ChatWindow = ({ onClose }) => {
             const response = await apiClient.post('/api/chat/find-or-create-room', { userId: targetUser.id });
             const room = response.data;
             handleSelectRoom(room);
-            setShowContactList(false); 
+            setShowContactList(false);
             if (room.last_message) {
-                 setActiveRooms(prev => {
-                     if (prev.some(r => r.id === room.id)) return prev;
-                     return [room, ...prev];
-                 });
-                 setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
+                setActiveRooms(prev => {
+                    if (prev.some(r => r.id === room.id)) return prev;
+                    return [room, ...prev];
+                });
+                setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
             }
         } catch (error) { toast.error("Error al iniciar chat."); setIsChatLoading(false); }
     };
@@ -287,22 +287,35 @@ const ChatWindow = ({ onClose }) => {
     const renderUserInfo = () => {
         const targetUser = selectedRoom?.user;
         if (!targetUser) return <p>Cargando...</p>;
+
+        // Calculamos el estado online en tiempo real igual que en el header
+        const currentRoomInList = activeRooms.find(r => r.id === selectedRoom.id);
+        const isOnline = currentRoomInList ? currentRoomInList.isOnline : !!selectedRoom.isOnline;
+
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
+
         return (
             <div className="user-info-view">
                 <div className="user-info-header-section">
                     <div className="user-info-avatar-large">
                         {targetUser.profile_picture ? (
-                            <img 
-                                src={targetUser.profile_picture} 
-                                alt="Perfil" 
-                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }} 
-                                onClick={() => setCurrentView('profile_pic')} 
+                            <img
+                                src={targetUser.profile_picture}
+                                alt="Perfil"
+                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
+                                onClick={() => setCurrentView('profile_pic')}
                             />
                         ) : <UserIcon />}
                     </div>
                     <h2 className="user-info-name">{targetUser.username}</h2>
-                    <span className="user-info-subtitle">{targetUser.admin ? 'Administrador' : 'Usuario'}</span>
+
+                    <span
+                        className={`chat-contact-status ${isOnline ? 'status-online' : ''}`}
+                        style={{ fontSize: '0.9rem', marginTop: '5px', fontWeight: '500' }}
+                    >
+                        {isOnline ? 'En línea' : 'Desconectado'}
+                    </span>
+
                 </div>
                 <div className="user-info-body">
                     <div className="info-item"><label>Unidad</label><p>{targetUser.unidad}</p></div>
@@ -338,16 +351,16 @@ const ChatWindow = ({ onClose }) => {
 
     const renderChatBody = () => {
         if (isLoading) return <p>Cargando...</p>;
-        
+
         if (user.admin && currentView === 'inbox') {
-            
+
             // --- VISTA B: LISTA DE CONTACTOS (NUEVO CHAT) ---
             if (showContactList) {
                 return (
                     <div className="admin-inbox slide-in-right">
                         <div className="chat-list-header">Seleccionar contacto</div>
                         {newChatUsers.length === 0 && <p style={{ padding: '15px', color: '#777' }}>No hay usuarios nuevos.</p>}
-                        
+
                         {newChatUsers.map(chatUser => (
                             <div key={chatUser.id} className="admin-room-item" onClick={() => handleStartNewChat(chatUser)}>
                                 <div className="wa-avatar-container">
@@ -367,7 +380,7 @@ const ChatWindow = ({ onClose }) => {
                                         </div>
                                     </div>
                                     <div className="wa-row-bottom">
-                                        <span className="wa-last-message" style={{color: '#009688'}}>
+                                        <span className="wa-last-message" style={{ color: '#009688' }}>
                                             ¡Toca para iniciar chat!
                                         </span>
                                     </div>
@@ -448,7 +461,7 @@ const ChatWindow = ({ onClose }) => {
                     <div className="chat-footer recording-mode">
                         <button type="button" className="chat-btn-cancel-record" onClick={cancelRecording}><CancelIcon /></button>
                         <div className="recording-indicator"><span className="record-dot"></span><span>Grabando... {formatTime(recordingTime)}</span></div>
-                        <button type="button" className="chat-btn-send" onClick={stopRecording}><SendIcon /></button>
+                        <button type="button" className="chat-btn-send" onClick={stopRecording}><StopIcon /></button>
                     </div>
                 ) : (
                     <form className="chat-footer" onSubmit={handleSendMessage}>
@@ -490,7 +503,7 @@ const ChatWindow = ({ onClose }) => {
     return (
         <div className="chat-window">
             <div className="chat-header">
-                {user.admin && (currentView !== 'inbox' || showContactList) && 
+                {user.admin && (currentView !== 'inbox' || showContactList) &&
                     <button onClick={handleBack} className="chat-back-btn"><BackIcon /></button>
                 }
 

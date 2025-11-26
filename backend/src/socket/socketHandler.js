@@ -3,15 +3,15 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import Notification from '../models/notification.model.js';
 import { onlineUsers } from './onlineUsers.js';
-export const onlineAdmins = new Set(); 
+export const onlineAdmins = new Set();
 import { sendPushNotification } from '../services/notification.service.js';
-import { sendNewMessageEmail } from '../services/email.service.js'; 
+import { sendNewMessageEmail } from '../services/email.service.js';
 
 let ioInstance = null;
 
 export const initializeSocket = (io) => {
 
-    ioInstance = io; 
+    ioInstance = io;
 
     // Middleware de autenticación para Socket.IO
     io.use((socket, next) => {
@@ -78,27 +78,27 @@ export const initializeSocket = (io) => {
                 //  Si el usuario es ADMIN, se borra todo para todos.
                 if (socket.user.admin) {
                     await room.destroy(); // Borra de la DB
-                    
+
                     // Notifica a todos en la sala (incluido el invitado)
                     io.to(`room_${roomId}`).emit('room_deleted', {
                         roomId: roomId
                     });
-                    
+
                     socket.emit('operation_success', { message: 'Chat eliminado permanentemente' });
-                
-                // Si el usuario es el INVITADO (dueño de la sala)
+
+                    // Si el usuario es el INVITADO (dueño de la sala)
                 } else if (room.user_id === socket.user.id) {
-                    
+
                     // NO borramos la sala de la DB.
                     socket.emit('room_deleted', {
                         roomId: roomId
                     });
-                    
+
                     socket.emit('operation_success', { message: 'Has salido del chat.' });
-                    
+
                     // Actualizamos el 'last_message' para que el admin vea
                     await room.update({ last_message: "El usuario ha abandonado el chat." });
-                    
+
                     // Notificamos al admin que la bandeja de entrada debe refrescarse
                     io.to('admin_room').emit('new_message_notification', {
                         message: { content: "El usuario ha abandonado el chat.", created_at: new Date().toISOString() },
@@ -203,15 +203,15 @@ export const initializeSocket = (io) => {
                 const newMessage = await ChatMessage.create({
                     room_id: roomId,
                     sender_id: senderId,
-                    content: content || null, 
-                    type: type || 'text',     
+                    content: content || null,
+                    type: type || 'text',
                     file_url: file_url || null
                 });
 
                 // Preparamos el texto de vista previa para la sala
                 // Si es texto, mostramos el texto. Si es archivo, mostramos un indicador.
-                const previewText = type === 'text' 
-                    ? content 
+                const previewText = type === 'text'
+                    ? content
                     : `📎 [${type === 'image' ? 'Imagen' : type}]`;
 
                 await ChatRoom.update(
@@ -233,10 +233,10 @@ export const initializeSocket = (io) => {
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
                 // --- SISTEMA DE NOTIFICACIONES ---
-                
+
                 // Si el remitente NO es admin 
                 if (!socket.user.admin) {
-                    
+
                     // Notificación visual en Dashboard (Bandeja de entrada admin) - SOCKET
                     io.to('admin_room').emit('new_message_notification', {
                         message: messageWithSender,
@@ -245,17 +245,17 @@ export const initializeSocket = (io) => {
 
                     // Buscar todos los admins para notificar
                     const admins = await Usuario.findAll({ where: { admin: true } });
-                    
+
                     // NOTIFICACION DB
-                    const notifBody = previewText.substring(0, 100); // Usamos el previewText para que no salga vacío si es foto
-                    const title = `Nuevo mensaje de ${socket.user.username}`;
+                    const title = `💬 Mensaje nuevo de ${socket.user.username}`;
+                    const notifBody = `${previewText.substring(0, 100)}`; // Muestra el contenido del mensaje
 
                     const notificationsToCreate = admins.map(admin => ({
                         user_id: admin.id,
                         title: title,
                         message: notifBody,
                         type: 'chat_message',
-                        resource_id: roomId, 
+                        resource_id: roomId,
                         is_read: false
                     }));
                     await Notification.bulkCreate(notificationsToCreate);
@@ -266,7 +266,7 @@ export const initializeSocket = (io) => {
                             sendPushNotification(admin.fcm_token, title, notifBody, { chatRoomId: String(roomId) });
                         }
                     }
-                    
+
                     const emailContent = content || "📎 El usuario ha enviado un archivo adjunto.";
                     const adminEmails = admins.map(a => a.email);
                     sendNewMessageEmail(adminEmails, socket.user.username, socket.user.unidad, emailContent);

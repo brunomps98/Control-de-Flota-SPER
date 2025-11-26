@@ -1,5 +1,6 @@
 import { vehicleDao } from "../repository/index.js";
 import { supabase } from '../config/supabaseClient.js';
+import { getIO } from '../socket/socketHandler.js';
 import path from 'path';
 
 
@@ -114,12 +115,48 @@ class VehicleDao {
                 throw newProduct;
             }
 
-            res.status(201).json({ message: "Vehículo creado con éxito", newProduct });
-        } catch (error) {
-            console.error("Error al crear vehículo:", error);
-            res.status(500).json({ message: "Error interno del servidor", error: error.message });
+            try {
+                // Buscar todos los admins
+                const admins = await Usuario.findAll({ where: { admin: true } });
+
+                const title = `🚗 Nuevo vehículo cargado`;
+                const body = `Cargado por: ${req.user.username} (${req.user.unidad})\nDominio: ${newProduct.dominio}`;
+
+                // Guardar en BD (Campanita)
+                const notifs = admins.map(admin => ({
+                    user_id: admin.id,
+                    title: title,
+                    message: body, // Se guarda el mensaje personalizado
+                    type: 'vehicle_update',
+                    resource_id: newProduct.id,
+                    is_read: false
+                }));
+            await Notification.bulkCreate(notifs);
+
+            //  Socket (Tiempo real web)
+            const io = getIO();
+            if (io) {
+                io.to('admin_room').emit('new_notification', {
+                    title, message: body, type: 'vehicle_update', resourceId: newProduct.id
+                });
+            }
+
+            //  Push Notification (Android)
+            for (const admin of admins) {
+                if (admin.fcm_token) {
+                    sendPushNotification(admin.fcm_token, title, body, { vehicleId: String(newProduct.id) });
+                }
+            }
+        } catch (notifError) {
+            console.error("Error enviando notificación de vehículo:", notifError);
         }
+
+        res.status(201).json({ message: "Vehículo creado con éxito", newProduct });
+    } catch(error) {
+        console.error("Error al crear vehículo:", error);
+        res.status(500).json({ message: "Error interno del servidor", error: error.message });
     }
+}
     static addVehicleWithImage = this.addVehicle;
     static addVehicleNoImage = this.addVehicle;
 
@@ -132,109 +169,143 @@ class VehicleDao {
     static vehicleGeneral = (req, res) => renderVehicleView(req, res, 'vehicleGeneral');
     static vehicleFilter = (req, res) => renderVehicleView(req, res, 'vehicle');
     static getVehiclesForUser = async (req, res) => {
-        try {
-            const query = { ...req.query, user: req.user, limit: 1000, page: 1 };
-            const result = await vehicleDao.getVehicles(query);
-            res.status(200).json({ docs: result.docs });
-        } catch (error) {
-            console.error('Error al obtener vehículos:', error);
-            res.status(500).json({ message: 'Error interno del servidor' });
-        }
+    try {
+        const query = { ...req.query, user: req.user, limit: 1000, page: 1 };
+        const result = await vehicleDao.getVehicles(query);
+        res.status(200).json({ docs: result.docs });
+    } catch (error) {
+        console.error('Error al obtener vehículos:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
+}
 
     static updateVehicle = async (req, res) => {
+    try {
+        const id = req.params.productId;
+        const body = req.body;
+
+        const updatedVehicle = await vehicleDao.updateVehicle(id, body, req.user);
+
+        if (updatedVehicle instanceof Error) throw updatedVehicle;
+        if (!updatedVehicle) {
+            return res.status(404).json({ status: "error", message: "Vehículo no encontrado." });
+        }
+
         try {
-            const id = req.params.productId;
-            const body = req.body;
+            const admins = await Usuario.findAll({ where: { admin: true } });
+            const title = "Vehículo Actualizado";
+            const body = `Se ha modificado el vehículo: ${updatedVehicle.dominio}`;
 
-            const updatedVehicle = await vehicleDao.updateVehicle(id, body, req.user);
+            // BD
+            const notifs = admins.map(admin => ({
+                user_id: admin.id,
+                title: title,
+                message: body,
+                type: 'vehicle_update',
+                resource_id: updatedVehicle.id,
+                is_read: false
+            }));
+            await Notification.bulkCreate(notifs);
 
-            if (updatedVehicle instanceof Error) throw updatedVehicle;
-            if (!updatedVehicle) {
-                return res.status(404).json({ status: "error", message: "Vehículo no encontrado." });
+            // Socket
+            const io = getIO();
+            if (io) {
+                io.to('admin_room').emit('new_notification', {
+                    title, message: body, type: 'vehicle_update', resourceId: updatedVehicle.id
+                });
             }
 
-            res.status(200).json({ status: "success", updatedVehicle });
-        } catch (error) {
-            console.error("Error al actualizar vehículo:", error);
-            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
+            // Push
+            for (const admin of admins) {
+                if (admin.fcm_token) {
+                    sendPushNotification(admin.fcm_token, title, body, { vehicleId: String(updatedVehicle.id) });
+                }
+            }
+        } catch (notifError) {
+            console.error("Error enviando notificación de vehículo:", notifError);
         }
+
+        res.status(200).json({ status: "success", updatedVehicle });
+    } catch (error) {
+        console.error("Error al actualizar vehículo:", error);
+        res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
     }
+}
 
     static deleteVehicle = async (req, res) => {
-        try {
-            const id = req.params.pid || req.params.cid;
-            const result = await vehicleDao.deleteVehicle(id, req.user);
+    try {
+        const id = req.params.pid || req.params.cid;
+        const result = await vehicleDao.deleteVehicle(id, req.user);
 
-            if (result instanceof Error) throw result;
+        if (result instanceof Error) throw result;
 
-            res.status(200).json({ status: "success", deletedProduct: result });
-        } catch (error) {
-            res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
-        }
+        res.status(200).json({ status: "success", deletedProduct: result });
+    } catch (error) {
+        res.status(500).json({ status: "error", message: "Internal Server Error", error: error.message });
     }
+}
 
     static deleteLastHistoryEntry = async (req, res) => {
-        try {
-            const { vid, fieldName } = req.params;
-            const result = await vehicleDao.deleteLastHistoryEntry(vid, fieldName);
+    try {
+        const { vid, fieldName } = req.params;
+        const result = await vehicleDao.deleteLastHistoryEntry(vid, fieldName);
 
-            if (result instanceof Error) throw result;
+        if (result instanceof Error) throw result;
 
-            res.status(200).json({ status: "success", message: result.message });
-        } catch (error) {
-            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
-        }
+        res.status(200).json({ status: "success", message: result.message });
+    } catch (error) {
+        res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
     }
+}
 
     static deleteOneHistoryEntry = async (req, res) => {
-        let { cid, fieldName, historyId } = req.params;
+    let { cid, fieldName, historyId } = req.params;
 
-        try {
-            const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId, req.user);
+    try {
+        const result = await vehicleDao.deleteOneHistoryEntry(cid, fieldName, historyId, req.user);
 
-            if (result instanceof Error) throw result;
+        if (result instanceof Error) throw result;
 
-            res.status(200).json({ status: "success", message: `Registro de ${fieldName} eliminado.` });
-        } catch (error) {
-            console.error(`Error al eliminar un registro de ${fieldName} (ID: ${historyId}):`, error);
-            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
-        }
+        res.status(200).json({ status: "success", message: `Registro de ${fieldName} eliminado.` });
+    } catch (error) {
+        console.error(`Error al eliminar un registro de ${fieldName} (ID: ${historyId}):`, error);
+        res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
     }
+}
 
     static deleteAllHistory = async (req, res) => {
-        const { cid, fieldName } = req.params;
+    const { cid, fieldName } = req.params;
 
-        try {
+    try {
 
-            const result = await vehicleDao.deleteAllHistory(cid, fieldName, req.user);
+        const result = await vehicleDao.deleteAllHistory(cid, fieldName, req.user);
 
-            if (result instanceof Error) throw result;
+        if (result instanceof Error) throw result;
 
-            res.status(200).json({ status: "success", message: `Historial de ${fieldName} eliminado.` });
+        res.status(200).json({ status: "success", message: `Historial de ${fieldName} eliminado.` });
 
-        } catch (error) {
-            
-            console.error(`Error al eliminar todo el historial de ${fieldName}:`, error);
-            res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
-        }
+    } catch (error) {
+
+        console.error(`Error al eliminar todo el historial de ${fieldName}:`, error);
+        res.status(500).json({ status: "error", message: "Error interno del servidor", error: error.message });
     }
+}
 
     // Ruta estática
     static realtimeVehicle = async (req, res) => {
-        res.render('realtimeVehicle');
-    }
+    res.render('realtimeVehicle');
+}
 
     static getVehicleHistory = async (req, res, historyMethodName) => {
-        try {
-            const { cid } = req.params;
-            const history = await vehicleDao[historyMethodName](cid);
-            res.status(200).json({ history });
-        } catch (error) {
-            console.error(`Error al obtener historial (${historyMethodName}):`, error);
-            res.status(500).json({ message: 'Error interno del servidor', error: error.message });
-        }
+    try {
+        const { cid } = req.params;
+        const history = await vehicleDao[historyMethodName](cid);
+        res.status(200).json({ history });
+    } catch (error) {
+        console.error(`Error al obtener historial (${historyMethodName}):`, error);
+        res.status(500).json({ message: 'Error interno del servidor', error: error.message });
     }
+}
 
     // Métodos específicos que usan el genérico
     static getKilometrajes = (req, res) => this.getVehicleHistory(req, res, 'getKilometrajesForVehicle');
