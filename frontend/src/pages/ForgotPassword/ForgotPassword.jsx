@@ -4,7 +4,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core'; 
 import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
-import '../../pages/login/login.css'; 
+import '../../pages/Login/Login.css'; 
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
