@@ -216,8 +216,8 @@ export default class userManager {
 
     updateUser = async (userId, userData) => {
         try {
-            // Extraemos profile_picture también
-            const { username, email, unidad, admin, password, profile_picture } = userData;
+            // Extraemos 'delete_profile_picture' también
+            const { username, email, unidad, admin, password, profile_picture, delete_profile_picture } = userData;
 
             const permissions = {
                 admin: admin,
@@ -249,8 +249,12 @@ export default class userManager {
                 ...permissions
             };
 
-            // Solo agregamos profile_picture si viene definido (no null/undefined)
-            if (profile_picture) {
+            // Lógica para manejar borrado o actualización de foto
+            if (delete_profile_picture === 'true' || delete_profile_picture === true) {
+                // Si la bandera de borrar está activa, forzamos null en la base de datos
+                dataToUpdate.profile_picture = null;
+            } else if (profile_picture) {
+                // Si no se borra, pero viene una foto nueva, la actualizamos
                 dataToUpdate.profile_picture = profile_picture;
             }
 

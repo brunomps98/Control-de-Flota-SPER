@@ -21,6 +21,24 @@ const LockIcon = () => (
     </svg>
 );
 
+const TrashIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="16" height="16">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+    </svg>
+);
+
+const UndoIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="16" height="16">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+    </svg>
+);
+
+const CloseIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="24" height="24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+);
+
 const unidadesPermitidas = [
     "Direccion General",
     "Unidad Penal 1",
@@ -41,9 +59,13 @@ const AdminUserPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
+    // Estados para edición
     const [editingUserId, setEditingUserId] = useState(null);
+    const [markForDeletion, setMarkForDeletion] = useState(false); // Para saber si borramos la foto
     
-    // MODIFICADO: Agregamos profile_picture al estado
+    // Estado para el visor de imagen
+    const [viewingImage, setViewingImage] = useState(null); // URL de la imagen a ver en grande
+
     const [editFormData, setEditFormData] = useState({
         username: '', 
         email: '', 
@@ -124,13 +146,20 @@ const AdminUserPage = () => {
 
     useEffect(() => {
         if (Capacitor.isPluginAvailable('App')) {
-            const handleBackButton = () => navigate('/vehicle');
+            const handleBackButton = () => {
+                // Si está viendo una imagen, el botón atrás cierra la imagen
+                if (viewingImage) {
+                    setViewingImage(null);
+                } else {
+                    navigate('/vehicle');
+                }
+            };
             const listenerPromise = App.addListener('backButton', handleBackButton);
             return () => {
                 listenerPromise.then(listener => listener.remove());
             };
         }
-    }, [navigate]);
+    }, [navigate, viewingImage]);
 
     const handleFilterChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -146,6 +175,7 @@ const AdminUserPage = () => {
 
     const handleEditClick = (user) => {
         setEditingUserId(user.id);
+        setMarkForDeletion(false); // Resetear estado de borrado
         const userUnidad = unidadesPermitidas.includes(user.unidad)
             ? user.unidad
             : "Direccion General";
@@ -155,12 +185,13 @@ const AdminUserPage = () => {
             unidad: userUnidad, 
             admin: user.admin, 
             password: '',
-            profile_picture: null // Reset de foto
+            profile_picture: null 
         });
     };
 
     const handleCancelEdit = () => {
         setEditingUserId(null);
+        setMarkForDeletion(false);
         setEditFormData({ 
             username: '', 
             email: '', 
@@ -173,6 +204,10 @@ const AdminUserPage = () => {
 
     const handleFormChange = (e) => {
         const { name, value, type, checked, files } = e.target;
+        if (name === 'profile_picture' && files) {
+            // Si sube un archivo nuevo, desmarcamos la eliminación
+            setMarkForDeletion(false);
+        }
         setEditFormData(prevData => ({
             ...prevData,
             [name]: files ? files[0] : (type === 'checkbox' ? checked : value)
@@ -181,20 +216,25 @@ const AdminUserPage = () => {
 
     const handleSaveEdit = async (userId) => {
         try {
-            // MODIFICADO: Usamos FormData para enviar texto + archivo
             const data = new FormData();
             data.append('username', editFormData.username);
             data.append('email', editFormData.email);
             data.append('unidad', editFormData.unidad);
             data.append('admin', editFormData.admin);
+            
             if (editFormData.password) {
                 data.append('password', editFormData.password);
             }
-            if (editFormData.profile_picture) {
+            
+            // LÓGICA DE FOTO
+            if (markForDeletion) {
+                // Si marcó borrar, enviamos la bandera (asegúrate que tu backend maneje esto)
+                data.append('delete_profile_picture', 'true');
+            } else if (editFormData.profile_picture) {
+                // Si subió foto nueva
                 data.append('profile_picture', editFormData.profile_picture);
             }
 
-            // PUT con header multipart
             const response = await apiClient.put(`/api/users/${userId}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -206,7 +246,6 @@ const AdminUserPage = () => {
             );
             handleCancelEdit();
             
-            // MODIFICADO: Recargar la página para que el ChatContext vea la nueva foto
             toast.success(`Usuario actualizado. Recargando...`, {
                 onClose: () => window.location.reload() 
             });
@@ -263,8 +302,7 @@ const AdminUserPage = () => {
             <div className="dashboard-container">
 
                 <div className="dashboard-header-block">
-                    <h1 className="dashboard-title">Gestión de Usuarios</h1>
-                    <h2 className="dashboard-subtitle">Lista de usuarios registrados</h2>
+                    <h1 className="dashboard-title">Gestión de Usuarios registrados</h1>
                 </div>
 
                 <button
@@ -330,7 +368,7 @@ const AdminUserPage = () => {
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
-                                <th scope="col">Foto</th> {/* NUEVA COLUMNA */}
+                                <th scope="col">Foto</th>
                                 <th scope="col">Username</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Unidad</th>
@@ -348,16 +386,44 @@ const AdminUserPage = () => {
                                         <>
                                             <td data-label="ID">{user.id}</td>
                                             
-                                            {/* CAMPO EDITABLE PARA FOTO */}
+                                            {/* EDICIÓN DE FOTO CON OPCIÓN DE BORRAR */}
                                             <td data-label="Foto">
-                                                <input 
-                                                    type="file" 
-                                                    name="profile_picture" 
-                                                    className="table-edit-input" 
-                                                    onChange={handleFormChange} 
-                                                    style={{width:'90px', fontSize:'0.7rem'}} 
-                                                    accept="image/*"
-                                                />
+                                                <div style={{display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start'}}>
+                                                    {markForDeletion ? (
+                                                        <div style={{color: '#E53E3E', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
+                                                            <span>¡Se eliminará!</span>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn-icon-undo" 
+                                                                onClick={() => setMarkForDeletion(false)}
+                                                                title="Deshacer"
+                                                            >
+                                                                <UndoIcon />
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <input 
+                                                                type="file" 
+                                                                name="profile_picture" 
+                                                                className="table-edit-input" 
+                                                                onChange={handleFormChange} 
+                                                                style={{width:'140px', fontSize:'0.7rem'}} 
+                                                                accept="image/*"
+                                                            />
+                                                            {/* Si el usuario TIENE foto y no estamos subiendo una nueva, mostrar opción de borrar */}
+                                                            {user.profile_picture && !editFormData.profile_picture && (
+                                                                <button 
+                                                                    type="button"
+                                                                    className="btn btn-sm btn-danger"
+                                                                    onClick={() => setMarkForDeletion(true)}
+                                                                >
+                                                                    <TrashIcon /> Eliminar actual
+                                                                </button>
+                                                            )}
+                                                        </>
+                                                    )}
+                                                </div>
                                             </td>
 
                                             <td data-label="Username">
@@ -430,10 +496,15 @@ const AdminUserPage = () => {
                                         <>
                                             <td data-label="ID">{user.id}</td>
                                             
-                                            {/* VISTA PREVIA DE FOTO */}
+                                            {/* VISTA PREVIA DE FOTO CLICKABLE */}
                                             <td data-label="Foto">
                                                 {user.profile_picture ? (
-                                                    <img src={user.profile_picture} alt="Avatar" style={{width:'35px', height:'35px', borderRadius:'50%', objectFit:'cover', border:'1px solid #555'}} />
+                                                    <img 
+                                                        src={user.profile_picture} 
+                                                        alt="Avatar" 
+                                                        className="table-avatar-img"
+                                                        onClick={() => setViewingImage(user.profile_picture)} 
+                                                    />
                                                 ) : (
                                                     <span style={{color:'#777', fontSize:'0.8rem'}}>N/A</span>
                                                 )}
@@ -471,6 +542,19 @@ const AdminUserPage = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {/* MODAL DE IMAGEN A PANTALLA COMPLETA */}
+                {viewingImage && (
+                    <div className="full-image-overlay" onClick={() => setViewingImage(null)}>
+                        <button className="close-overlay-btn" onClick={() => setViewingImage(null)}>
+                            <CloseIcon />
+                        </button>
+                        <div className="full-image-content" onClick={(e) => e.stopPropagation()}>
+                            <img src={viewingImage} alt="Full Profile" />
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );

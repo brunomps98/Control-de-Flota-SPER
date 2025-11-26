@@ -18,6 +18,7 @@ const StopIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="currentCol
 const CancelIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
 const SendIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.126A59.768 59.768 0 0 1 21.485 12 59.77 59.77 0 0 1 3.27 20.876L5.999 12Zm0 0h7.5" /></svg>);
 const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="60" height="60"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
+const NewChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821C21.068 3.789 20.037 3.175 19.005 3.175ZM14.016 11.5H11.5v2.5h-1v-2.5H8v-1h2.5V8h1v2.5h2.516v1Z"/></svg>);
 
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
@@ -39,6 +40,7 @@ const ChatWindow = ({ onClose }) => {
         selectedRoom, setSelectedRoom,
         adminMessages, setAdminMessages,
         isLoading, isChatLoading,
+        setIsChatLoading,
         selectRoom, startNewChat
     } = useChat();
 
@@ -52,6 +54,9 @@ const ChatWindow = ({ onClose }) => {
     const [mediaRecorder, setMediaRecorder] = useState(null);
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
+    
+    // --- ESTADO PARA EL BOTÓN FLOTANTE ---
+    const [showContactList, setShowContactList] = useState(false);
 
     const [openMenuId, setOpenMenuId] = useState(null);
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
@@ -141,6 +146,23 @@ const ChatWindow = ({ onClose }) => {
             if (newMessage.trim()) {
                 socket.emit('send_message', { roomId: targetRoomId, content: newMessage.trim(), type: 'text', file_url: null });
             }
+
+            if (user.admin && selectedRoom) {
+                setActiveRooms(prev => {
+                    const exists = prev.some(r => r.id === selectedRoom.id);
+                    if (!exists) {
+                        const newRoomEntry = {
+                            ...selectedRoom,
+                            last_message: newMessage.trim() || 'Archivo adjunto...',
+                            updated_at: new Date().toISOString()
+                        };
+                        return [newRoomEntry, ...prev];
+                    }
+                    return prev;
+                });
+                setNewChatUsers(prev => prev.filter(u => u.id !== selectedRoom.user.id));
+            }
+
             setNewMessage("");
             handleClearFiles();
         } catch (error) { toast.error("Error al enviar."); }
@@ -156,9 +178,49 @@ const ChatWindow = ({ onClose }) => {
         typingTimerRef.current = setTimeout(() => { socket.emit('typing_stop', { roomId: targetRoomId }); typingTimerRef.current = null; }, 2000);
     };
 
+    const handleSelectRoom = async (room) => {
+        try {
+            setIsChatLoading(true);
+            setCurrentView('chat');
+            setSelectedRoom(room);
+            const response = await apiClient.get(`/api/chat/room/${room.id}/messages`);
+            setAdminMessages(response.data.messages);
+            socket.emit('admin_join_room', room.id);
+        } catch (error) { console.error(error); }
+        finally { setIsChatLoading(false); }
+    };
+
+    const handleStartNewChat = async (targetUser) => {
+        try {
+            setIsChatLoading(true);
+            const response = await apiClient.post('/api/chat/find-or-create-room', { userId: targetUser.id });
+            const room = response.data;
+            handleSelectRoom(room);
+            setShowContactList(false); 
+            if (room.last_message) {
+                 setActiveRooms(prev => {
+                     if (prev.some(r => r.id === room.id)) return prev;
+                     return [room, ...prev];
+                 });
+                 setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
+            }
+        } catch (error) { toast.error("Error al iniciar chat."); setIsChatLoading(false); }
+    };
+
+    // --- MANEJO DEL BOTÓN ATRÁS ---
     const handleBack = () => {
-        if (currentView === 'info') setCurrentView('chat');
-        else { setCurrentView('inbox'); setSelectedRoom(null); setAdminMessages([]); setIsOtherUserTyping(false); }
+        if (currentView === 'profile_pic') {
+            setCurrentView('info'); // Si estamos en foto, volver a Info
+        } else if (showContactList) {
+            setShowContactList(false);
+        } else if (currentView === 'info') {
+            setCurrentView('chat');
+        } else {
+            setCurrentView('inbox');
+            setSelectedRoom(null);
+            setAdminMessages([]);
+            setIsOtherUserTyping(false);
+        }
     };
     const handleOpenUserInfo = () => { if (user.admin && selectedRoom) setCurrentView('info'); };
 
@@ -169,28 +231,15 @@ const ChatWindow = ({ onClose }) => {
         });
     };
 
-    // --- FUNCIÓN ELIMINAR CHAT CON TEXTOS CORREGIDOS ---
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false);
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
         if (!targetRoomId) return;
-
-        // Textos personalizados según rol
         const title = user.admin ? '¿Eliminar este chat?' : '¿Eliminar este chat?';
         const text = user.admin ? "Esta acción es irreversible y afectará a ambos." : "Se vaciará tu historial.";
         const confirmText = user.admin ? 'Eliminar' : 'Eliminar chat';
-
-        Swal.fire({
-            title: title,
-            text: text,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: confirmText
-        }).then((result) => {
-            if (result.isConfirmed) {
-                socket.emit('delete_room', { roomId: targetRoomId });
-            }
+        Swal.fire({ title, text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText }).then((result) => {
+            if (result.isConfirmed) socket.emit('delete_room', { roomId: targetRoomId });
         });
     };
 
@@ -239,22 +288,18 @@ const ChatWindow = ({ onClose }) => {
         const targetUser = selectedRoom?.user;
         if (!targetUser) return <p>Cargando...</p>;
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
-
         return (
             <div className="user-info-view">
                 <div className="user-info-header-section">
-                    {/* FOTO DE PERFIL O ICONO DEFAULT */}
                     <div className="user-info-avatar-large">
                         {targetUser.profile_picture ? (
-                            <img
-                                src={targetUser.profile_picture}
-                                alt="Perfil"
-                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
-                                onClick={() => window.open(targetUser.profile_picture, '_blank')}
+                            <img 
+                                src={targetUser.profile_picture} 
+                                alt="Perfil" 
+                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }} 
+                                onClick={() => setCurrentView('profile_pic')} 
                             />
-                        ) : (
-                            <UserIcon />
-                        )}
+                        ) : <UserIcon />}
                     </div>
                     <h2 className="user-info-name">{targetUser.username}</h2>
                     <span className="user-info-subtitle">{targetUser.admin ? 'Administrador' : 'Usuario'}</span>
@@ -280,36 +325,110 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
+    // --- NUEVA VISTA: FOTO PERFIL COMPLETA ---
+    const renderProfilePic = () => {
+        const targetUser = selectedRoom?.user;
+        if (!targetUser || !targetUser.profile_picture) return null;
+        return (
+            <div className="full-image-view">
+                <img src={targetUser.profile_picture} alt={targetUser.username} className="full-profile-img" />
+            </div>
+        );
+    };
+
     const renderChatBody = () => {
         if (isLoading) return <p>Cargando...</p>;
+        
         if (user.admin && currentView === 'inbox') {
+            
+            // --- VISTA B: LISTA DE CONTACTOS (NUEVO CHAT) ---
+            if (showContactList) {
+                return (
+                    <div className="admin-inbox slide-in-right">
+                        <div className="chat-list-header">Seleccionar contacto</div>
+                        {newChatUsers.length === 0 && <p style={{ padding: '15px', color: '#777' }}>No hay usuarios nuevos.</p>}
+                        
+                        {newChatUsers.map(chatUser => (
+                            <div key={chatUser.id} className="admin-room-item" onClick={() => handleStartNewChat(chatUser)}>
+                                <div className="wa-avatar-container">
+                                    {chatUser.profile_picture ? (
+                                        <img src={chatUser.profile_picture} alt="avatar" className="wa-avatar-img" />
+                                    ) : (
+                                        <div className="wa-avatar-placeholder">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" /></svg>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="wa-info-container">
+                                    <div className="wa-row-top">
+                                        <div className="wa-name-wrapper">
+                                            <span className="wa-name">{chatUser.username}</span>
+                                            {chatUser.isOnline && <div className="wa-status-dot"></div>}
+                                        </div>
+                                    </div>
+                                    <div className="wa-row-bottom">
+                                        <span className="wa-last-message" style={{color: '#009688'}}>
+                                            ¡Toca para iniciar chat!
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            }
+
+            // --- VISTA A: BANDEJA PRINCIPAL (CHATS ACTIVOS) ---
             return (
                 <div className="admin-inbox">
                     <div className="chat-list-header">Chats Activos</div>
                     {activeRooms.length === 0 && <p style={{ padding: '10px', color: '#777' }}>Sin chats activos.</p>}
+
                     {activeRooms.map(room => (
                         <div key={room.id} className="admin-room-item" onClick={() => selectRoom(room)}>
-                            <div className="room-item-user"><div className={`online-indicator ${room.isOnline ? 'online' : ''}`}></div>{room.user.username}</div>
-                            <div className="room-item-preview">{room.last_message}</div>
-                            <div className="room-item-timestamp">{formatTimestamp(room.updated_at)}</div>
+                            <div className="wa-avatar-container">
+                                {room.user.profile_picture ? (
+                                    <img src={room.user.profile_picture} alt="avatar" className="wa-avatar-img" />
+                                ) : (
+                                    <div className="wa-avatar-placeholder">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" /></svg>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="wa-info-container">
+                                <div className="wa-row-top">
+                                    <div className="wa-name-wrapper">
+                                        <span className="wa-name">{room.user.username}</span>
+                                        {room.isOnline && <div className="wa-status-dot"></div>}
+                                    </div>
+                                    <span className="wa-timestamp">{formatTimestamp(room.updated_at)}</span>
+                                </div>
+                                <div className="wa-row-bottom">
+                                    <span className="wa-last-message">
+                                        {room.last_message || "Imagen o archivo adjunto..."}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     ))}
-                    <div className="chat-list-header">Iniciar Nuevo Chat</div>
-                    {newChatUsers.map(chatUser => (
-                        <div key={chatUser.id} className="new-chat-item" onClick={() => startNewChat(chatUser)}>
-                            <div className={`online-indicator ${chatUser.isOnline ? 'online' : ''}`}></div><div className="user-name">{chatUser.username}</div>
-                        </div>
-                    ))}
+                    <button className="wa-fab-btn" onClick={() => setShowContactList(true)} title="Nuevo Chat">
+                        <NewChatIcon />
+                    </button>
                 </div>
             );
         }
+
+        // --- MANEJO DE VISTAS (Switch) ---
         if (user.admin && currentView === 'info') return renderUserInfo();
+        if (user.admin && currentView === 'profile_pic') return renderProfilePic(); // <--- AQUI LA NUEVA VISTA
         if (user.admin && currentView === 'chat') return isChatLoading ? <p>Cargando...</p> : renderMessageList(adminMessages);
         return guestMessages.length === 0 ? <p style={{ padding: '15px', color: '#bbb' }}>Inicia la conversación...</p> : renderMessageList(guestMessages);
     };
 
     const renderChatFooter = () => {
-        if (user.admin && (currentView === 'inbox' || currentView === 'info')) return null;
+        // Ocultar footer en bandeja, info Y en la foto de perfil
+        if (user.admin && (currentView === 'inbox' || currentView === 'info' || currentView === 'profile_pic')) return null;
         const showSendButton = newMessage.trim().length > 0 || selectedFiles.length > 0;
         return (
             <div className="chat-footer-wrapper">
@@ -346,40 +465,80 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
-    // Lógica Título Header
+    // --- LÓGICA HEADER DEL CHAT ---
     let headerTitle = 'Soporte';
+    let chatPartnerUser = null;
+    let isOnline = false;
+
     if (user.admin) {
-        if (currentView === 'inbox') headerTitle = 'Bandeja';
+        if (currentView === 'inbox') {
+            headerTitle = showContactList ? 'Seleccionar contacto' : 'Bandeja';
+        }
         else if (currentView === 'info') headerTitle = 'Info. del Usuario';
-        else headerTitle = selectedRoom?.user?.username;
+        else if (currentView === 'profile_pic') headerTitle = selectedRoom?.user?.username || 'Foto de perfil'; // Nombre al ver la foto
+        else {
+            headerTitle = selectedRoom?.user?.username;
+            chatPartnerUser = selectedRoom?.user;
+            const currentRoomInList = activeRooms.find(r => r.id === selectedRoom.id);
+            if (currentRoomInList) isOnline = currentRoomInList.isOnline;
+            else if (selectedRoom) isOnline = selectedRoom.isOnline;
+        }
     }
 
-    // Lógica Menú 3 Puntos
     const showOptions = (!user.admin) || (user.admin && currentView === 'chat');
 
     return (
         <div className="chat-window">
             <div className="chat-header">
-                {user.admin && currentView !== 'inbox' && <button onClick={handleBack} className="chat-back-btn"><BackIcon /></button>}
-                <h3 className={user.admin && currentView === 'chat' ? 'clickable-header-name' : ''} onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}>{headerTitle}</h3>
+                {user.admin && (currentView !== 'inbox' || showContactList) && 
+                    <button onClick={handleBack} className="chat-back-btn"><BackIcon /></button>
+                }
+
+                <div
+                    className={`chat-header-info ${user.admin && currentView === 'chat' ? 'clickable' : ''}`}
+                    onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', flexGrow: 1, overflow: 'hidden' }}
+                >
+                    {/* Solo mostramos el avatar pequeño en el header SI NO estamos viendo la foto grande ni info */}
+                    {chatPartnerUser && currentView !== 'profile_pic' && (
+                        <div className="header-avatar-container" style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.2)' }}>
+                            {chatPartnerUser.profile_picture ? (
+                                <img src={chatPartnerUser.profile_picture} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '100%', height: '100%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#555' }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" /></svg>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="chat-header-text-column">
+                        <h3 className="chat-contact-name">
+                            {headerTitle}
+                        </h3>
+                        {chatPartnerUser && currentView === 'chat' && (
+                            <span className={`chat-contact-status ${isOnline ? 'status-online' : ''}`}>
+                                {isOnline ? 'En línea' : 'Desconectado'}
+                            </span>
+                        )}
+                    </div>
+                </div>
+
                 {currentView === 'info' && <div style={{ width: '34px' }}></div>}
+
                 {showOptions && (
                     <div className="chat-header-options">
                         <button className="chat-header-menu-btn" onClick={() => setIsHeaderMenuOpen(!isHeaderMenuOpen)}><ThreeDotIcon /></button>
                         {isHeaderMenuOpen && (
                             <div className="chat-header-menu">
                                 <button onClick={onClose}>Cerrar Ventana</button>
-                                {/* MENÚ CORREGIDO: Eliminar Chat */}
-                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">
-                                    {user.admin ? 'Eliminar Chat' : 'Eliminar chat'}
-                                </button>
+                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">{user.admin ? 'Eliminar Chat' : 'Salir del Chat'}</button>
                             </div>
                         )}
                     </div>
                 )}
-                {user.admin && currentView === 'inbox' && (
-                    <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon /></button>
-                )}
+
+                {user.admin && currentView === 'inbox' && <button onClick={onClose} className="chat-close-btn-simple"><CloseIcon /></button>}
             </div>
             <div className="chat-body">{renderChatBody()}</div>
             {renderChatFooter()}

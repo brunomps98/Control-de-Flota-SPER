@@ -181,7 +181,9 @@ export const ChatProvider = ({ children, user }) => {
         currentView, setCurrentView,
         selectedRoom, setSelectedRoom,
         adminMessages, setAdminMessages,
-        isLoading, isChatLoading,
+        isLoading, 
+        isChatLoading, 
+        setIsChatLoading, 
         unreadChatCount, isChatOpen,
         selectRoom, startNewChat, toggleChat
     };

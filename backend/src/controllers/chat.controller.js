@@ -2,29 +2,24 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import { Op } from 'sequelize';
 import { onlineUsers } from '../socket/onlineUsers.js';
-import { supabase } from '../config/supabaseClient.js';
-import path from 'path';
+import { supabase } from '../config/supabaseClient.js'; 
+import path from 'path'; 
 
 class ChatController {
 
-    /**
-     * @summary Sube MÚLTIPLES archivos a Supabase y devuelve un array de resultados
-     */
     static uploadChatFile = async (req, res) => {
         try {
-            const files = req.files;
+            const files = req.files; 
 
             if (!files || files.length === 0) {
                 return res.status(400).json({ message: "No se han subido archivos." });
             }
 
-            // Procesamos todos los archivos en paralelo
             const uploadPromises = files.map(async (file) => {
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                 const extension = path.extname(file.originalname);
                 const fileName = `chat/${uniqueSuffix}${extension}`;
 
-                // Subir a Supabase
                 const { error: uploadError } = await supabase.storage
                     .from('uploads')
                     .upload(fileName, file.buffer, {
@@ -35,12 +30,10 @@ class ChatController {
 
                 if (uploadError) throw new Error('Error Supabase: ' + uploadError.message);
 
-                // Obtener URL
                 const { data: publicUrlData } = supabase.storage
                     .from('uploads')
                     .getPublicUrl(fileName);
 
-                // Determinar Tipo
                 let fileType = 'file';
                 if (file.mimetype.startsWith('image/')) fileType = 'image';
                 else if (file.mimetype.startsWith('video/')) fileType = 'video';
@@ -53,12 +46,11 @@ class ChatController {
                 };
             });
 
-            // Esperamos a que todos se suban
             const results = await Promise.all(uploadPromises);
 
-            res.status(200).json({
+            res.status(200).json({ 
                 message: "Archivos subidos correctamente",
-                files: results
+                files: results 
             });
 
         } catch (error) {
@@ -67,15 +59,14 @@ class ChatController {
         }
     }
 
-
     static getMyRoom = async (req, res) => {
         try {
-            const userId = req.user.id;
+            const userId = req.user.id; 
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
                 defaults: {
                     user_id: userId,
-                    last_message: "Inicia tu consulta..."
+                    last_message: null 
                 }
             });
             if (created) {
@@ -87,7 +78,7 @@ class ChatController {
                 include: [{
                     model: Usuario,
                     as: 'sender',
-                    attributes: ['id', 'username', 'admin']
+                    attributes: ['id', 'username', 'admin', 'profile_picture']
                 }]
             });
             res.status(200).json({ room, messages });
@@ -102,12 +93,16 @@ class ChatController {
 
     static getAdminRooms = async (req, res) => {
         try {
+            // Filtramos para traer solo salas que tengan un last_message real
             const activeRooms = await ChatRoom.findAll({
+                where: {
+                    last_message: { [Op.ne]: null } 
+                },
                 include: [{
                     model: Usuario,
                     as: 'user',
                     where: { admin: false },
-                    attributes: ['id', 'username', 'email', 'unidad']
+                    attributes: ['id', 'username', 'email', 'unidad', 'profile_picture']
                 }],
                 order: [['updated_at', 'DESC']]
             });
@@ -122,11 +117,13 @@ class ChatController {
 
             const adminUsers = await Usuario.findAll({ where: { admin: true }, attributes: ['id'] });
             const adminIds = adminUsers.map(admin => admin.id);
+            
+            // Excluimos a los que ya tienen sala CON MENSAJES y a los admins
             const allExcludedIds = [...userIdsWithRooms, ...adminIds];
-
+            
             const newChatUsers = await Usuario.findAll({
                 where: { id: { [Op.notIn]: allExcludedIds } },
-                attributes: ['id', 'username', 'email', 'unidad'],
+                attributes: ['id', 'username', 'email', 'unidad', 'profile_picture'],
                 order: [['username', 'ASC']]
             });
 
@@ -163,7 +160,7 @@ class ChatController {
                 include: [{
                     model: Usuario,
                     as: 'sender',
-                    attributes: ['id', 'username', 'admin']
+                    attributes: ['id', 'username', 'admin', 'profile_picture']
                 }]
             });
             res.status(200).json({ room, messages });
@@ -183,7 +180,10 @@ class ChatController {
         try {
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
-                defaults: { user_id: userId, last_message: "Conversación iniciada por el admin." }
+                defaults: { 
+                    user_id: userId, 
+                    last_message: null // Inicializamos en NULL para que no aparezca en la bandeja
+                }
             });
 
             if (created) console.log(`[CHAT] Admin ha creado una nueva sala para el usuario ${userId}`);
@@ -192,7 +192,7 @@ class ChatController {
                 include: [{
                     model: Usuario,
                     as: 'user',
-                    attributes: ['id', 'username', 'email', 'unidad']
+                    attributes: ['id', 'username', 'email', 'unidad', 'profile_picture']
                 }]
             });
 

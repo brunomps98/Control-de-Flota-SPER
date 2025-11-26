@@ -13,11 +13,19 @@ const sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     logging: false, 
     
+    pool: {
+        max: 5,         // Máximo de conexiones simultáneas
+        min: 0,         // Mínimo de conexiones (0 permite desconectar si no hay uso)
+        acquire: 30000, // Tiempo máximo para intentar conectar antes de tirar error (30s)
+        idle: 10000     // Tiempo máximo que una conexión puede estar inactiva (10s)
+    },
+
     dialectOptions: { 
         ssl: {
             require: true,
             rejectUnauthorized: false 
-        }
+        },
+        keepAlive: true 
     }
 });
 

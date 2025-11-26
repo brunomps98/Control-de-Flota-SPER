@@ -10,11 +10,11 @@ import { userDao } from "../repository/index.js";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
-import Usuario from '../models/user.model.js'; 
+import Usuario from '../models/user.model.js';
 import Notification from '../models/notification.model.js';
 import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
-import axios from 'axios'; 
+import axios from 'axios';
 import { sendPasswordResetEmail } from "../services/email.service.js";
 import DashboardController from "../controllers/dashboard.controller.js";
 
@@ -36,11 +36,11 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, 
-    max: 5, 
+    windowMs: 15 * 60 * 1000,
+    max: 5,
     message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
-    standardHeaders: true, 
-    legacyHeaders: false, 
+    standardHeaders: true,
+    legacyHeaders: false,
     skip: (req, res) => process.env.NODE_ENV === 'development',
 });
 
@@ -53,9 +53,9 @@ router.get("/health", (req, res) => {
 router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.registerUser);
 
 // --- RUTA DE LOGIN ---
-router.post('/login', loginLimiter, async (req, res) => { 
+router.post('/login', loginLimiter, async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
-    
+
     try {
         if (recaptchaToken) {
             const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -92,8 +92,8 @@ router.get('/user/current', verifyToken, (req, res) => {
 // --- RUTAS DE GESTIÓN DE USUARIOS (CRUD) ---
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const filters = req.query; 
-        const users = await UserDao.getAllUsers(filters); 
+        const filters = req.query;
+        const users = await UserDao.getAllUsers(filters);
         res.status(200).json(users);
     } catch (error) {
         console.error("Error en GET /api/users:", error);
@@ -114,8 +114,8 @@ router.post('/forgot-password', async (req, res) => {
             return res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
         }
         const resetPayload = { userId: user.id, email: user.email };
-        const resetToken = jwt.sign(resetPayload, process.env.SECRET_KEY, { expiresIn: '15m' }); 
-        const frontendUrl = process.env.FRONT_URL.split(',')[0]; 
+        const resetToken = jwt.sign(resetPayload, process.env.SECRET_KEY, { expiresIn: '15m' });
+        const frontendUrl = process.env.FRONT_URL.split(',')[0];
         const resetLink = `${frontendUrl}/reset-password/${resetToken}`;
 
         await sendPasswordResetEmail(user.email, resetLink);
@@ -153,10 +153,10 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
         const { fcmToken } = req.body;
         const userId = req.user.id;
         if (!fcmToken) return res.status(400).json({ message: 'No se proporcionó token.' });
-        
+
         await Usuario.update({ fcm_token: null }, { where: { fcm_token: fcmToken, id: { [Op.ne]: userId } } });
         await Usuario.update({ fcm_token: fcmToken }, { where: { id: userId } });
-        
+
         res.status(200).json({ message: 'Token FCM actualizado.' });
     } catch (error) {
         console.error("Error al guardar FCM token:", error);
@@ -204,7 +204,7 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
         const notifications = await Notification.findAll({
             where: { user_id: userId },
             order: [['created_at', 'DESC']],
-            limit: 50 
+            limit: 50
         });
         res.status(200).json(notifications);
     } catch (error) {
@@ -232,6 +232,19 @@ router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res)
     }
 });
 
+// --- IMPORTANTE: ESTA RUTA DEBE IR PRIMERO (La específica) ---
+router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
+    try {
+        await Notification.destroy({ where: { user_id: req.user.id } });
+        res.status(200).json({ success: true, message: "Bandeja vaciada." });
+    } catch (error) {
+        console.error("Error al vaciar notificaciones:", error);
+        res.status(500).json({ message: "Error del servidor" });
+    }
+});
+// -----------------------------------------------------------
+
+// --- LUEGO ESTA (La genérica con :id) ---
 router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const notificationId = req.params.id;
@@ -240,16 +253,6 @@ router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) =
         res.status(200).json({ success: true, message: "Notificación eliminada." });
     } catch (error) {
         console.error("Error al eliminar notificación:", error);
-        res.status(500).json({ message: "Error del servidor" });
-    }
-});
-
-router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        await Notification.destroy({ where: { user_id: req.user.id } });
-        res.status(200).json({ success: true, message: "Bandeja vaciada." });
-    } catch (error) {
-        console.error("Error al vaciar notificaciones:", error);
         res.status(500).json({ message: "Error del servidor" });
     }
 });

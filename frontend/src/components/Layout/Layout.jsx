@@ -8,7 +8,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import ChatWrapper from '../Chat/ChatWrapper';
 import { SocketProvider, useSocket } from '../../context/SocketContext';
-import { ChatProvider } from '../../context/ChatContext'; 
+import { ChatProvider } from '../../context/ChatContext';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { toast } from 'react-toastify';
 import ChatBot from '../ChatBot/ChatBot';
@@ -19,12 +19,12 @@ const Layout = () => {
     // --- Hooks de Estado ---
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+
     // Notificaciones de Campana 
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    
+
     // Estado del ChatBot (Flotante)
     const [isBotOpen, setIsBotOpen] = useState(false);
 
@@ -51,7 +51,7 @@ const Layout = () => {
         setIsNotificationOpen(false);
         if (notif.type === 'vehicle_update' && notif.resourceId) {
             navigate(`/vehicle-detail/${notif.resourceId}`);
-        } 
+        }
         else if (notif.type === 'new_ticket' && notif.resourceId) {
             navigate(`/case/${notif.resourceId}`);
         }
@@ -194,7 +194,7 @@ const Layout = () => {
         event.stopPropagation();
         const opening = !isNotificationOpen;
         setIsNotificationOpen(opening);
-        
+
         if (opening && unreadCount > 0) {
             setUnreadCount(0);
             try {
@@ -218,12 +218,16 @@ const Layout = () => {
     };
 
     const handleClearAll = async () => {
-        setNotifications([]);
-        setUnreadCount(0);
         try {
+            // --- CORRECCIÓN AQUÍ: Usar la ruta exacta que tienes en db.router.js ---
             await apiClient.delete('/api/notifications/clear-all');
+
+            // Actualizar estado visual
+            setNotifications([]);
+            setUnreadCount(0);
+
         } catch (error) {
-            console.error("Error vaciando notificaciones:", error);
+            console.error("Error al borrar notificaciones:", error);
         }
     };
 
@@ -268,7 +272,7 @@ const Layout = () => {
 
                 {/* Montamos oyente de notificaciones (Campana) */}
                 {user.admin && <NotificationsListener />}
-                
+
             </ChatProvider>
         </SocketProvider>
     );
