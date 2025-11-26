@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
-import '../../pages/login/login.css'; 
+import '../../pages/Login/Login.css'; 
 
 // Iconos de Ojo
 const EyeOpenIcon = () => (
