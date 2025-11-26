@@ -1,11 +1,10 @@
-
 class userRepository {
     constructor(dao){
         this.dao = dao
     }
 
-    async registerUser(username, unidad, email, password){
-        return await this.dao.regUser(username, unidad, email, password)
+    async registerUser(username, unidad, email, password, profilePicture){
+        return await this.dao.regUser(username, unidad, email, password, profilePicture)
     }
 
     async loginUser(username, password){

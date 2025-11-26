@@ -8,7 +8,6 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
 // Iconos 
-
 const FilterIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.973 1.011a.75.75 0 0 1 .472.691l1.524 8.283a.75.75 0 0 1-.472.691A18.66 18.66 0 0 1 12 15c-2.755 0-5.455-.232-7.973-1.011a.75.75 0 0 1-.472-.691l-1.524-8.283a.75.75 0 0 1 .472-.691A18.66 18.66 0 0 1 12 3Z" />
@@ -41,11 +40,18 @@ const AdminUserPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    
     const [editingUserId, setEditingUserId] = useState(null);
+    
+    // MODIFICADO: Agregamos profile_picture al estado
     const [editFormData, setEditFormData] = useState({
-        username: '', email: '', unidad: '', admin: false, password: ''
+        username: '', 
+        email: '', 
+        unidad: '', 
+        admin: false, 
+        password: '', 
+        profile_picture: null 
     });
-
 
     const [searchParams, setSearchParams] = useSearchParams();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -57,7 +63,6 @@ const AdminUserPage = () => {
         admin: false
     });
 
-
     useEffect(() => {
         setFilters({
             id: searchParams.get('id') || '',
@@ -67,7 +72,6 @@ const AdminUserPage = () => {
             admin: searchParams.get('admin') === 'true'
         });
     }, [searchParams]);
-
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -120,10 +124,8 @@ const AdminUserPage = () => {
 
     useEffect(() => {
         if (Capacitor.isPluginAvailable('App')) {
-
             const handleBackButton = () => navigate('/vehicle');
             const listenerPromise = App.addListener('backButton', handleBackButton);
-
             return () => {
                 listenerPromise.then(listener => listener.remove());
             };
@@ -137,6 +139,7 @@ const AdminUserPage = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
     };
+    
     const handleClearFilters = () => {
         setFilters({ id: '', username: '', email: '', unidad: '', admin: false });
     };
@@ -147,36 +150,74 @@ const AdminUserPage = () => {
             ? user.unidad
             : "Direccion General";
         setEditFormData({
-            username: user.username, email: user.email, unidad: userUnidad, admin: user.admin, password: ''
+            username: user.username, 
+            email: user.email, 
+            unidad: userUnidad, 
+            admin: user.admin, 
+            password: '',
+            profile_picture: null // Reset de foto
         });
     };
+
     const handleCancelEdit = () => {
         setEditingUserId(null);
-        setEditFormData({ username: '', email: '', unidad: '', admin: false, password: '' });
+        setEditFormData({ 
+            username: '', 
+            email: '', 
+            unidad: '', 
+            admin: false, 
+            password: '', 
+            profile_picture: null 
+        });
     };
+
     const handleFormChange = (e) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value, type, checked, files } = e.target;
         setEditFormData(prevData => ({
             ...prevData,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: files ? files[0] : (type === 'checkbox' ? checked : value)
         }));
     };
+
     const handleSaveEdit = async (userId) => {
         try {
-            const response = await apiClient.put(`/api/users/${userId}`, editFormData);
+            // MODIFICADO: Usamos FormData para enviar texto + archivo
+            const data = new FormData();
+            data.append('username', editFormData.username);
+            data.append('email', editFormData.email);
+            data.append('unidad', editFormData.unidad);
+            data.append('admin', editFormData.admin);
+            if (editFormData.password) {
+                data.append('password', editFormData.password);
+            }
+            if (editFormData.profile_picture) {
+                data.append('profile_picture', editFormData.profile_picture);
+            }
+
+            // PUT con header multipart
+            const response = await apiClient.put(`/api/users/${userId}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            
             setUsers(prevUsers =>
                 prevUsers.map(user =>
                     user.id === userId ? response.data : user
                 )
             );
             handleCancelEdit();
-            toast.success(`Usuario "${response.data.username}" actualizado.`);
+            
+            // MODIFICADO: Recargar la página para que el ChatContext vea la nueva foto
+            toast.success(`Usuario actualizado. Recargando...`, {
+                onClose: () => window.location.reload() 
+            });
+
         } catch (err) {
             const errorMsg = err.response?.data?.message || 'Error al guardar los cambios.';
             toast.error(errorMsg);
             console.error("Error al guardar:", err);
         }
     };
+
     const handleDelete = (userId, username) => {
         Swal.fire({
             title: `¿Estás seguro?`,
@@ -289,6 +330,7 @@ const AdminUserPage = () => {
                         <thead>
                             <tr>
                                 <th scope="col">ID</th>
+                                <th scope="col">Foto</th> {/* NUEVA COLUMNA */}
                                 <th scope="col">Username</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Unidad</th>
@@ -305,6 +347,19 @@ const AdminUserPage = () => {
                                     {editingUserId === user.id ? (
                                         <>
                                             <td data-label="ID">{user.id}</td>
+                                            
+                                            {/* CAMPO EDITABLE PARA FOTO */}
+                                            <td data-label="Foto">
+                                                <input 
+                                                    type="file" 
+                                                    name="profile_picture" 
+                                                    className="table-edit-input" 
+                                                    onChange={handleFormChange} 
+                                                    style={{width:'90px', fontSize:'0.7rem'}} 
+                                                    accept="image/*"
+                                                />
+                                            </td>
+
                                             <td data-label="Username">
                                                 <input
                                                     type="text"
@@ -349,7 +404,7 @@ const AdminUserPage = () => {
                                                     type="password"
                                                     name="password"
                                                     className="table-edit-input"
-                                                    placeholder="Dejar en blanco..."
+                                                    placeholder="Nueva..."
                                                     value={editFormData.password}
                                                     onChange={handleFormChange}
                                                 />
@@ -374,6 +429,16 @@ const AdminUserPage = () => {
                                     ) : (
                                         <>
                                             <td data-label="ID">{user.id}</td>
+                                            
+                                            {/* VISTA PREVIA DE FOTO */}
+                                            <td data-label="Foto">
+                                                {user.profile_picture ? (
+                                                    <img src={user.profile_picture} alt="Avatar" style={{width:'35px', height:'35px', borderRadius:'50%', objectFit:'cover', border:'1px solid #555'}} />
+                                                ) : (
+                                                    <span style={{color:'#777', fontSize:'0.8rem'}}>N/A</span>
+                                                )}
+                                            </td>
+
                                             <td data-label="Username">{user.username}</td>
                                             <td data-label="Email">{user.email}</td>
                                             <td data-label="Unidad">{user.unidad}</td>

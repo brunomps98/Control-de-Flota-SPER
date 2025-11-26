@@ -239,10 +239,23 @@ const ChatWindow = ({ onClose }) => {
         const targetUser = selectedRoom?.user;
         if (!targetUser) return <p>Cargando...</p>;
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
+
         return (
             <div className="user-info-view">
                 <div className="user-info-header-section">
-                    <div className="user-info-avatar-large"><UserIcon /></div>
+                    {/* FOTO DE PERFIL O ICONO DEFAULT */}
+                    <div className="user-info-avatar-large">
+                        {targetUser.profile_picture ? (
+                            <img
+                                src={targetUser.profile_picture}
+                                alt="Perfil"
+                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
+                                onClick={() => window.open(targetUser.profile_picture, '_blank')}
+                            />
+                        ) : (
+                            <UserIcon />
+                        )}
+                    </div>
                     <h2 className="user-info-name">{targetUser.username}</h2>
                     <span className="user-info-subtitle">{targetUser.admin ? 'Administrador' : 'Usuario'}</span>
                 </div>

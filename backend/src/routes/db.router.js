@@ -11,7 +11,7 @@ import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
 import Usuario from '../models/user.model.js'; 
-import Notification from '../models/notification.model.js'; // <--- IMPORT NUEVO
+import Notification from '../models/notification.model.js';
 import { Op } from 'sequelize';
 import rateLimit from 'express-rate-limit';
 import axios from 'axios'; 
@@ -36,55 +36,43 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // Límite de 5 intentos de login por IP cada 15 minutos
+    windowMs: 15 * 60 * 1000, 
+    max: 5, 
     message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
     standardHeaders: true, 
     legacyHeaders: false, 
     skip: (req, res) => process.env.NODE_ENV === 'development',
 });
 
-// --- RUTA PARA QUE FUNCIONE UPTIMEROBOT ---
+// RUTA PARA QUE FUNCIONE UPTIMEROBOT
 router.get("/health", (req, res) => {
     res.status(200).send("OK");
 });
 
-// --- RUTAS DE AUTENTICACIÓN ---
-router.post('/register', verifyToken, verifyAdmin, UserDao.registerUser);
+//  RUTAS DE AUTENTICACIÓN
+router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.registerUser);
 
 // --- RUTA DE LOGIN ---
 router.post('/login', loginLimiter, async (req, res) => { 
     const { username, password, recaptchaToken } = req.body;
     
     try {
-        //  VERIFICACIÓN RECAPTCHA 
         if (recaptchaToken) {
             const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-            
-            if (!secretKey) {
-                console.error("RECAPTCHA_SECRET_KEY no está definida en las variables de entorno.");
-                return res.status(500).json({ message: 'Error de configuración del servidor.' });
-            }
+            if (!secretKey) return res.status(500).json({ message: 'Error de configuración del servidor.' });
 
             const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaToken}`;
-            
             try {
                 const response = await axios.post(verificationURL);
                 const { success, score } = response.data;
-                
-                if (!success || score < 0.5) { 
-                    return res.status(403).json({ message: 'Verificación de reCAPTCHA fallida. Inténtelo de nuevo.' });
-                }
-                
+                if (!success || score < 0.5) return res.status(403).json({ message: 'Verificación de reCAPTCHA fallida.' });
             } catch (recaptchaError) {
-                console.error("Error al verificar reCAPTCHA:", recaptchaError.message);
                 return res.status(500).json({ message: 'Error del servidor durante la verificación.' });
             }
         }
 
         const user = await userDao.loginUser(username, password);
         const { password: _, ...userPayload } = user.get({ plain: true });
-
         const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '8h' });
 
         res.status(200).json({ status: 'success', user: userPayload, token });
@@ -105,7 +93,7 @@ router.get('/user/current', verifyToken, (req, res) => {
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const filters = req.query; 
-        const users = await userDao.getAllUsers(filters); 
+        const users = await UserDao.getAllUsers(filters); 
         res.status(200).json(users);
     } catch (error) {
         console.error("Error en GET /api/users:", error);
@@ -113,48 +101,10 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-router.put('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const userIdToUpdate = req.params.id;
-        const userData = req.body;
+router.put('/users/:id', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.updateUser);
 
-        if (req.user.id == userIdToUpdate && userData.admin === false) {
-            return res.status(403).json({ message: 'No puedes revocar tu propio permiso de administrador.' });
-        }
-        
-        if (userIdToUpdate == 6 && req.user.id != 6) {
-             return res.status(403).json({ message: 'No se puede editar al usuario Administrador principal.' });
-        }
+router.delete('/users/:id', verifyToken, verifyAdmin, UserDao.deleteUserContoller);
 
-        const updatedUser = await userDao.updateUser(userIdToUpdate, userData);
-        res.status(200).json(updatedUser);
-
-    } catch (error) {
-        console.error("Error en PUT /api/users/:id:", error);
-        res.status(500).json({ message: 'Error al actualizar el usuario', error: error.message });
-    }
-});
-
-router.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
-    try {
-        const userIdToDelete = req.params.id;
-
-        if (req.user.id == userIdToDelete) {
-            return res.status(400).json({ message: 'No puedes eliminarte a ti mismo.' });
-        }
-        
-        if (userIdToDelete == 6) {
-             return res.status(403).json({ message: 'No se puede eliminar al usuario Administrador principal.' });
-        }
-
-        const result = await userDao.deleteUser(userIdToDelete);
-        res.status(200).json(result);
-
-    } catch (error) {
-        console.error("Error en DELETE /api/users/:id:", error);
-        res.status(500).json({ message: 'Error al eliminar el usuario', error: error.message });
-    }
-});
 
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
@@ -202,15 +152,11 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
     try {
         const { fcmToken } = req.body;
         const userId = req.user.id;
-        if (!fcmToken) {
-            return res.status(400).json({ message: 'No se proporcionó token.' });
-        }
-        await Usuario.update({ fcm_token: null }, {
-            where: { fcm_token: fcmToken, id: { [Op.ne]: userId } }
-        });
-        await Usuario.update({ fcm_token: fcmToken }, {
-            where: { id: userId }
-        });
+        if (!fcmToken) return res.status(400).json({ message: 'No se proporcionó token.' });
+        
+        await Usuario.update({ fcm_token: null }, { where: { fcm_token: fcmToken, id: { [Op.ne]: userId } } });
+        await Usuario.update({ fcm_token: fcmToken }, { where: { id: userId } });
+        
         res.status(200).json({ message: 'Token FCM actualizado.' });
     } catch (error) {
         console.error("Error al guardar FCM token:", error);
@@ -219,7 +165,7 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
 });
 
 
-// --- RUTAS DE VEHÍCULOS (Protegidas) ---
+// --- RUTAS DE VEHÍCULOS ---
 router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
 router.put("/vehicle/:productId", verifyToken, VehicleDao.updateVehicle);
 router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicle);
@@ -236,12 +182,12 @@ router.get("/vehicle/:cid/destinos", verifyToken, VehicleDao.getDestinos);
 router.get("/vehicle/:cid/rodados", verifyToken, VehicleDao.getRodados);
 router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripciones);
 
-// --- RUTAS DE CHAT (Protegidas) ---
+// --- RUTAS DE CHAT ---
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
-router.post("/chat/upload", verifyToken, upload.array('files', 10), ChatController.uploadChatFile);
 router.post("/chat/find-or-create-room", verifyToken, verifyAdmin, ChatController.findOrCreateRoomForUser);
+router.post("/chat/upload", verifyToken, upload.array('files', 10), ChatController.uploadChatFile);
 
 
 // --- RUTAS DE SOPORTE ---
@@ -251,7 +197,7 @@ router.get('/support-tickets', SupportController.getTickets);
 router.get('/support/:ticketId', SupportController.getTicketById);
 router.delete('/support/:pid', SupportController.deleteTicket);
 
-// --- RUTAS DE NOTIFICACIONES (NUEVAS) ---
+// RUTAS DE NOTIFICACIONES
 router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -269,17 +215,7 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
 
 router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const userId = req.user.id;
-        // Actualizamos TODAS las notificaciones de este usuario que no estén leídas
-        await Notification.update(
-            { is_read: true }, 
-            { 
-                where: { 
-                    user_id: userId,
-                    is_read: false 
-                } 
-            }
-        );
+        await Notification.update({ is_read: true }, { where: { user_id: req.user.id, is_read: false } });
         res.status(200).json({ success: true, message: "Todas las notificaciones marcadas como leídas" });
     } catch (error) {
         console.error("Error al marcar todas como leídas:", error);
@@ -289,9 +225,7 @@ router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req,
 
 router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        await Notification.update({ is_read: true }, {
-            where: { id: req.params.id, user_id: req.user.id }
-        });
+        await Notification.update({ is_read: true }, { where: { id: req.params.id, user_id: req.user.id } });
         res.status(200).json({ success: true });
     } catch (error) {
         res.status(500).json({ message: "Error al actualizar notificación" });
@@ -301,20 +235,8 @@ router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res)
 router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const notificationId = req.params.id;
-        const userId = req.user.id;
-
-        // Eliminamos solo si el ID coincide y pertenece al usuario actual
-        const result = await Notification.destroy({
-            where: {
-                id: notificationId,
-                user_id: userId
-            }
-        });
-
-        if (result === 0) {
-            return res.status(404).json({ message: "Notificación no encontrada o no te pertenece." });
-        }
-
+        const result = await Notification.destroy({ where: { id: notificationId, user_id: req.user.id } });
+        if (result === 0) return res.status(404).json({ message: "Notificación no encontrada." });
         res.status(200).json({ success: true, message: "Notificación eliminada." });
     } catch (error) {
         console.error("Error al eliminar notificación:", error);
@@ -322,15 +244,9 @@ router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) =
     }
 });
 
-// --- BORRAR TODAS LAS NOTIFICACIONES ---
 router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
     try {
-        const userId = req.user.id;
-
-        await Notification.destroy({
-            where: { user_id: userId }
-        });
-
+        await Notification.destroy({ where: { user_id: req.user.id } });
         res.status(200).json({ success: true, message: "Bandeja vaciada." });
     } catch (error) {
         console.error("Error al vaciar notificaciones:", error);

@@ -33,6 +33,13 @@ const Usuario = sequelize.define('Usuario', {
         unique: true
     },
 
+    // FOTO DE PERFIL
+    profile_picture: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue: null
+    },
+
     // Roles y permisos
     admin: {
         type: DataTypes.BOOLEAN,

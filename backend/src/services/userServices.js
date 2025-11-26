@@ -6,7 +6,8 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 
 export default class userManager {
 
-    regUser = async (username, unidad, email, password) => {
+    // Agregamos profilePicture como argumento
+    regUser = async (username, unidad, email, password, profilePicture) => {
         try {
 
             // Inicializar todos los permisos en 'false'
@@ -25,7 +26,7 @@ export default class userManager {
                 trat: false
             };
 
-            // Usar la 'unidad' (string) para setear el flag booleano correcto
+            // Usar la unidad para setear el flag booleano correcto
             switch (unidad) {
                 case "Direccion General":
                     permissions.dg = true;
@@ -61,19 +62,18 @@ export default class userManager {
                     permissions.trat = true;
                     break;
                 default:
-                    // Si la unidad no coincide con ninguna, no se asigna permiso
                     console.warn(`[BACK] Unidad desconocida durante el registro: ${unidad}`);
             }
 
-            //  Crear el payload final para la base de datos
+            // Agregamos profile_picture al payload
             const newUserPayload = {
                 username,
                 unidad,
                 email,
                 password, 
+                profile_picture: profilePicture || null, // Guardamos la URL o null
                 ...permissions 
             };
-
 
             // Crear el usuario
             const newUser = await Usuario.create(newUserPayload);
@@ -84,12 +84,11 @@ export default class userManager {
             if (error instanceof UniqueConstraintError) {
                 throw new Error('Email already in use');
             }
-            throw error; // Lanza otros errores
+            throw error; 
         }
     }
 
     logInUser = async (username, password) => {
-        // Encontrar al usuario SOLO por el username
         const user = await Usuario.findOne({ 
             where: { username },
             attributes: {
@@ -101,18 +100,13 @@ export default class userManager {
             throw new Error("Credenciales inválidas");
         }
         
-        // Buscamos al usuario de nuevo, pero esta vez pidiendo el password
         const userWithPass = await Usuario.findOne({ where: { username } });
-
-        // Comparar la contraseña hasheada de la DB con la que mandó el usuario
         const isPasswordValid = await bcrypt.compare(password, userWithPass.password);
 
         if (!isPasswordValid) {
-            // Contraseña incorrecta
             throw new Error("Credenciales inválidas");
         }
 
-        // Si todo está bien, devuelve el usuario (sin el password)
         return user;
     }
 
@@ -121,24 +115,21 @@ export default class userManager {
         return user;
     }
 
-    //  Encontrar usuario por Email 
     findUserByEmail = async (email) => {
         try {
             const user = await Usuario.findOne({ 
                 where: { email },
                 attributes: { exclude: ['password'] } 
             });
-            return user; // Devuelve el usuario (o null si no se encuentra)
+            return user; 
         } catch (error) {
             console.error("Error al buscar usuario por email:", error);
             throw new Error('Error al buscar usuario');
         }
     }
 
-    // Actualizar la contraseña del usuario 
     updateUserPassword = async (userId, newPassword) => {
         try {
-            // Hasheamos la nueva contraseña ANTES de guardarla
             const hashedPassword = await bcrypt.hash(newPassword, 10); 
             
             const [affectedRows] = await Usuario.update(
@@ -157,13 +148,10 @@ export default class userManager {
         }
     }
 
-    //Funcion para traer todos los usuarios desde la vista admin y poder modificar los datos 
-    
     getAllUsers = async (filters = {}) => {
         try {
             const whereClause = {};
 
-            // Construimos la consulta dinámicamente
            if (filters.id) {
                 whereClause.id = sequelize.where(
                     sequelize.cast(sequelize.col('id'), 'TEXT'), 
@@ -179,13 +167,12 @@ export default class userManager {
             if (filters.unidad) {
                 whereClause.unidad = filters.unidad;
             }
-            // El frontend envía true como string
             if (filters.admin === 'true') {
                 whereClause.admin = true;
             }
 
             const users = await Usuario.findAll({
-                where: whereClause, // Aplicamos los filtros
+                where: whereClause, 
                 attributes: { 
                     exclude: ['password', 'fcm_token'] 
                 },
@@ -198,23 +185,17 @@ export default class userManager {
         }
     }
 
-    // --- Función eliminar un usuario ---
     deleteUser = async (userId) => {
-        // Usamos una transacción para asegurar que todo se borre
-        // o nada se borre si algo falla.
         const t = await sequelize.transaction();
         try {
-            // Eliminar los mensajes enviados por el usuario
             await ChatMessage.destroy({
                 where: { sender_id: userId }
             }, { transaction: t });
 
-            //  Eliminar la sala de chat del usuario
             await ChatRoom.destroy({
                 where: { user_id: userId }
             }, { transaction: t });
 
-            //  Finalmente, eliminar al usuario
             const rowsDeleted = await Usuario.destroy({
                 where: { id: userId }
             }, { transaction: t });
@@ -223,26 +204,23 @@ export default class userManager {
                 throw new Error('Usuario no encontrado');
             }
 
-            // Si todo salió bien, confirmamos la transacción
             await t.commit();
             return { message: 'Usuario y sus datos asociados eliminados con éxito.' };
 
         } catch (error) {
-            // Si algo falló, revertimos todo
             await t.rollback();
             console.error("Error al eliminar usuario (transacción revertida):", error);
             throw new Error('Error al eliminar el usuario.');
         }
     }
 
-    // Función actualizar un usuario
     updateUser = async (userId, userData) => {
         try {
-            const { username, email, unidad, admin, password } = userData;
+            // Extraemos profile_picture también
+            const { username, email, unidad, admin, password, profile_picture } = userData;
 
-            // Lógica de permisos
             const permissions = {
-                admin: admin, // Tomamos el valor de admin que nos llega
+                admin: admin,
                 dg: false, up1: false, up3: false, up4: false, up5: false,
                 up6: false, up7: false, up8: false, up9: false,
                 inst: false, trat: false
@@ -263,6 +241,7 @@ export default class userManager {
                 default:
                     console.warn(`[BACK] Unidad desconocida durante la actualización: ${unidad}`);
             }
+            
             const dataToUpdate = {
                 username,
                 email,
@@ -270,16 +249,19 @@ export default class userManager {
                 ...permissions
             };
 
+            // Solo agregamos profile_picture si viene definido (no null/undefined)
+            if (profile_picture) {
+                dataToUpdate.profile_picture = profile_picture;
+            }
+
             if (password && password.trim() !== "") {
                 dataToUpdate.password = await bcrypt.hash(password.trim(), 10);
             }
 
-            // Actualizamos al usuario en la DB
             await Usuario.update(dataToUpdate, {
                 where: { id: userId }
             });
 
-            // Devolvemos el usuario actualizado (sin la contraseña)
             const updatedUser = await Usuario.findByPk(userId, {
                 attributes: { exclude: ['password', 'fcm_token'] }
             });

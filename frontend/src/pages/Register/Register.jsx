@@ -7,19 +7,8 @@ import { Capacitor } from '@capacitor/core';
 import apiClient from '../../api/axiosConfig'; 
 import { toast } from 'react-toastify'; 
 
-const EyeOpenIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-    </svg>
-);
-const EyeClosedIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 14.302 6.096 17.668 12 17.668c1.7 0 3.297-.272 4.77-.748l-1.02-1.02A3 3 0 0 0 12 15a3 3 0 0 0-2.036.78l-1.4-1.4A5.967 5.967 0 0 1 12 9c.773 0 1.503.168 2.167.46l-1.12 1.12A3.003 3.003 0 0 0 12 10.5a3 3 0 0 0-.25.031l-1.42 1.42A5.96 5.96 0 0 1 3.98 8.223Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.225 10.225c.53.53.948 1.19 1.225 1.937M17.25 10.5c.09.43.146.874.146 1.328 0 1.5-.432 2.87-1.16 4.028m-1.742 1.742A9.01 9.01 0 0 1 12 17.668c-5.904 0-9.226-3.72-9.964-5.351.48-1.02.99-1.98 1.57-2.868m4.314-1.921A9.009 9.009 0 0 1 12 6.332c4.71 0 8.577 3.892 9.964 5.351.041.052.082.103.123.154l-3.32 3.32m-3.98-3.98-.4-1.292" />
-    </svg>
-);
-
+const EyeOpenIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
+const EyeClosedIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 14.302 6.096 17.668 12 17.668c1.7 0 3.297-.272 4.77-.748l-1.02-1.02A3 3 0 0 0 12 15a3 3 0 0 0-2.036.78l-1.4-1.4A5.967 5.967 0 0 1 12 9c.773 0 1.503.168 2.167.46l-1.12 1.12A3.003 3.003 0 0 0 12 10.5a3 3 0 0 0-.25.031l-1.42 1.42A5.96 5.96 0 0 1 3.98 8.223Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M10.225 10.225c.53.53.948 1.19 1.225 1.937M17.25 10.5c.09.43.146.874.146 1.328 0 1.5-.432 2.87-1.16 4.028m-1.742 1.742A9.01 9.01 0 0 1 12 17.668c-5.904 0-9.226-3.72-9.964-5.351.48-1.02.99-1.98 1.57-2.868m4.314-1.921A9.009 9.009 0 0 1 12 6.332c4.71 0 8.577 3.892 9.964 5.351.041.052.082.103.123.154l-3.32 3.32m-3.98-3.98-.4-1.292" /></svg>);
 
 const Register = () => {
     const navigate = useNavigate();
@@ -28,7 +17,8 @@ const Register = () => {
         username: '',
         unidad: '',
         email: '',
-        passw: ''
+        passw: '',
+        profile_picture: null
     });
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false); 
@@ -45,10 +35,10 @@ const Register = () => {
     }, [navigate]); 
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, files } = e.target;
         setFormData(prevState => ({
             ...prevState,
-            [name]: value
+            [name]: files ? files[0] : value // Si es input file, tomamos el archivo
         }));
     };
     
@@ -61,10 +51,26 @@ const Register = () => {
             toast.error(errorMsg); 
             return; 
         }
+
+        // Usamos FormData para poder enviar el archivo
+        const data = new FormData();
+        data.append('username', formData.username);
+        data.append('unidad', formData.unidad);
+        data.append('email', formData.email);
+        data.append('passw', formData.passw);
+        if (formData.profile_picture) {
+            data.append('profile_picture', formData.profile_picture);
+        }
+
         try {
-            const response = await apiClient.post('/api/register', formData);
+            // Importante: header multipart/form-data
+            const response = await apiClient.post('/api/register', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
             toast.success(response.data.message || '¡Usuario registrado con éxito!');
-            setFormData({ username: '', unidad: '', email: '', passw: '' });
+            setFormData({ username: '', unidad: '', email: '', passw: '', profile_picture: null });
+            // Limpiar visualmente el input file
+            document.getElementById('profilePicInput').value = "";
         } catch (err) {
             if (err.response?.status === 409) {
                 const errorMsg = 'El email o nombre de usuario ya existe.';
@@ -80,9 +86,7 @@ const Register = () => {
 
     return (
         <div className="login-page"> 
-            
             <main className="login-main">
-                
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
 
@@ -90,6 +94,19 @@ const Register = () => {
                     <p className="form-subtitle">Crear una cuenta para un nuevo agente.</p>
                     
                     <form onSubmit={handleSubmit}>
+                        {/* INPUT FOTO DE PERFIL */}
+                        <div className="mb-3">
+                            <label className="form-label">Foto de Perfil (Opcional)</label>
+                            <input 
+                                type="file" 
+                                className="form-control" 
+                                id="profilePicInput"
+                                name="profile_picture"
+                                onChange={handleChange}
+                                accept="image/*"
+                            />
+                        </div>
+
                         <div className="mb-3">
                             <label htmlFor="exampleInputUsername" className="form-label">Nombre de usuario</label>
                             <input 
