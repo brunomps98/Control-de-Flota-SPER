@@ -306,6 +306,30 @@
   }
 }
 
+@media (max-width: 991px) {
+  
+  .notification-container {
+    position: static; 
+  }
+
+  .notification-panel {
+    position: fixed; 
+    top: 70px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; 
+    max-width: 400px;
+    right: auto; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 9999;
+  }
+
+  .notification-panel::before,
+  .notification-panel::after {
+    display: none;
+  }
+}
+
 .navbar-collapse.show ~ .user-connected-mobile {
     display: none !important;
 }

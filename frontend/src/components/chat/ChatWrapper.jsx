@@ -103,12 +103,17 @@ const ChatWindow = ({ onClose }) => {
     const startRecording = async () => {
         try {
             handleClearFiles();
+
+            // Verificamos permisos antes de intentar 
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
             const recorder = new MediaRecorder(stream);
             const chunks = [];
             recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'audio/webm' });
+                // Creamos un archivo con nombre único
                 const file = new File([blob], `audio_${Date.now()}.webm`, { type: 'audio/webm' });
                 file.preview = URL.createObjectURL(file);
                 setSelectedFiles([file]);
@@ -121,10 +126,21 @@ const ChatWindow = ({ onClose }) => {
             setIsRecording(true);
             setRecordingTime(0);
             recordingInterval.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
+
         } catch (error) {
-            toast.error(window.location.protocol !== 'https:' ? "Requiere HTTPS o localhost." : "Error de micrófono.");
+            console.error("Error al iniciar grabación:", error);
+
+            // Si es web normal (no Capacitor) y no es seguro, mostramos el error de HTTPS.
+            // Si es Capacitor, mostramos el error real (probablemente permisos).
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && Capacitor.getPlatform() === 'web') {
+                toast.error("Requiere HTTPS para grabar audio.");
+            } else {
+                // Error real (ej: Permiso denegado en Android)
+                toast.error(`No se pudo acceder al micrófono: ${error.message}`);
+            }
         }
     };
+
     const stopRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); } };
     const cancelRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); setMediaRecorder(null); setIsRecording(false); setRecordingTime(0); } };
     const formatTime = (seconds) => { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins}:${secs < 10 ? '0' : ''}${secs}`; };
@@ -362,7 +378,29 @@ const ChatWindow = ({ onClose }) => {
         return (
             <div className="user-info-view">
                 <div className="user-info-header-section">
-                    <div className="user-info-avatar-large">
+                    <div
+                        className="user-info-avatar-large"
+                        onClick={() => {
+                            if (targetUser.profile_picture) {
+                                setCurrentView('profile_pic'); // Cambia a la vista de pantalla completa
+                            } else {
+                                toast.info("Sin imagen de perfil", { autoClose: 2000 }); // Muestra mensaje si no hay foto
+                            }
+                        }}
+                        style={{
+                            color: '#aeb9c4',
+                            marginBottom: '15px',
+                            background: '#1a222c',
+                            borderRadius: '50%',
+                            width: '100px',
+                            height: '100px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: '2px solid #4a5568',
+                            cursor: 'pointer' 
+                        }}
+                    >
                         {targetUser.profile_picture ? (
                             <img
                                 src={targetUser.profile_picture}
