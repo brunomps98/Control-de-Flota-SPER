@@ -101,20 +101,21 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                     Unidades
                     </a>
                     <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                        {user.dg && <li><Link className="dropdown-item" to="/vehicle?title=Direccion General" onClick={handleMobileLinkClick}>Direccion General</Link></li>}
-                        {user.up1 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1" onClick={handleMobileLinkClick}>Unidad Penal 1</Link></li>}
-                        {user.up3 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3" onClick={handleMobileLinkClick}>Unidad Penal 3</Link></li>}
-                        {user.up4 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 4" onClick={handleMobileLinkClick}>Unidad Penal 4</Link></li>}
-                        {user.up5 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 5" onClick={handleMobileLinkClick}>Unidad Penal 5</Link></li>}
-                        {user.up6 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 6" onClick={handleMobileLinkClick}>Unidad Penal 6</Link></li>}
-                        {user.up7 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 7" onClick={handleMobileLinkClick}>Unidad Penal 7</Link></li>}
-                        {user.up8 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 8" onClick={handleMobileLinkClick}>Unidad Penal 8</Link></li>}
-                        {user.up9 && <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 9" onClick={handleMobileLinkClick}>Unidad Penal 9</Link></li>}
-                        {user.inst && <li><Link className="dropdown-item" to="/vehicle?title=Instituto" onClick={handleMobileLinkClick}>Instituto</Link></li>}
-                        {user.trat && <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento" onClick={handleMobileLinkClick}>Tratamiento</Link></li>}
+                        <li><Link className="dropdown-item" to="/vehicle?title=Direccion General" onClick={handleMobileLinkClick}>Direccion General</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 1" onClick={handleMobileLinkClick}>Unidad Penal 1</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 3" onClick={handleMobileLinkClick}>Unidad Penal 3</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 4" onClick={handleMobileLinkClick}>Unidad Penal 4</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 5" onClick={handleMobileLinkClick}>Unidad Penal 5</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 6" onClick={handleMobileLinkClick}>Unidad Penal 6</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 7" onClick={handleMobileLinkClick}>Unidad Penal 7</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 8" onClick={handleMobileLinkClick}>Unidad Penal 8</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Unidad Penal 9" onClick={handleMobileLinkClick}>Unidad Penal 9</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Instituto" onClick={handleMobileLinkClick}>Instituto</Link></li>
+                        <li><Link className="dropdown-item" to="/vehicle?title=Tratamiento" onClick={handleMobileLinkClick}>Tratamiento</Link></li>
                     </ul>
                 </li>
             )}
+
             {user.admin && (
               <>
                 <li className="nav-item">
@@ -136,7 +137,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
 
             <li className="nav-item d-lg-none text-center py-2 text-white-50">
                <small>Usuario conectado:</small><br/>
-               {/* Link en versión móvil también */}
                <Link to="/profile/me" onClick={handleMobileLinkClick} style={{color:'white', textDecoration:'none'}}>
                    <strong>{user.username}</strong>
                </Link>
@@ -155,8 +155,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
               <span className="uc-label">Usuario conectado:</span>
-              
-              {/* --- AQUÍ EL CAMBIO: LINK AL PERFIL --- */}
               <Link 
                 to="/profile/me" 
                 className="uc-name" 
@@ -165,8 +163,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
               >
                 {user.username}
               </Link>
-              {/* --------------------------------------- */}
-
             </div>
             <button className="nav-link btn btn-link text-nowrap" onClick={handleLogout}>LogOut</button>
           </div>

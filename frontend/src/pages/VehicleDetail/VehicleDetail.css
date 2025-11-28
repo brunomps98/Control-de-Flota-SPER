@@ -1,24 +1,25 @@
 .vehicle-detail-main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 30px 40px; 
+    padding: 30px 40px;
 }
 
 .vehicle-main-title {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #ffffff; 
+    color: #ffffff;
     margin: 0;
 }
+
 .vehicle-main-subtitle {
     font-size: 1.1rem;
-    color: #aeb9c4; 
+    color: #aeb9c4;
     margin-bottom: 30px;
 }
 
 .detail-header-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr; 
+    grid-template-columns: 2fr 1fr;
     gap: 30px;
     align-items: flex-start;
 }
@@ -27,16 +28,16 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-    min-height: 400px; 
+    min-height: 400px;
 }
 
 .main-image-wrapper {
     width: 100%;
     aspect-ratio: 16 / 10;
-    background-color: #24303c; 
+    background-color: #24303c;
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid #4a5568; 
+    border: 1px solid #4a5568;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -70,7 +71,7 @@
 
 .thumbnail-image.selected {
     opacity: 1;
-    border-color: #009688; 
+    border-color: #009688;
 }
 
 .info-actions-container {
@@ -80,33 +81,33 @@
 }
 
 .info-card {
-    background-color: #24303c; 
+    background-color: #24303c;
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #4a5568; 
+    border: 1px solid #4a5568;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .info-card h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #ffffff; 
+    color: #ffffff;
     margin: 0 0 20px 0;
     padding-bottom: 15px;
-    border-bottom: 1px solid #4a5568; 
+    border-bottom: 1px solid #4a5568;
 }
 
 .info-card p {
     display: flex;
     justify-content: space-between;
     font-size: 0.95rem;
-    color: #aeb9c4; 
+    color: #aeb9c4;
     margin: 0 0 12px 0;
     line-height: 1.5;
 }
 
 .info-card p strong {
-    color: #ffffff; 
+    color: #ffffff;
     font-weight: 600;
     padding-right: 10px;
 }
@@ -118,31 +119,32 @@
 .info-card hr {
     border: 0;
     height: 1px;
-    background-color: #4a5568; 
+    background-color: #4a5568;
     margin: 15px 0;
 }
 
 .actions-card {
-    background-color: #24303c; 
+    background-color: #24303c;
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #4a5568; 
+    border: 1px solid #4a5568;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .actions-card h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #ffffff; 
+    color: #ffffff;
     margin: 0 0 20px 0;
 }
 
 .actions-card .btn-action {
-    display: block; 
+    display: block;
     width: 100%;
     text-align: center;
     margin-bottom: 12px;
 }
+
 .actions-card .btn-action:last-child {
     margin-bottom: 0;
 }
@@ -163,23 +165,26 @@
     background-color: #009688;
     color: white;
 }
+
 .btn-action.btn-primary:hover {
     background-color: #007a6e;
 }
 
 .btn-action.btn-secondary {
-    background-color: #4a5568; 
-    color: #ffffff; 
+    background-color: #4a5568;
+    color: #ffffff;
     border-color: #4a5568;
 }
+
 .btn-action.btn-secondary:hover {
-    background-color: #5a6b82; 
+    background-color: #5a6b82;
 }
 
 .btn-action.btn-destructive {
     background-color: #dc3545;
     color: white;
 }
+
 .btn-action.btn-destructive:hover {
     background-color: #c82333;
 }
@@ -187,12 +192,13 @@
 .history-grid-title {
     margin-top: 50px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #4a5568; 
+    border-bottom: 2px solid #4a5568;
 }
+
 .history-grid-title h2 {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #ffffff; 
+    color: #ffffff;
 }
 
 .history-grid {
@@ -204,10 +210,10 @@
 
 .history-section-placeholder,
 .history-section {
-    background-color: #24303c; 
+    background-color: #24303c;
     border-radius: 12px;
     padding: 25px;
-    border: 1px solid #4a5568; 
+    border: 1px solid #4a5568;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     min-height: 150px;
     display: flex;
@@ -219,7 +225,7 @@
     align-items: center;
     gap: 15px;
     font-size: 1rem;
-    color: #aeb9c4; 
+    color: #aeb9c4;
     font-weight: 600;
 }
 
@@ -234,7 +240,7 @@
 .history-section.error p {
     text-align: center;
     font-size: 1rem;
-    color: #aeb9c4; 
+    color: #aeb9c4;
 }
 
 .btn-load-history {
@@ -248,6 +254,7 @@
     transition: all 0.3s ease;
     border: none;
 }
+
 .btn-load-history:hover {
     background-color: #007a6e;
 }
@@ -256,14 +263,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #4a5568; 
+    border-bottom: 1px solid #4a5568;
     padding-bottom: 12px;
     margin-bottom: 15px;
 }
+
 .history-header h3 {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #ffffff; 
+    color: #ffffff;
     margin: 0;
 }
 
@@ -278,6 +286,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
 }
+
 .btn-history-delete-all:hover {
     background-color: #c82333;
     color: white;
@@ -288,24 +297,29 @@
     border-collapse: collapse;
     font-size: 0.9rem;
 }
-.history-section th, 
+
+.history-section th,
 .history-section td {
     padding: 10px 8px;
     text-align: left;
-    border-bottom: 1px solid #4a5568; 
+    border-bottom: 1px solid #4a5568;
 }
+
 .history-section th {
     font-weight: 600;
-    color: #aeb9c4; 
+    color: #aeb9c4;
     font-size: 0.8rem;
     text-transform: uppercase;
 }
+
 .history-section td {
-    color: #f0f4f8; 
+    color: #f0f4f8;
 }
+
 .history-section tr:last-child td {
     border-bottom: none;
 }
+
 .history-section .action-col {
     width: 60px;
     text-align: center;
@@ -316,23 +330,24 @@
     border: none;
     color: #90a0b1;
     cursor: pointer;
-    font-size: 1.1rem; 
+    font-size: 1.1rem;
     padding: 0;
     transition: all 0.2s;
 }
+
 .btn-history-delete-one:hover {
-    color: #dc3545; 
+    color: #dc3545;
     transform: scale(1.1);
 }
 
-/* --- 7. MENSAJES DE CARGA/ERROR PRINCIPAL (CORREGIDO) --- */
 .detail-loading-message,
 .detail-error-message {
     text-align: center;
     font-size: 1.2rem;
     padding: 60px 20px;
-    color: #aeb9c4; 
+    color: #aeb9c4;
 }
+
 .detail-error-message {
     color: #f8d7da;
     background-color: #a93c46;
@@ -341,14 +356,15 @@
 }
 
 
-/* --- 8. RESPONSIVE --- */
 @media (max-width: 960px) {
     .vehicle-detail-main {
         padding: 20px 15px;
     }
+
     .detail-header-grid {
         grid-template-columns: 1fr;
     }
+
     .history-grid {
         grid-template-columns: 1fr;
     }
@@ -358,59 +374,140 @@
     .vehicle-main-title {
         font-size: 1.8rem;
     }
+
     .vehicle-main-subtitle {
         font-size: 1rem;
         margin-bottom: 20px;
     }
-    .info-card, .actions-card, .history-section {
+
+    .info-card,
+    .actions-card,
+    .history-section {
         padding: 20px;
     }
 }
 
-/* --- 9. ESTILOS DE IMPRESIÓN --- */
 @media print {
-    body, .login-page { 
-        background-color: #ffffff !important;
-        padding: 0;
-        color: #000; 
+    @page {
+        margin: 1cm;
+        size: A4;
     }
-    
-    .app-navbar, .footer-bar, .actions-card, .btn-filter-toggle, .filter-container, .chat-wrapper-container {
+
+    body, .login-page {
+        background-color: #ffffff !important;
+        background-image: none !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .app-navbar, .footer-bar, .chat-wrapper-container, .btn-filter-toggle, .filter-container,
+    .thumbnail-list, .history-grid-title, .history-grid, .history-section, .actions-card, .actions-integrated, button, a.btn-action,
+    .Toastify, .swal2-container, .toast-container,
+    footer, .site-footer {
         display: none !important;
     }
 
-    .vehicle-detail-main, .info-card, .history-section, .chart-card {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        margin: 10px 0;
-        color: #000;
+    .vehicle-detail-main {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        display: block !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
-    /* Ajustes de color para impresión */
-    .vehicle-main-title, .vehicle-main-subtitle, .info-card h2, .info-card p,
-    .info-card p strong, .history-grid-title h2, .history-header h3,
-    .history-section th, .history-section td {
+    .vehicle-main-title {
         color: #000 !important;
+        font-size: 24pt !important;
+        text-align: center;
+        margin: 0 0 5px 0 !important;
+        border-bottom: 2px solid #000;
+    }
+    .vehicle-main-subtitle {
+        color: #000 !important;
+        text-align: center;
+        margin: 0 0 20px 0 !important;
+        font-size: 14pt !important;
+        opacity: 1 !important;
     }
 
-    .detail-header-grid, .history-grid {
-        grid-template-columns: 1fr;
+    .detail-header-grid {
+        display: block !important;
+    }
+
+    .gallery-container {
+        display: flex !important;
+        justify-content: center;
+        margin-bottom: 25px;
         page-break-inside: avoid;
     }
 
-    .gallery-container, .history-header button {
-        display: none;
-    }
-    
-    .info-card, .history-section {
-        page-break-inside: avoid;
-    }
-    
-    .thumbnail-list {
-        display: none;
-    }
     .main-image-wrapper {
-        display: block;
-        border: 1px solid #ccc;
+        width: 60% !important;
+        height: auto !important;
+        max-height: 300px !important;
+        border: 1px solid #000 !important;
+        background: none !important;
+        box-shadow: none !important;
+        margin: 0 auto !important;
+    }
+
+    .main-image {
+        object-fit: contain !important;
+        max-height: 300px !important;
+    }
+
+    .info-actions-container {
+        width: 100% !important;
+        margin-top: 10px;
+    }
+
+    .info-card {
+        background: transparent !important;
+        border: 2px solid #000 !important;
+        border-radius: 4px !important;
+        padding: 20px !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+
+    .info-card h2 {
+        font-size: 16pt !important;
+        border-bottom: 2px solid #000 !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 5px !important;
+        color: #000 !important;
+        text-transform: uppercase;
+        font-weight: 800 !important;
+    }
+
+    .info-card * {
+        color: #000000 !important;
+        text-shadow: none !important;
+        opacity: 1 !important;
+    }
+
+    .info-row {
+        border-bottom: 1px solid #ccc !important;
+        padding: 8px 0 !important;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .info-label { font-weight: 700 !important; font-size: 11pt !important; }
+    .info-value, .creator-link { font-weight: 500 !important; font-size: 11pt !important; text-align: right; }
+
+    .vehicle-detail-main::after {
+        content: "© Control de Flota S.P.E.R - Documento generado a traves de la plataforma.";
+        display: block !important; 
+        text-align: center;
+        font-size: 9pt;
+        color: #000 !important;
+        margin-top: 50px; 
+        border-top: 1px solid #000; 
+        padding-top: 10px;
+        width: 100%;
     }
 }
