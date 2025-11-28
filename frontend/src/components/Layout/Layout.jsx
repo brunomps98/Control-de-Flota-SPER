@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import logo from '../../assets/images/logo.png';
 import apiClient from '../../api/axiosConfig';
 import Navbar from '../common/NavBar/NavBar';
 import Footer from '../common/Footer/Footer';
@@ -48,11 +49,11 @@ const Layout = () => {
 
     // ---  MANEJAR CLIC EN NOTIFICACIÓN (WEB/INTERNO) ---
     const handleNotificationClick = async (notif) => {
-        setIsNotificationOpen(false); 
+        setIsNotificationOpen(false);
+
         const resourceId = notif.resourceId || notif.resource_id;
         const type = notif.type;
-        
-        // Usamos la misma lógica de redirección
+
         processRedirect(type, resourceId);
 
         // Marcar como leída
@@ -67,24 +68,31 @@ const Layout = () => {
         }
     };
 
-    // --- FUNCIÓN CENTRALIZADA DE REDIRECCIÓN ---
+    // FUNCIÓN CENTRALIZADA DE REDIRECCIÓN 
     const processRedirect = (type, resourceId) => {
-        console.log("Procesando redirección:", { type, resourceId });
-        
-        if (type === 'vehicle_update' && resourceId) {
-            navigate(`/vehicle-detail/${resourceId}`);
-        } 
+        console.log("🚀 Ejecutando Redirección Final:", { type, resourceId });
+
+        if (type === 'vehicle_update') {
+            if (resourceId) {
+                navigate(`/vehicle-detail/${resourceId}`);
+            } else {
+                navigate('/vehicle');
+            }
+        }
         else if (type === 'new_ticket') {
             if (resourceId) navigate(`/case/${resourceId}`);
             else navigate('/support-tickets');
-        } 
+        }
         else if (type === 'chat_message' || type === 'new_message') {
-            navigate('/chat'); 
+            // Navegamos a la vista base para asegurar que el chat se pueda abrir
+            navigate('/vehicle');
+
             if (resourceId) {
-                // Pequeño hack para pasar el ID al chat si ya está montado
+                // Abrimos el chat flotante con un pequeño delay para asegurar que el componente exista
                 setTimeout(() => {
+                    console.log("💬 Abriendo chat flotante ID:", resourceId);
                     window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
-                }, 500);
+                }, 800);
             }
         }
     };
@@ -107,28 +115,30 @@ const Layout = () => {
 
     // VERIFICAR REDIRECCIONES PENDIENTES (AL CARGAR USUARIO) 
     useEffect(() => {
+        // Solo ejecutamos si el usuario ya cargó correctamente
         if (user && !loading) {
-            // Revisamos si había una notificación pendiente en el "buzón" (localStorage)
             const pendingRedirect = localStorage.getItem('pending_notification_redirect');
-            
+
             if (pendingRedirect) {
                 try {
-                    const { type, resourceId } = JSON.parse(pendingRedirect);
-                    console.log("Encontrada redirección pendiente:", type, resourceId);
-                    
-                    // Limpiamos el buzón para que no redirija eternamente
+                    const parsed = JSON.parse(pendingRedirect);
+                    const { type, resourceId } = parsed;
+
+                    console.log("📬 Buzón: Encontrada redirección pendiente, ejecutando...", parsed);
+
+                    // Limpiamos INMEDIATAMENTE
                     localStorage.removeItem('pending_notification_redirect');
-                    
-                    // Ejecutamos la redirección ahora que el usuario está logueado
+
+                    // Ejecutamos la redirección final
                     processRedirect(type, resourceId);
-                    
+
                 } catch (e) {
-                    console.error("Error parseando redirección pendiente", e);
+                    console.error("Error procesando redirección pendiente", e);
                     localStorage.removeItem('pending_notification_redirect');
                 }
             }
         }
-    }, [user, loading]); // Se ejecuta cuando user cambia de null a objeto
+    }, [user, loading]);
 
     // CONFIGURAR PUSH NOTIFICATIONS (NATIVO) 
     useEffect(() => {
@@ -144,38 +154,39 @@ const Layout = () => {
 
                 await PushNotifications.register();
 
-                // Listeners
                 PushNotifications.addListener('registration', async (token) => {
                     try {
                         await apiClient.post('/api/user/fcm-token', { fcmToken: token.value });
                     } catch (error) { /* Silent fail */ }
                 });
 
+                // --- CLIC EN NOTIFICACIÓN ---
                 PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
                     const data = notification.notification.data;
-                    console.log('[FCM] Click recibido (raw):', data);
+                    console.log('[FCM] Click recibido:', data);
 
+                    // Normalización de datos
                     let type = data.type;
-                    let resourceId = data.resourceId || data.chatRoomId || data.vehicleId || data.id;
+                    let resourceId = null;
 
-                    // Normalización de datos según tu backend
-                    if (data.chatRoomId) { type = 'chat_message'; resourceId = data.chatRoomId; }
-                    else if (data.vehicleId) { type = 'vehicle_update'; resourceId = data.vehicleId; }
+                    if (data.chatRoomId) {
+                        type = 'chat_message';
+                        resourceId = data.chatRoomId;
+                    } else if (data.vehicleId) {
+                        type = 'vehicle_update';
+                        resourceId = data.vehicleId;
+                    } else if (data.id) {
+                        resourceId = data.id; // Para tickets u otros
+                    }
 
-                    // GUARDAR EN EL "BUZÓN" (LocalStorage)
-                    // No redirigimos directamente. Guardamos la intención y recargamos/dejamos seguir.
+                    // GUARDAMOS LA INTENCIÓN
+                    console.log(`[FCM] Guardando redirección y yendo a Login -> Type: ${type}, ID: ${resourceId}`);
                     localStorage.setItem('pending_notification_redirect', JSON.stringify({
                         type,
                         resourceId
                     }));
 
-                    if (window.location.pathname !== '/login') {
-                         processRedirect(type, resourceId);
-                         localStorage.removeItem('pending_notification_redirect'); // Ya lo usamos
-                    } else {
-                        // Si estamos en login, dejamos el item en localStorage para que
-                        // cuando el usuario se loguee exitosamente y cargue Layout, se redirija.
-                    }
+                    navigate('/login');
                 });
 
             } catch (error) {
@@ -188,8 +199,9 @@ const Layout = () => {
         return () => {
             PushNotifications.removeAllListeners();
         };
-    }, []); // Array vacío: Se registra UNA sola vez al montar la app, independiente del usuario.
+    }, []);
 
+    // --- Otros UseEffects ---
     useEffect(() => {
         const badge = document.querySelector('.grecaptcha-badge');
         if (badge) { badge.style.display = 'none'; badge.style.visibility = 'hidden'; }
@@ -217,7 +229,6 @@ const Layout = () => {
         };
     }, [user, resetInactivityTimer]);
 
-    // Listener de Sockets para Admin (Notificaciones en tiempo real)
     const NotificationsListener = () => {
         const socket = useSocket();
         useEffect(() => {
@@ -233,7 +244,6 @@ const Layout = () => {
         return null;
     };
 
-    // Carga de notificaciones iniciales
     useEffect(() => {
         if (user && user.admin) {
             apiClient.get('/api/notifications').then(res => {
@@ -245,11 +255,11 @@ const Layout = () => {
         }
     }, [user]);
 
-    // --- RENDER ---
-    if (loading) return <div>Cargando...</div>;
-    
-    // Si no hay usuario y ya terminó de cargar, Layout no renderiza nada (protección)
-    if (!user) return null; 
+    if (loading) return <div className="app-loading-screen">
+        <img src={logo} alt="Cargando..." className="loading-logo" />
+        <div className="loading-spinner"></div>
+    </div>
+    if (!user) return null;
 
     const handleBellClick = async (event) => {
         event.stopPropagation();
