@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import logo from '../../assets/images/logo.png';
 import apiClient from '../../api/axiosConfig';
 import Navbar from '../common/NavBar/NavBar';
 import Footer from '../common/Footer/Footer';
@@ -51,7 +50,8 @@ const Layout = () => {
     const handleNotificationClick = async (notif) => {
         setIsNotificationOpen(false);
 
-        const resourceId = notif.resourceId || notif.resource_id;
+        // Intentamos obtener el ID de todas las formas posibles
+        const resourceId = notif.resourceId || notif.resource_id || notif.id;
         const type = notif.type;
 
         processRedirect(type, resourceId);
@@ -69,13 +69,17 @@ const Layout = () => {
     };
 
     // FUNCIÓN CENTRALIZADA DE REDIRECCIÓN 
-    const processRedirect = (type, resourceId) => {
-        console.log("🚀 Ejecutando Redirección Final:", { type, resourceId });
+    const processRedirect = (rawType, resourceId) => {
+        console.log("🚀 Procesando Redirección:", { rawType, resourceId });
+
+        let type = rawType;
+        if (type === 'vehicle') type = 'vehicle_update';
 
         if (type === 'vehicle_update') {
             if (resourceId) {
                 navigate(`/vehicle-detail/${resourceId}`);
             } else {
+                console.warn("⚠️ Redirección de vehículo sin ID, yendo a lista.");
                 navigate('/vehicle');
             }
         }
@@ -84,16 +88,20 @@ const Layout = () => {
             else navigate('/support-tickets');
         }
         else if (type === 'chat_message' || type === 'new_message') {
-            // Navegamos a la vista base para asegurar que el chat se pueda abrir
-            navigate('/vehicle');
+            navigate('/vehicle'); // Base segura
 
             if (resourceId) {
-                // Abrimos el chat flotante con un pequeño delay para asegurar que el componente exista
+                // 2. Abrir ventana
                 setTimeout(() => {
-                    console.log("💬 Abriendo chat flotante ID:", resourceId);
+                    console.log("💬 Disparando evento OPEN_CHAT_ROOM para:", resourceId);
                     window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
-                }, 800);
+                }, 1000); // 1 segundo para asegurar que todo cargó
             }
+        }
+        else {
+            // Fallback por si el tipo no coincide
+            console.log("Tipo desconocido, yendo a home.");
+            navigate('/vehicle');
         }
     };
 
@@ -113,9 +121,8 @@ const Layout = () => {
         fetchUserSession();
     }, [navigate]);
 
-    // VERIFICAR REDIRECCIONES PENDIENTES (AL CARGAR USUARIO) 
+    //  VERIFICAR REDIRECCIONES PENDIENTES (AL CARGAR USUARIO) 
     useEffect(() => {
-        // Solo ejecutamos si el usuario ya cargó correctamente
         if (user && !loading) {
             const pendingRedirect = localStorage.getItem('pending_notification_redirect');
 
@@ -124,12 +131,10 @@ const Layout = () => {
                     const parsed = JSON.parse(pendingRedirect);
                     const { type, resourceId } = parsed;
 
-                    console.log("📬 Buzón: Encontrada redirección pendiente, ejecutando...", parsed);
+                    console.log("📬 Buzón: Ejecutando redirección pendiente:", parsed);
 
-                    // Limpiamos INMEDIATAMENTE
                     localStorage.removeItem('pending_notification_redirect');
 
-                    // Ejecutamos la redirección final
                     processRedirect(type, resourceId);
 
                 } catch (e) {
@@ -160,7 +165,6 @@ const Layout = () => {
                     } catch (error) { /* Silent fail */ }
                 });
 
-                // --- CLIC EN NOTIFICACIÓN ---
                 PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
                     const data = notification.notification.data;
                     console.log('[FCM] Click recibido:', data);
@@ -169,23 +173,23 @@ const Layout = () => {
                     let type = data.type;
                     let resourceId = null;
 
-                    if (data.chatRoomId) {
-                        type = 'chat_message';
-                        resourceId = data.chatRoomId;
-                    } else if (data.vehicleId) {
-                        type = 'vehicle_update';
-                        resourceId = data.vehicleId;
-                    } else if (data.id) {
-                        resourceId = data.id; // Para tickets u otros
+                    if (data.vehicleId) { resourceId = data.vehicleId; type = 'vehicle_update'; }
+                    else if (data.chatRoomId) { resourceId = data.chatRoomId; type = 'chat_message'; }
+                    else if (data.id) {
+                        resourceId = data.id;
+                        if (type === 'vehicle') type = 'vehicle_update';
                     }
 
-                    // GUARDAMOS LA INTENCIÓN
-                    console.log(`[FCM] Guardando redirección y yendo a Login -> Type: ${type}, ID: ${resourceId}`);
+                    // 1. GUARDAMOS LA INTENCIÓN
                     localStorage.setItem('pending_notification_redirect', JSON.stringify({
                         type,
                         resourceId
                     }));
 
+                    // FORZAMOS EL CIERRE DE SESIÓN 
+                    console.log("[FCM] Forzando logout y yendo a Login...");
+                    localStorage.removeItem('token');
+                    setUser(null); // Limpiamos el estado visualmente
                     navigate('/login');
                 });
 
@@ -255,10 +259,15 @@ const Layout = () => {
         }
     }, [user]);
 
-    if (loading) return <div className="app-loading-screen">
-        <img src={logo} alt="Cargando..." className="loading-logo" />
-        <div className="loading-spinner"></div>
-    </div>
+    // --- RENDERIZADO DEL SPLASH SCREEN ---
+    if (loading) {
+        return (
+            <div className="app-loading-screen">
+                <div className="loading-spinner"></div>
+            </div>
+        );
+    }
+
     if (!user) return null;
 
     const handleBellClick = async (event) => {
