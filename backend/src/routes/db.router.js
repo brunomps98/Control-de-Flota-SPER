@@ -13,7 +13,6 @@ import ChatController from "../controllers/chat.controller.js";
 import Usuario from '../models/user.model.js';
 import Notification from '../models/notification.model.js';
 import { Op } from 'sequelize';
-import rateLimit from 'express-rate-limit';
 import axios from 'axios';
 import { sendPasswordResetEmail } from "../services/email.service.js";
 import DashboardController from "../controllers/dashboard.controller.js";
@@ -45,7 +44,7 @@ router.get("/health", (req, res) => {
 router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.registerUser);
 
 // --- RUTA DE LOGIN ---
-router.post('/login', loginLimiter, async (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
 
     try {
@@ -250,7 +249,6 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
         const notifications = await Notification.findAll({
             where: { user_id: userId },
             order: [['created_at', 'DESC']],
-            limit: 50
         });
         res.status(200).json(notifications);
     } catch (error) {
