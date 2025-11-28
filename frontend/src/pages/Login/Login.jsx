@@ -98,7 +98,7 @@ const Login = () => {
             const { user, token } = response.data;
             localStorage.setItem('token', token);
             const destinationPath = '/vehicle';
-            navigate(destinationPath, { state: { username: user.username } });
+            window.location.href = destinationPath;
         } catch (err) {
             console.error("Login Error:", err);
             toast.error(err.response?.data?.message || 'Error al iniciar sesión');
