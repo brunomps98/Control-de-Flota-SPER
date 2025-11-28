@@ -3,6 +3,10 @@ import { supabase } from '../config/supabaseClient.js';
 import { getIO } from '../socket/socketHandler.js';
 import path from 'path';
 
+import Usuario from '../models/user.model.js';
+import Notification from '../models/notification.model.js';
+import { sendPushNotification } from '../services/notification.service.js';
+
 
 const renderVehicleView = async (req, res, viewName) => {
     try {
