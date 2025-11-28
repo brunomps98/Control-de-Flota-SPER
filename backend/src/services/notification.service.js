@@ -51,7 +51,6 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
             priority: 'high',
             notification: {
                 sound: 'default',
-                click_action: 'FLUTTER_NOTIFICATION_CLICK' 
             }
         }
     };

@@ -46,37 +46,14 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
-    // ---  MANEJAR CLIC EN NOTIFICACIÓN (WEB) ---
+    // ---  MANEJAR CLIC EN NOTIFICACIÓN (WEB/INTERNO) ---
     const handleNotificationClick = async (notif) => {
-        setIsNotificationOpen(false); // Cierra el panel
-
+        setIsNotificationOpen(false); 
         const resourceId = notif.resourceId || notif.resource_id;
         const type = notif.type;
-
-        console.log("Navegando a:", { type, resourceId });
-
-        if (resourceId) {
-            if (type === 'vehicle_update') {
-                navigate(`/vehicle-detail/${resourceId}`);
-            } else if (type === 'new_ticket') {
-                navigate(`/case/${resourceId}`);
-            } 
-            else if (type === 'chat_message' || type === 'new_message') {
-                if (user && user.admin) {
-                    // Emitimos el evento para abrir la ventana flotante
-                    window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
-                } else {
-                    navigate('/chat');
-                }
-            }
-        }
-        // Bloque genérico (si no hay ID)
-        else if (type === 'chat_message' || type === 'new_message') {
-            if (user && user.admin) {
-            } else {
-                navigate('/chat');
-            }
-        }
+        
+        // Usamos la misma lógica de redirección
+        processRedirect(type, resourceId);
 
         // Marcar como leída
         try {
@@ -90,14 +67,36 @@ const Layout = () => {
         }
     };
 
-    // --- UseEffects ---
+    // --- FUNCIÓN CENTRALIZADA DE REDIRECCIÓN ---
+    const processRedirect = (type, resourceId) => {
+        console.log("Procesando redirección:", { type, resourceId });
+        
+        if (type === 'vehicle_update' && resourceId) {
+            navigate(`/vehicle-detail/${resourceId}`);
+        } 
+        else if (type === 'new_ticket') {
+            if (resourceId) navigate(`/case/${resourceId}`);
+            else navigate('/support-tickets');
+        } 
+        else if (type === 'chat_message' || type === 'new_message') {
+            navigate('/chat'); 
+            if (resourceId) {
+                // Pequeño hack para pasar el ID al chat si ya está montado
+                setTimeout(() => {
+                    window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
+                }, 500);
+            }
+        }
+    };
+
+    // CARGAR USUARIO 
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
                 const response = await apiClient.get('/api/user/current');
                 setUser(response.data.user);
             } catch (error) {
-                console.error("No hay sesión de usuario activa:", error.response?.data?.message || error.message);
+                console.error("No hay sesión de usuario activa:", error);
                 navigate('/login');
             } finally {
                 setLoading(false);
@@ -106,115 +105,81 @@ const Layout = () => {
         fetchUserSession();
     }, [navigate]);
 
-    // --- Cargar notificaciones guardadas en DB (Solo Admin) ---
+    // VERIFICAR REDIRECCIONES PENDIENTES (AL CARGAR USUARIO) 
     useEffect(() => {
-        if (user && user.admin) {
-            const fetchNotifications = async () => {
+        if (user && !loading) {
+            // Revisamos si había una notificación pendiente en el "buzón" (localStorage)
+            const pendingRedirect = localStorage.getItem('pending_notification_redirect');
+            
+            if (pendingRedirect) {
                 try {
-                    const response = await apiClient.get('/api/notifications');
-                    if (Array.isArray(response.data)) {
-                        const notifs = response.data;
-                        setNotifications(notifs);
-                        const unread = notifs.filter(n => !n.is_read).length;
-                        setUnreadCount(unread);
-                    }
-                } catch (error) {
-                    console.error("Error cargando notificaciones:", error);
+                    const { type, resourceId } = JSON.parse(pendingRedirect);
+                    console.log("Encontrada redirección pendiente:", type, resourceId);
+                    
+                    // Limpiamos el buzón para que no redirija eternamente
+                    localStorage.removeItem('pending_notification_redirect');
+                    
+                    // Ejecutamos la redirección ahora que el usuario está logueado
+                    processRedirect(type, resourceId);
+                    
+                } catch (e) {
+                    console.error("Error parseando redirección pendiente", e);
+                    localStorage.removeItem('pending_notification_redirect');
                 }
-            };
-            fetchNotifications();
-        }
-    }, [user]);
-
-    useEffect(() => {
-        const badge = document.querySelector('.grecaptcha-badge');
-        if (badge) {
-            badge.style.display = 'none';
-            badge.style.visibility = 'hidden';
-        }
-    }, []);
-
-    useEffect(() => {
-        if (Capacitor.getPlatform() === 'web') return;
-        const handleBackButton = () => {
-            const path = location.pathname;
-            if (path === '/vehicle' || path === '/vehicle-general') {
-                App.exitApp();
             }
-            else {
-                navigate(-1);
-            }
-        };
-        const listener = App.addListener('backButton', handleBackButton);
-        return () => {
-            listener.remove();
-        };
-    }, [navigate, location]);
+        }
+    }, [user, loading]); // Se ejecuta cuando user cambia de null a objeto
 
+    // CONFIGURAR PUSH NOTIFICATIONS (NATIVO) 
     useEffect(() => {
-        // Solo ejecutar si estamos en una app nativa (Android/iOS)
         if (Capacitor.getPlatform() === 'web') return;
 
         const registerForNotifications = async () => {
             try {
                 let permStatus = await PushNotifications.checkPermissions();
-
                 if (permStatus.receive === 'prompt') {
                     permStatus = await PushNotifications.requestPermissions();
                 }
-
-                if (permStatus.receive !== 'granted') {
-                    console.warn('[FCM] Permiso de notificaciones denegado.');
-                    return;
-                }
+                if (permStatus.receive !== 'granted') return;
 
                 await PushNotifications.register();
 
+                // Listeners
                 PushNotifications.addListener('registration', async (token) => {
-                    console.log('[FCM] Token obtenido:', token.value);
                     try {
                         await apiClient.post('/api/user/fcm-token', { fcmToken: token.value });
-                    } catch (error) {
-                        console.error('[FCM] Error al guardar token en backend:', error);
-                    }
-                });
-
-                PushNotifications.addListener('registrationError', (error) => {
-                    console.error('[FCM] Error en registro:', error);
-                });
-
-                PushNotifications.addListener('pushNotificationReceived', (notification) => {
-                    console.log('[FCM] Notificación recibida en primer plano:', notification);
-                    toast.info(notification.title || 'Nueva notificación');
-                    setUnreadCount(prev => prev + 1); 
+                    } catch (error) { /* Silent fail */ }
                 });
 
                 PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
                     const data = notification.notification.data;
-                    console.log('[FCM] Click en notificación:', data);
+                    console.log('[FCM] Click recibido (raw):', data);
 
-                    if (data.chatRoomId) {
-                        if (user && user.admin) {
-                            setTimeout(() => {
-                                window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: data.chatRoomId }));
-                            }, 800); // Delay un poco mayor para asegurar que la app cargó el contexto
-                        }
-                        else navigate('/chat');
-                    }
-                    else if (data.vehicleId) {
-                        navigate(`/vehicle-detail/${data.vehicleId}`);
-                    }
-                    else if (data.type === 'new_ticket') {
-                        if (data.id) {
-                            navigate(`/case/${data.id}`);
-                        } else {
-                            navigate('/support-tickets');
-                        }
+                    let type = data.type;
+                    let resourceId = data.resourceId || data.chatRoomId || data.vehicleId || data.id;
+
+                    // Normalización de datos según tu backend
+                    if (data.chatRoomId) { type = 'chat_message'; resourceId = data.chatRoomId; }
+                    else if (data.vehicleId) { type = 'vehicle_update'; resourceId = data.vehicleId; }
+
+                    // GUARDAR EN EL "BUZÓN" (LocalStorage)
+                    // No redirigimos directamente. Guardamos la intención y recargamos/dejamos seguir.
+                    localStorage.setItem('pending_notification_redirect', JSON.stringify({
+                        type,
+                        resourceId
+                    }));
+
+                    if (window.location.pathname !== '/login') {
+                         processRedirect(type, resourceId);
+                         localStorage.removeItem('pending_notification_redirect'); // Ya lo usamos
+                    } else {
+                        // Si estamos en login, dejamos el item en localStorage para que
+                        // cuando el usuario se loguee exitosamente y cargue Layout, se redirija.
                     }
                 });
 
             } catch (error) {
-                console.error('[FCM] Error general en setup:', error);
+                console.error('[FCM] Error setup:', error);
             }
         };
 
@@ -223,110 +188,98 @@ const Layout = () => {
         return () => {
             PushNotifications.removeAllListeners();
         };
-    }, [user, navigate]); 
+    }, []); // Array vacío: Se registra UNA sola vez al montar la app, independiente del usuario.
 
     useEffect(() => {
-        if (!user) return;
-        if (Capacitor.getPlatform() !== 'web') return;
+        const badge = document.querySelector('.grecaptcha-badge');
+        if (badge) { badge.style.display = 'none'; badge.style.visibility = 'hidden'; }
+    }, []);
 
+    useEffect(() => {
+        if (Capacitor.getPlatform() === 'web') return;
+        const handleBackButton = () => {
+            const path = location.pathname;
+            if (path === '/vehicle' || path === '/vehicle-general') App.exitApp();
+            else navigate(-1);
+        };
+        const listener = App.addListener('backButton', handleBackButton);
+        return () => { listener.remove(); };
+    }, [navigate, location]);
+
+    useEffect(() => {
+        if (!user || Capacitor.getPlatform() !== 'web') return;
         const events = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'];
         resetInactivityTimer();
-        events.forEach(event => {
-            window.addEventListener(event, resetInactivityTimer);
-        });
+        events.forEach(event => window.addEventListener(event, resetInactivityTimer));
         return () => {
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-            events.forEach(event => {
-                window.removeEventListener(event, resetInactivityTimer);
-            });
+            if (timerRef.current) clearTimeout(timerRef.current);
+            events.forEach(event => window.removeEventListener(event, resetInactivityTimer));
         };
     }, [user, resetInactivityTimer]);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (isNotificationOpen) {
-                setIsNotificationOpen(false);
-            }
-        };
-        window.addEventListener('click', handleClickOutside);
-        return () => {
-            window.removeEventListener('click', handleClickOutside);
-        };
-    }, [isNotificationOpen]);
-
-    // --- Componentes "Oyentes" de Sockets ---
+    // Listener de Sockets para Admin (Notificaciones en tiempo real)
     const NotificationsListener = () => {
         const socket = useSocket();
         useEffect(() => {
             if (!socket) return;
             const handleNewNotification = (data) => {
-                console.log("Nueva notificación recibida:", data);
                 setNotifications(prev => [data, ...prev].slice(0, 10));
                 setUnreadCount(prev => prev + 1);
                 toast.info(`🔔 ${data.message}`, { icon: false });
             };
             socket.on('new_notification', handleNewNotification);
-            return () => {
-                socket.off('new_notification', handleNewNotification);
-            };
+            return () => socket.off('new_notification', handleNewNotification);
         }, [socket]);
         return null;
     };
 
-    if (loading) {
-        return <div>Cargando...</div>;
-    }
-    if (!user) {
-        return null;
-    }
+    // Carga de notificaciones iniciales
+    useEffect(() => {
+        if (user && user.admin) {
+            apiClient.get('/api/notifications').then(res => {
+                if (Array.isArray(res.data)) {
+                    setNotifications(res.data);
+                    setUnreadCount(res.data.filter(n => !n.is_read).length);
+                }
+            }).catch(e => console.error(e));
+        }
+    }, [user]);
+
+    // --- RENDER ---
+    if (loading) return <div>Cargando...</div>;
+    
+    // Si no hay usuario y ya terminó de cargar, Layout no renderiza nada (protección)
+    if (!user) return null; 
 
     const handleBellClick = async (event) => {
         event.stopPropagation();
         const opening = !isNotificationOpen;
         setIsNotificationOpen(opening);
-
         if (opening && unreadCount > 0) {
             setUnreadCount(0);
             try {
                 await apiClient.put('/api/notifications/mark-all-read');
                 setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-            } catch (error) {
-                console.error("Error al marcar notificaciones como leídas:", error);
-            }
+            } catch (error) { console.error(error); }
         }
     };
-
     const handleDeleteOne = async (id, event) => {
         if (event) event.stopPropagation();
         setNotifications(prev => prev.filter(n => n.id !== id));
         setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
-        try {
-            await apiClient.delete(`/api/notifications/${id}`);
-        } catch (error) {
-            console.error("Error eliminando notificación:", error);
-        }
+        apiClient.delete(`/api/notifications/${id}`).catch(e => console.error(e));
     };
-
     const handleClearAll = async () => {
-        try {
-            await apiClient.delete('/api/notifications/clear-all');
+        apiClient.delete('/api/notifications/clear-all').then(() => {
             setNotifications([]);
             setUnreadCount(0);
-        } catch (error) {
-            console.error("Error al borrar notificaciones:", error);
-        }
+        }).catch(e => console.error(e));
     };
 
     return (
         <SocketProvider>
             <ChatProvider user={user}>
-                <div className="layout-container" onClick={(e) => {
-                    if (isNotificationOpen) {
-                        setIsNotificationOpen(false);
-                    }
-                }}>
+                <div className="layout-container" onClick={() => isNotificationOpen && setIsNotificationOpen(false)}>
                     <Navbar
                         user={user}
                         unreadCount={unreadCount}
@@ -342,9 +295,7 @@ const Layout = () => {
                     </main>
                     <Footer />
 
-                    {!user.admin && (
-                        <ChatBot onToggle={(state) => setIsBotOpen(state)} />
-                    )}
+                    {!user.admin && <ChatBot onToggle={(state) => setIsBotOpen(state)} />}
                     <ChatWrapper hideButton={isBotOpen} />
                 </div>
                 {user.admin && <NotificationsListener />}
