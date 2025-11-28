@@ -34,7 +34,10 @@ class userRepository {
     async updateUser(userId, userData) {
         return await this.dao.updateUser(userId, userData);
     }
-
+    
+    async getUserById(id) {
+        return await this.dao.getUserById(id);
+    }
 }
 
 export {userRepository}

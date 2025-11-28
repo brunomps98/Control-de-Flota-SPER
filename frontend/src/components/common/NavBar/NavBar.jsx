@@ -67,8 +67,6 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
           <span>SPER</span>
         </Link>
 
-
-
         <div className="d-flex align-items-center d-lg-none gap-2">
           <NotificationBell {...bellProps} extraClasses="d-lg-none" />
           <button
@@ -138,7 +136,10 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
 
             <li className="nav-item d-lg-none text-center py-2 text-white-50">
                <small>Usuario conectado:</small><br/>
-               <strong>{user.username}</strong>
+               {/* Link en versión móvil también */}
+               <Link to="/profile/me" onClick={handleMobileLinkClick} style={{color:'white', textDecoration:'none'}}>
+                   <strong>{user.username}</strong>
+               </Link>
             </li>
 
             <li className="nav-item d-lg-none">
@@ -154,7 +155,18 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>
               <span className="uc-label">Usuario conectado:</span>
-              <span className="uc-name">{user.username}</span>
+              
+              {/* --- AQUÍ EL CAMBIO: LINK AL PERFIL --- */}
+              <Link 
+                to="/profile/me" 
+                className="uc-name" 
+                style={{textDecoration:'none', color:'inherit', cursor:'pointer'}}
+                title="Ver mi perfil"
+              >
+                {user.username}
+              </Link>
+              {/* --------------------------------------- */}
+
             </div>
             <button className="nav-link btn btn-link text-nowrap" onClick={handleLogout}>LogOut</button>
           </div>

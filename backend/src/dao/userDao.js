@@ -1,5 +1,6 @@
 import { userDao } from "../repository/index.js";
 import { supabase } from '../config/supabaseClient.js';
+import Usuario from '../models/user.model.js';
 import path from 'path';
 
 class UserDao {
@@ -124,6 +125,13 @@ class UserDao {
     static deleteUser = async (req, res) => { 
         return await userDao.deleteUser(req); 
     }
+
+    
+    // Metodo para eliminar foto de perfil desde el mismo perfil
+    static deleteProfilePicture = async (userId) => {
+        // Actualizamos la base de datos
+        await Usuario.update({ profile_picture: null }, { where: { id: userId } });
+    }
     
     // Wrapper para el router (Full Controller)
     static deleteUserContoller = async (req, res) => {
@@ -155,5 +163,26 @@ class UserDao {
         return await userDao.updateUserPassword(id, password);
     }
 
+    static updateSelfProfilePicture = async (userId, file) => {
+        // Subir a Supabase 
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const extension = path.extname(file.originalname);
+        const fileName = `profiles/${uniqueSuffix}${extension}`;
+        
+        const { error } = await supabase.storage.from('uploads').upload(fileName, file.buffer, {
+            contentType: file.mimetype, upsert: false
+        });
+        if (error) throw new Error(error.message);
+        
+        const { data } = supabase.storage.from('uploads').getPublicUrl(fileName);
+        const publicUrl = data.publicUrl;
+
+        // Actualizar usuario
+        await Usuario.update({ profile_picture: publicUrl }, { where: { id: userId } });
+        
+        // Devolver usuario actualizado
+        return await Usuario.findByPk(userId, { attributes: { exclude: ['password'] } });
+    }
+    
 }
 export default UserDao;

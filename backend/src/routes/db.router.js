@@ -89,6 +89,60 @@ router.get('/user/current', verifyToken, (req, res) => {
     res.status(200).json({ user: req.user });
 });
 
+router.get('/users/profile/:id', verifyToken, async (req, res) => {
+    try {
+        const user = await userDao.getUserById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+        // Devolvemos solo datos seguros
+        res.json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            unidad: user.unidad,
+            profile_picture: user.profile_picture,
+            admin: user.admin
+        });
+    } catch (error) {
+        console.error("Error en GET /profile:", error);
+        res.status(500).json({ message: 'Error al obtener perfil' });
+    }
+});
+
+// Actualizar MI propia foto de perfil
+router.put('/user/profile/photo', verifyToken, upload.single('profile_picture'), async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No se subió ninguna imagen' });
+        const updatedUser = await UserDao.updateSelfProfilePicture(req.user.id, req.file);
+        res.json({ message: 'Foto actualizada', user: updatedUser });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al actualizar foto' });
+    }
+});
+
+// Borrar foto de perfil (Dueño o Admin)
+router.delete('/users/profile/:id/photo', verifyToken, async (req, res) => {
+    try {
+        const targetUserId = parseInt(req.params.id);
+        const requestingUser = req.user;
+
+        // Verificar permisos: ¿Es el dueño O es admin?
+        if (requestingUser.id !== targetUserId && !requestingUser.admin) {
+            return res.status(403).json({ message: 'No tienes permiso para modificar este perfil.' });
+        }
+
+        // Llamamos al DAO para poner la foto en null
+        await UserDao.deleteProfilePicture(targetUserId);
+        
+        res.json({ message: 'Foto eliminada correctamente' });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al eliminar foto' });
+    }
+});
+
 // --- RUTAS DE GESTIÓN DE USUARIOS (CRUD) ---
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {

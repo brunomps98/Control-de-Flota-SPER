@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
@@ -58,21 +58,21 @@ const AdminUserPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     // Estados para edición
     const [editingUserId, setEditingUserId] = useState(null);
     const [markForDeletion, setMarkForDeletion] = useState(false); // Para saber si borramos la foto
-    
+
     // Estado para el visor de imagen
     const [viewingImage, setViewingImage] = useState(null); // URL de la imagen a ver en grande
 
     const [editFormData, setEditFormData] = useState({
-        username: '', 
-        email: '', 
-        unidad: '', 
-        admin: false, 
-        password: '', 
-        profile_picture: null 
+        username: '',
+        email: '',
+        unidad: '',
+        admin: false,
+        password: '',
+        profile_picture: null
     });
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -168,7 +168,7 @@ const AdminUserPage = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
     };
-    
+
     const handleClearFilters = () => {
         setFilters({ id: '', username: '', email: '', unidad: '', admin: false });
     };
@@ -180,25 +180,25 @@ const AdminUserPage = () => {
             ? user.unidad
             : "Direccion General";
         setEditFormData({
-            username: user.username, 
-            email: user.email, 
-            unidad: userUnidad, 
-            admin: user.admin, 
+            username: user.username,
+            email: user.email,
+            unidad: userUnidad,
+            admin: user.admin,
             password: '',
-            profile_picture: null 
+            profile_picture: null
         });
     };
 
     const handleCancelEdit = () => {
         setEditingUserId(null);
         setMarkForDeletion(false);
-        setEditFormData({ 
-            username: '', 
-            email: '', 
-            unidad: '', 
-            admin: false, 
-            password: '', 
-            profile_picture: null 
+        setEditFormData({
+            username: '',
+            email: '',
+            unidad: '',
+            admin: false,
+            password: '',
+            profile_picture: null
         });
     };
 
@@ -221,11 +221,11 @@ const AdminUserPage = () => {
             data.append('email', editFormData.email);
             data.append('unidad', editFormData.unidad);
             data.append('admin', editFormData.admin);
-            
+
             if (editFormData.password) {
                 data.append('password', editFormData.password);
             }
-            
+
             // LÓGICA DE FOTO
             if (markForDeletion) {
                 // Si marcó borrar, enviamos la bandera (asegúrate que tu backend maneje esto)
@@ -238,16 +238,16 @@ const AdminUserPage = () => {
             const response = await apiClient.put(`/api/users/${userId}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            
+
             setUsers(prevUsers =>
                 prevUsers.map(user =>
                     user.id === userId ? response.data : user
                 )
             );
             handleCancelEdit();
-            
+
             toast.success(`Usuario actualizado. Recargando...`, {
-                onClose: () => window.location.reload() 
+                onClose: () => window.location.reload()
             });
 
         } catch (err) {
@@ -385,16 +385,16 @@ const AdminUserPage = () => {
                                     {editingUserId === user.id ? (
                                         <>
                                             <td data-label="ID">{user.id}</td>
-                                            
+
                                             {/* EDICIÓN DE FOTO CON OPCIÓN DE BORRAR */}
                                             <td data-label="Foto">
-                                                <div style={{display:'flex', flexDirection:'column', gap:'5px', alignItems:'flex-start'}}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-start' }}>
                                                     {markForDeletion ? (
-                                                        <div style={{color: '#E53E3E', fontSize:'0.8rem', display:'flex', alignItems:'center', gap:'5px'}}>
+                                                        <div style={{ color: '#E53E3E', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
                                                             <span>¡Se eliminará!</span>
-                                                            <button 
-                                                                type="button" 
-                                                                className="btn-icon-undo" 
+                                                            <button
+                                                                type="button"
+                                                                className="btn-icon-undo"
                                                                 onClick={() => setMarkForDeletion(false)}
                                                                 title="Deshacer"
                                                             >
@@ -403,17 +403,17 @@ const AdminUserPage = () => {
                                                         </div>
                                                     ) : (
                                                         <>
-                                                            <input 
-                                                                type="file" 
-                                                                name="profile_picture" 
-                                                                className="table-edit-input" 
-                                                                onChange={handleFormChange} 
-                                                                style={{width:'140px', fontSize:'0.7rem'}} 
+                                                            <input
+                                                                type="file"
+                                                                name="profile_picture"
+                                                                className="table-edit-input"
+                                                                onChange={handleFormChange}
+                                                                style={{ width: '140px', fontSize: '0.7rem' }}
                                                                 accept="image/*"
                                                             />
                                                             {/* Si el usuario TIENE foto y no estamos subiendo una nueva, mostrar opción de borrar */}
                                                             {user.profile_picture && !editFormData.profile_picture && (
-                                                                <button 
+                                                                <button
                                                                     type="button"
                                                                     className="btn btn-sm btn-danger"
                                                                     onClick={() => setMarkForDeletion(true)}
@@ -495,22 +495,35 @@ const AdminUserPage = () => {
                                     ) : (
                                         <>
                                             <td data-label="ID">{user.id}</td>
-                                            
+
                                             {/* VISTA PREVIA DE FOTO CLICKABLE */}
                                             <td data-label="Foto">
                                                 {user.profile_picture ? (
-                                                    <img 
-                                                        src={user.profile_picture} 
-                                                        alt="Avatar" 
+                                                    <img
+                                                        src={user.profile_picture}
+                                                        alt="Avatar"
                                                         className="table-avatar-img"
-                                                        onClick={() => setViewingImage(user.profile_picture)} 
+                                                        onClick={() => setViewingImage(user.profile_picture)}
                                                     />
                                                 ) : (
-                                                    <span style={{color:'#777', fontSize:'0.8rem'}}>N/A</span>
+                                                    <span style={{ color: '#777', fontSize: '0.8rem' }}>N/A</span>
                                                 )}
                                             </td>
 
-                                            <td data-label="Username">{user.username}</td>
+                                            <td data-label="Username">
+                                                <Link
+                                                    to={`/profile/${user.id}`}
+                                                    style={{
+                                                        color: 'inherit',       
+                                                        textDecoration: 'none', 
+                                                        fontWeight: 'bold',    
+                                                        cursor: 'pointer'       
+                                                    }}
+                                                    title="Ver perfil completo"
+                                                >
+                                                    {user.username}
+                                                </Link>
+                                            </td>
                                             <td data-label="Email">{user.email}</td>
                                             <td data-label="Unidad">{user.unidad}</td>
                                             <td data-label="Admin">

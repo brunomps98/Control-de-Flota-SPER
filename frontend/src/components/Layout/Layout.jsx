@@ -46,14 +46,47 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
-    // ---  MANEJAR CLIC EN NOTIFICACIÓN ---
-    const handleNotificationClick = (notif) => {
-        setIsNotificationOpen(false);
-        if (notif.type === 'vehicle_update' && notif.resourceId) {
-            navigate(`/vehicle-detail/${notif.resourceId}`);
+    // ---  MANEJAR CLIC EN NOTIFICACIÓN (WEB) ---
+    const handleNotificationClick = async (notif) => {
+        setIsNotificationOpen(false); // Cierra el panel
+
+        const resourceId = notif.resourceId || notif.resource_id;
+        const type = notif.type;
+
+        console.log("Navegando a:", { type, resourceId });
+
+        if (resourceId) {
+            if (type === 'vehicle_update') {
+                navigate(`/vehicle-detail/${resourceId}`);
+            } else if (type === 'new_ticket') {
+                navigate(`/case/${resourceId}`);
+            } 
+            else if (type === 'chat_message' || type === 'new_message') {
+                if (user && user.admin) {
+                    // Emitimos el evento para abrir la ventana flotante
+                    window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
+                } else {
+                    navigate('/chat');
+                }
+            }
         }
-        else if (notif.type === 'new_ticket' && notif.resourceId) {
-            navigate(`/case/${notif.resourceId}`);
+        // Bloque genérico (si no hay ID)
+        else if (type === 'chat_message' || type === 'new_message') {
+            if (user && user.admin) {
+            } else {
+                navigate('/chat');
+            }
+        }
+
+        // Marcar como leída
+        try {
+            if (!notif.is_read) {
+                await apiClient.put(`/api/notifications/${notif.id}/read`);
+                setNotifications(prev => prev.map(n => n.id === notif.id ? { ...n, is_read: true } : n));
+                setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
+            }
+        } catch (error) {
+            console.error("Error al marcar notificación como leída:", error);
         }
     };
 
@@ -124,7 +157,6 @@ const Layout = () => {
 
         const registerForNotifications = async () => {
             try {
-                // Pedir permiso al usuario
                 let permStatus = await PushNotifications.checkPermissions();
 
                 if (permStatus.receive === 'prompt') {
@@ -136,13 +168,10 @@ const Layout = () => {
                     return;
                 }
 
-                // Registrar el dispositivo en FCM
                 await PushNotifications.register();
 
-                // Escuchar el evento de registro exitoso para obtener el token
                 PushNotifications.addListener('registration', async (token) => {
                     console.log('[FCM] Token obtenido:', token.value);
-                    // Enviamos el token al backend para guardarlo en la tabla de usuarios
                     try {
                         await apiClient.post('/api/user/fcm-token', { fcmToken: token.value });
                     } catch (error) {
@@ -150,16 +179,14 @@ const Layout = () => {
                     }
                 });
 
-                // Manejar errores de registro
                 PushNotifications.addListener('registrationError', (error) => {
                     console.error('[FCM] Error en registro:', error);
                 });
 
-                // Manejar recepción de notificaciones en primer plano
                 PushNotifications.addListener('pushNotificationReceived', (notification) => {
                     console.log('[FCM] Notificación recibida en primer plano:', notification);
                     toast.info(notification.title || 'Nueva notificación');
-                    setUnreadCount(prev => prev + 1); // Actualizar campanita
+                    setUnreadCount(prev => prev + 1); 
                 });
 
                 PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
@@ -167,7 +194,11 @@ const Layout = () => {
                     console.log('[FCM] Click en notificación:', data);
 
                     if (data.chatRoomId) {
-                        if (user && user.admin) navigate('/dashboard');
+                        if (user && user.admin) {
+                            setTimeout(() => {
+                                window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: data.chatRoomId }));
+                            }, 800); // Delay un poco mayor para asegurar que la app cargó el contexto
+                        }
                         else navigate('/chat');
                     }
                     else if (data.vehicleId) {
@@ -189,24 +220,16 @@ const Layout = () => {
 
         registerForNotifications();
 
-        // Limpieza de listeners al desmontar
         return () => {
             PushNotifications.removeAllListeners();
         };
-    }, [user, navigate]); // Dependencias
+    }, [user, navigate]); 
 
     useEffect(() => {
         if (!user) return;
-
         if (Capacitor.getPlatform() !== 'web') return;
 
-        const events = [
-            'mousemove',
-            'keydown',
-            'touchstart',
-            'scroll',
-            'click'
-        ];
+        const events = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'];
         resetInactivityTimer();
         events.forEach(event => {
             window.addEventListener(event, resetInactivityTimer);
@@ -234,8 +257,6 @@ const Layout = () => {
     }, [isNotificationOpen]);
 
     // --- Componentes "Oyentes" de Sockets ---
-
-    // Oyente para la Campana (Solo Admins)
     const NotificationsListener = () => {
         const socket = useSocket();
         useEffect(() => {
@@ -254,7 +275,6 @@ const Layout = () => {
         return null;
     };
 
-    // --- Early Returns ---
     if (loading) {
         return <div>Cargando...</div>;
     }
@@ -262,7 +282,6 @@ const Layout = () => {
         return null;
     }
 
-    // --- Funciones Handler ---
     const handleBellClick = async (event) => {
         event.stopPropagation();
         const opening = !isNotificationOpen;
@@ -292,19 +311,14 @@ const Layout = () => {
 
     const handleClearAll = async () => {
         try {
-            // --- CORRECCIÓN AQUÍ: Usar la ruta exacta que tienes en db.router.js ---
             await apiClient.delete('/api/notifications/clear-all');
-
-            // Actualizar estado visual
             setNotifications([]);
             setUnreadCount(0);
-
         } catch (error) {
             console.error("Error al borrar notificaciones:", error);
         }
     };
 
-    // --- Renderizado ---
     return (
         <SocketProvider>
             <ChatProvider user={user}>
@@ -328,24 +342,12 @@ const Layout = () => {
                     </main>
                     <Footer />
 
-                    {/* Solo lo mostramos si el usuario NO es admin  */}
                     {!user.admin && (
-                        <ChatBot
-                            // El bot se gestiona solo con el contexto, solo avisa si se abre/cierra
-                            // para ajustar la posición del otro botón si fuera necesario
-                            onToggle={(state) => setIsBotOpen(state)}
-                        />
+                        <ChatBot onToggle={(state) => setIsBotOpen(state)} />
                     )}
-
-                    {/* ChatWrapper consume contexto, solo pasamos si debe ocultarse por el bot */}
-                    <ChatWrapper
-                        hideButton={isBotOpen}
-                    />
+                    <ChatWrapper hideButton={isBotOpen} />
                 </div>
-
-                {/* Montamos oyente de notificaciones (Campana) */}
                 {user.admin && <NotificationsListener />}
-
             </ChatProvider>
         </SocketProvider>
     );

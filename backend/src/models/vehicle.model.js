@@ -9,6 +9,14 @@ const Vehiculo = sequelize.define('Vehiculo', {
         primaryKey: true,
         autoIncrement: true
     },
+    user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'usuarios', // nombre de la tabla
+            key: 'id'
+        }
+    },
     dominio: {
         type: DataTypes.STRING(20),
         unique: true,
@@ -102,6 +110,7 @@ Destino.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Rodado.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Thumbnail.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Descripcion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
+Vehiculo.belongsTo(Usuario, { foreignKey: 'user_id', as: 'owner' });
 
 
 // Exportación de TODOS los modelos

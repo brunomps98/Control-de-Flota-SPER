@@ -4,17 +4,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles.css';
-import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3'; 
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 // Layout
 import Layout from './components/Layout/Layout';
-import AdminRoute from './components/common/AdminRoute/AdminRoute'; 
+import AdminRoute from './components/common/AdminRoute/AdminRoute';
 
 // Paginas
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Vehicle from './pages/Vehicle/Vehicle';
-import Register from './pages/Register/Register'; 
+import Register from './pages/Register/Register';
 import Support from './pages/Support/Support';
 import SupportTickets from './pages/SupportTickets/SupportTickets';
 import Case from './pages/Case/Case';
@@ -25,6 +25,7 @@ import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import Dashboard from './pages/Dashboard/Dashboard';
 import AdminUserPage from './pages/AdminUserPage/AdminUserPage';
+import UserProfile from './pages/UserProfile/UserProfile';
 
 // Obtenemos la clave publica de las variables de entorno
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
@@ -34,27 +35,30 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     {/* Envolvemos la app con el Captcha de Google */}
     <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
       <BrowserRouter>
-      <ToastContainer
+        <ToastContainer
           position="top-right"
           autoClose={5000}
-          theme="light" 
+          theme="light"
         />
         <Routes>
           {/* --- Rutas Públicas (no usan el Layout) --- */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/support" element={<Support />} /> 
+          <Route path="/support" element={<Support />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
           <Route element={<Layout />}>
-            
+
             {/* --- Rutas para TODOS los usuarios logueados --- */}
             <Route path="/vehicle" element={<Vehicle />} />
             <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
             <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
             <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
+            {/* --- RUTAS DE PERFIL --- */}
+            <Route path="/profile/me" element={<UserProfile />} />
+            <Route path="/profile/:userId" element={<UserProfile />} />
 
             {/* --- Rutas SÓLO PARA ADMINS --- */}
             <Route element={<AdminRoute />}>

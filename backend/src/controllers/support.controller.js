@@ -11,9 +11,8 @@ class SupportController {
 
     /**
      * @summary Busca a todos los admins y les envía el email de notificación.
-     * Se ejecuta "fire-and-forget" para no hacer esperar al usuario.
      */
-    static _sendNotificationToAdmins = async (newTicket, fileUrls) => {
+    static _sendNotificationToAdmins = async (newTicket, fileUrls, creatorName = "Usuario") => {
         try {
             // Buscamos todos los emails de admins
             const admins = await Usuario.findAll({
@@ -66,7 +65,6 @@ class SupportController {
             }
 
         } catch (error) {
-            // Este error solo se loguea en el backend, no detiene al usuario
             console.error("[Support Controller] Error al buscar admins para notificar:", error);
         }
     };
@@ -76,9 +74,7 @@ class SupportController {
     static getTickets = async (req, res) => {
         try {
             const filters = req.query;
-
             const tickets = await supportRepository.getAllSupportTickets(filters);
-
             res.status(200).json({ tickets: tickets });
         } catch (error) {
             res.status(500).json({ message: 'Error al obtener los tickets' });
@@ -100,7 +96,7 @@ class SupportController {
         }
     };
 
-    // Crear un ticket con archivos usando una ID
+    // Crear un ticket con archivos
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
@@ -140,9 +136,10 @@ class SupportController {
 
             ticketData.files = fileUrls;
 
-            // Capturamos el ticket creado (con su ID)
-            const creatorName = req.user ? req.user.username : ticketData.name;
+            const newTicket = await supportRepository.addSupportTicket(ticketData);
 
+            // Capturamos el nombre
+            const creatorName = req.user ? req.user.username : ticketData.name;
 
             SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
 
@@ -158,13 +155,13 @@ class SupportController {
     static createTicketNoFiles = async (req, res) => {
         try {
             const ticketData = req.body;
-
             ticketData.files = [];
+
+            const newTicket = await supportRepository.addSupportTicket(ticketData);
 
             const creatorName = req.user ? req.user.username : ticketData.name;
 
-
-            SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
+            SupportController._sendNotificationToAdmins(newTicket, [], creatorName);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {

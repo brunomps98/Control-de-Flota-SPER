@@ -1,4 +1,4 @@
-import Usuario from "../models/user.model.js"; 
+import Usuario from "../models/user.model.js";
 import bcrypt from 'bcryptjs';
 import { UniqueConstraintError, Op } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
@@ -70,36 +70,36 @@ export default class userManager {
                 username,
                 unidad,
                 email,
-                password, 
+                password,
                 profile_picture: profilePicture || null, // Guardamos la URL o null
-                ...permissions 
+                ...permissions
             };
 
             // Crear el usuario
             const newUser = await Usuario.create(newUserPayload);
-            
+
             return newUser;
 
         } catch (error) {
             if (error instanceof UniqueConstraintError) {
                 throw new Error('Email already in use');
             }
-            throw error; 
+            throw error;
         }
     }
 
     logInUser = async (username, password) => {
-        const user = await Usuario.findOne({ 
+        const user = await Usuario.findOne({
             where: { username },
             attributes: {
-                exclude: ['password'] 
+                exclude: ['password']
             }
         });
 
         if (!user) {
             throw new Error("Credenciales inválidas");
         }
-        
+
         const userWithPass = await Usuario.findOne({ where: { username } });
         const isPasswordValid = await bcrypt.compare(password, userWithPass.password);
 
@@ -117,11 +117,11 @@ export default class userManager {
 
     findUserByEmail = async (email) => {
         try {
-            const user = await Usuario.findOne({ 
+            const user = await Usuario.findOne({
                 where: { email },
-                attributes: { exclude: ['password'] } 
+                attributes: { exclude: ['password'] }
             });
-            return user; 
+            return user;
         } catch (error) {
             console.error("Error al buscar usuario por email:", error);
             throw new Error('Error al buscar usuario');
@@ -130,8 +130,8 @@ export default class userManager {
 
     updateUserPassword = async (userId, newPassword) => {
         try {
-            const hashedPassword = await bcrypt.hash(newPassword, 10); 
-            
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+
             const [affectedRows] = await Usuario.update(
                 { password: hashedPassword },
                 { where: { id: userId } }
@@ -152,9 +152,9 @@ export default class userManager {
         try {
             const whereClause = {};
 
-           if (filters.id) {
+            if (filters.id) {
                 whereClause.id = sequelize.where(
-                    sequelize.cast(sequelize.col('id'), 'TEXT'), 
+                    sequelize.cast(sequelize.col('id'), 'TEXT'),
                     { [Op.iLike]: `%${filters.id}%` }
                 );
             }
@@ -172,11 +172,11 @@ export default class userManager {
             }
 
             const users = await Usuario.findAll({
-                where: whereClause, 
-                attributes: { 
-                    exclude: ['password', 'fcm_token'] 
+                where: whereClause,
+                attributes: {
+                    exclude: ['password', 'fcm_token']
                 },
-                order: [['username', 'ASC']] 
+                order: [['username', 'ASC']]
             });
             return users;
         } catch (error) {
@@ -237,11 +237,11 @@ export default class userManager {
                 case "Unidad Penal 9": permissions.up9 = true; break;
                 case "Instituto": permissions.inst = true; break;
                 case "Tratamiento": permissions.trat = true; break;
-                case "ADMIN": break; 
+                case "ADMIN": break;
                 default:
                     console.warn(`[BACK] Unidad desconocida durante la actualización: ${unidad}`);
             }
-            
+
             const dataToUpdate = {
                 username,
                 email,
@@ -269,7 +269,7 @@ export default class userManager {
             const updatedUser = await Usuario.findByPk(userId, {
                 attributes: { exclude: ['password', 'fcm_token'] }
             });
-            
+
             return updatedUser;
 
         } catch (error) {
@@ -278,6 +278,18 @@ export default class userManager {
                 throw new Error('El email o nombre de usuario ya está en uso por otra cuenta.');
             }
             throw new Error('Error al actualizar el usuario.');
+        }
+    }
+
+    getUserById = async (id) => {
+        try {
+            const user = await Usuario.findByPk(id, {
+                attributes: { exclude: ['password', 'fcm_token'] } // Excluimos datos sensibles
+            });
+            return user;
+        } catch (error) {
+            console.error("Error en getUserById (DAO):", error);
+            throw error;
         }
     }
 }

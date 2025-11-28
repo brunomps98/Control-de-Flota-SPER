@@ -4,6 +4,7 @@ import { useChat } from '../../context/ChatContext';
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
@@ -31,6 +32,7 @@ const formatTimestamp = (isoDateString) => {
 };
 
 const ChatWindow = ({ onClose }) => {
+    const navigate = useNavigate();
     const {
         user, socket,
         guestRoom, guestMessages, setGuestMessages,
@@ -233,13 +235,42 @@ const ChatWindow = ({ onClose }) => {
 
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false);
+
+        // 1. Aseguramos obtener el ID correcto dependiendo quién sea
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
-        if (!targetRoomId) return;
-        const title = user.admin ? '¿Eliminar este chat?' : '¿Eliminar este chat?';
-        const text = user.admin ? "Esta acción es irreversible y afectará a ambos." : "Se vaciará tu historial.";
-        const confirmText = user.admin ? 'Eliminar' : 'Eliminar chat';
-        Swal.fire({ title, text, icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText }).then((result) => {
-            if (result.isConfirmed) socket.emit('delete_room', { roomId: targetRoomId });
+
+        // DEBUG: Esto te ayudará a ver en la consola si está fallando aquí
+        console.log("Intentando borrar. Usuario Admin:", user.admin, "Room ID:", targetRoomId);
+
+        if (!targetRoomId) {
+            toast.error("Error: No se identificó el chat a eliminar.");
+            return;
+        }
+
+        // 2. Textos personalizados según el rol
+        const title = user.admin ? '¿Eliminar chat permanentemente?' : '¿Vaciar mi historial?';
+        const text = user.admin
+            ? "Esta acción borrará la sala y los mensajes de la base de datos para AMBOS. Es irreversible."
+            : "Se borrarán los mensajes de tu vista. El administrador aún conservará el registro.";
+        const confirmButtonText = user.admin ? 'Eliminar Todo' : 'Vaciar Historial';
+
+        Swal.fire({
+            title,
+            text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (user.admin) {
+                    socket.emit('delete_room', { roomId: targetRoomId });
+                } else {
+                    socket.emit('clear_history', { roomId: targetRoomId });
+                    setGuestMessages([]);
+                    toast.success("Historial vaciado.");
+                }
+            }
         });
     };
 
@@ -288,11 +319,17 @@ const ChatWindow = ({ onClose }) => {
         const targetUser = selectedRoom?.user;
         if (!targetUser) return <p>Cargando...</p>;
 
-        // Calculamos el estado online en tiempo real igual que en el header
+        // Calculamos el estado online
         const currentRoomInList = activeRooms.find(r => r.id === selectedRoom.id);
         const isOnline = currentRoomInList ? currentRoomInList.isOnline : !!selectedRoom.isOnline;
 
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
+
+        // --- FUNCIÓN DE REDIRECCIÓN ---
+        const goToProfile = () => {
+            navigate(`/profile/${targetUser.id}`); // Navega a la URL del perfil
+            if (onClose) onClose(); // Cierra el chat para ver la página limpia
+        };
 
         return (
             <div className="user-info-view">
@@ -302,12 +339,21 @@ const ChatWindow = ({ onClose }) => {
                             <img
                                 src={targetUser.profile_picture}
                                 alt="Perfil"
-                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', cursor: 'pointer' }}
-                                onClick={() => setCurrentView('profile_pic')}
+                                style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }}
                             />
                         ) : <UserIcon />}
                     </div>
-                    <h2 className="user-info-name">{targetUser.username}</h2>
+
+                    <h2
+                        className="user-info-name"
+                        onClick={goToProfile}
+                        style={{
+                            cursor: 'pointer',
+                        }}
+                        title="Ir al perfil completo"
+                    >
+                        {targetUser.username}
+                    </h2>
 
                     <span
                         className={`chat-contact-status ${isOnline ? 'status-online' : ''}`}
@@ -338,7 +384,7 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
-    // --- NUEVA VISTA: FOTO PERFIL COMPLETA ---
+    // Vista de foto de perfil completa
     const renderProfilePic = () => {
         const targetUser = selectedRoom?.user;
         if (!targetUser || !targetUser.profile_picture) return null;
@@ -354,7 +400,7 @@ const ChatWindow = ({ onClose }) => {
 
         if (user.admin && currentView === 'inbox') {
 
-            // --- VISTA B: LISTA DE CONTACTOS (NUEVO CHAT) ---
+            // VISTA B: LISTA DE CONTACTOS (NUEVO CHAT)
             if (showContactList) {
                 return (
                     <div className="admin-inbox slide-in-right">
@@ -391,7 +437,7 @@ const ChatWindow = ({ onClose }) => {
                 );
             }
 
-            // --- VISTA A: BANDEJA PRINCIPAL (CHATS ACTIVOS) ---
+            // VISTA A: BANDEJA PRINCIPAL (CHATS ACTIVOS)
             return (
                 <div className="admin-inbox">
                     <div className="chat-list-header">Chats Activos</div>
@@ -432,9 +478,9 @@ const ChatWindow = ({ onClose }) => {
             );
         }
 
-        // --- MANEJO DE VISTAS (Switch) ---
+        // MANEJO DE VISTAS (Switch)
         if (user.admin && currentView === 'info') return renderUserInfo();
-        if (user.admin && currentView === 'profile_pic') return renderProfilePic(); // <--- AQUI LA NUEVA VISTA
+        if (user.admin && currentView === 'profile_pic') return renderProfilePic();
         if (user.admin && currentView === 'chat') return isChatLoading ? <p>Cargando...</p> : renderMessageList(adminMessages);
         return guestMessages.length === 0 ? <p style={{ padding: '15px', color: '#bbb' }}>Inicia la conversación...</p> : renderMessageList(guestMessages);
     };
@@ -545,7 +591,7 @@ const ChatWindow = ({ onClose }) => {
                         {isHeaderMenuOpen && (
                             <div className="chat-header-menu">
                                 <button onClick={onClose}>Cerrar Ventana</button>
-                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">{user.admin ? 'Eliminar Chat' : 'Salir del Chat'}</button>
+                                <button onClick={handleDeleteChat} className="chat-delete-chat-btn">{user.admin ? 'Eliminar Chat' : 'Eliminar Chat'}</button>
                             </div>
                         )}
                     </div>
@@ -560,9 +606,38 @@ const ChatWindow = ({ onClose }) => {
 };
 
 const ChatWrapper = ({ hideButton }) => {
-    const { user, isChatOpen, unreadChatCount, toggleChat } = useChat();
+    const { user, isChatOpen, unreadChatCount, toggleChat, selectRoom, activeRooms } = useChat(); // Removed setIsChatOpen from here as it might not be available
     const [popping, setPopping] = useState(false);
     useEffect(() => { if (unreadChatCount > 0) { setPopping(true); setTimeout(() => setPopping(false), 200); } }, [unreadChatCount]);
+
+    useEffect(() => {
+        const handleOpenSpecificChat = (event) => {
+            const roomId = event.detail;
+
+            // Buscamos la sala en la lista de activos
+            const targetRoom = activeRooms.find(r => String(r.id) === String(roomId));
+
+            if (targetRoom) {
+                // Si el chat está cerrado, lo abrimos manualmente
+                if (!isChatOpen) {
+                    toggleChat();
+                }
+
+                // Seleccionamos la sala inmediatamente
+                selectRoom(targetRoom);
+            } else {
+                console.warn("Sala no encontrada en la lista activa. ID:", roomId);
+            }
+        };
+
+        window.addEventListener('OPEN_CHAT_ROOM', handleOpenSpecificChat);
+
+        // Limpieza al desmontar
+        return () => {
+            window.removeEventListener('OPEN_CHAT_ROOM', handleOpenSpecificChat);
+        };
+    }, [activeRooms, isChatOpen, selectRoom, toggleChat]);
+
     if (!user) return null;
     return (
         <div className="chat-wrapper-container">
