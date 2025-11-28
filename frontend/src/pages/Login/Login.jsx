@@ -29,6 +29,14 @@ const Login = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
 
     useEffect(() => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                console.log("Login: Token detectado, redirigiendo a /vehicle");
+                navigate('/vehicle');
+            }
+        }, [navigate]);
+
+    useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/');
         const listenerPromise = App.addListener('backButton', handleBackButton);

@@ -180,17 +180,23 @@ const Layout = () => {
                         if (type === 'vehicle') type = 'vehicle_update';
                     }
 
-                    // 1. GUARDAMOS LA INTENCIÓN
+                    // 1. GUARDAMOS LA INTENCIÓN (El "Buzón")
+                    // Esto es vital. Guardamos a dónde quiere ir el usuario para leerlo apenas cargue la app.
                     localStorage.setItem('pending_notification_redirect', JSON.stringify({
                         type,
                         resourceId
                     }));
 
-                    // FORZAMOS EL CIERRE DE SESIÓN 
-                    console.log("[FCM] Forzando logout y yendo a Login...");
-                    localStorage.removeItem('token');
-                    setUser(null); // Limpiamos el estado visualmente
-                    navigate('/login');
+                    // 2. LÓGICA INTELIGENTE DE NAVEGACIÓN
+                    const token = localStorage.getItem('token');
+
+                    if (token) {
+                        console.log("[FCM] Sesión activa detectada. Yendo al inicio para procesar redirección...");
+                        window.location.href = '/vehicle';
+                    } else {
+                        console.log("[FCM] No hay sesión. Yendo al Login.");
+                        navigate('/login');
+                    }
                 });
 
             } catch (error) {
