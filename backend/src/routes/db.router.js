@@ -35,14 +35,6 @@ router.use((req, res, next) => {
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { message: 'Demasiados intentos de inicio de sesión desde esta IP. Por favor, intente de nuevo después de 15 minutos.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: (req, res) => process.env.NODE_ENV === 'development',
-});
 
 // RUTA PARA QUE FUNCIONE UPTIMEROBOT
 router.get("/health", (req, res) => {
