@@ -2,14 +2,14 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import { Op } from 'sequelize';
 import { onlineUsers } from '../socket/onlineUsers.js';
-import { supabase } from '../config/supabaseClient.js'; 
-import path from 'path'; 
+import { supabase } from '../config/supabaseClient.js';
+import path from 'path';
 
 class ChatController {
 
     static uploadChatFile = async (req, res) => {
         try {
-            const files = req.files; 
+            const files = req.files;
 
             if (!files || files.length === 0) {
                 return res.status(400).json({ message: "No se han subido archivos." });
@@ -48,9 +48,9 @@ class ChatController {
 
             const results = await Promise.all(uploadPromises);
 
-            res.status(200).json({ 
+            res.status(200).json({
                 message: "Archivos subidos correctamente",
-                files: results 
+                files: results
             });
 
         } catch (error) {
@@ -61,12 +61,12 @@ class ChatController {
 
     static getMyRoom = async (req, res) => {
         try {
-            const userId = req.user.id; 
+            const userId = req.user.id;
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
                 defaults: {
                     user_id: userId,
-                    last_message: null 
+                    last_message: null
                 }
             });
             if (created) {
@@ -74,13 +74,11 @@ class ChatController {
             }
             const messages = await ChatMessage.findAll({
                 where: { room_id: room.id },
-                order: [['created_at', 'ASC']],
-                include: [{
-                    model: Usuario,
-                    as: 'sender',
-                    attributes: ['id', 'username', 'admin', 'profile_picture']
-                }]
+                include: [{ model: Usuario, as: 'sender', attributes: ['id', 'username', 'admin'] }],
+                order: [['created_at', 'ASC']]
             });
+
+            // Devolvemos todo junto
             res.status(200).json({ room, messages });
         } catch (error) {
             console.error('[CHAT] Error en getMyRoom:', error);
@@ -96,7 +94,7 @@ class ChatController {
             // Filtramos para traer solo salas que tengan un last_message real
             const activeRooms = await ChatRoom.findAll({
                 where: {
-                    last_message: { [Op.ne]: null } 
+                    last_message: { [Op.ne]: null }
                 },
                 include: [{
                     model: Usuario,
@@ -117,10 +115,10 @@ class ChatController {
 
             const adminUsers = await Usuario.findAll({ where: { admin: true }, attributes: ['id'] });
             const adminIds = adminUsers.map(admin => admin.id);
-            
+
             // Excluimos a los que ya tienen sala CON MENSAJES y a los admins
             const allExcludedIds = [...userIdsWithRooms, ...adminIds];
-            
+
             const newChatUsers = await Usuario.findAll({
                 where: { id: { [Op.notIn]: allExcludedIds } },
                 attributes: ['id', 'username', 'email', 'unidad', 'profile_picture'],
@@ -180,8 +178,8 @@ class ChatController {
         try {
             const [room, created] = await ChatRoom.findOrCreate({
                 where: { user_id: userId },
-                defaults: { 
-                    user_id: userId, 
+                defaults: {
+                    user_id: userId,
                     last_message: null // Inicializamos en NULL para que no aparezca en la bandeja
                 }
             });

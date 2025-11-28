@@ -195,18 +195,46 @@ const ChatWindow = ({ onClose }) => {
     const handleStartNewChat = async (targetUser) => {
         try {
             setIsChatLoading(true);
+
+            // Pedimos la sala
             const response = await apiClient.post('/api/chat/find-or-create-room', { userId: targetUser.id });
-            const room = response.data;
-            handleSelectRoom(room);
+
+            // Verificamos si la respuesta trae los mensajes o solo la sala
+            const room = response.data.room || response.data;
+            const messages = response.data.messages || []; // Si el backend ya los manda, los usamos
+
+            // Transición INSTANTÁNEA de UI (Optimistic UI)
+            setCurrentView('chat');
+            setSelectedRoom(room);
             setShowContactList(false);
+
+            // Manejo de mensajes: Si el backend no los mandó, los buscamos 
+            if (response.data.messages) {
+                setAdminMessages(messages);
+            } else {
+                const msgRes = await apiClient.get(`/api/chat/room/${room.id}/messages`);
+                setAdminMessages(msgRes.data.messages);
+            }
+
+            // Conectar socket
+            socket.emit('admin_join_room', room.id);
+
+            // Actualizar listas laterales
             if (room.last_message) {
                 setActiveRooms(prev => {
                     if (prev.some(r => r.id === room.id)) return prev;
                     return [room, ...prev];
                 });
+                // Quitamos al usuario de la lista de "Nuevos"
                 setNewChatUsers(prev => prev.filter(u => u.id !== targetUser.id));
             }
-        } catch (error) { toast.error("Error al iniciar chat."); setIsChatLoading(false); }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al iniciar chat.");
+        } finally {
+            setIsChatLoading(false);
+        }
     };
 
     // --- MANEJO DEL BOTÓN ATRÁS ---
@@ -236,10 +264,10 @@ const ChatWindow = ({ onClose }) => {
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false);
 
-        // 1. Aseguramos obtener el ID correcto dependiendo quién sea
+        // Aseguramos obtener el ID correcto dependiendo quién sea
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
 
-        // DEBUG: Esto te ayudará a ver en la consola si está fallando aquí
+        // Debug
         console.log("Intentando borrar. Usuario Admin:", user.admin, "Room ID:", targetRoomId);
 
         if (!targetRoomId) {
@@ -247,7 +275,7 @@ const ChatWindow = ({ onClose }) => {
             return;
         }
 
-        // 2. Textos personalizados según el rol
+        // Textos personalizados según el rol
         const title = user.admin ? '¿Eliminar chat permanentemente?' : '¿Vaciar mi historial?';
         const text = user.admin
             ? "Esta acción borrará la sala y los mensajes de la base de datos para AMBOS. Es irreversible."
