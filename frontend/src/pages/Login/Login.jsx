@@ -6,7 +6,9 @@ import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'react-toastify';
+import { redirectTo } from '../../utils/navigation';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+
 const EyeOpenIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
@@ -29,12 +31,12 @@ const Login = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
 
     useEffect(() => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                console.log("Login: Token detectado, redirigiendo a /vehicle");
-                navigate('/vehicle');
-            }
-        }, [navigate]);
+        const token = localStorage.getItem('token');
+        if (token) {
+            console.log("Login: Token detectado, redirigiendo a /vehicle");
+            navigate('/vehicle');
+        }
+    }, [navigate]);
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
@@ -106,7 +108,7 @@ const Login = () => {
             const { user, token } = response.data;
             localStorage.setItem('token', token);
             const destinationPath = '/vehicle';
-            window.location.href = destinationPath;
+            redirectTo(destinationPath);
         } catch (err) {
             console.error("Login Error:", err);
             toast.error(err.response?.data?.message || 'Error al iniciar sesión');

@@ -20,7 +20,12 @@
   },
   "homepage": "https://github.com/brunomps98/Control-de-Flota-S.P.E.R.#readme",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "babel-plugin-transform-vite-meta-env": "^1.0.3",
+    "concurrently": "^9.2.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest-environment-jsdom": "^30.2.0"
   },
   "dependencies": {
     "pg": "^8.16.3",

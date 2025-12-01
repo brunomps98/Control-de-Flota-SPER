@@ -13,7 +13,6 @@ const Case = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     useEffect(() => {
         const fetchTicket = async () => {
             try {
@@ -32,9 +31,21 @@ const Case = () => {
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
+        
+        let backButtonListener;
         const handleBackButton = () => navigate('/support-tickets');
-        const listener = App.addListener('backButton', handleBackButton);
-        return () => listener.remove();
+
+        const setupListener = async () => {
+            backButtonListener = await App.addListener('backButton', handleBackButton);
+        };
+        
+        setupListener();
+
+        return () => {
+            if (backButtonListener) {
+                backButtonListener.remove();
+            }
+        };
     }, [navigate]); 
 
     const handleDelete = () => {
@@ -70,9 +81,7 @@ const Case = () => {
 
     return (
         <div className="page-full-dark">
-
             <main className="main-content-dark">
-                
                 {loading && (
                     <p className="loading-message">Cargando detalles del caso...</p>
                 )}

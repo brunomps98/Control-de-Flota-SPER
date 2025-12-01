@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'; 
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './SupportTickets.css';
 import { App } from '@capacitor/app';
@@ -16,9 +16,10 @@ const FilterIcon = () => (
     </svg>
 );
 
-const SupportTickets = () => {
+// CAMBIO 1: Recibimos debounceDelay como prop con valor por defecto 400
+const SupportTickets = ({ debounceDelay = 400 }) => {
     const navigate = useNavigate();
-    
+
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -33,10 +34,27 @@ const SupportTickets = () => {
     });
 
     useEffect(() => {
+        // Si es web, no hacemos nada
         if (Capacitor.getPlatform() === 'web') return;
-        const handleBackButton = () => navigate('/vehicle'); 
-        const listener = App.addListener('backButton', handleBackButton);
-        return () => listener.remove();
+
+        let backButtonListener;
+
+        const setupListener = async () => {
+            // addListener es asíncrono, esperamos a que nos de el handler
+            backButtonListener = await App.addListener('backButton', () => {
+                navigate('/vehicle');
+            });
+        };
+
+        setupListener();
+
+        // Cleanup function
+        return () => {
+            // Verificamos si el listener fue creado antes de intentar removerlo
+            if (backButtonListener) {
+                backButtonListener.remove();
+            }
+        };
     }, [navigate]);
 
     useEffect(() => {
@@ -64,8 +82,9 @@ const SupportTickets = () => {
             }
         };
         fetchTickets();
-    }, [searchParams]); 
+    }, [searchParams]);
 
+    // CAMBIO 2: Usamos debounceDelay en el setTimeout
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
@@ -82,9 +101,9 @@ const SupportTickets = () => {
             if (paramsChanged || Object.keys(query).length === 0) {
                 setSearchParams(query);
             }
-        }, 400); 
+        }, debounceDelay); // <--- Aquí usamos la prop
         return () => clearTimeout(timer);
-    }, [filters, setSearchParams, searchParams]);
+    }, [filters, setSearchParams, searchParams, debounceDelay]); // Agregamos debounceDelay a dependencias
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -133,10 +152,10 @@ const SupportTickets = () => {
         });
     };
 
-    
+
     return (
         <div className="login-page">
-            
+
             <main>
                 <div className="tickets-container">
                     <h1 id="information-title">Listado de Casos de Soporte</h1>
