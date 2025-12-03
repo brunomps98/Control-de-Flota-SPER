@@ -1,18 +1,19 @@
 import admin from 'firebase-admin';
 import path from 'path';
 import fs from 'fs';
-import { __dirname } from '../utils.js'; 
+import { __dirname } from '../utils.js';
+import Usuario from '../models/user.model.js';
 
 // Determinamos dónde leer la clave
 const isProduction = process.env.NODE_ENV === 'production';
 
-const serviceAccountPath = isProduction 
-    ? '/etc/secrets/firebase-service-account.json' 
+const serviceAccountPath = isProduction
+    ? '/etc/secrets/firebase-service-account.json'
     : path.join(__dirname, './config/firebase-service-account.json');
 
 try {
     const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-    
+
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
     });
@@ -46,8 +47,8 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
             title: title,
             body: body,
         },
-        data: data, 
-        android: { 
+        data: data,
+        android: {
             priority: 'high',
             notification: {
                 sound: 'default',
@@ -57,7 +58,25 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
 
     try {
         const response = await admin.messaging().send(message);
+        console.log('[FCM] Notificación enviada:', response); 
     } catch (error) {
-        console.error('[FCM] Error al enviar notificación:', error);
+
+        // Si el error es que el token no existe o no está registrado
+        if (error.code === 'messaging/registration-token-not-registered' || error.code === 'messaging/invalid-registration-token') {
+            console.warn(`[FCM] Token inválido detectado (${fcmToken}). Eliminando de la BD...`);
+
+            // Buscamos al usuario que tenga ese token y lo ponemos en null
+            try {
+                await Usuario.update(
+                    { fcm_token: null },
+                    { where: { fcm_token: fcmToken } }
+                );
+                console.log('[FCM] Token eliminado correctamente.');
+            } catch (dbError) {
+                console.error('[FCM] Error al eliminar token de BD:', dbError);
+            }
+        } else {
+            console.error('[FCM] Error desconocido al enviar notificación:', error);
+        }
     }
 };

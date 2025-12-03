@@ -8,6 +8,7 @@ const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',  // Usamos el host explícito de Gmail
     port: 465,               // Puerto SSL seguro (Render no bloquea este)
     secure: true,            // true para puerto 465, false para otros
+    family: 4,
     auth: {
         user: process.env.EMAIL_USER, 
         pass: process.env.EMAIL_PASS  
