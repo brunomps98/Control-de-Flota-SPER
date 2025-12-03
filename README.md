@@ -60,7 +60,7 @@ El proyecto sigue una arquitectura de capas (**MVC + Services + Repository Patte
 
 | Dashboard Principal | Gestión de Vehículos |
 |:-------------------:|:--------------------:|
-| ![Dashboard](./docs/img/dashboard.png) | ![Vehiculos](./docs/img/Vehiculos.png) |
+| ![Dashboard](./docs/img/Dashboard.png) | ![Vehiculos](./docs/img/Vehiculos.png) |
 
 | Detalle de Unidad | Chat en Tiempo Real |
 |:-----------------:|:-------------------:|
@@ -143,6 +143,8 @@ cd backend && npm test
 
 # Frontend
 cd frontend && npm test
+
+```
 
 📂 Estructura del Proyecto
 
