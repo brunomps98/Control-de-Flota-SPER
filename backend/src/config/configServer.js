@@ -5,9 +5,13 @@ dotenv.config();
 
 const databaseUrl = process.env.DATABASE_URL;
 
+// Condicional para verificar si la variable de entorno DATABASE_URL está o no en el archivo .env
+
 if (!databaseUrl) {
     throw new Error("La variable de entorno DATABASE_URL no está definida. Revisa tu archivo .env");
 }
+
+// Creación de constante para poder conectarse a postgresql mediante Sequelize
 
 const sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
@@ -28,6 +32,8 @@ const sequelize = new Sequelize(databaseUrl, {
         keepAlive: true 
     }
 });
+
+// Conectamos a la DB y sino arrojamos error 
 
 const connectToDB = async () => {
     try {

@@ -34,7 +34,7 @@ export const initializeSocket = (io) => {
 
         let userRoomName = '';
 
-        // LÓGICA DE ONLINE/OFFLINE 
+        // Lógica de ONLINE/OFFLINE
         if (socket.user.admin) {
             socket.join('admin_room');
             userRoomName = 'admin_room';
@@ -43,7 +43,7 @@ export const initializeSocket = (io) => {
             if (onlineAdmins.size === 1) {
                 io.emit('support_status_change', { isOnline: true });
             }
-            console.log(`[SOCKET] 👑 ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
+            console.log(`[SOCKET] ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
 
         } else {
             try {
@@ -61,7 +61,7 @@ export const initializeSocket = (io) => {
             }
         }
 
-        // --- LÓGICA DE BORRADO DE SALA ---
+        // Lógica de borrado de sala
         socket.on('delete_room', async (payload) => {
             try {
                 const { roomId } = payload;
@@ -93,7 +93,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-        // --- LÓGICA DE LIMPIAR HISTORIAL (SOLO USUARIO) ---
+        // Lógica de limpiar historial solo para el usuario
         socket.on('clear_history', async (payload) => {
             try {
                 const { roomId } = payload;
@@ -108,15 +108,14 @@ export const initializeSocket = (io) => {
                     return socket.emit('operation_error', { message: 'No tienes permiso para vaciar este chat.' });
                 }
 
-                // NO borramos la sala de la BD (para que el Admin siga viendo el historial).
-                // Pero podemos actualizar el último mensaje para avisar al admin que el usuario "limpió/salió".
+                // No borramos la sala de la BD (para que el Admin siga viendo el historial)
 
-                await room.update({ last_message: "🚫 El usuario ha vaciado su historial/salido." });
+                await room.update({ last_message: " El usuario ha vaciado su historial/salido." });
 
                 // Avisamos al Admin (si está conectado) que el usuario hizo esto
                 io.to('admin_room').emit('new_message_notification', {
                     message: {
-                        content: "🚫 El usuario ha vaciado su historial/salido.",
+                        content: " El usuario ha vaciado su historial/salido.",
                         created_at: new Date().toISOString(),
                         type: 'info' 
                     },
@@ -133,7 +132,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-        // --- LÓGICA DE BORRADO DE MENSAJE  ---
+        // Lógica de borrado de mensaje
         socket.on('delete_message', async (payload) => {
             try {
                 const { messageId } = payload;
@@ -196,7 +195,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-        //  LÓGICA "ESCRIBIENDO..." 
+        //  Lógica Escribiendo...
         socket.on('typing_start', (payload) => {
             try {
                 const { roomId } = payload;
@@ -221,14 +220,14 @@ export const initializeSocket = (io) => {
         socket.on('admin_join_room', (roomId) => {
             try {
                 if (!socket.user.admin) {
-                    console.warn(`[SOCKET] ⚠️ Intento no autorizado de ${socket.user.username} para unirse a sala ${roomId}`);
+                    console.warn(`[SOCKET]  Intento no autorizado de ${socket.user.username} para unirse a sala ${roomId}`);
                     return;
                 }
                 const roomName = `room_${roomId}`;
                 socket.join(roomName);
-                console.log(`[SOCKET] 👑 Admin ${socket.user.username} ahora está escuchando ${roomName}`);
+                console.log(`[SOCKET]  Admin ${socket.user.username} ahora está escuchando ${roomName}`);
             } catch (error) {
-                console.error(`[SOCKET] ⚠️ Error en 'admin_join_room':`, error);
+                console.error(`[SOCKET]  Error en 'admin_join_room':`, error);
             }
         });
 
@@ -243,7 +242,7 @@ export const initializeSocket = (io) => {
                 }
 
                 if (!socket.user.admin && userRoomName !== `room_${roomId}`) {
-                    console.warn(`[SOCKET] ⚠️ Intento de escritura no autorizado...`);
+                    console.warn(`[SOCKET]  Intento de escritura no autorizado...`);
                     return;
                 }
 
@@ -275,7 +274,8 @@ export const initializeSocket = (io) => {
                 const targetRoomName = `room_${roomId}`;
                 io.to(targetRoomName).emit('new_message', messageWithSender);
 
-                // --- NOTIFICACIONES ---
+                // Notificaciones
+                
                 if (!socket.user.admin) {
 
                     io.to('admin_room').emit('new_message_notification', {
@@ -329,7 +329,7 @@ export const initializeSocket = (io) => {
 
 
         socket.on('disconnect', () => {
-            console.log(`[SOCKET] ❌ Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
+            console.log(`[SOCKET] Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
 
             if (socket.user.admin && socket.user.id) {
                 onlineAdmins.delete(socket.user.id);

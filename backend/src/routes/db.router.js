@@ -35,15 +35,15 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-// RUTA PARA QUE FUNCIONE UPTIMEROBOT
+// Ruta para que funcione UpTimeRobot
 router.get("/health", (req, res) => {
     res.status(200).send("OK");
 });
 
-//  RUTAS DE AUTENTICACIÓN
+//  Rutas de autenticación
 router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.registerUser);
 
-// --- RUTA DE LOGIN ---
+// Ruta de login
 router.post('/login', async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
 
@@ -99,7 +99,7 @@ router.get('/users/profile/:id', verifyToken, async (req, res) => {
     }
 });
 
-// Actualizar MI propia foto de perfil
+// Actualizar mi propia foto de perfil
 router.put('/user/profile/photo', verifyToken, upload.single('profile_picture'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No se subió ninguna imagen' });
@@ -134,7 +134,7 @@ router.delete('/users/profile/:id/photo', verifyToken, async (req, res) => {
     }
 });
 
-// --- RUTAS DE GESTIÓN DE USUARIOS (CRUD) ---
+// Rutas de gestión de datos (CRUD)
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const filters = req.query;
@@ -210,7 +210,7 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
 });
 
 
-// --- RUTAS DE VEHÍCULOS ---
+// Rutas de Vehiculos
 router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
 router.put("/vehicle/:productId", verifyToken, VehicleDao.updateVehicle);
 router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicle);
@@ -227,7 +227,7 @@ router.get("/vehicle/:cid/destinos", verifyToken, VehicleDao.getDestinos);
 router.get("/vehicle/:cid/rodados", verifyToken, VehicleDao.getRodados);
 router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripciones);
 
-// --- RUTAS DE CHAT ---
+// Rutas de Chat
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);
 router.get("/chat/rooms", verifyToken, verifyAdmin, ChatController.getAdminRooms);
 router.get("/chat/room/:roomId/messages", verifyToken, verifyAdmin, ChatController.getMessagesForRoom);
@@ -235,14 +235,14 @@ router.post("/chat/find-or-create-room", verifyToken, verifyAdmin, ChatControlle
 router.post("/chat/upload", verifyToken, upload.array('files', 10), ChatController.uploadChatFile);
 
 
-// --- RUTAS DE SOPORTE ---
+// Rutas de Soporte
 router.post('/support', upload.array('files'), SupportController.createTicket);
 router.post('/support-no-files', SupportController.createTicketNoFiles);
 router.get('/support-tickets', SupportController.getTickets);
 router.get('/support/:ticketId', SupportController.getTicketById);
 router.delete('/support/:pid', SupportController.deleteTicket);
 
-// RUTAS DE NOTIFICACIONES
+// Rutas de notificaciones
 router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -257,6 +257,7 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
+//Ruta para marcar todas las notificaciones como marcadas
 router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.update({ is_read: true }, { where: { user_id: req.user.id, is_read: false } });
@@ -276,7 +277,7 @@ router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res)
     }
 });
 
-// --- IMPORTANTE: ESTA RUTA DEBE IR PRIMERO (La específica) ---
+// Ruta para vaciar notificaciones
 router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.destroy({ where: { user_id: req.user.id } });
@@ -286,9 +287,8 @@ router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, 
         res.status(500).json({ message: "Error del servidor" });
     }
 });
-// -----------------------------------------------------------
 
-// --- LUEGO ESTA (La genérica con :id) ---
+// Ruta generica de notifaciones con ID
 router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const notificationId = req.params.id;
@@ -301,7 +301,7 @@ router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) =
     }
 });
 
-// --- RUTAS DASHBOARD --- 
+// Ruta para el dashboard
 router.get("/dashboard/stats", verifyToken, verifyAdmin, DashboardController.getDashboardStats);
 
 export default router;

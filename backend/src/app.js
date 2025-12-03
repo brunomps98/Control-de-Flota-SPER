@@ -37,6 +37,7 @@ const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...extras]));
 // Definimos el "comodín" (Regex) de Vercel
 const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
 
+// Configuración de CORS
 const corsOptions = {
   origin: function(origin, callback) {
     if (!origin) {
@@ -62,6 +63,7 @@ const corsOptions = {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Mensaje para mostrar exito
 app.get('/', (req, res) => {
     res.status(200).send('Server is live and healthy!');
 });

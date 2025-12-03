@@ -141,7 +141,8 @@ class SupportController {
             // Capturamos el nombre
             const creatorName = req.user ? req.user.username : ticketData.name;
 
-            SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
+            // Implementamos await acá para que las notificaciones terminen antes de responder
+            await SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
@@ -149,7 +150,6 @@ class SupportController {
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };
-
 
     // Crea un nuevo ticket sin archivos 
     static createTicketNoFiles = async (req, res) => {
@@ -161,7 +161,8 @@ class SupportController {
 
             const creatorName = req.user ? req.user.username : ticketData.name;
 
-            SupportController._sendNotificationToAdmins(newTicket, [], creatorName);
+            // <-- AWAIT aquí también
+            await SupportController._sendNotificationToAdmins(newTicket, [], creatorName);
 
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
@@ -169,6 +170,7 @@ class SupportController {
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };
+
 
     // Elimina un ticket
     static deleteTicket = async (req, res) => {

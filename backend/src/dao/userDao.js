@@ -24,7 +24,7 @@ class UserDao {
         res.redirect('/');
     }
 
-    // REGISTRO DE USUARIO CON FOTO
+    // Registro de usuario con foto
     static registerUser = async (req, res) => {
         const { username, unidad, email, passw } = req.body;
         let profilePictureUrl = null;
@@ -71,12 +71,12 @@ class UserDao {
         }
     }
 
-    // OBTENER TODOS 
+    // Obtener todos los usuarios
     static getAllUsers = async (filters) => {
         return await userDao.getAllUsers(filters);
     }
 
-    // ACTUALIZAR USUARIO (CON FOTO) 
+    // Actualizar usuario (con foto)
     static updateUser = async (req, res) => {
         const id = req.params.id;
         const userData = req.body;
@@ -133,7 +133,7 @@ class UserDao {
         await Usuario.update({ profile_picture: null }, { where: { id: userId } });
     }
     
-    // Wrapper para el router (Full Controller)
+    // Wrapper para el router 
     static deleteUserContoller = async (req, res) => {
         try {
             const userIdToDelete = req.params.id;
