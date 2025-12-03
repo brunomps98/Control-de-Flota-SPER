@@ -148,6 +148,8 @@ cd frontend && npm test
 
 📂 Estructura del Proyecto
 
+```bash
+
 /control-flota-sper
 ├── backend
 │   ├── src
@@ -175,6 +177,8 @@ cd frontend && npm test
 │   └── package.json
 │
 └── README.md               # Documentación del proyecto
+
+```
 
 👤 Autor
 Bruno - Desarrollador Full Stack
