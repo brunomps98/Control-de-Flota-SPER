@@ -91,7 +91,7 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
 };
 
 
-// Notificación de Acción en Vehículo (Carga o Edición)
+// Notificación de Acción en Vehículo 
 export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehicleData) => {
     const to = adminEmails.join(', ');
 
