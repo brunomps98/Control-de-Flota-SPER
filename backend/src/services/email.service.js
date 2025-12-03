@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// --- CONFIGURACIÓN OPTIMIZADA PARA RENDER ---
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',  // Usamos el host explícito de Gmail
     port: 465,               // Puerto SSL seguro (Render no bloquea este)
