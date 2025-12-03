@@ -70,7 +70,6 @@ class ChatController {
                 }
             });
             if (created) {
-                console.log(`[CHAT] Nueva sala creada para el usuario ${userId}`);
             }
             const messages = await ChatMessage.findAll({
                 where: { room_id: room.id },
@@ -183,8 +182,6 @@ class ChatController {
                     last_message: null // Inicializamos en NULL para que no aparezca en la bandeja
                 }
             });
-
-            if (created) console.log(`[CHAT] Admin ha creado una nueva sala para el usuario ${userId}`);
 
             const finalRoom = await ChatRoom.findByPk(room.id, {
                 include: [{

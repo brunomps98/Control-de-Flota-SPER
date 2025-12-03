@@ -57,15 +57,14 @@ class UserDao {
             // Guardar usuario (Pasamos la URL como 5to argumento)
             const newUser = await userDao.registerUser(username, unidad, email, passw, profilePictureUrl);
 
-            console.log(newUser);
             res.status(201).json({ message: "Usuario registrado con éxito" });
             
         } catch (error) {
             if (error.message === 'Email already in use' || (error.name && error.name.includes('SequelizeUniqueConstraintError'))) {
-                console.log('El correo o usuario ya existe', error);
+                console.error('El correo o usuario ya existe', error);
                 res.status(409).json({ message: 'El email o nombre de usuario ya existe.' });
             } else {
-                console.log('Error al registrar usuario:', error)
+                console.error('Error al registrar usuario:', error)
                 res.status(500).json({ message: 'Error al registrar usuario', details: error.message });
             }
         }

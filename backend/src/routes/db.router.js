@@ -27,7 +27,6 @@ const verifyAdmin = (req, res, next) => {
 const router = Router();
 
 router.use((req, res, next) => {
-    console.log(`--> Petición llegó a db.router.js: ${req.method} ${req.url}`);
     next();
 });
 

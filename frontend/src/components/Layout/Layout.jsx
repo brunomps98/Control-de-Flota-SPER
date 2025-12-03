@@ -70,7 +70,6 @@ const Layout = () => {
 
     // FUNCIÓN CENTRALIZADA DE REDIRECCIÓN 
     const processRedirect = (rawType, resourceId) => {
-        console.log("🚀 Procesando Redirección:", { rawType, resourceId });
 
         let type = rawType;
         if (type === 'vehicle') type = 'vehicle_update';
@@ -93,14 +92,12 @@ const Layout = () => {
             if (resourceId) {
                 // 2. Abrir ventana
                 setTimeout(() => {
-                    console.log("💬 Disparando evento OPEN_CHAT_ROOM para:", resourceId);
                     window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
                 }, 1000); // 1 segundo para asegurar que todo cargó
             }
         }
         else {
             // Fallback por si el tipo no coincide
-            console.log("Tipo desconocido, yendo a home.");
             navigate('/vehicle');
         }
     };
@@ -131,7 +128,6 @@ const Layout = () => {
                     const parsed = JSON.parse(pendingRedirect);
                     const { type, resourceId } = parsed;
 
-                    console.log("📬 Buzón: Ejecutando redirección pendiente:", parsed);
 
                     localStorage.removeItem('pending_notification_redirect');
 
@@ -167,7 +163,6 @@ const Layout = () => {
 
                 PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
                     const data = notification.notification.data;
-                    console.log('[FCM] Click recibido:', data);
 
                     // Normalización de datos
                     let type = data.type;
@@ -191,16 +186,13 @@ const Layout = () => {
                     const token = localStorage.getItem('token');
 
                     if (token) {
-                        console.log("[FCM] Sesión activa detectada. Yendo al inicio para procesar redirección...");
                         window.location.href = '/vehicle';
                     } else {
-                        console.log("[FCM] No hay sesión. Yendo al Login.");
                         navigate('/login');
                     }
                 });
 
             } catch (error) {
-                console.error('[FCM] Error setup:', error);
             }
         };
 

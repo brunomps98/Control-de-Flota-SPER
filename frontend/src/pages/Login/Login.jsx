@@ -33,7 +33,6 @@ const Login = () => {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            console.log("Login: Token detectado, redirigiendo a /vehicle");
             navigate('/vehicle');
         }
     }, [navigate]);

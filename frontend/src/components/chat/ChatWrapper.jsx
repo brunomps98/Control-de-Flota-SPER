@@ -283,9 +283,6 @@ const ChatWindow = ({ onClose }) => {
         // Aseguramos obtener el ID correcto dependiendo quién sea
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
 
-        // Debug
-        console.log("Intentando borrar. Usuario Admin:", user.admin, "Room ID:", targetRoomId);
-
         if (!targetRoomId) {
             toast.error("Error: No se identificó el chat a eliminar.");
             return;

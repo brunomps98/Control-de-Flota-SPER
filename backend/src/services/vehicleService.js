@@ -10,6 +10,13 @@ import { sendVehicleActionEmail } from './email.service.js';
 import { getIO } from '../socket/socketHandler.js';
 import { sendPushNotification } from './notification.service.js';
 
+/**
+ * Verifica si un usuario tiene permisos para ver o editar una unidad específica.
+ * @param {Object} user - Objeto del usuario (req.user).
+ * @param {string} vehicleTitle - Nombre de la unidad del vehículo (ej: "Unidad Penal 1").
+ * @returns {boolean} True si tiene permiso, False si no.
+ */
+
 const checkPermission = (user, vehicleTitle) => {
     if (user.admin) {
         return true;
@@ -98,6 +105,13 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
 
 export default class VehicleManager {
 
+    /**
+     * Obtiene una lista paginada de vehículos aplicando filtros dinámicos.
+     * Si el usuario no es admin, filtra automáticamente solo su unidad.
+     * * @param {Object} queryParams - Parámetros de la URL (page, limit, dominio, etc.).
+     * @returns {Promise<Object>} Objeto con docs, totalDocs, page, totalPages.
+     */
+
     getVehicles = async (queryParams) => {
 
         try {
@@ -148,7 +162,6 @@ export default class VehicleManager {
 
             includeWhere.push({ model: Thumbnail, as: 'thumbnails', required: false });
 
-            console.log("[BACK] Aplicando filtro:", filter);
 
             const { count, rows } = await Vehiculo.findAndCountAll({
                 where: filter,
@@ -158,7 +171,6 @@ export default class VehicleManager {
                 order: [['dominio', 'ASC']],
             });
 
-            console.log(`[BACK] Query encontró ${count} vehículos.`);
 
             const totalPages = Math.ceil(count / limit);
             const docs = rows.map(product => {
@@ -178,6 +190,14 @@ export default class VehicleManager {
             throw err;
         }
     }
+
+    /**
+     * Busca un vehículo por ID e incluye todo su historial (Services, Reparaciones, etc.).
+     * @param {string|number} id - ID del vehículo.
+     * @param {Object} user - Usuario que solicita la información (para validar permisos).
+     * @returns {Promise<Object|null>} El vehículo completo o null si no existe.
+     * @throws {Error} Si el usuario no tiene permisos para ver este vehículo.
+     */
 
     getVehicleById = async (id, user) => {
         try {
@@ -212,6 +232,14 @@ export default class VehicleManager {
             throw err;
         }
     }
+
+    /**
+     * Crea un nuevo vehículo y registra sus datos iniciales en una transacción.
+     * Notifica a los administradores si el creador no es admin.
+     * * @param {Object} product - Datos del vehículo (dominio, modelo, kilometros, etc.).
+     * @param {Object} user - Usuario que crea el vehículo.
+     * @returns {Promise<Object>} El vehículo creado.
+     */
 
     addVehicle = async (product, user) => {
         const t = await sequelize.transaction();
@@ -260,6 +288,13 @@ export default class VehicleManager {
             throw err;
         }
     }
+
+    /**
+     * Actualiza datos de un vehículo y agrega entradas al historial si cambiaron.
+     * @param {string} id - ID del vehículo a modificar.
+     * @param {Object} updateData - Objeto con los campos a actualizar.
+     * @param {Object} user - Usuario que realiza la acción.
+     */
 
     updateVehicle = async (id, updateData, user) => {
         const t = await sequelize.transaction();

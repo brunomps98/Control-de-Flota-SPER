@@ -19,13 +19,16 @@ Sistema integral de gestión y administración de flota vehicular desarrollado p
 ## 🚀 Características Principales
 
 * **Gestión Vehicular:** CRUD completo de unidades con historial detallado de kilometraje, reparaciones, services, choferes y documentación.
+* **Soporte Móvil (Android):** Aplicación nativa (.apk) generada con Capacitor, permitiendo el uso en tablets y celulares de los oficiales en campo.
 * **Control de Acceso (RBAC):**
     * *Administradores:* Control total sobre usuarios y flota global.
     * *Usuarios:* Acceso restringido únicamente a los vehículos de su unidad asignada (ej. UP1, UP3).
 * **Sistema de Comunicación:**
     * Chat interno en tiempo real (Socket.io).
     * Sistema de Tickets de Soporte con capacidad de adjuntar evidencia multimedia.
-* **Notificaciones:** Alertas instantáneas en la interfaz y notificaciones Push/Email para eventos críticos.
+* **Notificaciones Inteligentes:**
+    * **Web:** Alertas visuales instantáneas (WebSockets).
+    * **Android:** Notificaciones Push nativas mediante **Firebase Cloud Messaging (FCM)**, alertando incluso con la app cerrada.
 * **Dashboard Estadístico:** Visualización de métricas de flota para la toma de decisiones estratégicas.
 
 ---
@@ -41,9 +44,12 @@ El proyecto sigue una arquitectura de capas (**MVC + Services + Repository Patte
 * **Seguridad:** JWT (Auth) & Bcrypt (Hashing)
 * **Almacenamiento:** Supabase Storage (Multimedia)
 * **Tiempo Real:** Socket.io
+* **Notificaciones:** Firebase Admin SDK (FCM)
 
 ### Frontend
 * **Framework:** React (Vite)
+* **Mobile Runtime:** Capacitor (CapacitorJS)
+* **Plataforma:** Web & Android
 * **Estilos:** CSS Modules + Bootstrap
 * **Cliente HTTP:** Axios
 * **PWA:** Capacidades progresivas para uso móvil.
@@ -77,6 +83,7 @@ El proyecto sigue una arquitectura de capas (**MVC + Services + Repository Patte
 ### Requisitos Previos
 * Node.js v18+
 * PostgreSQL
+* Android Studio (Solo para compilar la APK)
 
 ### Configuración Local
 
@@ -114,6 +121,16 @@ El proyecto sigue una arquitectura de capas (**MVC + Services + Repository Patte
     npm run dev
     ```
     *Este comando levantará simultáneamente el servidor Backend (puerto 8080) y el cliente Frontend.*
+
+5.  **Compilar para Android**
+    Si deseas generar la aplicación móvil:
+    ```bash
+    cd frontend
+    npm run build
+    npx cap sync
+    npx cap open android
+    ```
+    *Esto abrirá Android Studio, desde donde podrás ejecutar la app en un emulador o dispositivo físico.*
 
 ---
 
@@ -153,7 +170,7 @@ cd frontend && npm test
 /control-flota-sper
 ├── backend
 │   ├── src
-│   │   ├── config          # Auth middleware, DB config, Supabase
+│   │   ├── config          # Auth middleware, DB config, Supabase, Firebase
 │   │   ├── controllers     # Lógica de Chat, Soporte, Dashboard
 │   │   ├── dao             # Data Access Objects (User, Vehicle)
 │   │   ├── models          # Modelos Sequelize
@@ -167,6 +184,7 @@ cd frontend && npm test
 │   └── package.json
 │
 ├── frontend
+│   ├── android             # Proyecto nativo Android (Generado por Capacitor)
 │   ├── src
 │   │   ├── api             # Configuración Axios
 │   │   ├── components      # Componentes Reutilizables

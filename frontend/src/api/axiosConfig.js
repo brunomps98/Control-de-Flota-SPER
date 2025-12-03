@@ -6,14 +6,11 @@ const baseURL = platform === 'android'
     ? 'https://control-de-flota-backend.onrender.com' 
     : import.meta.env.VITE_API_URL;
 
-console.log('API baseURL selected:', baseURL);
-
 const capacitorAdapter = async (config) => {
   try {
 
     // Manejo de FormData 
     if (config.data instanceof FormData) {
-        console.log('Detectado FormData en Capacitor, usando fetch()...');
         
         const fetchHeaders = new Headers(config.headers);
         fetchHeaders.delete('Content-Type'); 

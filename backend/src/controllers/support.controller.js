@@ -103,8 +103,6 @@ class SupportController {
             let fileUrls = [];
 
             if (req.files && req.files.length > 0) {
-                console.log(`Subiendo ${req.files.length} archivos de soporte a Supabase...`);
-
                 for (const file of req.files) {
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                     const extension = path.extname(file.originalname);

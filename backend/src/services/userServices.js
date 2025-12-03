@@ -6,7 +6,17 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 
 export default class userManager {
 
-    // Agregamos profilePicture como argumento
+    /**
+     * Registra un nuevo usuario y asigna permisos booleanos según la unidad seleccionada.
+     * * @param {string} username - Nombre de usuario único.
+     * @param {string} unidad - Nombre de la unidad (ej: "Unidad Penal 1").
+     * @param {string} email - Correo electrónico único.
+     * @param {string} password - Contraseña en texto plano (será hasheada automáticamente por el modelo o hook).
+     * @param {string|null} profilePicture - URL de la foto de perfil o null.
+     * @returns {Promise<Object>} El usuario creado (sin password).
+     * @throws {Error} Si el email o usuario ya existen.
+     */
+
     regUser = async (username, unidad, email, password, profilePicture) => {
         try {
 
@@ -88,6 +98,14 @@ export default class userManager {
         }
     }
 
+    /**
+     * Valida las credenciales de un usuario para el inicio de sesión.
+     * * @param {string} username - Nombre de usuario.
+     * @param {string} password - Contraseña ingresada.
+     * @returns {Promise<Object>} El usuario autenticado.
+     * @throws {Error} Si el usuario no existe o la contraseña es incorrecta.
+     */
+
     logInUser = async (username, password) => {
         const user = await Usuario.findOne({
             where: { username },
@@ -148,6 +166,12 @@ export default class userManager {
         }
     }
 
+    /**
+     * Obtiene todos los usuarios aplicando filtros opcionales.
+     * @param {Object} filters - Filtros de búsqueda (username, email, unidad, admin).
+     * @returns {Promise<Array>} Lista de usuarios (excluyendo passwords).
+     */
+
     getAllUsers = async (filters = {}) => {
         try {
             const whereClause = {};
@@ -184,6 +208,12 @@ export default class userManager {
             throw new Error('Error al obtener la lista de usuarios');
         }
     }
+
+    /**
+     * Elimina un usuario y todos sus datos asociados (ChatRoom, Mensajes) en cascada.
+     * Se ejecuta dentro de una transacción para asegurar integridad.
+     * @param {number} userId - ID del usuario a eliminar.
+     */
 
     deleteUser = async (userId) => {
         const t = await sequelize.transaction();

@@ -57,7 +57,6 @@ export const sendPushNotification = async (fcmToken, title, body, data = {}) => 
 
     try {
         const response = await admin.messaging().send(message);
-        console.log('[FCM] Notificación enviada:', response);
     } catch (error) {
         console.error('[FCM] Error al enviar notificación:', error);
     }

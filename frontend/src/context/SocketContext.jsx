@@ -21,11 +21,9 @@ export const SocketProvider = ({ children }) => {
         const token = localStorage.getItem('token'); 
 
         if (!token) {
-            console.log("Socket: Usuario no logueado, no se conectará.");
             return;
         }
 
-        console.log('Socket: Intentando conectar a:', SOCKET_URL);
 
         const newSocket = io(SOCKET_URL, {
             auth: {
@@ -40,7 +38,6 @@ export const SocketProvider = ({ children }) => {
 
         // Manejo de eventos de conexión
         newSocket.on('connect', () => {
-            console.log('Socket.io: Conectado al servidor ✅ ID:', newSocket.id);
         });
 
         newSocket.on('connect_error', (err) => {
@@ -48,7 +45,6 @@ export const SocketProvider = ({ children }) => {
         });
 
         newSocket.on('disconnect', () => {
-            console.log('Socket.io: Desconectado del servidor 🔌');
         });
 
         // Función de limpieza: se desconecta cuando el componente se desmonta

@@ -24,7 +24,7 @@ const renderVehicleView = async (req, res, viewName) => {
 
         res.render(viewName, { ...result, user: req.user });
     } catch (error) {
-        console.log(`Error al renderizar ${viewName}`, error);
+        console.error(`Error al renderizar ${viewName}`, error);
         res.status(500).json({ error: `error al leer los vehículos` });
     }
 };
@@ -75,8 +75,6 @@ class VehicleDao {
             let thumbnailUrls = [];
 
             if (req.files && req.files.length > 0) {
-                console.log(`Subiendo ${req.files.length} archivos a Supabase...`);
-
                 for (const file of req.files) {
                     // Creamos un nombre de archivo único
                     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

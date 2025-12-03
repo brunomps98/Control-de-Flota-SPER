@@ -55,7 +55,6 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Notificación de ticket enviada a: ${to}`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
@@ -87,9 +86,7 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Email de reseteo enviado a: ${userEmail}`);
     } catch (error) {
-        console.error("[Email Service] Error al enviar correo de reseteo:", error);
     }
 };
 
@@ -125,7 +122,6 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Vehículo (${actionType}) notificado a: ${to}`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo de vehículo:", error);
     }
@@ -155,7 +151,6 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log(`[Email Service] Notificación de chat enviada a: ${to}`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo de chat:", error);
     }

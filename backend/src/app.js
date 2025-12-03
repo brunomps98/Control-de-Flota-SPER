@@ -6,11 +6,9 @@ import cors from "cors";
 
 dotenv.config();
 const app = express();
-console.log('\n');
 
 // Mensaje log de petición recibida
 app.use((req, res, next) => {
-  console.log(`[BACK] --> Petición recibida: ${req.method} ${req.originalUrl}`);
   next();
 });
 

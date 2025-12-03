@@ -30,8 +30,7 @@ export const initializeSocket = (io) => {
 
     io.on('connection', async (socket) => {
 
-        console.log(`[SOCKET] ✅ Cliente autenticado: ${socket.user.username} (ID: ${socket.user.id})`);
-
+    
         let userRoomName = '';
 
         // Lógica de ONLINE/OFFLINE
@@ -43,8 +42,7 @@ export const initializeSocket = (io) => {
             if (onlineAdmins.size === 1) {
                 io.emit('support_status_change', { isOnline: true });
             }
-            console.log(`[SOCKET] ${socket.user.username} se unió... (Admins Online: ${onlineAdmins.size})`);
-
+            
         } else {
             try {
                 const [room] = await ChatRoom.findOrCreate({
@@ -55,9 +53,8 @@ export const initializeSocket = (io) => {
                 userRoomName = `room_${room.id}`;
                 socket.join(userRoomName);
                 onlineUsers[socket.user.id] = true;
-                console.log(`[SOCKET] 🗣️ ${socket.user.username} se unió a su sala privada: ${userRoomName}`);
+            
             } catch (error) {
-                console.error(`[SOCKET] ⚠️ Error al unir a ${socket.user.username} a su sala:`, error);
             }
         }
 
@@ -225,9 +222,7 @@ export const initializeSocket = (io) => {
                 }
                 const roomName = `room_${roomId}`;
                 socket.join(roomName);
-                console.log(`[SOCKET]  Admin ${socket.user.username} ahora está escuchando ${roomName}`);
             } catch (error) {
-                console.error(`[SOCKET]  Error en 'admin_join_room':`, error);
             }
         });
 
@@ -329,19 +324,16 @@ export const initializeSocket = (io) => {
 
 
         socket.on('disconnect', () => {
-            console.log(`[SOCKET] Cliente desconectado: ${socket.user.username} (ID: ${socket.id})`);
 
             if (socket.user.admin && socket.user.id) {
                 onlineAdmins.delete(socket.user.id);
                 if (onlineAdmins.size === 0) {
                     io.emit('support_status_change', { isOnline: false });
                 }
-                console.log(`[SOCKET] Status update: Admin ${socket.user.username} está offline. (Admins Online: ${onlineAdmins.size})`);
             }
 
             if (!socket.user.admin && socket.user.id) {
                 delete onlineUsers[socket.user.id];
-                console.log(`[SOCKET] Status update: ${socket.user.username} está offline. (Online: ${Object.keys(onlineUsers).length})`);
             }
         });
     });
