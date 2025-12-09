@@ -4,10 +4,11 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.RESEND_FROM;
+const FROM = process.env.RESEND_FROM; 
+
+const SAFE_DEMO_EMAIL = ['controldeflotasper@gmail.com']; 
 
 // Nuevo ticket de soporte
-
 export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = []) => {
 
     let filesHtml = '<p>No se adjuntaron archivos.</p>';
@@ -35,50 +36,45 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
 
     try {
         await resend.emails.send({
-            from: process.env.RESEND_FROM, 
-
-            to: ['controldeflotasper@gmail.com'],
-
+            from: FROM, 
+            to: SAFE_DEMO_EMAIL, 
             subject: `Nuevo Ticket: ${ticketData.problem_description.substring(0, 30)}...`,
             html: htmlBody
         });
-        console.log("Correo enviado con Resend");
+        console.log("✅ [Ticket] Correo enviado con Resend");
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
 };
 
-
 // Reseteo de contraseña
-
 export const sendPasswordResetEmail = async (userEmail, resetLink) => {
 
     const htmlBody = `
         <h1>Restablecimiento de Contraseña</h1>
-        <p>Has solicitado restablecer tu contraseña.</p>
+        <p>Has solicitado restablecer tu contraseña para el usuario: <strong>${userEmail}</strong></p>
         <p>Haz clic en el siguiente enlace (válido por 15 minutos):</p>
         <a href="${resetLink}" style="background:#009688;color:white;padding:10px 15px;text-decoration:none;border-radius:5px;">
             Restablecer Contraseña
         </a>
         <hr>
-        <p>Si no solicitaste esto, ignora este mensaje.</p>
+        <p>⚠️ NOTA MODO DEMO: Este correo fue redirigido a tu cuenta admin porque estás en Sandbox.</p>
     `;
 
     try {
         await resend.emails.send({
             from: FROM,
-            to: userEmail,
-            subject: 'Restablecimiento de tu contraseña',
+            to: SAFE_DEMO_EMAIL, 
+            subject: 'Restablecimiento de tu contraseña (Modo Demo)',
             html: htmlBody
         });
+        console.log(`✅ [Password] Reset enviado a ${SAFE_DEMO_EMAIL} (Original: ${userEmail})`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
 };
 
-
 // Acción en vehiculo
-
 export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehicleData) => {
 
     const subjectAction = actionType === 'CREATE' ? 'Nuevo Vehículo Cargado' : 'Vehículo Actualizado';
@@ -101,18 +97,17 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
     try {
         await resend.emails.send({
             from: FROM,
-            to: adminEmails,
+            to: SAFE_DEMO_EMAIL, 
             subject: `📢 ${subjectAction}: ${vehicleData.dominio}`,
             html: htmlBody
         });
+        console.log("✅ [Vehicle] Notificación enviada");
     } catch (error) {
         console.error("[Email Service] Error:", error);
     }
 };
 
-
 // Mensaje de chat 
-
 export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, messageContent) => {
 
     const htmlBody = `
@@ -129,10 +124,11 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
     try {
         await resend.emails.send({
             from: FROM,
-            to: adminEmails,
+            to: SAFE_DEMO_EMAIL, 
             subject: `💬 Nuevo mensaje de ${senderName}`,
             html: htmlBody
         });
+        console.log("✅ [Chat] Notificación enviada");
     } catch (error) {
         console.error("[Email Service] Error:", error);
     }
