@@ -38,7 +38,6 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
             from: process.env.RESEND_FROM, 
 
             to: ['controldeflotasper@gmail.com'],
-            
 
             subject: `Nuevo Ticket: ${ticketData.problem_description.substring(0, 30)}...`,
             html: htmlBody
