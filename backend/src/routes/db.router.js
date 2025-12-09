@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { __dirname } from "../utils.js";
-import express from 'express';
 import multer from "multer";
-import path from 'path';
 import VehicleDao from "../dao/vehicleDao.js";
 import UserDao from "../dao/userDao.js";
 import SupportController from "../controllers/support.controller.js";
