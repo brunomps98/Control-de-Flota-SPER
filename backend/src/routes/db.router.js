@@ -63,7 +63,7 @@ router.post('/login', async (req, res) => {
 
         const user = await userDao.loginUser(username, password);
         const { password: _, ...userPayload } = user.get({ plain: true });
-        const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '365d' });
+        const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '1d' });
 
         res.status(200).json({ status: 'success', user: userPayload, token });
 
