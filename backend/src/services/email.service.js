@@ -41,7 +41,6 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
             subject: `Nuevo Ticket: ${ticketData.problem_description.substring(0, 30)}...`,
             html: htmlBody
         });
-        console.log("✅ [Ticket] Correo enviado con Resend");
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
@@ -68,7 +67,6 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
             subject: 'Restablecimiento de tu contraseña (Modo Demo)',
             html: htmlBody
         });
-        console.log(`✅ [Password] Reset enviado a ${SAFE_DEMO_EMAIL} (Original: ${userEmail})`);
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
@@ -98,10 +96,9 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
         await resend.emails.send({
             from: FROM,
             to: SAFE_DEMO_EMAIL, 
-            subject: `📢 ${subjectAction}: ${vehicleData.dominio}`,
+            subject: ` ${subjectAction}: ${vehicleData.dominio}`,
             html: htmlBody
         });
-        console.log("✅ [Vehicle] Notificación enviada");
     } catch (error) {
         console.error("[Email Service] Error:", error);
     }
@@ -125,10 +122,9 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
         await resend.emails.send({
             from: FROM,
             to: SAFE_DEMO_EMAIL, 
-            subject: `💬 Nuevo mensaje de ${senderName}`,
+            subject: `Nuevo mensaje de ${senderName}`,
             html: htmlBody
         });
-        console.log("✅ [Chat] Notificación enviada");
     } catch (error) {
         console.error("[Email Service] Error:", error);
     }
