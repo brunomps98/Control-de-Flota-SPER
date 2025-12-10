@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { __dirname } from "../utils.js";
 import multer from "multer";
-import VehicleDao from "../dao/vehicleDao.js";
-import UserDao from "../dao/userDao.js";
+import VehicleController from "../controllers/vehicle.controller.js";
+import UserController from "../controllers/user.controller.js";
 import SupportController from "../controllers/support.controller.js";
-import { userDao } from "../repository/index.js";
+import { userDao as userRepository } from "../repository/index.js";
 import jwt from 'jsonwebtoken';
 import { verifyToken } from "../config/authMiddleware.js";
 import ChatController from "../controllers/chat.controller.js";
@@ -38,7 +38,7 @@ router.get("/health", (req, res) => {
 });
 
 //  Rutas de autenticación
-router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.registerUser);
+router.post('/register', verifyToken, verifyAdmin, upload.single('profile_picture'), UserController.registerUser);
 
 // Ruta de login
 router.post('/login', async (req, res) => {
@@ -59,7 +59,7 @@ router.post('/login', async (req, res) => {
             }
         }
 
-        const user = await userDao.loginUser(username, password);
+        const user = await userRepository.loginUser(username, password);
         const { password: _, ...userPayload } = user.get({ plain: true });
         const token = jwt.sign(userPayload, process.env.SECRET_KEY, { expiresIn: '1d' });
 
@@ -79,7 +79,7 @@ router.get('/user/current', verifyToken, (req, res) => {
 
 router.get('/users/profile/:id', verifyToken, async (req, res) => {
     try {
-        const user = await userDao.getUserById(req.params.id);
+        const user = await userRepository.getUserById(req.params.id);
         if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
         // Devolvemos solo datos seguros
         res.json({
@@ -100,7 +100,7 @@ router.get('/users/profile/:id', verifyToken, async (req, res) => {
 router.put('/user/profile/photo', verifyToken, upload.single('profile_picture'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No se subió ninguna imagen' });
-        const updatedUser = await UserDao.updateSelfProfilePicture(req.user.id, req.file);
+        const updatedUser = await UserController.updateSelfProfilePicture(req.user.id, req.file);
         res.json({ message: 'Foto actualizada', user: updatedUser });
 
     } catch (error) {
@@ -121,7 +121,7 @@ router.delete('/users/profile/:id/photo', verifyToken, async (req, res) => {
         }
 
         // Llamamos al DAO para poner la foto en null
-        await UserDao.deleteProfilePicture(targetUserId);
+        await UserController.deleteProfilePicture(targetUserId);
         
         res.json({ message: 'Foto eliminada correctamente' });
 
@@ -135,7 +135,7 @@ router.delete('/users/profile/:id/photo', verifyToken, async (req, res) => {
 router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const filters = req.query;
-        const users = await UserDao.getAllUsers(filters);
+        const users = await UserController.getAllUsers(filters);
         res.status(200).json(users);
     } catch (error) {
         console.error("Error en GET /api/users:", error);
@@ -143,15 +143,15 @@ router.get('/users', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-router.put('/users/:id', verifyToken, verifyAdmin, upload.single('profile_picture'), UserDao.updateUser);
+router.put('/users/:id', verifyToken, verifyAdmin, upload.single('profile_picture'), UserController.updateUser);
 
-router.delete('/users/:id', verifyToken, verifyAdmin, UserDao.deleteUserContoller);
+router.delete('/users/:id', verifyToken, verifyAdmin, UserController.deleteUserContoller);
 
 
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
-        const user = await userDao.findUserByEmail(email);
+        const user = await userRepository.findUserByEmail(email);
         if (!user) {
             return res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
         }
@@ -176,7 +176,7 @@ router.post('/reset-password', async (req, res) => {
     try {
         const payload = jwt.verify(token, process.env.SECRET_KEY);
         const { userId } = payload;
-        await userDao.updateUserPassword(userId, newPassword);
+        await userRepository.updateUserPassword(userId, newPassword);
         res.status(200).json({ message: 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.' });
     } catch (error) {
         if (error instanceof jwt.TokenExpiredError) {
@@ -208,21 +208,21 @@ router.post('/user/fcm-token', verifyToken, async (req, res) => {
 
 
 // Rutas de Vehiculos
-router.get("/vehicle/:cid", verifyToken, VehicleDao.getVehicleById);
-router.put("/vehicle/:productId", verifyToken, VehicleDao.updateVehicle);
-router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleDao.addVehicle);
-router.post('/addVehicleNoImage', verifyToken, VehicleDao.addVehicle);
-router.delete('/vehicle/:pid', verifyToken, VehicleDao.deleteVehicle);
-router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleDao.deleteLastHistoryEntry);
-router.delete('/vehicle/:cid/history/all/:fieldName', verifyToken, VehicleDao.deleteAllHistory);
-router.delete('/vehicle/:cid/history/:fieldName/:historyId', verifyToken, VehicleDao.deleteOneHistoryEntry);
-router.get('/vehicles', verifyToken, VehicleDao.getVehiclesForUser);
-router.get("/vehicle/:cid/kilometrajes", verifyToken, VehicleDao.getKilometrajes);
-router.get("/vehicle/:cid/services", verifyToken, VehicleDao.getServices);
-router.get("/vehicle/:cid/reparaciones", verifyToken, VehicleDao.getReparaciones);
-router.get("/vehicle/:cid/destinos", verifyToken, VehicleDao.getDestinos);
-router.get("/vehicle/:cid/rodados", verifyToken, VehicleDao.getRodados);
-router.get("/vehicle/:cid/descripciones", verifyToken, VehicleDao.getDescripciones);
+router.get("/vehicle/:cid", verifyToken, VehicleController.getVehicleById);
+router.put("/vehicle/:productId", verifyToken, VehicleController.updateVehicle);
+router.post('/addVehicleWithImage', verifyToken, upload.array('thumbnail'), VehicleController.addVehicle);
+router.post('/addVehicleNoImage', verifyToken, VehicleController.addVehicle);
+router.delete('/vehicle/:pid', verifyToken, VehicleController.deleteVehicle);
+router.delete('/vehicle/:vid/history/:fieldName', verifyToken, VehicleController.deleteLastHistoryEntry);
+router.delete('/vehicle/:cid/history/all/:fieldName', verifyToken, VehicleController.deleteAllHistory);
+router.delete('/vehicle/:cid/history/:fieldName/:historyId', verifyToken, VehicleController.deleteOneHistoryEntry);
+router.get('/vehicles', verifyToken, VehicleController.getVehiclesForUser);
+router.get("/vehicle/:cid/kilometrajes", verifyToken, VehicleController.getKilometrajes);
+router.get("/vehicle/:cid/services", verifyToken, VehicleController.getServices);
+router.get("/vehicle/:cid/reparaciones", verifyToken, VehicleController.getReparaciones);
+router.get("/vehicle/:cid/destinos", verifyToken, VehicleController.getDestinos);
+router.get("/vehicle/:cid/rodados", verifyToken, VehicleController.getRodados);
+router.get("/vehicle/:cid/descripciones", verifyToken, VehicleController.getDescripciones);
 
 // Rutas de Chat
 router.get("/chat/myroom", verifyToken, ChatController.getMyRoom);

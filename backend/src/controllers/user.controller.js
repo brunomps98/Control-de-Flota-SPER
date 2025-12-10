@@ -3,7 +3,7 @@ import { supabase } from '../config/supabaseClient.js';
 import Usuario from '../models/user.model.js';
 import path from 'path';
 
-class UserDao {
+class UserController {
 
     static loginUser = async (req, res) => {
         res.status(501).json({ message: 'Esta ruta de login está obsoleta, usar la del router principal.' });
@@ -184,4 +184,4 @@ class UserDao {
     }
     
 }
-export default UserDao;
+export default UserController;
