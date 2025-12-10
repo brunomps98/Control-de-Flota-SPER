@@ -90,7 +90,7 @@ describe('UserManager Service', () => {
 
             await expect(userManager.regUser('user', 'u', 'email@existente.com', 'p', null))
                 .rejects
-                .toThrow('Email already in use');
+                .toThrow('Email ya en uso');
         });
     });
 
