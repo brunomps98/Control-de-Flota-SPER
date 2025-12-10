@@ -7,8 +7,7 @@ import apiClient from '../../../api/axiosConfig';
 // Mocks
 jest.mock('../../../api/axiosConfig');
 
-// Mocks de react-router-dom
-
+// Mock de React Router
 let mockParams = new URLSearchParams();
 
 jest.mock('react-router-dom', () => ({
@@ -21,7 +20,7 @@ jest.mock('react-router-dom', () => ({
     }),
 }));
 
-// Mock de Capacitor
+// Mocks de Capacitor
 jest.mock('@capacitor/app', () => ({
     App: {
         addListener: jest.fn(() => ({ remove: jest.fn() }))
@@ -45,7 +44,7 @@ jest.mock('../../../components/common/VehicleCard/VehicleCard', () => {
 jest.mock('sweetalert2', () => ({ fire: jest.fn() }));
 jest.mock('sweetalert2-react-content', () => () => ({ fire: jest.fn() }));
 
-// Datos falsos
+// Cargamos datos falsos
 const mockVehicles = {
     docs: [
         { id: 1, marca: 'Ford', modelo: 'Ranger', dominio: 'AA-111-AA', tipo: 'Camioneta', thumbnails: [] },
@@ -66,6 +65,7 @@ describe('Componente Vehicle (Página)', () => {
         jest.useRealTimers(); // Liberamos el tiempo
     });
 
+    // Tests
     test('Debe renderizar el título y la lista de vehículos', async () => {
         await act(async () => {
             render(<BrowserRouter><Vehicle /></BrowserRouter>);
@@ -101,7 +101,7 @@ describe('Componente Vehicle (Página)', () => {
         });
 
         await waitFor(() => {
-            // Busca el mensaje exacto que tienes en tu código
+            // Buscamos el mensaje de que no se encontraron vehiculos que tenemos en el codigo
             expect(screen.getByText(/No se encontraron vehículos/i)).toBeInTheDocument();
         });
     });

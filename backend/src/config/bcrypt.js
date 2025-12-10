@@ -9,4 +9,4 @@ export const createHash = (password) => {
 export const isValidatePassword = (password, hashedPassword) => {
     // Usamos compareSync para que devuelva true o false directamente
     return bcrypt.compareSync(password, hashedPassword);
-}
+} 

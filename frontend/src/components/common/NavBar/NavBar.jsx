@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import logo from '../../../assets/images/logo.png';
 import './NavBar.css';
 
+// Iconos
+
 const BellIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="24" height="24">
     <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.017 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
@@ -38,6 +40,8 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
     </div>
   );
 };
+
+// Navbar y botón de logout
 
 const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll }) => {
   const navigate = useNavigate();
@@ -95,6 +99,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             <li className="nav-item">
                <Link className="nav-link" aria-current="page" to="/real-time-vehicle" onClick={handleMobileLinkClick}>Cargar Vehículo</Link>
             </li>
+            {/* Lista de establecimientos: Solo las ven los admins */}
             {user.admin && (
                 <li className="nav-item dropdown">
                     <a className="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -115,7 +120,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                     </ul>
                 </li>
             )}
-
+            {/* Estas rutas solo se las mostramos a los admins */}
             {user.admin && (
               <>
                 <li className="nav-item">
@@ -134,7 +139,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             )}
 
             <li className="nav-item d-lg-none border-top border-secondary my-2"></li>
-
+            {/* Usuario conectado lo ven todos y es clickeable para llevar al perfil */}
             <li className="nav-item d-lg-none text-center py-2 text-white-50">
                <small>Usuario conectado:</small><br/>
                <Link to="/profile/me" onClick={handleMobileLinkClick} style={{color:'white', textDecoration:'none'}}>
@@ -150,7 +155,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
             </li>
           </ul>
 
-          {/* VISTA DESKTOP */}
+          {/* Vista desktop */}
           <div className="d-none d-lg-flex align-items-center gap-3 flex-shrink-1">
             <NotificationBell {...bellProps} />
             <div className="user-connected" role="status" aria-label={`Usuario conectado ${user.username}`}>

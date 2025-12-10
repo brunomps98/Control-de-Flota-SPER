@@ -6,6 +6,8 @@ import apiClient from '../../../api/axiosConfig';
 import { toast } from 'react-toastify';
 
 // Mocks
+
+// Mocks de axios 
 jest.mock('../../../api/axiosConfig');
 jest.mock('react-toastify', () => ({
     toast: {
@@ -14,7 +16,7 @@ jest.mock('react-toastify', () => ({
     },
 }));
 
-// Mock de Capacitor
+// Mocks de Capacitor
 jest.mock('@capacitor/app', () => ({
     App: { addListener: jest.fn().mockReturnValue(Promise.resolve({ remove: jest.fn() })) },
 }));
@@ -44,6 +46,8 @@ describe('Componente RealTimeVehicle (Cargar Vehículo)', () => {
         // Simulamos respuesta de usuario logueado
         apiClient.get.mockResolvedValue({ data: { user: mockUser } });
     });
+
+    // Tests
 
     test('Debe renderizar el formulario correctamente', async () => {
         await act(async () => {

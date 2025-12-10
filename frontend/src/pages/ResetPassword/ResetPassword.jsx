@@ -1,3 +1,5 @@
+// Componente para restablecer contraseña olvidada
+
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
@@ -5,7 +7,7 @@ import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
 import '../../pages/Login/Login.css'; 
 
-// Iconos de Ojo
+// Iconos de ojo abierto/cerrado para mostrar/ocultar contraseña
 const EyeOpenIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
@@ -20,9 +22,8 @@ const EyeClosedIcon = () => (
 );
 
 const ResetPassword = () => {
-    const { token } = useParams(); // Obtiene el token de la URL
+    const { token } = useParams(); // Obtenemos el token de la URL
     const navigate = useNavigate();
-    
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +36,7 @@ const ResetPassword = () => {
         setError('');
         setMessage('');
 
+        // Mensaje de que las contraseñas no coinciden
         if (password !== confirmPassword) {
             const errorMsg = 'Las contraseñas no coinciden.';
             setError(errorMsg);
@@ -45,23 +47,23 @@ const ResetPassword = () => {
         setIsLoading(true);
 
         try {
-            // Llamamos al endpoint del backend que creamos
+            // Llamamos al endpoint del backend 
             const response = await apiClient.post('/api/reset-password', { 
                 token: token, 
                 newPassword: password 
             });
-            
             setMessage(response.data.message);
             toast.success(response.data.message);
             setPassword('');
             setConfirmPassword('');
             
-            // Redirigir al login después de 3 segundos
+            // Redirigir al login después de 3 segundos de exito
             setTimeout(() => {
                 navigate('/login');
             }, 3000);
-
+        
         } catch (error) {
+            // Mensajes de error
             console.error("Error al restablecer contraseña:", error);
             const errorMsg = error.response?.data?.message || 'Error interno del servidor.';
             setError(errorMsg);

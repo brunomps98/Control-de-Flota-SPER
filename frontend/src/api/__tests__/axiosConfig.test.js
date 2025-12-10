@@ -153,7 +153,6 @@ describe('Configuración de Axios (axiosConfig)', () => {
             expect(url).toContain('/upload');
             expect(options.method).toBe('POST');
             expect(options.body).toBeInstanceOf(FormData);
-
             // Verificamos que se haya borrado el Content-Type
             expect(options.headers.get('Content-Type')).toBeNull();
         });
@@ -172,7 +171,7 @@ describe('Configuración de Axios (axiosConfig)', () => {
 
             await client.post('/upload', formData);
 
-            // Verificamos que en la llamada a fetch, los headers NO tengan Content-Type manual
+            // Verificamos que en la llamada a fetch, los headers no tengan Content-Type manual
             const fetchOptions = global.fetch.mock.calls[0][1];
             expect(fetchOptions.headers.has('Content-Type')).toBe(false);
         });

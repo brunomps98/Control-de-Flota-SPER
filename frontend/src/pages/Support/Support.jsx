@@ -10,7 +10,7 @@ import { toast } from 'react-toastify';
 const Support = () => {
     const navigate = useNavigate();
     
-    // Campos de formulario 
+    // Campos de formulario inicializados vacios
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -21,6 +21,7 @@ const Support = () => {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // UseEffect de capacitor para manejo de botón atras
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/');
@@ -38,7 +39,7 @@ const Support = () => {
             [name]: files ? files : value
         }));
     };
-
+    // Manejo de formulario para cargar casos sin y con imagenes adjuntas
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);

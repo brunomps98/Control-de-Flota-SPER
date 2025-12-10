@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+// Obtenemos la url de la base de datos del archivo.env
 const databaseUrl = process.env.DATABASE_URL;
 
 // Condicional para verificar si la variable de entorno DATABASE_URL está o no en el archivo .env

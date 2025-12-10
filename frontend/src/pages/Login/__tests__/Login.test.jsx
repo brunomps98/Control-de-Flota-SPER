@@ -10,7 +10,7 @@ import { redirectTo } from '../../../utils/navigation';
 // Mock de Axios
 jest.mock('../../../api/axiosConfig');
 
-// Mock de nuestra utilidad de navegación 
+// Mock de navigation
 jest.mock('../../../utils/navigation', () => ({
     redirectTo: jest.fn(),
 }));
@@ -22,12 +22,13 @@ jest.mock('react-router-dom', () => ({
     useNavigate: () => mockNavigate,
 }));
 
-// Mock de Capacitor
+// Mocks  de Capacitor
 jest.mock('@capacitor/app', () => ({
     App: {
         addListener: jest.fn().mockReturnValue(Promise.resolve({ remove: jest.fn() })),
     },
 }));
+
 jest.mock('@capacitor/core', () => ({
     Capacitor: {
         getPlatform: () => 'web',
@@ -56,6 +57,8 @@ describe('Componente Login', () => {
         localStorage.clear();
     });
 
+    // Tests 
+    
     test('Debe renderizar el formulario de login correctamente', () => {
         render(<BrowserRouter><Login /></BrowserRouter>);
 

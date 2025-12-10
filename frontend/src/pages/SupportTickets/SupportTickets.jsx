@@ -7,8 +7,10 @@ import { Capacitor } from '@capacitor/core';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
+// Inicialización de Swal
 const MySwal = withReactContent(Swal);
 
+// Icono
 const FilterIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.973 1.011a.75.75 0 0 1 .472.691l1.524 8.283a.75.75 0 0 1-.472.691A18.66 18.66 0 0 1 12 15c-2.755 0-5.455-.232-7.973-1.011a.75.75 0 0 1-.472-.691l-1.524-8.283a.75.75 0 0 1 .472-.691A18.66 18.66 0 0 1 12 3Z" />
@@ -16,14 +18,12 @@ const FilterIcon = () => (
     </svg>
 );
 
-// CAMBIO 1: Recibimos debounceDelay como prop con valor por defecto 400
+// Recibimos debounceDelay como prop con valor por defecto 400
 const SupportTickets = ({ debounceDelay = 400 }) => {
     const navigate = useNavigate();
-
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
     const [searchParams, setSearchParams] = useSearchParams();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filters, setFilters] = useState({
@@ -33,6 +33,7 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
         phone: ''
     });
 
+    // UseEffect Capacitor
     useEffect(() => {
         // Si es web, no hacemos nada
         if (Capacitor.getPlatform() === 'web') return;
@@ -40,7 +41,7 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
         let backButtonListener;
 
         const setupListener = async () => {
-            // addListener es asíncrono, esperamos a que nos de el handler
+            // Addlister asincronico que espera el handler
             backButtonListener = await App.addListener('backButton', () => {
                 navigate('/vehicle');
             });
@@ -71,11 +72,13 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
             setLoading(true);
             setError(null);
             try {
+                // Intentamos traer los tickets
                 const response = await apiClient.get('/api/support-tickets', {
                     params: Object.fromEntries(searchParams)
                 });
                 setTickets(response.data.tickets || []);
             } catch (err) {
+                // Y sino mostramos error
                 setError(err.response?.data?.message || 'No se pudieron cargar los tickets.');
             } finally {
                 setLoading(false);
@@ -84,7 +87,7 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
         fetchTickets();
     }, [searchParams]);
 
-    // CAMBIO 2: Usamos debounceDelay en el setTimeout
+    // Usamos debounceDelay en el setTimeout
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
@@ -101,10 +104,9 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
             if (paramsChanged || Object.keys(query).length === 0) {
                 setSearchParams(query);
             }
-        }, debounceDelay); // <--- Aquí usamos la prop
+        }, debounceDelay); 
         return () => clearTimeout(timer);
-    }, [filters, setSearchParams, searchParams, debounceDelay]); // Agregamos debounceDelay a dependencias
-
+    }, [filters, setSearchParams, searchParams, debounceDelay]); 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
@@ -121,8 +123,10 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
         setFilters({ name: '', surname: '', email: '', phone: '' });
     };
 
+    // Para borrar tickets de soporte
     const handleDelete = (ticketId) => {
         MySwal.fire({
+            // Preguntamos y obtenemos confirmación del usuario
             title: '¿Estás seguro?',
             text: "¡No podrás revertir esto!",
             icon: 'warning',
@@ -137,11 +141,13 @@ const SupportTickets = ({ debounceDelay = 400 }) => {
                     await apiClient.delete(`/api/support/${ticketId}`);
                     setTickets(prevTickets => prevTickets.filter(t => t.id !== ticketId));
                     MySwal.fire(
+                        // Mensaje de exito
                         '¡Eliminado!',
                         'El ticket ha sido eliminado.',
                         'success'
                     );
                 } catch (err) {
+                    // Y sino mostramos error al eliminar el ticket
                     MySwal.fire(
                         'Error',
                         err.response?.data?.message || 'No se pudo eliminar el ticket.',

@@ -7,18 +7,18 @@ import MySwal from '../../../utils/swal';
 
 // Mocks
 
-// Axios
+// Mock de Axios
 jest.mock('../../../api/axiosConfig', () => ({
     get: jest.fn(),
     delete: jest.fn(),
 }));
 
-// SweetAlert 
+// Mock de SweetAlert 
 jest.mock('../../../utils/swal', () => ({
     fire: jest.fn(),
 }));
 
-// Capacitor
+// Mock de capacitor app
 jest.mock('@capacitor/app', () => {
     const mockRemove = jest.fn();
     return {
@@ -31,6 +31,7 @@ jest.mock('@capacitor/app', () => {
     };
 });
 
+// Mock de capacitor core
 jest.mock('@capacitor/core', () => ({
     Capacitor: {
         getPlatform: jest.fn(() => 'web'),
@@ -148,14 +149,14 @@ describe('Componente Case (Detalle)', () => {
         renderComponent();
         await waitFor(() => expect(screen.getByText('Reportado por: Bruno Test')).toBeInTheDocument());
 
-        // Simulamos que el usuario dice NO (isConfirmed: false)
+        // Simulamos que el usuario dice no (false)
         MySwal.fire.mockResolvedValueOnce({ isConfirmed: false });
 
         const deleteBtn = screen.getByText('Eliminar Caso');
         fireEvent.click(deleteBtn);
 
         await waitFor(() => {
-            // Aseguramos que NO se llamó a delete
+            // Aseguramos que no se llamó a delete
             expect(apiClient.delete).not.toHaveBeenCalled();
         });
     });

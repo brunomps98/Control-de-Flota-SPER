@@ -6,10 +6,10 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
 const Home = () => {
-
+  // Use effect de Capacitor
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
-
+    // Si apretamos atras, cerramos la app en android 
     const handleBackButton = () => {
         App.exitApp();
     };

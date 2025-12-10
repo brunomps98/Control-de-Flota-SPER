@@ -7,14 +7,14 @@ import { App } from '@capacitor/app';
 
 // Mocks
 
-// Axios
+// Mock de Axios
 jest.mock('../../../api/axiosConfig', () => ({
     get: jest.fn(),
     delete: jest.fn(),
 }));
 
 
-// SweetAlert2
+// Mock de SweetAlert2
 const mockSwalFire = jest.fn();
 jest.mock('sweetalert2', () => ({
     fire: (...args) => mockSwalFire(...args),
@@ -25,7 +25,7 @@ jest.mock('sweetalert2-react-content', () => {
     });
 });
 
-// Capacitor
+// Mocks de Capacitor
 jest.mock('@capacitor/app', () => {
     const mockRemove = jest.fn();
 
@@ -59,6 +59,7 @@ const mockSetSearchParams = jest.fn((params) => {
     mockSearchParamsInstance = new URLSearchParams(params);
 });
 
+// Mock de React Router
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useNavigate: () => mockNavigate,
@@ -92,6 +93,7 @@ describe('Componente SupportTickets', () => {
         );
     };
 
+    // Tests
     test('Debe cargar y renderizar los tickets correctamente', async () => {
         renderComponent();
 

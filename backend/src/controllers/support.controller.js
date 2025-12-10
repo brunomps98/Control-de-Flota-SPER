@@ -9,9 +9,8 @@ import { sendPushNotification } from '../services/notification.service.js';
 
 class SupportController {
 
-    /**
-     * @summary Busca a todos los admins y les envía el email de notificación.
-     */
+    // Función que busca a todos los admins y les envía el email de notificación 
+
     static _sendNotificationToAdmins = async (newTicket, fileUrls, creatorName = "Usuario") => {
         try {
             // Buscamos todos los emails de admins
@@ -26,13 +25,13 @@ class SupportController {
 
             const adminEmails = admins.map(admin => admin.email);
 
-            //  Enviar el correo 
+            //  Envia correo a los admins
             sendNewTicketEmail(adminEmails, newTicket, fileUrls);
 
             const title = `🎫 Nuevo Ticket de Soporte`;
             const body = `Creado por: ${creatorName}\nProblema: ${newTicket.problem_description.substring(0, 40)}...`;
 
-            // Guardar en Base de Datos 
+            // Guardamos en la base de datos la notificación
             const notificationsToCreate = admins.map(admin => ({
                 user_id: admin.id,
                 title: title,
@@ -43,7 +42,7 @@ class SupportController {
             }));
             await Notification.bulkCreate(notificationsToCreate); // Guardado masivo
 
-            // Enviar Socket (Campanita)
+            // Enviar socket (Campanita)
             const io = getIO();
             if (io) {
                 io.to('admin_room').emit('new_notification', {
@@ -65,23 +64,25 @@ class SupportController {
             }
 
         } catch (error) {
+            // Manejo de errores
             console.error("[Support Controller] Error al buscar admins para notificar:", error);
         }
     };
 
 
-    // Obtiene todos los tickets
+    // Función para obtener todos los tickets
     static getTickets = async (req, res) => {
         try {
             const filters = req.query;
             const tickets = await supportRepository.getAllSupportTickets(filters);
             res.status(200).json({ tickets: tickets });
         } catch (error) {
+            // Manejo de errores
             res.status(500).json({ message: 'Error al obtener los tickets' });
         }
     };
 
-    // Obtiene un ticket por su ID
+    // Función para obtener un ticket por su id
     static getTicketById = async (req, res) => {
         try {
             const { ticketId } = req.params;
@@ -91,12 +92,13 @@ class SupportController {
             }
             res.status(200).json({ ticket: ticket });
         } catch (error) {
+            // Manejo de errores
             console.error("Error al obtener el ticket por ID:", error);
             res.status(500).json({ message: 'Error interno del servidor' });
         }
     };
 
-    // Crear un ticket con archivos
+    // Función para crear un ticket con archivos
     static createTicket = async (req, res) => {
         try {
             const ticketData = req.body;
@@ -117,6 +119,7 @@ class SupportController {
                         });
 
                     if (uploadError) {
+                        // Manejo de errores
                         throw new Error('Error al subir el archivo de soporte a Supabase: ' + uploadError.message);
                     }
 
@@ -125,6 +128,7 @@ class SupportController {
                         .getPublicUrl(fileName);
 
                     if (!publicUrlData) {
+                        // Error del lado de la url de supabase
                         throw new Error('No se pudo obtener la URL pública de Supabase para el archivo de soporte.');
                     }
 
@@ -139,47 +143,48 @@ class SupportController {
             // Capturamos el nombre
             const creatorName = req.user ? req.user.username : ticketData.name;
 
-            // Implementamos await acá para que las notificaciones terminen antes de responder
+            // Implementamos await para que las notificaciones terminen antes de responder
             await SupportController._sendNotificationToAdmins(newTicket, fileUrls, creatorName);
-
+            // Mensaje de exito de creación de tickets
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
+            // Manejo de errores
             console.error("ERROR AL CREAR TICKET (con archivos):", error);
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };
 
-    // Crea un nuevo ticket sin archivos 
+    // Función para crear un nuevo ticket sin archivos 
     static createTicketNoFiles = async (req, res) => {
         try {
             const ticketData = req.body;
             ticketData.files = [];
-
             const newTicket = await supportRepository.addSupportTicket(ticketData);
-
             const creatorName = req.user ? req.user.username : ticketData.name;
-
-            // <-- AWAIT aquí también
             await SupportController._sendNotificationToAdmins(newTicket, [], creatorName);
-
+            // Mostramos mensaje de exito
             res.status(201).json({ message: 'Ticket de soporte creado con éxito.' });
         } catch (error) {
+            // Manejo de errores
             console.error("ERROR AL CREAR TICKET (sin archivos):", error);
             res.status(500).json({ message: 'No se pudo crear el ticket.' });
         }
     };
 
 
-    // Elimina un ticket
+    // Función para eliminar un ticket
     static deleteTicket = async (req, res) => {
         try {
             const id = req.params.pid;
             const deletedTicket = await supportRepository.deleteSupportTicket(id);
             if (!deletedTicket) {
+                // Mensaje de error que el ticket no fue encontrado
                 return res.status(404).json({ status: "error", message: "Ticket not found" });
             }
+            // Mensaje de exito en la elimninación
             res.status(200).json({ status: "success", message: "Ticket deleted successfully" });
         } catch (error) {
+            // Mensaje de error al eliminar ticket
             res.status(500).json({ status: "error", message: error.message });
         }
     };

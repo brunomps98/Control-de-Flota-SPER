@@ -6,16 +6,14 @@ import apiClient from '../../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import { App } from '@capacitor/app';
 
-// --- MOCKS ---
+// Mocks
 
-// Mock de @capacitor/app (Crucial para evitar el error del .then)
+// Mocks de capacitor
 jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(),
   },
 }));
-
-// Mock de Capacitor Core para simular plataforma
 jest.mock('@capacitor/core', () => ({
     Capacitor: {
         getPlatform: jest.fn(() => 'web'), // Por defecto web
@@ -38,7 +36,7 @@ jest.mock('react-toastify', () => ({
   },
 }));
 
-// Mock de React Router (Navigate)
+// Mock de React Router
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => {
     const original = jest.requireActual('react-router-dom');
@@ -59,6 +57,7 @@ describe('Componente Support (Formulario de Soporte)', () => {
         });
     });
 
+    // Tests
     test('Debe renderizar el formulario con todos sus campos', () => {
         render(<BrowserRouter><Support /></BrowserRouter>);
 

@@ -5,12 +5,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles.css';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
-
-// Layout
 import Layout from './components/Layout/Layout';
 import AdminRoute from './components/common/AdminRoute/AdminRoute';
-
-// Paginas
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
 import Vehicle from './pages/Vehicle/Vehicle';
@@ -41,26 +37,26 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           theme="light"
         />
         <Routes>
-          {/* --- Rutas Públicas (no usan el Layout) --- */}
+          {/* Rutas Públicas (no usan el Layout) */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/support" element={<Support />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* --- Rutas Privadas/Internas (usan el Layout como plantilla) --- */}
+          {/* Rutas Privadas/Internas (usan el Layout como plantilla) */}
           <Route element={<Layout />}>
 
-            {/* --- Rutas para TODOS los usuarios logueados --- */}
+            {/* Rutas para TODOS los usuarios logueados */}
             <Route path="/vehicle" element={<Vehicle />} />
             <Route path="/eddit-vehicle/:productId" element={<EdditVehicle />} />
             <Route path="/real-time-vehicle" element={<RealTimeVehicle />} />
             <Route path="/vehicle-detail/:cid" element={<VehicleDetail />} />
-            {/* --- RUTAS DE PERFIL --- */}
+            {/* Rutas de perfil */}
             <Route path="/profile/me" element={<UserProfile />} />
             <Route path="/profile/:userId" element={<UserProfile />} />
 
-            {/* --- Rutas SÓLO PARA ADMINS --- */}
+            {/* Rutas solo para admins */}
             <Route element={<AdminRoute />}>
               <Route path="/support-tickets" element={<SupportTickets />} />
               <Route path="/case/:ticketId" element={<Case />} />

@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { redirectTo } from '../../utils/navigation';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
+// Iconos
 const EyeOpenIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20">
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" />
@@ -29,14 +30,15 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { executeRecaptcha } = useGoogleReCaptcha();
-
+    // UseEffect para obtener token y navegar hacia vehicle
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             navigate('/vehicle');
         }
     }, [navigate]);
-
+   
+    // UseEffect de capacitor con manejo de botón atras que lleva al home
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/');
@@ -47,6 +49,7 @@ const Login = () => {
         };
     }, [navigate]);
 
+    // UseEffect para el captcha
     useEffect(() => {
         const showBadge = () => {
             const badge = document.querySelector('.grecaptcha-badge');
@@ -92,12 +95,13 @@ const Login = () => {
                 recaptchaToken = await executeRecaptcha('login');
             }
 
+            // Recaptcha solo lo usamos en web y no en el apk de android
+
             // Construir y enviar el payload
             const payload = {
                 username,
                 password,
-                // Si recaptchaToken no es null (web), se añade al body.
-                // Si es null (Android), se omite.
+                // Si recaptchaToken no es null (web), se añade al body, si es null (Android), se omite.
                 ...(recaptchaToken && { recaptchaToken: recaptchaToken })
             };
 

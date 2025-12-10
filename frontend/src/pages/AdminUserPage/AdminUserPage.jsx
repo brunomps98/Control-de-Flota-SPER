@@ -39,6 +39,7 @@ const CloseIcon = () => (
     </svg>
 );
 
+// Unidades permitidas 
 const unidadesPermitidas = [
     "Direccion General",
     "Unidad Penal 1",
@@ -66,6 +67,7 @@ const AdminUserPage = () => {
     // Estado para el visor de imagen
     const [viewingImage, setViewingImage] = useState(null); // URL de la imagen a ver en grande
 
+    // Para formularios
     const [editFormData, setEditFormData] = useState({
         username: '',
         email: '',
@@ -84,6 +86,8 @@ const AdminUserPage = () => {
         unidad: '',
         admin: false
     });
+
+    // UseEffect
 
     useEffect(() => {
         setFilters({
@@ -169,10 +173,12 @@ const AdminUserPage = () => {
         }));
     };
 
+    // Para el botón de limpiar campos
     const handleClearFilters = () => {
         setFilters({ id: '', username: '', email: '', unidad: '', admin: false });
     };
 
+    // Para el boton de editar
     const handleEditClick = (user) => {
         setEditingUserId(user.id);
         setMarkForDeletion(false); // Resetear estado de borrado
@@ -188,7 +194,8 @@ const AdminUserPage = () => {
             profile_picture: null
         });
     };
-
+    
+    // Para el botón de cancelar edición
     const handleCancelEdit = () => {
         setEditingUserId(null);
         setMarkForDeletion(false);
@@ -214,6 +221,7 @@ const AdminUserPage = () => {
         }));
     };
 
+    // Para el botón de guardar cambios en la DB
     const handleSaveEdit = async (userId) => {
         try {
             const data = new FormData();
@@ -226,15 +234,15 @@ const AdminUserPage = () => {
                 data.append('password', editFormData.password);
             }
 
-            // LÓGICA DE FOTO
+            // Lógica de la foto de perfil
             if (markForDeletion) {
-                // Si marcó borrar, enviamos la bandera (asegúrate que tu backend maneje esto)
+                // Si marcó borrar, enviamos la bandera
                 data.append('delete_profile_picture', 'true');
             } else if (editFormData.profile_picture) {
                 // Si subió foto nueva
                 data.append('profile_picture', editFormData.profile_picture);
             }
-
+            // Para mostrar respuesta con manejo de errores
             const response = await apiClient.put(`/api/users/${userId}`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
@@ -257,6 +265,7 @@ const AdminUserPage = () => {
         }
     };
 
+    // Para eliminar un usuario de la DB
     const handleDelete = (userId, username) => {
         Swal.fire({
             title: `¿Estás seguro?`,
@@ -282,6 +291,7 @@ const AdminUserPage = () => {
         });
     };
 
+    //Carga de usuarios
     if (loading) {
         return (
             <div className="login-page">
@@ -386,7 +396,7 @@ const AdminUserPage = () => {
                                         <>
                                             <td data-label="ID">{user.id}</td>
 
-                                            {/* EDICIÓN DE FOTO CON OPCIÓN DE BORRAR */}
+                                            {/* Edición de foto con funcion de borrar */}
                                             <td data-label="Foto">
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', alignItems: 'flex-start' }}>
                                                     {markForDeletion ? (
@@ -411,7 +421,7 @@ const AdminUserPage = () => {
                                                                 style={{ width: '140px', fontSize: '0.7rem' }}
                                                                 accept="image/*"
                                                             />
-                                                            {/* Si el usuario TIENE foto y no estamos subiendo una nueva, mostrar opción de borrar */}
+                                                            {/* Si el usuario tiene foto y no estamos subiendo una nueva, mostrar opción de borrar */}
                                                             {user.profile_picture && !editFormData.profile_picture && (
                                                                 <button
                                                                     type="button"
@@ -496,7 +506,7 @@ const AdminUserPage = () => {
                                         <>
                                             <td data-label="ID">{user.id}</td>
 
-                                            {/* VISTA PREVIA DE FOTO CLICKABLE */}
+                                            {/* Vista previa de foto clickeable */}
                                             <td data-label="Foto">
                                                 {user.profile_picture ? (
                                                     <img
@@ -556,7 +566,7 @@ const AdminUserPage = () => {
                     </table>
                 </div>
 
-                {/* MODAL DE IMAGEN A PANTALLA COMPLETA */}
+                {/* Modal de imagen a pantalla completa */}
                 {viewingImage && (
                     <div className="full-image-overlay" onClick={() => setViewingImage(null)}>
                         <button className="close-overlay-btn" onClick={() => setViewingImage(null)}>

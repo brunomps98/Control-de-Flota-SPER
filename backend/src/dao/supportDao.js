@@ -3,19 +3,19 @@ import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
 
 class SupportDao {
-
+    // Crear Ticket
     async addTicket(ticket) {
-        // Usamos una transacción para asegurar que el ticket Y sus archivos se creen
+        // Usamos una transacción para asegurar que el ticket y sus archivos se creen
         const t = await sequelize.transaction();
 
         try {
-            //Separamos los 'files' del resto de los datos del ticket
+            //Separamos los archivos del resto de los datos del ticket
             const { files, ...ticketData } = ticket;
 
-            //Creamos el ticket principal
+            // Creamos el ticket principal
             const newTicket = await Soporte.create(ticketData, { transaction: t });
 
-            //Si hay archivos, los creamos en la tabla 'soporte_archivos'
+            // Si hay archivos, los creamos en la tabla soporte_archivos
             if (files && files.length > 0) {
                 const fileData = files.map(url => ({
                     soporte_id: newTicket.id,
@@ -29,11 +29,12 @@ class SupportDao {
             return newTicket;
 
         } catch (error) {
+            // Manejo de errores
             await t.rollback();
             throw error;
         }
     }
-
+    // Funcion para eliminar ticket por su ID
     async deleteTicket(id) {
         const ticket = await Soporte.findByPk(id);
         if (ticket) {
@@ -43,11 +44,10 @@ class SupportDao {
         return null;
     }
 
+    // Obtener todos los tickets
     async getAllTickets(filters = {}) { 
-
         const whereClause = {};
-
-        // Verificamos que 'filters' no sea nulo antes de usarlo
+        // Verificamos que filters no sea nulo antes de usarlo
         if (filters && filters.name) {
             whereClause.name = { [Op.iLike]: `%${filters.name}%` };
         }
@@ -71,6 +71,7 @@ class SupportDao {
         });
     }
 
+    // Obtener ticket por su ID
     async getTicketById(id) {
         return await Soporte.findByPk(id, {
             include: [{

@@ -16,7 +16,7 @@ jest.mock('react-router-dom', () => ({
     useNavigate: () => mockNavigate, // Sobreescribimos solo el hook useNavigate
 }));
 
-// Mock @capacitor/app
+// Mock de capacitor app
 jest.mock('@capacitor/app', () => ({
     App: {
         addListener: jest.fn().mockReturnValue({
@@ -25,14 +25,14 @@ jest.mock('@capacitor/app', () => ({
     },
 }));
 
-// Mock @capacitor/core
+// Mock de capacitor core
 jest.mock('@capacitor/core', () => ({
     Capacitor: {
         getPlatform: jest.fn(() => 'web'),
     },
 }));
 
-// Mock Axios
+// Mock de Axios
 jest.mock('../../../api/axiosConfig', () => ({
     __esModule: true,
     default: {
@@ -40,7 +40,7 @@ jest.mock('../../../api/axiosConfig', () => ({
     },
 }));
 
-// Mock Toastify
+// Mock de React Toastify
 jest.mock('react-toastify', () => ({
     toast: {
         success: jest.fn(),
@@ -65,6 +65,7 @@ describe('Componente EdditVehicle (Añadir Historial / Actualizar)', () => {
         jest.useRealTimers(); // Restauramos timers
     });
 
+    // Renderizamos componente
     const renderComponent = () => {
         render(
             <MemoryRouter initialEntries={[`/edit-vehicle/${productId}`]}>
@@ -74,6 +75,8 @@ describe('Componente EdditVehicle (Añadir Historial / Actualizar)', () => {
             </MemoryRouter>
         );
     };
+
+    //Tests 
 
     test('Debe renderizar el formulario correctamente', () => {
         renderComponent();

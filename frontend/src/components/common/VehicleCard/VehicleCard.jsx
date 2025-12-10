@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import './VehicleCard.css';
 import Tilt from 'react-parallax-tilt'; 
 
-// Recibe props 
+// Recibimos props 
 const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
     
     const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
@@ -27,12 +27,13 @@ const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
             glarePosition="all"
             scale={1.02}
         >
+            {/* Redirección a vehicle-detail al clickear */}
             <Link to={`/vehicle-detail/${vehicle.id}`} className="vehicle-card-link">
                 
                 <div className="vehicle-card-image">
                     <img src={imageUrl} alt={`${vehicle.marca} ${vehicle.modelo}`} />
                     
-                    {/* Botón de eliminar SOLO para admins */}
+                    {/* Botón de eliminar solo visible para admins */}
                     {isAdmin && (
                         <div 
                             className="vehicle-delete-btn" 

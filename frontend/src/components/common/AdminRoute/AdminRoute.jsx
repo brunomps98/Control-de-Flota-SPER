@@ -10,7 +10,7 @@ const AdminRoute = () => {
     if (user && user.admin) {
         return <Outlet />;
     }
-
+    // Redirigimos a vehicle
     return <Navigate to="/vehicle" replace />;
 };
 

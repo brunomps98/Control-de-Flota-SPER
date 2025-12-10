@@ -7,14 +7,14 @@ import path from 'path';
 
 class ChatController {
 
+    // Funcion para subir archivos
     static uploadChatFile = async (req, res) => {
         try {
             const files = req.files;
-
+            // Si no hay archivos cargados mostramos mensaje
             if (!files || files.length === 0) {
                 return res.status(400).json({ message: "No se han subido archivos." });
             }
-
             const uploadPromises = files.map(async (file) => {
                 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
                 const extension = path.extname(file.originalname);
@@ -27,13 +27,14 @@ class ChatController {
                         cacheControl: '3600',
                         upsert: false
                     });
-
+                // Si hay error de carga en supabase, mostramos error
                 if (uploadError) throw new Error('Error Supabase: ' + uploadError.message);
 
                 const { data: publicUrlData } = supabase.storage
                     .from('uploads')
                     .getPublicUrl(fileName);
 
+                // Tipos de archivos
                 let fileType = 'file';
                 if (file.mimetype.startsWith('image/')) fileType = 'image';
                 else if (file.mimetype.startsWith('video/')) fileType = 'video';
@@ -47,18 +48,20 @@ class ChatController {
             });
 
             const results = await Promise.all(uploadPromises);
-
+            // Mensaje de exito al subir archivos
             res.status(200).json({
                 message: "Archivos subidos correctamente",
                 files: results
             });
 
         } catch (error) {
+            // Error al subir archivos
             console.error('[CHAT] Error en uploadChatFile:', error);
             res.status(500).json({ message: 'Error al subir archivos.', error: error.message });
         }
     }
 
+    // Función para obtener sala actual
     static getMyRoom = async (req, res) => {
         try {
             const userId = req.user.id;
@@ -80,6 +83,7 @@ class ChatController {
             // Devolvemos todo junto
             res.status(200).json({ room, messages });
         } catch (error) {
+            // Manejo de errores
             console.error('[CHAT] Error en getMyRoom:', error);
             res.status(500).json({
                 message: 'Error interno del servidor al obtener el chat',
@@ -88,9 +92,10 @@ class ChatController {
         }
     }
 
+    // Función para obtener salas de admin
     static getAdminRooms = async (req, res) => {
         try {
-            // Filtramos para traer solo salas que tengan un last_message real
+            // Filtramos para traer solo salas que tengan un last_message real (para que no muestre todos los chats)
             const activeRooms = await ChatRoom.findAll({
                 where: {
                     last_message: { [Op.ne]: null }
@@ -115,7 +120,7 @@ class ChatController {
             const adminUsers = await Usuario.findAll({ where: { admin: true }, attributes: ['id'] });
             const adminIds = adminUsers.map(admin => admin.id);
 
-            // Excluimos a los que ya tienen sala CON MENSAJES y a los admins
+            // Excluimos a los que ya tienen sala con mensajes y a los admins
             const allExcludedIds = [...userIdsWithRooms, ...adminIds];
 
             const newChatUsers = await Usuario.findAll({
@@ -130,12 +135,14 @@ class ChatController {
                 return { ...plainUser, isOnline };
             });
 
+            // Json con activerooms y newChatUsers
             res.status(200).json({
                 activeRooms: activeRoomsWithStatus,
                 newChatUsers: newChatUsersWithStatus
             });
 
         } catch (error) {
+            // Manejo de errores
             console.error('[CHAT] Error en getAdminRooms:', error);
             res.status(500).json({
                 message: 'Error interno del servidor al obtener las salas',
@@ -143,12 +150,13 @@ class ChatController {
             });
         }
     }
-
+    // Función para obtener mensajes de una sala
     static getMessagesForRoom = async (req, res) => {
         try {
             const { roomId } = req.params;
             const room = await ChatRoom.findByPk(roomId);
             if (!room) {
+                // Si la sala no existe, mostramos un mensaje
                 return res.status(404).json({ message: 'Sala no encontrada' });
             }
             const messages = await ChatMessage.findAll({
@@ -162,6 +170,7 @@ class ChatController {
             });
             res.status(200).json({ room, messages });
         } catch (error) {
+            // Manejo de errores
             console.error('[CHAT] Error en getMessagesForRoom:', error);
             res.status(500).json({
                 message: 'Error interno del servidor al obtener los mensajes',
@@ -169,9 +178,10 @@ class ChatController {
             });
         }
     }
-
+    // Función para encontrar o crear sala
     static findOrCreateRoomForUser = async (req, res) => {
         const { userId } = req.body;
+        // Mensaje de que no hay ID de usuario
         if (!userId) return res.status(400).json({ message: "Falta el ID del usuario." });
 
         try {
@@ -195,6 +205,7 @@ class ChatController {
             res.status(200).json({ ...finalRoom.get({ plain: true }), isOnline });
 
         } catch (error) {
+            // Manejo de errores
             console.error('[CHAT] Error en findOrCreateRoomForUser:', error);
             res.status(500).json({ message: 'Error al crear o buscar la sala.' });
         }

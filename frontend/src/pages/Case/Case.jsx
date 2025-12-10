@@ -13,6 +13,9 @@ const Case = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // UseEffect
+
+    // Para obtener caso de soporte
     useEffect(() => {
         const fetchTicket = async () => {
             try {
@@ -29,6 +32,7 @@ const Case = () => {
         fetchTicket();
     }, [ticketId]);
 
+    // Lógica de Capacitor
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         
@@ -48,6 +52,7 @@ const Case = () => {
         };
     }, [navigate]); 
 
+    // Para eliminar ticket de soporte de la DB
     const handleDelete = () => {
         MySwal.fire({
             title: '¿Estás seguro?',

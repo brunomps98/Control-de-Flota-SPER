@@ -13,7 +13,6 @@ const BotIcon = () => (
 const ChatBot = ({ onToggle }) => { 
     // Consumimos el estado del chat principal directamente
     const { isChatOpen, toggleChat } = useChat();
-
     const [isOpen, setIsOpen] = useState(false);
     const [currentStep, setCurrentStep] = useState('inicio');
     const [history, setHistory] = useState([]);
@@ -49,7 +48,6 @@ const ChatBot = ({ onToggle }) => {
                 if (!isChatOpen) {
                     toggleChat();
                 }
-                
                 setCurrentStep('inicio');
                 setHistory([]);
             }, 1500);

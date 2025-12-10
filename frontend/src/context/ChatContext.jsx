@@ -9,28 +9,24 @@ export const useChat = () => useContext(ChatContext);
 
 export const ChatProvider = ({ children, user }) => {
     const socket = useSocket();
-    
-    // --- ESTADOS DEL CHAT ---
+
+    // Estados de chat
     const [guestRoom, setGuestRoom] = useState(null);
     const [guestMessages, setGuestMessages] = useState([]);
-    
     const [activeRooms, setActiveRooms] = useState([]);
     const [newChatUsers, setNewChatUsers] = useState([]);
-    
-    const [currentView, setCurrentView] = useState('inbox'); 
+    const [currentView, setCurrentView] = useState('inbox');
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [adminMessages, setAdminMessages] = useState([]);
-    
-    const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false);
     const [isChatLoading, setIsChatLoading] = useState(false);
-    
+
     // Estado de notificaciones
     const [unreadChatCount, setUnreadChatCount] = useState(0);
     const [isChatOpen, setIsChatOpen] = useState(false);
-
     const loadedUserIdRef = useRef(null);
 
-    // --- CARGA INICIAL ---
+    // Carga inicial del chat
     useEffect(() => {
         if (!user) return;
         if (loadedUserIdRef.current === user.id) return;
@@ -38,10 +34,12 @@ export const ChatProvider = ({ children, user }) => {
         const loadInitialData = async () => {
             setIsLoading(true);
             try {
+                // Si es admin llevamos al buzón con todos los mensajes
                 if (user.admin) {
                     const response = await apiClient.get('/api/chat/rooms');
                     setActiveRooms(response.data.activeRooms);
                     setNewChatUsers(response.data.newChatUsers);
+                    // Si no es admin mostramos redirigimos solamente al chat con el admin
                 } else {
                     const response = await apiClient.get('/api/chat/myroom');
                     setGuestRoom(response.data.room);
@@ -57,7 +55,7 @@ export const ChatProvider = ({ children, user }) => {
         loadInitialData();
     }, [user?.id]);
 
-    // --- LISTENERS ---
+    // Listeners
     useEffect(() => {
         if (!socket || !user) return;
 
@@ -65,7 +63,7 @@ export const ChatProvider = ({ children, user }) => {
             if (!user.admin && message.room_id === guestRoom?.id) {
                 setGuestMessages((prev) => [...prev, message]);
                 if (!isChatOpen) setUnreadChatCount(prev => prev + 1);
-            } 
+            }
             else if (user.admin) {
                 if (selectedRoom?.id === message.room_id) {
                     setAdminMessages((prev) => [...prev, message]);
@@ -85,7 +83,8 @@ export const ChatProvider = ({ children, user }) => {
                 }
             }
         };
-
+        
+        // Notiicaciones para admin
         const handleAdminNotification = ({ message, roomId }) => {
             if (user.admin) {
                 setActiveRooms(prevRooms => {
@@ -107,7 +106,7 @@ export const ChatProvider = ({ children, user }) => {
                 if (!isChatOpen) setUnreadChatCount(prev => prev + 1);
             }
         };
-
+        // Para eliminación de mensajes y de salas
         const handleMessageDeleted = ({ messageId, roomId }) => {
             if (user.admin && selectedRoom?.id === roomId) setAdminMessages(prev => prev.filter(m => m.id !== messageId));
             if (!user.admin && guestRoom?.id === roomId) setGuestMessages(prev => prev.filter(m => m.id !== messageId));
@@ -122,7 +121,7 @@ export const ChatProvider = ({ children, user }) => {
                 }
             }
             if (!user.admin && guestRoom?.id === roomId) {
-                setGuestMessages([]); 
+                setGuestMessages([]);
             }
         };
 
@@ -139,7 +138,9 @@ export const ChatProvider = ({ children, user }) => {
         };
     }, [socket, user, guestRoom, selectedRoom, isChatOpen]);
 
-    // --- ACCIONES ---
+    // Acciones
+
+    // Seleccionar sala
     const selectRoom = async (room) => {
         try {
             setIsChatLoading(true);
@@ -154,7 +155,7 @@ export const ChatProvider = ({ children, user }) => {
             setIsChatLoading(false);
         }
     };
-
+    // Iniciar nuevo chat
     const startNewChat = async (targetUser) => {
         try {
             setIsChatLoading(true);
@@ -168,6 +169,7 @@ export const ChatProvider = ({ children, user }) => {
         }
     };
 
+    // Cerrar y abrir chat 
     const toggleChat = () => {
         if (!isChatOpen) setUnreadChatCount(0);
         setIsChatOpen(prev => !prev);
@@ -181,9 +183,9 @@ export const ChatProvider = ({ children, user }) => {
         currentView, setCurrentView,
         selectedRoom, setSelectedRoom,
         adminMessages, setAdminMessages,
-        isLoading, 
-        isChatLoading, 
-        setIsChatLoading, 
+        isLoading,
+        isChatLoading,
+        setIsChatLoading,
         unreadChatCount, isChatOpen,
         selectRoom, startNewChat, toggleChat
     };

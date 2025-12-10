@@ -15,4 +15,6 @@ if (!supabaseUrl || !supabaseKey) {
     process.exit(1);
 }
 
+// Las exportamos y creamos el cliente
+
 export const supabase = createClient(supabaseUrl, supabaseKey);

@@ -15,7 +15,7 @@ const EdditVehicle = () => {
         service: '', rodado: '', reparaciones: ''
     });
 
-
+    // UseEffect para Capacitor
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate(`/vehicle-detail/${productId}`);
@@ -24,6 +24,7 @@ const EdditVehicle = () => {
     }, [navigate, productId]);
 
     // Lógica de carga
+    // Iniciamos vacios los campos
     useEffect(() => {
         setFormData({
             description: '',
@@ -37,7 +38,6 @@ const EdditVehicle = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
         // Aplicamos consistencia de mayúsculas
         let finalValue = value;
         if (['destino'].includes(name)) {
@@ -50,6 +50,7 @@ const EdditVehicle = () => {
         }));
     };
 
+    // Redirección a vehicle detail si hay exito y sino mostramos error al actualizar vehiculo
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -73,7 +74,7 @@ const EdditVehicle = () => {
 
                     <form onSubmit={handleSubmit} className="vehicle-form-grid">
 
-                        {/* CHOFER */}
+                        {/* Chofer */}
                         <div className="form-group span-2">
                             <label htmlFor="description" className="form-label">Nuevo Chofer / Responsable</label>
                             <input
@@ -87,7 +88,7 @@ const EdditVehicle = () => {
                             />
                         </div>
 
-                        {/* KILOMETROS (NUMERICO) */}
+                        {/* Kilometros (Solo se permiten numeros) */}
                         <div className="form-group span-1">
                             <label htmlFor="kilometros" className="form-label">Kilómetros</label>
                             <input
@@ -102,7 +103,7 @@ const EdditVehicle = () => {
                             />
                         </div>
 
-                        {/* DESTINO (TEXTO MAYUSCULA) */}
+                        {/* Destino (texto en mayuscula si o si) */}
                         <div className="form-group span-1">
                             <label htmlFor="destino" className="form-label">Destino</label>
                             <input
@@ -117,7 +118,8 @@ const EdditVehicle = () => {
                             />
                         </div>
 
-                        {/* FECHAS */}
+                        {/* Fechas */}
+                        {/* Service */}
                         <div className="form-group span-1">
                             <label htmlFor="service" className="form-label">Nuevo Venc. Service</label>
                             <input
@@ -129,6 +131,7 @@ const EdditVehicle = () => {
                                 onChange={handleChange}
                             />
                         </div>
+                        {/* Rodado */}
                         <div className="form-group span-1">
                             <label htmlFor="rodado" className="form-label">Nuevo Venc. Cubiertas</label>
                             <input
@@ -140,8 +143,7 @@ const EdditVehicle = () => {
                                 onChange={handleChange}
                             />
                         </div>
-
-                        {/* REPARACIONES */}
+                        {/* Reparaciones hechas */}
                         <div className="form-group span-2">
                             <label htmlFor="reparaciones" className="form-label">Reparaciones / Novedades</label>
                             <input

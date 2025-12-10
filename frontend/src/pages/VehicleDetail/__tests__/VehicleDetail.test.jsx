@@ -3,7 +3,7 @@ import { render, screen, waitFor, fireEvent, act } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom';
 import Swal from 'sweetalert2'; 
 
-// Mocks de SweetAlert configurados correctamente
+// Mock de SweetAlert 
 jest.mock('sweetalert2', () => ({
     fire: jest.fn()
 }));
@@ -14,16 +14,17 @@ jest.mock('sweetalert2-react-content', () => {
     });
 });
 
-// Referencia rápida al mock para usar en los expects
+// Referencia al mock para usarlo despues
 const mockFire = Swal.fire;
 
-// Axios mock
+// Mock de Axios
 jest.mock('../../../api/axiosConfig');
 import apiClient from '../../../api/axiosConfig';
 
-// Navigate y Router mocks
+// Mock de Navigate
 const mockNavigate = jest.fn();
 
+// Mock de React Router
 jest.mock('react-router-dom', () => {
     const actual = jest.requireActual('react-router-dom');
     return {
@@ -37,7 +38,7 @@ jest.mock('react-router-dom', () => {
     };
 });
 
-// Capacitor mocks
+// Mocks de Capacitor
 jest.mock('@capacitor/app', () => ({
     App: { addListener: jest.fn().mockReturnValue(Promise.resolve({ remove: jest.fn() })) },
 }));
@@ -47,7 +48,7 @@ jest.mock('@capacitor/core', () => ({
 
 import VehicleDetail from '../VehicleDetail';
 
-// Datos falsos
+// Cargamos datos falsos
 const mockVehicleData = {
     id: 1,
     dominio: 'AA-123-BB',
@@ -95,6 +96,7 @@ describe('Componente VehicleDetail', () => {
         });
     });
 
+    // Tests
     test('Debe renderizar los datos del vehículo correctamente', async () => {
         await act(async () => {
             render(<BrowserRouter><VehicleDetail /></BrowserRouter>);

@@ -1,8 +1,11 @@
+// Archivo de configuración de socketIO
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
 
 const platform = Capacitor.getPlatform();
+// Seteamos URL y variables de entorno para que funcione en capacitor tambien
 const SOCKET_URL = platform === 'android' 
     ? 'https://control-de-flota-backend.onrender.com' 
     : import.meta.env.VITE_API_URL;
@@ -41,7 +44,7 @@ export const SocketProvider = ({ children }) => {
         });
 
         newSocket.on('connect_error', (err) => {
-            console.error('Socket.io: Error de conexión ❌', err.message);
+            console.error('Socket.io: Error de conexión ', err.message);
         });
 
         newSocket.on('disconnect', () => {

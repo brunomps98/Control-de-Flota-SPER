@@ -13,10 +13,11 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { toast } from 'react-toastify';
 import ChatBot from '../ChatBot/ChatBot';
 
+// Fijamos tiempo de timeout si el usuario no realiza ninguna acción, cerramos sesión 
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000;
 
 const Layout = () => {
-    // --- Hooks de Estado ---
+    // Hooks de estados del layout
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -27,18 +28,17 @@ const Layout = () => {
 
     // Estado del ChatBot (Flotante)
     const [isBotOpen, setIsBotOpen] = useState(false);
-
     const navigate = useNavigate();
     const location = useLocation();
     const timerRef = useRef(null);
 
-    // --- Callbacks ---
+    // Callbacks
     const handleInactivityLogout = useCallback(() => {
         localStorage.removeItem('token');
         toast.info('Tu sesión se cerró automáticamente por inactividad.');
         navigate('/login', { replace: true });
     }, [navigate]);
-
+    // Reseteamos el tiempo de inactividad si el usuario hace algo
     const resetInactivityTimer = useCallback(() => {
         if (timerRef.current) {
             clearTimeout(timerRef.current);
@@ -46,17 +46,16 @@ const Layout = () => {
         timerRef.current = setTimeout(handleInactivityLogout, INACTIVITY_TIMEOUT_MS);
     }, [handleInactivityLogout]);
 
-    // ---  MANEJAR CLIC EN NOTIFICACIÓN (WEB/INTERNO) ---
+    // Manejar clicks en notificaciones en web
     const handleNotificationClick = async (notif) => {
         setIsNotificationOpen(false);
 
         // Intentamos obtener el ID de todas las formas posibles
         const resourceId = notif.resourceId || notif.resource_id || notif.id;
         const type = notif.type;
-
         processRedirect(type, resourceId);
 
-        // Marcar como leída
+        // Marcar notificación como leída
         try {
             if (!notif.is_read) {
                 await apiClient.put(`/api/notifications/${notif.id}/read`);
@@ -68,7 +67,7 @@ const Layout = () => {
         }
     };
 
-    // FUNCIÓN CENTRALIZADA DE REDIRECCIÓN 
+    // Función de redirección
     const processRedirect = (rawType, resourceId) => {
 
         let type = rawType;
@@ -90,7 +89,7 @@ const Layout = () => {
             navigate('/vehicle'); // Base segura
 
             if (resourceId) {
-                // 2. Abrir ventana
+                // Abrir ventana
                 setTimeout(() => {
                     window.dispatchEvent(new CustomEvent('OPEN_CHAT_ROOM', { detail: resourceId }));
                 }, 1000); // 1 segundo para asegurar que todo cargó
@@ -102,7 +101,7 @@ const Layout = () => {
         }
     };
 
-    // CARGAR USUARIO 
+    // Cargamos usuario
     useEffect(() => {
         const fetchUserSession = async () => {
             try {
@@ -118,7 +117,7 @@ const Layout = () => {
         fetchUserSession();
     }, [navigate]);
 
-    //  VERIFICAR REDIRECCIONES PENDIENTES (AL CARGAR USUARIO) 
+    //  Verificamos redirecciones pendientes al cargar
     useEffect(() => {
         if (user && !loading) {
             const pendingRedirect = localStorage.getItem('pending_notification_redirect');
@@ -141,7 +140,7 @@ const Layout = () => {
         }
     }, [user, loading]);
 
-    // CONFIGURAR PUSH NOTIFICATIONS (NATIVO) 
+    // Configuración de notificaciones push (capacitor)
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
 
@@ -175,18 +174,19 @@ const Layout = () => {
                         if (type === 'vehicle') type = 'vehicle_update';
                     }
 
-                    // 1. GUARDAMOS LA INTENCIÓN (El "Buzón")
-                    // Esto es vital. Guardamos a dónde quiere ir el usuario para leerlo apenas cargue la app.
+                    // Guardamos la intención (el buzón)
+                    // Guardamos a dónde quiere ir el usuario para leerlo apenas cargue la app
                     localStorage.setItem('pending_notification_redirect', JSON.stringify({
                         type,
                         resourceId
                     }));
 
-                    // 2. LÓGICA INTELIGENTE DE NAVEGACIÓN
+                    // Lógica inteligente de navegación
                     const token = localStorage.getItem('token');
-
+                    // Si existe token llevamos a vehicle
                     if (token) {
                         window.location.href = '/vehicle';
+                        // Y sino redirrecionamos al login 
                     } else {
                         navigate('/login');
                     }
@@ -203,11 +203,13 @@ const Layout = () => {
         };
     }, []);
 
-    // --- Otros UseEffects ---
+    // UseEffect para el captcha (oculto)
     useEffect(() => {
         const badge = document.querySelector('.grecaptcha-badge');
         if (badge) { badge.style.display = 'none'; badge.style.visibility = 'hidden'; }
     }, []);
+
+    //UseEffects para capacitor
 
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
@@ -231,6 +233,7 @@ const Layout = () => {
         };
     }, [user, resetInactivityTimer]);
 
+    // UseEffect papra notificaciones
     const NotificationsListener = () => {
         const socket = useSocket();
         useEffect(() => {
@@ -257,7 +260,7 @@ const Layout = () => {
         }
     }, [user]);
 
-    // --- RENDERIZADO DEL SPLASH SCREEN ---
+    // Renderizado de pagina de carga
     if (loading) {
         return (
             <div className="app-loading-screen">
@@ -268,6 +271,7 @@ const Layout = () => {
 
     if (!user) return null;
 
+    // Definimos el botón para marcar las notificaciones como leidas
     const handleBellClick = async (event) => {
         event.stopPropagation();
         const opening = !isNotificationOpen;
@@ -280,6 +284,7 @@ const Layout = () => {
             } catch (error) { console.error(error); }
         }
     };
+    // Definimos el botón para eliminar una sola notificación
     const handleDeleteOne = async (id, event) => {
         if (event) event.stopPropagation();
         setNotifications(prev => prev.filter(n => n.id !== id));

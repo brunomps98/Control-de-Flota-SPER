@@ -16,7 +16,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Primero, chequear si el plugin 'App' de Capacitor está disponible
+        // Primero, chequeamos si el plugin 'App' de Capacitor está disponible
         if (Capacitor.isPluginAvailable('App')) {
 
             // Si está disponible, añadimos el listener
@@ -31,7 +31,7 @@ const Dashboard = () => {
         // Si no está disponible (ej. en web 'npm run dev'), no hacemos nada.
     }, [navigate]);
 
-    // Llamar al endpoint del backend al cargar
+    // Llamamos al endpoint del backend al cargar
     useEffect(() => {
         const fetchStats = async () => {
             try {
@@ -116,7 +116,7 @@ const Dashboard = () => {
     };
 
 
-    // --- Renderizado ---
+    // Renderizado
     if (loading) {
         return (
             <div className="login-page">

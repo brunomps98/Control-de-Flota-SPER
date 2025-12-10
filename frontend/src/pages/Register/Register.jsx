@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react'; 
-import { useNavigate } from 'react-router-dom'; 
-import './Register.css'; 
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Register.css';
 import logoSper from '../../assets/images/logo.png';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
-import apiClient from '../../api/axiosConfig'; 
-import { toast } from 'react-toastify'; 
+import apiClient from '../../api/axiosConfig';
+import { toast } from 'react-toastify';
 
+// Iconos
 const EyeOpenIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 10.224 7.29 6.332 12 6.332c4.71 0 8.577 3.892 9.964 5.351a1.012 1.012 0 0 1 0 .639C20.577 13.776 16.71 17.668 12 17.668c-4.71 0-8.577-3.892-9.964-5.351Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
 const EyeClosedIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 14.302 6.096 17.668 12 17.668c1.7 0 3.297-.272 4.77-.748l-1.02-1.02A3 3 0 0 0 12 15a3 3 0 0 0-2.036.78l-1.4-1.4A5.967 5.967 0 0 1 12 9c.773 0 1.503.168 2.167.46l-1.12 1.12A3.003 3.003 0 0 0 12 10.5a3 3 0 0 0-.25.031l-1.42 1.42A5.96 5.96 0 0 1 3.98 8.223Z" /><path strokeLinecap="round" strokeLinejoin="round" d="M10.225 10.225c.53.53.948 1.19 1.225 1.937M17.25 10.5c.09.43.146.874.146 1.328 0 1.5-.432 2.87-1.16 4.028m-1.742 1.742A9.01 9.01 0 0 1 12 17.668c-5.904 0-9.226-3.72-9.964-5.351.48-1.02.99-1.98 1.57-2.868m4.314-1.921A9.009 9.009 0 0 1 12 6.332c4.71 0 8.577 3.892 9.964 5.351.041.052.082.103.123.154l-3.32 3.32m-3.98-3.98-.4-1.292" /></svg>);
 
 const Register = () => {
     const navigate = useNavigate();
-    
+
+    // Inicializamos los campos vacios
     const [formData, setFormData] = useState({
         username: '',
         unidad: '',
@@ -21,18 +23,19 @@ const Register = () => {
         profile_picture: null
     });
     const [error, setError] = useState('');
-    const [showPassword, setShowPassword] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
 
+    // UseEffect de Capacitor
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => {
-            navigate('/vehicle'); 
+            navigate('/vehicle');
         };
         const listener = App.addListener('backButton', handleBackButton);
         return () => {
             listener.remove();
         };
-    }, [navigate]); 
+    }, [navigate]);
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -41,15 +44,16 @@ const Register = () => {
             [name]: files ? files[0] : value // Si es input file, tomamos el archivo
         }));
     };
-    
+
+    // Mensaje de error si los campos no estan completos
     const handleSubmit = async (e) => {
-        e.preventDefault(); 
-        setError(''); 
+        e.preventDefault();
+        setError('');
         if (!formData.username || !formData.email || !formData.passw || !formData.unidad) {
             const errorMsg = 'Por favor, completá todos los campos obligatorios.';
             setError(errorMsg);
-            toast.error(errorMsg); 
-            return; 
+            toast.error(errorMsg);
+            return;
         }
 
         // Usamos FormData para poder enviar el archivo
@@ -63,20 +67,22 @@ const Register = () => {
         }
 
         try {
-            // Importante: header multipart/form-data
+            // Mnesaje de usuario reigstrado con exito si los datos son correctos
             const response = await apiClient.post('/api/register', data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             toast.success(response.data.message || '¡Usuario registrado con éxito!');
             setFormData({ username: '', unidad: '', email: '', passw: '', profile_picture: null });
-            // Limpiar visualmente el input file
+            // Limpiamos visualmente los input
             document.getElementById('profilePicInput').value = "";
         } catch (err) {
+            // Error de datos ya existentes
             if (err.response?.status === 409) {
                 const errorMsg = 'El email o nombre de usuario ya existe.';
                 setError(errorMsg);
                 toast.error(errorMsg);
             } else {
+                // Error general
                 const errorMsg = err.response?.data?.message || 'Error al registrar el usuario.';
                 setError(errorMsg);
                 toast.error(errorMsg);
@@ -85,45 +91,46 @@ const Register = () => {
     };
 
     return (
-        <div className="login-page"> 
+        <div className="login-page">
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
 
                     <h2 className="form-title">Registrar Nuevo Usuario</h2>
                     <p className="form-subtitle">Crear una cuenta para un nuevo agente.</p>
-                    
+
                     <form onSubmit={handleSubmit}>
-                        {/* INPUT FOTO DE PERFIL */}
+                        {/* Input de foto de perfil */}
                         <div className="mb-3">
-                            <label className="form-label">Foto de Perfil (Opcional)</label>
-                            <input 
-                                type="file" 
-                                className="form-control" 
+                            <label className="form-label">Foto de Perfil</label>
+                            <input
+                                type="file"
+                                className="form-control"
                                 id="profilePicInput"
                                 name="profile_picture"
                                 onChange={handleChange}
                                 accept="image/*"
                             />
                         </div>
-
+                        {/* Input de nombre de usuario */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputUsername" className="form-label">Nombre de usuario</label>
-                            <input 
-                                type="text" 
-                                className="form-control" 
-                                id="exampleInputUsername" 
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="exampleInputUsername"
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                required 
+                                required
                             />
                         </div>
+                        {/* Input de unidad */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputUnidad" className="form-label">Unidad</label>
-                            <select 
-                                className="form-control" 
-                                id="exampleInputUnidad" 
+                            <select
+                                className="form-control"
+                                id="exampleInputUnidad"
                                 name="unidad"
                                 value={formData.unidad}
                                 onChange={handleChange}
@@ -143,48 +150,49 @@ const Register = () => {
                                 <option value="Tratamiento">Tratamiento</option>
                             </select>
                         </div>
+                        {/* Input de Email */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputEmail1" className="form-label">Email</label>
-                            <input 
-                                type="email" 
-                                className="form-control" 
-                                id="exampleInputEmail1" 
-                                aria-describedby="emailHelp" 
+                            <input
+                                type="email"
+                                className="form-control"
+                                id="exampleInputEmail1"
+                                aria-describedby="emailHelp"
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                required 
+                                required
                             />
                             <div id="emailHelp" className="form-text">El email no será compartido.</div>
                         </div>
-
+                        {/* Input de contraseña */}
                         <div className="mb-3">
                             <label htmlFor="exampleInputPassword1" className="form-label">Contraseña</label>
                             <div className="input-wrapper">
-                                <input 
+                                <input
                                     type={showPassword ? "text" : "password"}
-                                    className="form-control" 
-                                    id="exampleInputPassword1" 
+                                    className="form-control"
+                                    id="exampleInputPassword1"
                                     name="passw"
                                     value={formData.passw}
                                     onChange={handleChange}
-                                    required 
+                                    required
                                 />
-                                <button 
-                                    type="button" 
-                                    className="password-toggle-btn" 
+                                <button
+                                    type="button"
+                                    className="password-toggle-btn"
                                     onClick={() => setShowPassword(!showPassword)}
                                 >
                                     {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
                                 </button>
                             </div>
                         </div>
-
+                        {/* Botón de registrar usuario */}
                         <div className="button-container">
-                            <button type="submit" className="login-submit-btn">Registrar Usuario</button> 
+                            <button type="submit" className="login-submit-btn">Registrar Usuario</button>
                         </div>
                     </form>
-                    
+                    {/* Seteamos el mensaje de error */}
                     {error && (
                         <div className="alert alert-danger" role="alert">
                             {error}

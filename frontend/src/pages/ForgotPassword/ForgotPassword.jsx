@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
-import { App } from '@capacitor/app'; 
-import { Capacitor } from '@capacitor/core'; 
+import { Link, useNavigate } from 'react-router-dom';
+import { App } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import apiClient from '../../api/axiosConfig';
 import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
-import '../../pages/Login/Login.css'; 
+import '../../pages/Login/Login.css';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
@@ -13,6 +13,7 @@ const ForgotPassword = () => {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
+    // UseEffect de Capacitor
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/login');
@@ -26,14 +27,14 @@ const ForgotPassword = () => {
         setMessage('');
 
         try {
-            // Llamamos al endpoint del backend que creamos
+            // Llamamos al endpoint del backend
             const response = await apiClient.post('/api/forgot-password', { email });
-            
+
             // Mostramos el mensaje genérico de éxito
             setMessage(response.data.message);
             toast.success(response.data.message);
             setEmail('');
-
+            // Mensaje de error 
         } catch (error) {
             console.error("Error al solicitar reseteo:", error);
             const errorMsg = error.response?.data?.message || 'Error interno del servidor.';
@@ -48,19 +49,20 @@ const ForgotPassword = () => {
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
-                    
+
                     <h2 className="form-title">Restablecer Contraseña</h2>
                     <p className="form-subtitle">Ingresa tu email y te enviaremos un enlace de recuperación.</p>
 
                     <form onSubmit={handleSubmit} className="login-form">
-                        
-                        {/* Si ya se envió, mostramos el mensaje */}
+
+                        {/* Si ya se envió, mostramos el mensaje de exito */}
                         {message ? (
                             <div className="alert alert-success" role="alert">
                                 {message}
                             </div>
                         ) : (
                             <>
+                                {/* Campo para el email */}
                                 <div className="mb-3">
                                     <label htmlFor="emailInput" className="form-label">Email</label>
                                     <input
@@ -72,13 +74,13 @@ const ForgotPassword = () => {
                                         required
                                     />
                                 </div>
-
+                                {/* BOton para enviar mensaje y mensaje de enviando */}
                                 <button type="submit" className="login-submit-btn" disabled={isLoading}>
                                     {isLoading ? 'Enviando...' : 'Enviar Enlace'}
                                 </button>
                             </>
                         )}
-                        
+                        {/* Botón que redirige al login */}
                         <div className="forgot-password-link-container">
                             <Link to="/login" className="forgot-password-link">
                                 Volver a Iniciar Sesión

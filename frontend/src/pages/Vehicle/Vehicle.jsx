@@ -9,8 +9,10 @@ import { Capacitor } from '@capacitor/core';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
+// Inicializamos Swal
 const MySwal = withReactContent(Swal);
 
+// Icono
 const FilterIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 7.973 1.011a.75.75 0 0 1 .472.691l1.524 8.283a.75.75 0 0 1-.472.691A18.66 18.66 0 0 1 12 15c-2.755 0-5.455-.232-7.973-1.011a.75.75 0 0 1-.472-.691l-1.524-8.283a.75.75 0 0 1 .472-.691A18.66 18.66 0 0 1 12 3Z" />
@@ -19,21 +21,19 @@ const FilterIcon = () => (
 );
 
 const Vehicle = () => {
-    // Obtener usuario del contexto (Layout)
+    // Obtener usuario del layout
     const { user } = useOutletContext() || {}; 
-    
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const location = useLocation();
     const navigate = useNavigate();
-
     const [filters, setFilters] = useState({
         dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
     });
 
-    
+    // UseEffect para mensaje de bienvenida (Bienvenido "Usuario")
     useEffect(() => {
         if (location.state?.username) {
             toast.success(`Bienvenido, ${location.state.username}!`);
@@ -43,6 +43,7 @@ const Vehicle = () => {
 
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+    // UseEffect para Capacitor y manejo de botón atras
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const listenerPromise = App.addListener('backButton', (event) => {
@@ -68,6 +69,7 @@ const Vehicle = () => {
         });
     }, [searchParams]);
 
+    // UseEffect para obtener vehiculos
     useEffect(() => {
         const fetchVehicles = async () => {
             setLoading(true);
@@ -78,6 +80,7 @@ const Vehicle = () => {
                 });
                 setVehicles(response.data.docs || []);
             } catch (err) {
+                // Mensaje de error
                 toast.error(err.response?.data?.message || 'No se pudieron cargar los vehículos.');
                 setError('Error al cargar vehículos.');
             } finally {
@@ -87,6 +90,7 @@ const Vehicle = () => {
         fetchVehicles();
     }, [searchParams]);
 
+    // Timer para timeout
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
@@ -106,6 +110,8 @@ const Vehicle = () => {
         }, 400);
         return () => clearTimeout(timer);
     }, [filters, setSearchParams, searchParams]);
+    
+    // Todo para filtrar
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -128,6 +134,7 @@ const Vehicle = () => {
     // Manejar eliminación desde la Card
     const handleDeleteVehicle = (vehicleId) => {
         MySwal.fire({
+            // Confirmación
             title: '¿Estás seguro?',
             text: "¡Vas a eliminar este vehículo! Esta acción no se puede deshacer.",
             icon: 'warning',
@@ -152,6 +159,7 @@ const Vehicle = () => {
                 } catch (err) {
                     console.error(err);
                     MySwal.fire(
+                        // Mensaje de error 
                         'Error',
                         'Hubo un problema al eliminar el vehículo.',
                         'error'

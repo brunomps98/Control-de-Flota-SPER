@@ -4,9 +4,7 @@ import { Op } from 'sequelize';
 
 class DashboardController {
 
-    /**
-     * @summary Obtiene todas las estadísticas para el dashboard principal.
-     */
+    //Función para obtener todas las estadísticas para el dashboard principal
     static getDashboardStats = async (req, res) => {
         try {
             // Vehículos por Unidad (Gráfico de Torta)
@@ -15,8 +13,8 @@ class DashboardController {
                     'title', // La columna de la unidad
                     [sequelize.fn('COUNT', sequelize.col('id')), 'count'] // Contar cuántos hay
                 ],
-                group: ['title'], 
-                order: [['count', 'DESC']] 
+                group: ['title'],
+                order: [['count', 'DESC']] // Ordenarlos
             });
 
             // Vehículos por Año (Gráfico de Barras)
@@ -26,7 +24,7 @@ class DashboardController {
                     [sequelize.fn('COUNT', sequelize.col('id')), 'count']
                 ],
                 group: ['anio'],
-                order: [['anio', 'ASC']] 
+                order: [['anio', 'ASC']]
             });
 
             // Vehículos por Tipo (Gráfico de Barras)
@@ -71,6 +69,7 @@ class DashboardController {
             });
 
         } catch (error) {
+            // Manejo de errores
             console.error('[DASHBOARD] Error en getDashboardStats:', error);
             res.status(500).json({
                 message: 'Error interno del servidor al obtener las estadísticas',

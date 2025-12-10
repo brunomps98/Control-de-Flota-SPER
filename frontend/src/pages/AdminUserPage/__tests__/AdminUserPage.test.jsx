@@ -8,13 +8,14 @@ import { App } from '@capacitor/app';
 // Mocks
 
 
-// Mock de @capacitor/app
+// Mock de capacitor/app
 jest.mock('@capacitor/app', () => ({
   App: {
     addListener: jest.fn(), 
   },
 }));
 
+// Mock de axios
 jest.mock('../../../api/axiosConfig.js', () => ({
   __esModule: true,
   default: {
@@ -28,6 +29,7 @@ const mockNavigate = jest.fn();
 const mockSearchParams = new URLSearchParams();
 const mockSetSearchParams = jest.fn();
 
+// Mock de react-dom
 jest.mock('react-router-dom', () => {
     const original = jest.requireActual('react-router-dom');
     return {
@@ -37,6 +39,7 @@ jest.mock('react-router-dom', () => {
     };
 });
 
+// Mock de capacitor core
 jest.mock('@capacitor/core', () => ({
     Capacitor: {
         isPluginAvailable: () => true,
@@ -44,6 +47,7 @@ jest.mock('@capacitor/core', () => ({
     },
 }));
 
+// Mock de sweet alert
 jest.mock('sweetalert2', () => {
     const fire = jest.fn().mockResolvedValue({ isConfirmed: true });
     return {
@@ -88,7 +92,7 @@ describe('Componente AdminUserPage (Gestión de Usuarios)', () => {
         await waitFor(() => expect(screen.getByText('Usuario1')).toBeInTheDocument());
 
         const editButtons = screen.getAllByText('Editar');
-        const editUserBtn = editButtons[1]; // El segundo usuario (Usuario1)
+        const editUserBtn = editButtons[1]; // El segundo usuario 
 
         fireEvent.click(editUserBtn);
 

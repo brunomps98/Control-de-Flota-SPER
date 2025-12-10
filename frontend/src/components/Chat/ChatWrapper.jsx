@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-// --- ICONOS ---
+// Iconos
 const ThreeDotIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Zm0 6a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" /></svg>);
 const ChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="32" height="32"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 0 1 1.037-.443 48.282 48.282 0 0 0 5.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>);
 const CloseIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="24" height="24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>);
@@ -57,9 +57,8 @@ const ChatWindow = ({ onClose }) => {
     const [recordingTime, setRecordingTime] = useState(0);
     const recordingInterval = useRef(null);
 
-    // --- ESTADO PARA EL BOTÓN FLOTANTE ---
+    // Estado para el botón flotante
     const [showContactList, setShowContactList] = useState(false);
-
     const [openMenuId, setOpenMenuId] = useState(null);
     const [isHeaderMenuOpen, setIsHeaderMenuOpen] = useState(false);
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
@@ -131,11 +130,11 @@ const ChatWindow = ({ onClose }) => {
             console.error("Error al iniciar grabación:", error);
 
             // Si es web normal (no Capacitor) y no es seguro, mostramos el error de HTTPS.
-            // Si es Capacitor, mostramos el error real (probablemente permisos).
+            // Si es Capacitor, mostramos el error real 
             if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && Capacitor.getPlatform() === 'web') {
                 toast.error("Requiere HTTPS para grabar audio.");
             } else {
-                // Error real (ej: Permiso denegado en Android)
+                // Error real 
                 toast.error(`No se pudo acceder al micrófono: ${error.message}`);
             }
         }
@@ -219,7 +218,7 @@ const ChatWindow = ({ onClose }) => {
             const room = response.data.room || response.data;
             const messages = response.data.messages || []; // Si el backend ya los manda, los usamos
 
-            // Transición INSTANTÁNEA de UI (Optimistic UI)
+            // Transición instantanea de ui
             setCurrentView('chat');
             setSelectedRoom(room);
             setShowContactList(false);
@@ -253,7 +252,7 @@ const ChatWindow = ({ onClose }) => {
         }
     };
 
-    // --- MANEJO DEL BOTÓN ATRÁS ---
+    // Manejo de botón de atras
     const handleBack = () => {
         if (currentView === 'profile_pic') {
             setCurrentView('info'); // Si estamos en foto, volver a Info
@@ -366,7 +365,7 @@ const ChatWindow = ({ onClose }) => {
 
         const chatImages = adminMessages.filter(msg => msg.type === 'image' && msg.file_url);
 
-        // --- FUNCIÓN DE REDIRECCIÓN ---
+        // Función de redirección
         const goToProfile = () => {
             navigate(`/profile/${targetUser.id}`); // Navega a la URL del perfil
             if (onClose) onClose(); // Cierra el chat para ver la página limpia
@@ -463,7 +462,7 @@ const ChatWindow = ({ onClose }) => {
 
         if (user.admin && currentView === 'inbox') {
 
-            // VISTA B: LISTA DE CONTACTOS (NUEVO CHAT)
+            // Vista b: Lista de contactos (nuevo chat)
             if (showContactList) {
                 return (
                     <div className="admin-inbox slide-in-right">
@@ -500,7 +499,7 @@ const ChatWindow = ({ onClose }) => {
                 );
             }
 
-            // VISTA A: BANDEJA PRINCIPAL (CHATS ACTIVOS)
+            // Vista a: Bandeja principal con chats activos
             return (
                 <div className="admin-inbox">
                     <div className="chat-list-header">Chats Activos</div>
@@ -541,7 +540,7 @@ const ChatWindow = ({ onClose }) => {
             );
         }
 
-        // MANEJO DE VISTAS (Switch)
+        // Manejo de vistas con switch
         if (user.admin && currentView === 'info') return renderUserInfo();
         if (user.admin && currentView === 'profile_pic') return renderProfilePic();
         if (user.admin && currentView === 'chat') return isChatLoading ? <p>Cargando...</p> : renderMessageList(adminMessages);
@@ -587,7 +586,7 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
-    // --- LÓGICA HEADER DEL CHAT ---
+    // Lógica del header del chat
     let headerTitle = 'Soporte';
     let chatPartnerUser = null;
     let isOnline = false;
@@ -621,7 +620,7 @@ const ChatWindow = ({ onClose }) => {
                     onClick={user.admin && currentView === 'chat' ? handleOpenUserInfo : undefined}
                     style={{ display: 'flex', alignItems: 'center', gap: '10px', flexGrow: 1, overflow: 'hidden' }}
                 >
-                    {/* Solo mostramos el avatar pequeño en el header SI NO estamos viendo la foto grande ni info */}
+                    {/* Mostramos la foto de perfil chica en el header solo si no estamos dentro de su perfil */}
                     {chatPartnerUser && currentView !== 'profile_pic' && (
                         <div className="header-avatar-container" style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.2)' }}>
                             {chatPartnerUser.profile_picture ? (

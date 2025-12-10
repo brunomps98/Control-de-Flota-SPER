@@ -3,6 +3,7 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 
 const platform = Capacitor.getPlatform();
 const baseURL = platform === 'android' 
+    // Seteamos la url de render y de la variable de entorno
     ? 'https://control-de-flota-backend.onrender.com' 
     : import.meta.env.VITE_API_URL;
 
@@ -38,7 +39,7 @@ const capacitorAdapter = async (config) => {
         };
     }
 
-    // Manejo de JSON, GET, PUT, etc.
+    // Manejo de Json, get, put, etc.
     const options = {
       method: config.method.toUpperCase(),
       url: `${config.baseURL}${config.url}`,

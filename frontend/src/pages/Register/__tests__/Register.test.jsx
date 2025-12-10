@@ -6,13 +6,20 @@ import apiClient from '../../../api/axiosConfig';
 import { toast } from 'react-toastify';
 
 // Mocks
+
+// Mock de Axios
 jest.mock('../../../api/axiosConfig');
 
+// Mock de Navigate
 const mockNavigate = jest.fn();
+
+// Mock de React-dom
 jest.mock('react-router-dom', () => ({
     ...jest.requireActual('react-router-dom'),
     useNavigate: () => mockNavigate,
 }));
+
+//Mocks de capacitor
 
 jest.mock('@capacitor/app', () => ({
     App: { addListener: jest.fn().mockReturnValue(Promise.resolve({ remove: jest.fn() })) },
@@ -21,6 +28,7 @@ jest.mock('@capacitor/core', () => ({
     Capacitor: { getPlatform: () => 'web' },
 }));
 
+// Mock de react-toastify
 jest.mock('react-toastify', () => ({
     toast: {
         error: jest.fn(),
@@ -28,6 +36,7 @@ jest.mock('react-toastify', () => ({
     },
 }));
 
+// Mock de imagen de perfil
 jest.mock('../../../assets/images/logo.png', () => 'test-logo-stub');
 
 describe('Componente Register', () => {
@@ -36,6 +45,8 @@ describe('Componente Register', () => {
         jest.clearAllMocks();
     });
 
+    // Tests
+    
     test('Debe renderizar el formulario de registro correctamente', () => {
         render(<BrowserRouter><Register /></BrowserRouter>);
 
@@ -92,13 +103,9 @@ describe('Componente Register', () => {
     test('Debe mostrar error si faltan campos (Validación HTML5)', async () => {
         // Este test verifica que el navegador (o jsdom) bloquee el envío
          render(<BrowserRouter><Register /></BrowserRouter>);
-
         const submitBtn = screen.getByRole('button', { name: 'Registrar Usuario' });
         fireEvent.click(submitBtn);
-
-        // Como los campos tienen 'required', el submit NO se dispara y apiClient NO se llama
-        expect(apiClient.post).not.toHaveBeenCalled();
-        
+        expect(apiClient.post).not.toHaveBeenCalled();    
         // Verificamos que algún input sea inválido
         const userInput = screen.getByLabelText(/Nombre de usuario/i);
         expect(userInput).toBeInvalid(); 
