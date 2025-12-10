@@ -3,12 +3,13 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 import Usuario from '../models/user.model.js';
 import Notification from '../models/notification.model.js';
 import { onlineUsers } from './onlineUsers.js';
-export const onlineAdmins = new Set();
+import { onlineAdmins } from './onlineAdmins.js';
 import { sendPushNotification } from '../services/notification.service.js';
 import { sendNewMessageEmail } from '../services/email.service.js';
 
 let ioInstance = null;
 
+// Inicializamos SocketIO
 export const initializeSocket = (io) => {
 
     ioInstance = io;
@@ -17,6 +18,7 @@ export const initializeSocket = (io) => {
     io.use((socket, next) => {
         try {
             const token = socket.handshake.auth.token;
+            // Manejo de errores por tokens
             if (!token) {
                 return next(new Error('Autenticación fallida: No hay token.'));
             }
@@ -28,16 +30,16 @@ export const initializeSocket = (io) => {
         }
     });
 
+    // Conexión
     io.on('connection', async (socket) => {
 
     
         let userRoomName = '';
 
-        // Lógica de ONLINE/OFFLINE
+        // Lógica de online/offline
         if (socket.user.admin) {
             socket.join('admin_room');
             userRoomName = 'admin_room';
-
             onlineAdmins.add(socket.user.id);
             if (onlineAdmins.size === 1) {
                 io.emit('support_status_change', { isOnline: true });
@@ -203,6 +205,7 @@ export const initializeSocket = (io) => {
                 console.error("[SOCKET] Error en 'typing_start':", error);
             }
         });
+        // Lógica Dejó de escribir
         socket.on('typing_stop', (payload) => {
             try {
                 const { roomId } = payload;
@@ -213,7 +216,7 @@ export const initializeSocket = (io) => {
                 console.error("[SOCKET] Error en 'typing_stop':", error);
             }
         });
-
+        // Lógica Admin se unió a la sala
         socket.on('admin_join_room', (roomId) => {
             try {
                 if (!socket.user.admin) {
@@ -226,7 +229,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-
+        // Lógica envio de mensajes
         socket.on('send_message', async (payload) => {
             try {
                 const { roomId, content, type, file_url } = payload;
@@ -322,7 +325,7 @@ export const initializeSocket = (io) => {
             }
         });
 
-
+        // Desconexión 
         socket.on('disconnect', () => {
 
             if (socket.user.admin && socket.user.id) {

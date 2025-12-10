@@ -1,6 +1,6 @@
 import { __dirname } from '../utils.js'; 
 import path from 'path';
-
+ 
 describe('Utils - __dirname', () => {
     test('Debe exportar una ruta absoluta válida', () => {
         // Verificar que sea un string

@@ -21,7 +21,7 @@ const allowedFromEnv = rawFront
   .filter(Boolean);
 
 
-// Todas las URL permitidas ademas de la que contiene FRONT_URL
+// Todas las URL permitidas por cors ademas de la que contiene FRONT_URL
 const extras = [
   "capacitor://localhost",
   "ionic://localhost",
@@ -53,6 +53,7 @@ const corsOptions = {
     
     return callback(new Error('CORS - origin not allowed: ' + origin), false);
   },
+  // Metodos DB
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
   optionsSuccessStatus: 200

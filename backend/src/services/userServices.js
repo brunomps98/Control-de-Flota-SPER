@@ -6,16 +6,15 @@ import { ChatRoom, ChatMessage } from '../models/chat.model.js';
 
 export default class userManager {
 
-    /**
-     * Registra un nuevo usuario y asigna permisos booleanos según la unidad seleccionada.
-     * * @param {string} username - Nombre de usuario único.
-     * @param {string} unidad - Nombre de la unidad (ej: "Unidad Penal 1").
-     * @param {string} email - Correo electrónico único.
-     * @param {string} password - Contraseña en texto plano (será hasheada automáticamente por el modelo o hook).
-     * @param {string|null} profilePicture - URL de la foto de perfil o null.
-     * @returns {Promise<Object>} El usuario creado (sin password).
-     * @throws {Error} Si el email o usuario ya existen.
-     */
+    /* Registra un nuevo usuario y asigna permisos booleanos según la unidad seleccionada.
+        username: Nombre de usuario único.
+        unidad: Nombre de la unidad (ej: "Unidad Penal 1").
+        email: Correo electrónico único.
+        password: Contraseña en texto plano (será hasheada automáticamente por el modelo o hook).
+        profilePicture: URL de la foto de perfil o null.
+         Retorna: Promise<Object>: El usuario creado (sin password)
+         Arroja error si el email o usuario ya existen.
+         */
 
     regUser = async (username, unidad, email, password, profilePicture) => {
         try {
@@ -36,7 +35,7 @@ export default class userManager {
                 trat: false
             };
 
-            // Usar la unidad para setear el flag booleano correcto
+            // Usamos la unidad para setear el flag booleano correcto
             switch (unidad) {
                 case "Direccion General":
                     permissions.dg = true;
@@ -87,23 +86,25 @@ export default class userManager {
 
             // Crear el usuario
             const newUser = await Usuario.create(newUserPayload);
-
+            // Lo retornamos
             return newUser;
 
         } catch (error) {
+            // Manejo de errores
             if (error instanceof UniqueConstraintError) {
-                throw new Error('Email already in use');
+                // Email en uso
+                throw new Error('Email ya en uso');
             }
             throw error;
         }
     }
 
-    /**
-     * Valida las credenciales de un usuario para el inicio de sesión.
-     * * @param {string} username - Nombre de usuario.
-     * @param {string} password - Contraseña ingresada.
-     * @returns {Promise<Object>} El usuario autenticado.
-     * @throws {Error} Si el usuario no existe o la contraseña es incorrecta.
+    /*
+    Valida las credenciales de un usuario para el inicio de sesión.
+    username: Nombre de usuario.
+    password: Contraseña ingresada.
+    retorna: Promise<Object>: El usuario autenticado
+    arroja error si el usuario no existe o la contraseña es incorrecta.
      */
 
     logInUser = async (username, password) => {
@@ -128,11 +129,13 @@ export default class userManager {
         return user;
     }
 
+    // Obtiene el usuario
     getUserByUsername = async (username) => {
         const user = await Usuario.findOne({ where: { username } });
         return user;
     }
 
+    // Encuentra al usuario por su email
     findUserByEmail = async (email) => {
         try {
             const user = await Usuario.findOne({
@@ -141,11 +144,13 @@ export default class userManager {
             });
             return user;
         } catch (error) {
+            // Manejo de errores
             console.error("Error al buscar usuario por email:", error);
             throw new Error('Error al buscar usuario');
         }
     }
 
+    // Actualizar contraseña del usuario
     updateUserPassword = async (userId, newPassword) => {
         try {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -156,20 +161,22 @@ export default class userManager {
             );
 
             if (affectedRows === 0) {
+                // Mensaje de error
                 throw new Error('Usuario no encontrado para actualizar contraseña.');
             }
-
+            // Mensaje de exito
             return { message: 'Contraseña actualizada con éxito.' };
         } catch (error) {
+            // Manejo de errores
             console.error("Error al actualizar la contraseña:", error);
             throw new Error('Error al actualizar la contraseña');
         }
     }
 
-    /**
-     * Obtiene todos los usuarios aplicando filtros opcionales.
-     * @param {Object} filters - Filtros de búsqueda (username, email, unidad, admin).
-     * @returns {Promise<Array>} Lista de usuarios (excluyendo passwords).
+    /*
+    Obtiene todos los usuarios aplicando filtros opcionales
+    {Object} filters: Filtros de búsqueda (username, email, unidad, admin)
+    retorna: Promise<Array>: Lista de usuarios (excluyendo passwords)
      */
 
     getAllUsers = async (filters = {}) => {
@@ -209,10 +216,10 @@ export default class userManager {
         }
     }
 
-    /**
-     * Elimina un usuario y todos sus datos asociados (ChatRoom, Mensajes) en cascada.
-     * Se ejecuta dentro de una transacción para asegurar integridad.
-     * @param {number} userId - ID del usuario a eliminar.
+    /*
+    Elimina un usuario y todos sus datos asociados (ChatRoom, Mensajes) en cascada
+    Se ejecuta dentro de una transacción para asegurar integridad
+    userID: ID del usuario a eliminar.
      */
 
     deleteUser = async (userId) => {
@@ -244,6 +251,7 @@ export default class userManager {
         }
     }
 
+    // Actualizar usuario
     updateUser = async (userId, userData) => {
         try {
             // Extraemos 'delete_profile_picture' también
@@ -303,6 +311,7 @@ export default class userManager {
             return updatedUser;
 
         } catch (error) {
+            // Manejo de errores
             console.error("Error al actualizar el usuario:", error);
             if (error instanceof UniqueConstraintError) {
                 throw new Error('El email o nombre de usuario ya está en uso por otra cuenta.');
@@ -311,6 +320,7 @@ export default class userManager {
         }
     }
 
+    // Obtener usuario por su id
     getUserById = async (id) => {
         try {
             const user = await Usuario.findByPk(id, {

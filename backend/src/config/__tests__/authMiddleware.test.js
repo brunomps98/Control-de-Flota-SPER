@@ -2,6 +2,8 @@ import { verifyToken, isAdmin } from '../authMiddleware.js';
 import jwt from 'jsonwebtoken';
 
 // Mocks
+
+// Mock de jsonwebtoken
 jest.mock('jsonwebtoken');
 
 // Helpers para crear Req, Res y Next falsos
@@ -11,6 +13,7 @@ const mockRequest = () => {
   return req;
 };
 
+// Mock de respuesta
 const mockResponse = () => {
   const res = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -49,9 +52,10 @@ describe('Auth Middleware', () => {
             expect(res.status).not.toHaveBeenCalled(); // No se respondió error
         });
 
+        // Tests
+
         test('Debe retornar 401 si no se envía la cabecera de autorización', () => {
             const req = mockRequest();
-            // No seteamos req.headers['authorization']
             const res = mockResponse();
 
             verifyToken(req, res, mockNext);
@@ -86,7 +90,7 @@ describe('Auth Middleware', () => {
     describe('isAdmin', () => {
         test('Debe llamar a next() si el usuario es administrador (isAdmin: true)', () => {
             const req = mockRequest();
-            req.user = { id: 1, isAdmin: true }; // Usuario inyectado previamente
+            req.user = { id: 1, isAdmin: true }; 
             const res = mockResponse();
 
             isAdmin(req, res, mockNext);

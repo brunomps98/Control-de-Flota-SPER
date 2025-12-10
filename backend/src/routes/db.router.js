@@ -15,6 +15,7 @@ import axios from 'axios';
 import { sendPasswordResetEmail } from "../services/email.service.js";
 import DashboardController from "../controllers/dashboard.controller.js";
 
+// Verificación: "¿Es admin o no?"
 const verifyAdmin = (req, res, next) => {
     if (!req.user || !req.user.admin) {
         return res.status(403).json({ message: 'Acción no autorizada. Solo los administradores pueden realizar esta acción.' });
@@ -28,6 +29,7 @@ router.use((req, res, next) => {
     next();
 });
 
+// Multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -45,6 +47,7 @@ router.post('/login', async (req, res) => {
     const { username, password, recaptchaToken } = req.body;
 
     try {
+        // Recaptcha google
         if (recaptchaToken) {
             const secretKey = process.env.RECAPTCHA_SECRET_KEY;
             if (!secretKey) return res.status(500).json({ message: 'Error de configuración del servidor.' });
@@ -66,6 +69,7 @@ router.post('/login', async (req, res) => {
         res.status(200).json({ status: 'success', user: userPayload, token });
 
     } catch (error) {
+        // Manejo de errores
         if (error.message === "Credenciales inválidas") {
             return res.status(401).json({ message: 'Credenciales incorrectas' });
         }
@@ -73,10 +77,13 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Ruta de obtención de usuario actual
 router.get('/user/current', verifyToken, (req, res) => {
+
     res.status(200).json({ user: req.user });
 });
 
+// Ruta para obtener los perfiles del usuario
 router.get('/users/profile/:id', verifyToken, async (req, res) => {
     try {
         const user = await userRepository.getUserById(req.params.id);
@@ -91,12 +98,13 @@ router.get('/users/profile/:id', verifyToken, async (req, res) => {
             admin: user.admin
         });
     } catch (error) {
+        // Manejo de errores
         console.error("Error en GET /profile:", error);
         res.status(500).json({ message: 'Error al obtener perfil' });
     }
 });
 
-// Actualizar mi propia foto de perfil
+// Ruta para ctualizar mi propia foto de perfil
 router.put('/user/profile/photo', verifyToken, upload.single('profile_picture'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No se subió ninguna imagen' });
@@ -104,28 +112,31 @@ router.put('/user/profile/photo', verifyToken, upload.single('profile_picture'),
         res.json({ message: 'Foto actualizada', user: updatedUser });
 
     } catch (error) {
+        // Manejo de errores
         console.error(error);
         res.status(500).json({ message: 'Error al actualizar foto' });
     }
 });
 
-// Borrar foto de perfil (Dueño o Admin)
+// Ruta para borrar foto de perfil (admin o dueño de la misma foto)
 router.delete('/users/profile/:id/photo', verifyToken, async (req, res) => {
     try {
         const targetUserId = parseInt(req.params.id);
         const requestingUser = req.user;
 
-        // Verificar permisos: ¿Es el dueño O es admin?
+        // Verificar permisos: ¿Es el dueño o es admin?
         if (requestingUser.id !== targetUserId && !requestingUser.admin) {
+            // Mostramos error si no hay permiso para ejecutar la operación
             return res.status(403).json({ message: 'No tienes permiso para modificar este perfil.' });
         }
 
-        // Llamamos al DAO para poner la foto en null
+        // Llamamos al dao para poner la foto en null
         await UserController.deleteProfilePicture(targetUserId);
-        
+        // Mostramos exito al eliminar la foto
         res.json({ message: 'Foto eliminada correctamente' });
 
     } catch (error) {
+        // Manejo de errores
         console.error(error);
         res.status(500).json({ message: 'Error al eliminar foto' });
     }
@@ -147,12 +158,13 @@ router.put('/users/:id', verifyToken, verifyAdmin, upload.single('profile_pictur
 
 router.delete('/users/:id', verifyToken, verifyAdmin, UserController.deleteUserContoller);
 
-
+// Ruta para función de recuperar contraseña (usuario, email, contraseña,etc.)
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         const user = await userRepository.findUserByEmail(email);
         if (!user) {
+            // Mostramos mensaje generico para avisar que se mando el mail, SOLO si coincide con un email existente en la DB
             return res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
         }
         const resetPayload = { userId: user.id, email: user.email };
@@ -163,39 +175,46 @@ router.post('/forgot-password', async (req, res) => {
         await sendPasswordResetEmail(user.email, resetLink);
         res.status(200).json({ message: 'Si existe una cuenta con ese email, se ha enviado un enlace de recuperación.' });
     } catch (error) {
+        // Manejo de errores
         console.error("Error en /forgot-password:", error);
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 });
 
+// Ruta para resetear la contraseña por una nueva
 router.post('/reset-password', async (req, res) => {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
+        // Manejo de errores
         return res.status(400).json({ message: 'Faltan el token o la nueva contraseña.' });
     }
     try {
+        // Verificamos token y chequeamos contraseña, si hay exito, mostramos un mensaje
         const payload = jwt.verify(token, process.env.SECRET_KEY);
         const { userId } = payload;
         await userRepository.updateUserPassword(userId, newPassword);
         res.status(200).json({ message: 'Contraseña actualizada con éxito. Ya puedes iniciar sesión.' });
     } catch (error) {
+        // Sino mostramos error de que el enlace expiró, pasados los minutos
         if (error instanceof jwt.TokenExpiredError) {
             return res.status(401).json({ message: 'El enlace de recuperación ha expirado. Por favor, solicita uno nuevo.' });
         }
         if (error instanceof jwt.JsonWebTokenError) {
+            // Si colocamos un enlace invalido, mostramos error
             return res.status(401).json({ message: 'El enlace de recuperación no es válido.' });
         }
+        // Error en la pagina
         console.error("Error en /reset-password:", error);
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 });
 
+// Rutas para tokens (verificación, actualización y eliminación)
 router.post('/user/fcm-token', verifyToken, async (req, res) => {
     try {
         const { fcmToken } = req.body;
         const userId = req.user.id;
         if (!fcmToken) return res.status(400).json({ message: 'No se proporcionó token.' });
-
         await Usuario.update({ fcm_token: null }, { where: { fcm_token: fcmToken, id: { [Op.ne]: userId } } });
         await Usuario.update({ fcm_token: fcmToken }, { where: { id: userId } });
 
@@ -254,7 +273,7 @@ router.get('/notifications', verifyToken, verifyAdmin, async (req, res) => {
     }
 });
 
-//Ruta para marcar todas las notificaciones como marcadas
+// Ruta para marcar todas las notificaciones como marcadas
 router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.update({ is_read: true }, { where: { user_id: req.user.id, is_read: false } });
@@ -265,6 +284,7 @@ router.put('/notifications/mark-all-read', verifyToken, verifyAdmin, async (req,
     }
 });
 
+// Ruta para marcar UNA notificacion por ID como leida
 router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.update({ is_read: true }, { where: { id: req.params.id, user_id: req.user.id } });
@@ -274,7 +294,7 @@ router.put('/notifications/:id/read', verifyToken, verifyAdmin, async (req, res)
     }
 });
 
-// Ruta para vaciar notificaciones
+// Ruta para vaciar todas las notificaciones
 router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, res) => {
     try {
         await Notification.destroy({ where: { user_id: req.user.id } });
@@ -285,7 +305,7 @@ router.delete('/notifications/clear-all', verifyToken, verifyAdmin, async (req, 
     }
 });
 
-// Ruta generica de notifaciones con ID
+// Ruta generica de eliminación de notificaciones por ID
 router.delete('/notifications/:id', verifyToken, verifyAdmin, async (req, res) => {
     try {
         const notificationId = req.params.id;

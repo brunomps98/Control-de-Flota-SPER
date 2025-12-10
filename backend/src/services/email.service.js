@@ -1,8 +1,11 @@
+// Importamos resend
 import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Inicialización de resend para el envio de notificaciones por mail
+// Tomamos variables de entorno del .env
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = process.env.RESEND_FROM; 
 
@@ -15,7 +18,7 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
     if (fileUrls.length > 0) {
         filesHtml = '<ul>' + fileUrls.map(url => `<li><a href="${url}">Ver Archivo Adjunto</a></li>`).join('') + '</ul>';
     }
-
+    // Cuerpo del htmll para el mensaje
     const htmlBody = `
         <h1>Nuevo Ticket de Soporte Recibido</h1>
         <p>Se ha generado un nuevo caso de soporte desde el formulario público.</p>
@@ -33,7 +36,7 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
         <hr>
         <p>Ingresa al panel de administración para gestionarlo.</p>
     `;
-
+    // Intentamos enviar el mail
     try {
         await resend.emails.send({
             from: FROM, 
@@ -41,14 +44,15 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
             subject: `Nuevo Ticket: ${ticketData.problem_description.substring(0, 30)}...`,
             html: htmlBody
         });
+        // Sino mostramos error
     } catch (error) {
         console.error("[Email Service] Error al enviar correo:", error);
     }
 };
 
-// Reseteo de contraseña
+// Email de eseteo de contraseña
 export const sendPasswordResetEmail = async (userEmail, resetLink) => {
-
+    // Cuerpo de html para el mail
     const htmlBody = `
         <h1>Restablecimiento de Contraseña</h1>
         <p>Has solicitado restablecer tu contraseña para el usuario: <strong>${userEmail}</strong></p>
@@ -57,10 +61,11 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
             Restablecer Contraseña
         </a>
         <hr>
-        <p>⚠️ NOTA MODO DEMO: Este correo fue redirigido a tu cuenta admin porque estás en Sandbox.</p>
+        <p> NOTA MODO DEMO: Este correo fue redirigido a tu cuenta admin porque estás en Sandbox.</p>
     `;
 
     try {
+        // Intentamos enviar el email
         await resend.emails.send({
             from: FROM,
             to: SAFE_DEMO_EMAIL, 
@@ -68,16 +73,17 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
             html: htmlBody
         });
     } catch (error) {
+        // Sino mostramos error
         console.error("[Email Service] Error al enviar correo:", error);
     }
 };
 
-// Acción en vehiculo
+// Acción en vehiculo ( eliminación, agregado o edición de un vehiculo)
 export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehicleData) => {
 
     const subjectAction = actionType === 'CREATE' ? 'Nuevo Vehículo Cargado' : 'Vehículo Actualizado';
     const color = actionType === 'CREATE' ? '#4CAF50' : '#2196F3';
-
+    // Cuerpo de html
     const htmlBody = `
         <div style="font-family: Arial, sans-serif; color: #333;">
             <h1 style="color: ${color};">${subjectAction}</h1>
@@ -93,6 +99,7 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
     `;
 
     try {
+        // Intentamos enviar el email
         await resend.emails.send({
             from: FROM,
             to: SAFE_DEMO_EMAIL, 
@@ -100,13 +107,14 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
             html: htmlBody
         });
     } catch (error) {
+        // Sino mostramos error
         console.error("[Email Service] Error:", error);
     }
 };
 
 // Mensaje de chat 
 export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, messageContent) => {
-
+    // Cuerpo html del mail
     const htmlBody = `
         <div style="font-family: Arial, sans-serif; color: #333;">
             <h1 style="color: #009688;">Nuevo Mensaje de Chat</h1>
@@ -117,7 +125,7 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
             <p>Ingresa al panel para responder.</p>
         </div>
     `;
-
+    // Intentamos enviar el email
     try {
         await resend.emails.send({
             from: FROM,
@@ -126,6 +134,7 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
             html: htmlBody
         });
     } catch (error) {
+        // Sino mostramos error
         console.error("[Email Service] Error:", error);
     }
 };

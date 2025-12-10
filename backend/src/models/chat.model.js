@@ -52,7 +52,7 @@ const ChatMessage = sequelize.define('ChatMessage', {
     updatedAt: false
 });
 
-// ASOCIACIONES 
+// Asociaciones
 ChatRoom.belongsTo(Usuario, { foreignKey: 'user_id', as: 'user' });
 ChatMessage.belongsTo(Usuario, { foreignKey: 'sender_id', as: 'sender' });
 ChatMessage.belongsTo(ChatRoom, { foreignKey: 'room_id', as: 'room' });

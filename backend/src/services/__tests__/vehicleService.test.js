@@ -4,9 +4,11 @@ import Usuario from '../../models/user.model.js';
 import Notification from '../../models/notification.model.js';
 import { sequelize } from '../../config/configServer.js'; 
 
-// --- MOCKS ---
+// Mocks
 
 // Mock de los Modelos de Sequelize
+
+// Mock de modelo de vehiculos
 jest.mock('../../models/vehicle.model.js', () => ({
     Vehiculo: { findAndCountAll: jest.fn(), findByPk: jest.fn(), create: jest.fn() },
     Kilometraje: { create: jest.fn(), destroy: jest.fn() },
@@ -18,15 +20,17 @@ jest.mock('../../models/vehicle.model.js', () => ({
     Descripcion: { create: jest.fn(), destroy: jest.fn() }
 }));
 
+// Mock de modelo de usuarios
 jest.mock('../../models/user.model.js', () => ({
     findAll: jest.fn()
 }));
 
+// Mock de modelo de notificaciones 
 jest.mock('../../models/notification.model.js', () => ({
     bulkCreate: jest.fn()
 }));
 
-// 2. Mock de la Configuración (Sequelize)
+// Mock de la Configuración (Sequelize)
 
 // Definimos estructura basica
 jest.mock('../../config/configServer.js', () => ({
@@ -40,11 +44,12 @@ jest.mock('../email.service.js', () => ({
     sendVehicleActionEmail: jest.fn()
 }));
 
-
+// Mock de notificaciones
 jest.mock('../notification.service.js', () => ({
     sendPushNotification: jest.fn()
 }));
 
+// Mock de SocketIo
 jest.mock('../../socket/socketHandler.js', () => ({
     getIO: jest.fn(() => ({
         to: jest.fn().mockReturnThis(),
@@ -97,6 +102,7 @@ describe('VehicleManager Service', () => {
             expect(result.docs[0].dominio).toBe('AAA111');
         });
 
+        // Test
         test('Debe filtrar unidades permitidas si el usuario NO es admin', async () => {
             const user = { admin: false, up1: true }; 
             const queryParams = { page: 1, limit: 10, user };
@@ -121,7 +127,7 @@ describe('VehicleManager Service', () => {
             kilometros: 1000,
             usuario: 'Chofer Test'
         };
-
+        // Test
         test('Debe crear un vehículo y sus relaciones dentro de una transacción', async () => {
             // Mock de creación exitosa
             Vehiculo.create.mockResolvedValue({ id: 1, ...newVehicleData });
@@ -157,7 +163,7 @@ describe('VehicleManager Service', () => {
             expect(mockTransaction.rollback).toHaveBeenCalled();
             expect(mockTransaction.commit).not.toHaveBeenCalled();
         });
-
+        // Test
         test('Debe denegar permiso si el usuario no pertenece a la unidad del vehículo', async () => {
             const userSinPermiso = { admin: false, up1: false, dg: true }; 
             const vehicleDataUP1 = { title: 'Unidad Penal 1', dominio: 'TEST' };

@@ -10,11 +10,11 @@ import { sendVehicleActionEmail } from './email.service.js';
 import { getIO } from '../socket/socketHandler.js';
 import { sendPushNotification } from './notification.service.js';
 
-/**
- * Verifica si un usuario tiene permisos para ver o editar una unidad específica.
- * @param {Object} user - Objeto del usuario (req.user).
- * @param {string} vehicleTitle - Nombre de la unidad del vehículo (ej: "Unidad Penal 1").
- * @returns {boolean} True si tiene permiso, False si no.
+/*
+Verifica si un usuario tiene permisos para ver o editar una unidad específica.
+    user: Objeto del usuario (req.user)
+    vehicleTitle: Nombre de la unidad del vehículo (ej: "Unidad Penal 1").
+    retorna true si tiene permiso o false si no tiene.
  */
 
 const checkPermission = (user, vehicleTitle) => {
@@ -105,11 +105,11 @@ const notifyAdmins = async (actionType, user, vehicleData) => {
 
 export default class VehicleManager {
 
-    /**
-     * Obtiene una lista paginada de vehículos aplicando filtros dinámicos.
-     * Si el usuario no es admin, filtra automáticamente solo su unidad.
-     * * @param {Object} queryParams - Parámetros de la URL (page, limit, dominio, etc.).
-     * @returns {Promise<Object>} Objeto con docs, totalDocs, page, totalPages.
+    /*
+    Obtiene una lista paginada de vehículos aplicando filtros dinámicos.
+    Si el usuario no es admin, filtra automáticamente solo su unidad
+    queryParams: Parámetros de la URL (page, limit, dominio, etc.).
+    retorna objeto con docs, totalDocs, page, totalPages.
      */
 
     getVehicles = async (queryParams) => {
@@ -191,12 +191,12 @@ export default class VehicleManager {
         }
     }
 
-    /**
-     * Busca un vehículo por ID e incluye todo su historial (Services, Reparaciones, etc.).
-     * @param {string|number} id - ID del vehículo.
-     * @param {Object} user - Usuario que solicita la información (para validar permisos).
-     * @returns {Promise<Object|null>} El vehículo completo o null si no existe.
-     * @throws {Error} Si el usuario no tiene permisos para ver este vehículo.
+    /*
+    Busca un vehículo por ID e incluye todo su historial (Services, Reparaciones, etc.)
+    id: ID del vehículo.
+    user: Usuario que solicita la información (para validar permisos).
+    retorna el vehículo completo o null si no existe.
+    arroja error si el usuario no tiene permisos para ver este vehículo.
      */
 
     getVehicleById = async (id, user) => {
@@ -233,12 +233,12 @@ export default class VehicleManager {
         }
     }
 
-    /**
-     * Crea un nuevo vehículo y registra sus datos iniciales en una transacción.
-     * Notifica a los administradores si el creador no es admin.
-     * * @param {Object} product - Datos del vehículo (dominio, modelo, kilometros, etc.).
-     * @param {Object} user - Usuario que crea el vehículo.
-     * @returns {Promise<Object>} El vehículo creado.
+    /*
+    Crea un nuevo vehículo y registra sus datos iniciales en una transacción
+    Notifica a los administradores si el creador no es admin.
+    product: Datos del vehículo (dominio, modelo, kilometros, etc.).
+    user: Usuario que crea el vehículo.
+    retorna el vehiculo creado
      */
 
     addVehicle = async (product, user) => {
@@ -289,11 +289,11 @@ export default class VehicleManager {
         }
     }
 
-    /**
-     * Actualiza datos de un vehículo y agrega entradas al historial si cambiaron.
-     * @param {string} id - ID del vehículo a modificar.
-     * @param {Object} updateData - Objeto con los campos a actualizar.
-     * @param {Object} user - Usuario que realiza la acción.
+    /*
+    Actualiza datos de un vehículo y agrega entradas al historial si cambiaron
+    id: ID del vehículo a modificar
+    updateData: Objeto con los campos a actualizar
+    user: Usuario que realiza la acción.
      */
 
     updateVehicle = async (id, updateData, user) => {
@@ -348,6 +348,7 @@ export default class VehicleManager {
         }
     }
 
+    // Eliminar vehiculo
     deleteVehicle = async (id, user) => {
         try {
             const vehicle = await Vehiculo.findByPk(id);
@@ -362,6 +363,7 @@ export default class VehicleManager {
         }
     }
 
+    // Eliminar todo el historial 
     deleteAllHistory = async (cid, fieldName, user) => {
         try {
             const vehicle = await Vehiculo.findByPk(cid);
@@ -389,7 +391,7 @@ export default class VehicleManager {
             return err;
         }
     }
-
+    // Eliminar una sola entrada del historial 
     deleteOneHistoryEntry = async (cid, fieldName, historyId, user) => {
         try {
             const vehicle = await Vehiculo.findByPk(cid);
@@ -423,6 +425,7 @@ export default class VehicleManager {
         }
     }
 
+    // Obtener todo el historial de un vehiculo
     getHistoryForVehicle = async (vehiculoId, historyModel, orderField) => {
         try {
             return await historyModel.findAll({
@@ -433,6 +436,8 @@ export default class VehicleManager {
             throw err;
         }
     }
+
+    // Obtener datos del vehiculo
     getKilometrajesForVehicle = async (vehiculoId) => {
         return this.getHistoryForVehicle(vehiculoId, Kilometraje, 'fecha_registro');
     }

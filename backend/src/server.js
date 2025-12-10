@@ -4,17 +4,21 @@ import dotenv from "dotenv";
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { initializeSocket } from './socket/socketHandler.js'; 
+// Importamos los modelos para asegurar que se registren en la DB antes de iniciar
+import './models/user.model.js';
 import './models/user.model.js';
 import './models/vehicle.model.js';
 import './models/chat.model.js';
 import './models/support.model.js'; 
 
-dotenv.config();
+dotenv.config(); // Carga variables de entorno (.env)
 
+// Usamos http.createServer para poder unir Express + Socket.io en el mismo puerto
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0'; 
 const httpServer = http.createServer(app);
 
+// Configuración de orígenes permitidos
 const rawFront = process.env.FRONT_URL || "";
 const allowedFromEnv = rawFront
   .split(',')
@@ -32,9 +36,10 @@ const mobileOrigins = [
 
 const allowedOrigins = Array.from(new Set([...allowedFromEnv, ...mobileOrigins]));
 
+// Para que cors permita cualquier url de vercel con el mismo dominio
 const vercelRegex = /^https:\/\/control-de-flota-sper.*\.vercel\.app$/;
 
-
+// Configuración de socketIO
 const io = new SocketIOServer(httpServer, {
     cors: {
         origin: function(origin, callback) {
@@ -62,18 +67,23 @@ const io = new SocketIOServer(httpServer, {
     },
     path: "/socket.io/" 
 });
-
+// Inicializamos la lógica de los eventos (Chat, Notificaciones)
 initializeSocket(io);
 
+// Función de arranque 
 const startServer = async () => {
     try {
+      // Primero conectamos a la base de datos
         await connectToDB(); 
+        // Si la DB conecta, levantamos el error
         httpServer.listen(PORT, HOST, () => { 
             console.log(`Servidor HTTP y Sockets escuchando en http://localhost:${PORT}/\n`);
         });
     } catch (err) {
+      // Sino arrojamos error
         console.error("Error al iniciar el servidor:", err);
     }
 };
 
+// Ejecutar arranque
 startServer();

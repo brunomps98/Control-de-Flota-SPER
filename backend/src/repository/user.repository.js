@@ -1,7 +1,12 @@
 class userRepository {
+
+    // Constructor
+
     constructor(dao){
         this.dao = dao
     }
+
+    // Metodos de usuario
 
     async registerUser(username, unidad, email, password, profilePicture){
         return await this.dao.regUser(username, unidad, email, password, profilePicture)
@@ -40,4 +45,5 @@ class userRepository {
     }
 }
 
+// Exportamos
 export {userRepository}

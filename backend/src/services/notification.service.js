@@ -4,13 +4,15 @@ import fs from 'fs';
 import { __dirname } from '../utils.js';
 import Usuario from '../models/user.model.js';
 
-// Determinamos dónde leer la clave
+// Determinamos dónde leer la clave (archivo .env)
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Colocamos firebase
 const serviceAccountPath = isProduction
     ? '/etc/secrets/firebase-service-account.json'
     : path.join(__dirname, './config/firebase-service-account.json');
 
+ // Intentamos iniciar Firebase Admin SDK al iniciar el servidor
 try {
     const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
@@ -21,19 +23,21 @@ try {
     console.log('Firebase Admin SDK inicializado correctamente.');
 
 } catch (error) {
+    // Sino mostramos error
     console.error('Error al inicializar Firebase Admin SDK:', error.message);
     if (!isProduction) {
+        // Si no está el archivo de configuración en la carpeta mostramos error
         console.warn('Asegúrate de tener el archivo "firebase-service-account.json" en la carpeta "src/config/" para pruebas locales.');
     }
 }
 
 
-/**
- * @summary Envía una notificación push a un token de dispositivo específico
- * @param {string} fcmToken - El token de Firebase del dispositivo
- * @param {string} title - El título de la notificación
- * @param {string} body - El cuerpo del mensaje
- * @param {object} data - Datos adicionales (ej. a qué chat abrir)
+
+/* Esto envía una notificación push a un token de dispositivo específico
+    fcmToken: Es el token de Firebase del dispositivo
+    title: Es el título de la notificación
+    body: El cuerpo del mensaje
+    data: Datos adicionales 
  */
 export const sendPushNotification = async (fcmToken, title, body, data = {}) => {
     if (!fcmToken) {

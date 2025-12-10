@@ -1,6 +1,7 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 
+// Modelo de soporte 
 const Soporte = sequelize.define('Soporte', {
     id: {
         type: DataTypes.INTEGER,
@@ -30,7 +31,7 @@ const Soporte = sequelize.define('Soporte', {
 });
 
 
-// Modelo "Hijo": SoporteArchivo 
+// Modelo Hijo: SoporteArchivo 
 const SoporteArchivo = sequelize.define('SoporteArchivo', {
     id: {
         type: DataTypes.INTEGER,

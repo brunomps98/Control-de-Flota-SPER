@@ -3,6 +3,7 @@ module.exports = {
     [
       '@babel/preset-env',
       {
+        // Traduce el código para que funcione en node
         targets: {
           node: 'current'
         }
@@ -10,6 +11,7 @@ module.exports = {
     ]
   ],
   plugins: [
+    // Lo transformamos para que Jest pueda leerlo y entenderlo
     'babel-plugin-transform-import-meta'
   ]
 };

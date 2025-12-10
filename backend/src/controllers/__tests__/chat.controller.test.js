@@ -7,6 +7,8 @@ import { onlineUsers } from '../../socket/onlineUsers.js';
 // Mocks
 
 // Mock de Modelos
+
+// Chat
 jest.mock('../../models/chat.model.js', () => ({
     ChatRoom: {
         findOrCreate: jest.fn(),
@@ -18,6 +20,7 @@ jest.mock('../../models/chat.model.js', () => ({
     }
 }));
 
+//Usuarios
 jest.mock('../../models/user.model.js', () => ({
     findAll: jest.fn()
 }));
@@ -32,6 +35,7 @@ jest.mock('../../config/supabaseClient.js', () => ({
 }));
 
 // Mock de OnlineUsers
+
 // Simulamos que el usuario con ID 1 está conectado
 jest.mock('../../socket/onlineUsers.js', () => ({
     onlineUsers: { 1: 'socket_id_123' }
@@ -92,6 +96,8 @@ describe('ChatController', () => {
             }));
         });
 
+        // Tests
+
         test('Debe retornar 400 si no hay archivos', async () => {
             const req = mockRequest({}, {}, {}, null, []); // Sin archivos
             const res = mockResponse();
@@ -143,7 +149,7 @@ describe('ChatController', () => {
             const req = mockRequest();
             const res = mockResponse();
 
-            // Salas Activas Mock (Usuario 1 está online según el mock global)
+            // Salas Activas Mock 
             const mockActiveRooms = [
                 { 
                     id: 10, user_id: 1, last_message: 'Hola', 
@@ -152,7 +158,7 @@ describe('ChatController', () => {
             ];
             ChatRoom.findAll.mockResolvedValue(mockActiveRooms);
 
-            // Admins Mock (para excluirlos)
+            // Admins Mock 
             Usuario.findAll
                 .mockResolvedValueOnce([{ id: 99 }]) // Primera llamada: busca admins
                 .mockResolvedValueOnce([{ // Segunda llamada: busca usuarios nuevos

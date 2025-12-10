@@ -60,6 +60,7 @@ class UserController {
             res.status(201).json({ message: "Usuario registrado con éxito" });
             
         } catch (error) {
+            // Mensajes de errores
             if (error.message === 'Email already in use' || (error.name && error.name.includes('SequelizeUniqueConstraintError'))) {
                 console.error('El correo o usuario ya existe', error);
                 res.status(409).json({ message: 'El email o nombre de usuario ya existe.' });
@@ -81,6 +82,7 @@ class UserController {
         const userData = req.body;
 
         try {
+            // Mensajes de errores
             if (String(req.user.id) === String(id) && userData.admin === 'false') {
                  return res.status(403).json({ message: 'No puedes revocar tu propio permiso de administrador.' });
             }
@@ -121,6 +123,8 @@ class UserController {
         }
     }
 
+    // Función para eliminar usuarios
+
     static deleteUser = async (req, res) => { 
         return await userDao.deleteUser(req); 
     }
@@ -154,14 +158,17 @@ class UserController {
         }
     }
     
+    // Encontrar usuario por email
     static findUserByEmail = async (email) => {
         return await userDao.findUserByEmail(email);
     }
-    
+
+    //Actualizar contraseña
     static updateUserPassword = async (id, password) => {
         return await userDao.updateUserPassword(id, password);
     }
 
+    // Actualizar propia imagen de perfil
     static updateSelfProfilePicture = async (userId, file) => {
         // Subir a Supabase 
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

@@ -8,6 +8,8 @@ import { UniqueConstraintError } from 'sequelize';
 // Mocks
 
 // Mock de Modelos
+
+// Modelo de usuario
 jest.mock('../../models/user.model.js', () => ({
     create: jest.fn(),
     findOne: jest.fn(),
@@ -17,6 +19,7 @@ jest.mock('../../models/user.model.js', () => ({
     findAll: jest.fn()
 }));
 
+// Modelo de chat
 jest.mock('../../models/chat.model.js', () => ({
     ChatRoom: { destroy: jest.fn() },
     ChatMessage: { destroy: jest.fn() }
@@ -81,6 +84,7 @@ describe('UserManager Service', () => {
             expect(result).toHaveProperty('id', 1);
         });
 
+        // Test 
         test('Debe lanzar error si el email ya existe', async () => {
             Usuario.create.mockRejectedValue(new UniqueConstraintError({}));
 
@@ -110,6 +114,7 @@ describe('UserManager Service', () => {
             expect(bcrypt.compare).toHaveBeenCalledWith('passwordCorrecta', 'hashedPassword');
         });
 
+        // Test
         test('Debe lanzar error si la contraseña es incorrecta', async () => {
             const mockUser = { id: 1, username: 'admin', password: 'hashedPassword' };
             Usuario.findOne.mockResolvedValue(mockUser);
@@ -122,6 +127,7 @@ describe('UserManager Service', () => {
                 .toThrow('Credenciales inválidas');
         });
 
+        // Test
         test('Debe lanzar error si el usuario no existe', async () => {
             Usuario.findOne.mockResolvedValue(null); // Usuario no encontrado
 
@@ -132,6 +138,7 @@ describe('UserManager Service', () => {
     });
 
     describe('deleteUser', () => {
+        // Test
         test('Debe eliminar chat, salas y usuario dentro de una transacción', async () => {
             Usuario.destroy.mockResolvedValue(1); // 1 fila afectada
 
@@ -179,6 +186,7 @@ describe('UserManager Service', () => {
             );
         });
 
+        // Test
         test('Debe asignar permisos de ADMIN correctamente', async () => {
             const updatePayload = {
                 username: 'adminUser',

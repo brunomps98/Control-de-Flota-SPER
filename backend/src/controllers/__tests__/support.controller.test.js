@@ -29,22 +29,28 @@ jest.mock('../../config/supabaseClient.js', () => ({
 }));
 
 // Mock de Modelos y Servicios Auxiliares
+
+// Mock de usuarios
 jest.mock('../../models/user.model.js', () => ({
     findAll: jest.fn() 
 }));
 
+// Mock de notificaciones
 jest.mock('../../models/notification.model.js', () => ({
     bulkCreate: jest.fn()
 }));
 
+// Mock de servicios de email
 jest.mock('../../services/email.service.js', () => ({
     sendNewTicketEmail: jest.fn()
 }));
 
+// Mock de notificaciones
 jest.mock('../../services/notification.service.js', () => ({
     sendPushNotification: jest.fn()
 }));
 
+//Mock de socketIO
 jest.mock('../../socket/socketHandler.js', () => ({
     getIO: jest.fn(() => ({
         to: jest.fn().mockReturnThis(),
@@ -75,7 +81,7 @@ describe('SupportController', () => {
         jest.clearAllMocks();
 
         // Implementamos Happy Path
-        // Definimos que, por defecto, Supabase SIEMPRE funciona bien.
+        // Definimos que, por defecto, Supabase siempre funciona bien
         mockUpload = jest.fn().mockResolvedValue({ error: null }); 
         mockGetPublicUrl = jest.fn().mockReturnValue({ data: { publicUrl: 'http://supa.base/foto.jpg' } });
 
@@ -101,6 +107,7 @@ describe('SupportController', () => {
             expect(res.json).toHaveBeenCalledWith({ tickets: mockTickets });
         });
 
+        // Test
         test('Debe responder 500 si falla el repositorio', async () => {
             const req = mockRequest();
             const res = mockResponse();
@@ -128,6 +135,7 @@ describe('SupportController', () => {
             expect(res.json).toHaveBeenCalledWith({ ticket: mockTicket });
         });
 
+        //Test
         test('Debe responder 404 si el ticket no existe', async () => {
             const req = mockRequest({}, { ticketId: '999' });
             const res = mockResponse();
@@ -173,6 +181,7 @@ describe('SupportController', () => {
             expect(res.status).toHaveBeenCalledWith(201);
         });
 
+        // Test 
         test('Debe responder 500 si falla la subida a Supabase', async () => {
             const req = mockRequest(
                 { name: 'User' }, 
@@ -204,6 +213,7 @@ describe('SupportController', () => {
             expect(res.status).toHaveBeenCalledWith(200);
         });
 
+        // Test 
         test('Debe responder 404 si el ticket no existe', async () => {
             const req = mockRequest({}, { pid: '99' });
             const res = mockResponse();

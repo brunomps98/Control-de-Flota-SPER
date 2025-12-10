@@ -2,6 +2,8 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js'; 
 import bcrypt from 'bcryptjs';
 
+// Modelo de usuarios
+
 const Usuario = sequelize.define('Usuario', {
     id: {
         type: DataTypes.INTEGER,
@@ -26,14 +28,14 @@ const Usuario = sequelize.define('Usuario', {
         allowNull: false
     },
     
-    // Columna FCM 
+    // Columna FCM Token
     fcm_token: {
         type: DataTypes.STRING,
         allowNull: true,
         unique: true
     },
 
-    // FOTO DE PERFIL
+    // Foto de perfil
     profile_picture: {
         type: DataTypes.TEXT,
         allowNull: true,
@@ -45,6 +47,7 @@ const Usuario = sequelize.define('Usuario', {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
+    // Establecimientos
     up1: { type: DataTypes.BOOLEAN, defaultValue: false },
     up3: { type: DataTypes.BOOLEAN, defaultValue: false },
     up4: { type: DataTypes.BOOLEAN, defaultValue: false },

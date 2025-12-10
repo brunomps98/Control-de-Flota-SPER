@@ -1,7 +1,12 @@
 class vehicleRepository {
+    
+    // Constructor
+
     constructor(dao) {
         this.dao = dao;
     }
+
+    // Metodos de vehicle
 
     async getVehicles(queryParams) {
         return await this.dao.getVehicles(queryParams);
@@ -55,4 +60,5 @@ class vehicleRepository {
     }
 }
 
+// Lo exportamos 
 export { vehicleRepository };

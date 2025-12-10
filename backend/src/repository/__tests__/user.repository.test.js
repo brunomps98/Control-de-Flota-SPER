@@ -19,10 +19,12 @@ describe('User Repository', () => {
             getUserById: jest.fn()
         };
 
-        // Inyectamos el falso DAO al Repositorio
+        // Inyectamos el falso dao al Repositorio
         userRepo = new userRepository(mockDao);
     });
 
+    // Tests 
+    
     test('registerUser debe llamar a dao.regUser con los parámetros correctos', async () => {
         // Configuración
         const mockUser = { id: 1, username: 'test' };

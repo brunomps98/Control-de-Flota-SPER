@@ -2,6 +2,7 @@ import { createHash, isValidatePassword } from '../bcrypt.js';
 import bcrypt from 'bcryptjs';
 
 // Mocks
+
 // Le decimos a Jest que intercepte 'bcryptjs'
 jest.mock('bcryptjs', () => ({
     genSaltSync: jest.fn(),
@@ -44,6 +45,8 @@ describe('Bcrypt Utils', () => {
             expect(bcrypt.compareSync).toHaveBeenCalledWith('password', 'hash_correcto');
             expect(result).toBe(true);
         });
+
+        // Test
 
         test('Debe retornar false si bcrypt.compareSync devuelve false', () => {
             bcrypt.compareSync.mockReturnValue(false);

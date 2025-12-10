@@ -37,7 +37,7 @@ export const Notification = sequelize.define('Notification', {
     underscored: true 
 });
 
-// Relación
+// Relaciónes
 Notification.belongsTo(Usuario, { foreignKey: 'user_id', as: 'recipient' });
 Usuario.hasMany(Notification, { foreignKey: 'user_id', as: 'notifications' });
 

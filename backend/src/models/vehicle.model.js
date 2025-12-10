@@ -13,7 +13,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-            model: 'usuarios', // nombre de la tabla
+            model: 'usuarios', 
             key: 'id'
         }
     },
@@ -22,6 +22,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
         unique: true,
         allowNull: false
     },
+    // Datos de vehiculo
     marca: { type: DataTypes.STRING(100) },
     modelo: { type: DataTypes.STRING(100) },
     anio: { type: DataTypes.INTEGER }, 
@@ -93,7 +94,7 @@ const Descripcion = sequelize.define('Descripcion', {
 
 
 // Relaciones Vehiculo y sus "Arrays"
-// "Un Vehículo TIENE MUCHOS..."
+// "Un Vehículo tiene muchos..."
 Vehiculo.hasMany(Kilometraje, { foreignKey: 'vehiculo_id', as: 'kilometrajes' });
 Vehiculo.hasMany(Service, { foreignKey: 'vehiculo_id', as: 'services' });
 Vehiculo.hasMany(Reparacion, { foreignKey: 'vehiculo_id', as: 'reparaciones' });
@@ -102,7 +103,7 @@ Vehiculo.hasMany(Rodado, { foreignKey: 'vehiculo_id', as: 'rodados' });
 Vehiculo.hasMany(Thumbnail, { foreignKey: 'vehiculo_id', as: 'thumbnails' });
 Vehiculo.hasMany(Descripcion, { foreignKey: 'vehiculo_id', as: 'descripciones' });
 
-// "...y cada uno de esos registros PERTENECE A UN Vehículo"
+// "...y cada uno de esos registros pertenece a un vehiculo"
 Kilometraje.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Service.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Reparacion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
@@ -113,7 +114,7 @@ Descripcion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Vehiculo.belongsTo(Usuario, { foreignKey: 'user_id', as: 'owner' });
 
 
-// Exportación de TODOS los modelos
+// Exportación de todos los modelos
 export {
     Vehiculo,
     Kilometraje,

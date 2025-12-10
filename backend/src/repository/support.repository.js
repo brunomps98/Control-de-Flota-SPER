@@ -3,8 +3,6 @@ import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
 
 class SupportRepository {
-    
-    // Ya no necesitamos constructor(dao) porque la lógica vive aquí
 
     // Crear Ticket (Con transacción)
     async addSupportTicket(ticket) {
@@ -29,7 +27,7 @@ class SupportRepository {
             // Confirmamos la transacción
             await t.commit();
             return newTicket;
-
+            // Manejo de errores con rollback
         } catch (error) {
             await t.rollback();
             throw error;
@@ -73,7 +71,7 @@ class SupportRepository {
         });
     }
 
-    // Obtener ticket por ID
+    // Obtener ticket por id
     async getSupportTicketById(id) {
         return await Soporte.findByPk(id, {
             include: [{
@@ -83,5 +81,5 @@ class SupportRepository {
         });
     }
 }
-
+// Exportamos
 export { SupportRepository };
