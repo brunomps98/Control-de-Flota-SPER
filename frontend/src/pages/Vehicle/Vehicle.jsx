@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams, useLocation, useNavigate, useOutletContext } from 'react-router-dom'; // 1. Importar useOutletContext
+import { Link, useSearchParams, useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
 import './Vehicle.css';
 import VehicleCard from '../../components/common/VehicleCard/VehicleCard';
@@ -20,9 +20,10 @@ const FilterIcon = () => (
     </svg>
 );
 
+// Montamos el componente principal
 const Vehicle = () => {
     // Obtener usuario del layout
-    const { user } = useOutletContext() || {}; 
+    const { user } = useOutletContext() || {};
     const [vehicles, setVehicles] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -49,7 +50,7 @@ const Vehicle = () => {
         const listenerPromise = App.addListener('backButton', (event) => {
             if (location.pathname === '/vehicle') {
                 event.preventDefault();
-                App.exitApp(); 
+                App.exitApp();
             }
         });
         return () => {
@@ -57,6 +58,7 @@ const Vehicle = () => {
         };
     }, [location.pathname]);
 
+    // UseEffect para sincronizar filtros con URL
     useEffect(() => {
         setFilters({
             dominio: searchParams.get('dominio') || '',
@@ -110,13 +112,13 @@ const Vehicle = () => {
         }, 400);
         return () => clearTimeout(timer);
     }, [filters, setSearchParams, searchParams]);
-    
-    // Todo para filtrar
 
+    // Manejar cambios en filtros
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
         setFilters(prev => ({ ...prev, [name]: value }));
     };
+    // Manejar envío de formulario de filtros
     const handleFilterSubmit = (e) => {
         e.preventDefault();
         const query = {};
@@ -125,6 +127,7 @@ const Vehicle = () => {
         }
         setSearchParams(query);
     };
+    // Manejar limpieza de filtros
     const handleClearFilters = () => {
         setFilters({
             dominio: '', modelo: '', destino: '', marca: '', año: '', tipo: '', title: ''
@@ -134,7 +137,7 @@ const Vehicle = () => {
     // Manejar eliminación desde la Card
     const handleDeleteVehicle = (vehicleId) => {
         MySwal.fire({
-            // Confirmación
+            // Confirmación de eliminación al usuario con Swal
             title: '¿Estás seguro?',
             text: "¡Vas a eliminar este vehículo! Esta acción no se puede deshacer.",
             icon: 'warning',
@@ -145,12 +148,13 @@ const Vehicle = () => {
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
             if (result.isConfirmed) {
+                // Llamada a la API para eliminar el vehículo
                 try {
                     await apiClient.delete(`/api/vehicle/${vehicleId}`);
-                    
+
                     // Actualizamos el estado local filtrando el vehículo eliminado
                     setVehicles(prev => prev.filter(v => v.id !== vehicleId));
-                    
+                    // Mensaje de éxito
                     MySwal.fire(
                         '¡Eliminado!',
                         'El vehículo ha sido eliminado correctamente.',
@@ -172,9 +176,10 @@ const Vehicle = () => {
     return (
         <div className="login-page" style={{ padding: '30px 40px' }}>
             <div className="titulo-products">
+                {/* Título de la página */}
                 <h1>Flota de Vehículos</h1>
             </div>
-
+            {/* Botón para mostrar/ocultar filtros en móvil */}
             <button
                 className="btn-filter-toggle"
                 onClick={() => setIsFilterOpen(prev => !prev)}
@@ -182,58 +187,69 @@ const Vehicle = () => {
                 <FilterIcon />
                 {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
             </button>
-
+            {/* Formulario de filtros */}
             <form
                 className={`filter-container ${isFilterOpen ? 'filter-mobile-open' : ''}`}
                 onSubmit={handleFilterSubmit}
             >
-               <h3 className="filter-title">Filtrar Vehículos</h3>
+                {/* Título de filtros */}
+                <h3 className="filter-title">Filtrar Vehículos</h3>
+                {/* Campo Dominio */}
                 <div className="filter-group">
                     <label htmlFor="dominio">Dominio:</label>
                     <input type="text" id="dominio" name="dominio" value={filters.dominio} onChange={handleFilterChange} placeholder="AA-123-BB" />
                 </div>
+                {/* Campo Modelo */}
                 <div className="filter-group">
                     <label htmlFor="modelo">Modelo:</label>
                     <input type="text" id="modelo" name="modelo" value={filters.modelo} onChange={handleFilterChange} placeholder="Ranger" />
                 </div>
+                {/* Campo Destino */}
                 <div className="filter-group">
                     <label htmlFor="destino">Destino:</label>
                     <input type="text" id="destino" name="destino" value={filters.destino} onChange={handleFilterChange} placeholder="U.P. N°1" />
                 </div>
+                {/* Campo Marca */}
                 <div className="filter-group">
                     <label htmlFor="marca">Marca:</label>
                     <input type="text" id="marca" name="marca" value={filters.marca} onChange={handleFilterChange} placeholder="Ford" />
                 </div>
+                {/* Campo Año */}
                 <div className="filter-group">
                     <label htmlFor="año">Año:</label>
                     <input type="text" id="año" name="año" value={filters.año} onChange={handleFilterChange} placeholder="2020" />
                 </div>
+                {/* Campo Tipo */}
                 <div className="filter-group">
                     <label htmlFor="tipo">Tipo:</label>
                     <input type="text" id="tipo" name="tipo" value={filters.tipo} onChange={handleFilterChange} placeholder="Camioneta" />
                 </div>
+                {/* Botones de filtrar y limpiar */}
                 <div className="filter-buttons">
                     <button type="submit" className="btn-filter-primary">Filtrar</button>
                     <button type="button" className="btn-filter-secondary" onClick={handleClearFilters}>Limpiar</button>
                 </div>
             </form>
-
+            {/* Grid de vehículos */}
             <div className="vehicle-grid">
+                {/* Renderizado condicional según estado de carga y datos */}
+                {/* Si está cargando, mostramos esqueleto */}
                 {loading ? (
+
                     Array.from({ length: 6 }).map((_, i) => (
                         <div key={i} className="vehicle-card-skeleton"></div>
                     ))
                 ) : vehicles.length > 0 ? (
                     vehicles.map(vehicle => (
                         // Pasamos props isAdmin y onDelete
-                        <VehicleCard 
-                            key={vehicle.id} 
-                            vehicle={vehicle} 
+                        <VehicleCard
+                            key={vehicle.id}
+                            vehicle={vehicle}
                             isAdmin={user?.admin}
-                            onDelete={handleDeleteVehicle} 
+                            onDelete={handleDeleteVehicle}
                         />
                     ))
-                ) : (
+                ) : {/* Si no hay vehículos, mostramos mensaje */ }(
                     <p className="no-vehicles-message">{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}
             </div>

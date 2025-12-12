@@ -1,3 +1,3 @@
-// Para contabilizar usuarios online y guardarlos en un array
+// Para contabilizar usuarios online, guardarlos en un array y mostrarlos en tiempo real
 
 export const onlineUsers = {};

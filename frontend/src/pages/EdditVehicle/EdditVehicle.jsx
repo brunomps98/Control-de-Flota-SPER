@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
+// Montamos el componente principal
 const EdditVehicle = () => {
     const { productId } = useParams();
     const navigate = useNavigate();
@@ -24,7 +25,7 @@ const EdditVehicle = () => {
     }, [navigate, productId]);
 
     // Lógica de carga
-    // Iniciamos vacios los campos
+    // Inicializamos el formulario en blanco
     useEffect(() => {
         setFormData({
             description: '',
@@ -36,6 +37,7 @@ const EdditVehicle = () => {
         });
     }, [productId]);
 
+    // Manejador de cambios en el formulario
     const handleChange = (e) => {
         const { name, value } = e.target;
         // Aplicamos consistencia de mayúsculas
@@ -68,6 +70,7 @@ const EdditVehicle = () => {
 
     return (
         <div className="login-page vehicle-form-page">
+            {/* Estructura del formulario de edición de vehículo */}
             <main className="login-main">
                 <div className="login-card vehicle-form-card">
                     <h2 className="form-title">Añadir Historial / Actualizar</h2>
@@ -118,8 +121,7 @@ const EdditVehicle = () => {
                             />
                         </div>
 
-                        {/* Fechas */}
-                        {/* Service */}
+                        {/* Fechas de services */}
                         <div className="form-group span-1">
                             <label htmlFor="service" className="form-label">Nuevo Venc. Service</label>
                             <input
@@ -156,7 +158,7 @@ const EdditVehicle = () => {
                                 placeholder="Reparaciones realizadas"
                             />
                         </div>
-
+                        {/* Botón de guardar datos */}
                         <div className="form-group span-2">
                             <button className="login-submit-btn" type="submit">
                                 Guardar Historial

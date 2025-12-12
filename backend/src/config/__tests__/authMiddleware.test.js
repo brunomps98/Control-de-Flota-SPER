@@ -99,6 +99,8 @@ describe('Auth Middleware', () => {
             expect(res.status).not.toHaveBeenCalled();
         });
 
+        // Test
+
         test('Debe retornar 403 si el usuario NO es administrador', () => {
             const req = mockRequest();
             req.user = { id: 2, isAdmin: false };
@@ -112,6 +114,8 @@ describe('Auth Middleware', () => {
             }));
             expect(mockNext).not.toHaveBeenCalled();
         });
+
+        // Test
 
         test('Debe retornar 403 si no hay usuario en la request (caso borde)', () => {
             const req = mockRequest();

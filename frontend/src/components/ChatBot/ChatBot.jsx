@@ -10,6 +10,7 @@ const BotIcon = () => (
     </svg>
 );
 
+// Montamos el componente ChatBot
 const ChatBot = ({ onToggle }) => { 
     // Consumimos el estado del chat principal directamente
     const { isChatOpen, toggleChat } = useChat();
@@ -33,6 +34,7 @@ const ChatBot = ({ onToggle }) => {
         }
     }, [history, isOpen]);
 
+    // Manejo de selección de opción
     const handleOptionClick = (option) => {
         const newHistory = [...history, { sender: 'user', text: option.texto }];
 
@@ -40,6 +42,7 @@ const ChatBot = ({ onToggle }) => {
         if (option.accion === 'transferir_admin') {
             setHistory([...newHistory, { sender: 'bot', text: 'Te estoy transfiriendo con un administrador... aguarda un momento.' }]);
 
+            // Cierre del bot y apertura del chat principal
             setTimeout(() => {
                 setIsOpen(false); // Cierra el bot visualmente
                 if (onToggle) onToggle(false); // Avisa al layout que el bot se cerró
@@ -58,6 +61,7 @@ const ChatBot = ({ onToggle }) => {
         const nextStepId = option.siguienteId;
         const nextStepData = chatFlow[nextStepId];
 
+        // Agregar respuesta del bot
         if (nextStepData) {
             setTimeout(() => {
                 setHistory(prev => [
@@ -71,6 +75,7 @@ const ChatBot = ({ onToggle }) => {
         setHistory(newHistory);
     };
 
+    // Toogle del chat bot
     const toggleBotChat = () => {
         const newState = !isOpen;
         setIsOpen(newState);
@@ -80,6 +85,7 @@ const ChatBot = ({ onToggle }) => {
     // Lógica de ocultamiento: Se oculta si el chat principal está abierto
     const shouldHideButton = isChatOpen;
 
+    // Modo solo (pantalla completa) si el chat principal está abierto
     const isSoloMode = isOpen;
 
     return (

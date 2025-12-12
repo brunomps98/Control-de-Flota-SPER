@@ -5,5 +5,6 @@
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
+// Exportamos MySwal para ser utilizado en otros archivos
 const MySwal = withReactContent(Swal);
 export default MySwal;

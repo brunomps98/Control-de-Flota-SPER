@@ -2,6 +2,7 @@ import { Vehiculo, Kilometraje } from '../models/vehicle.model.js';
 import { sequelize } from '../config/configServer.js';
 import { Op } from 'sequelize';
 
+// Creamos el controlador para el dashboard que contendrá las estadísticas principales
 class DashboardController {
 
     //Función para obtener todas las estadísticas para el dashboard principal
@@ -44,16 +45,19 @@ class DashboardController {
                 WHERE k.vehiculo_id = "Vehiculo"."id"
             )`;
 
+            // Consulta principal para obtener los vehículos con su máximo kilometraje
             const top5KmVehiculos = await Vehiculo.findAll({
                 attributes: [
                     'dominio',
                     [sequelize.literal(maxKilometrajeSubQuery), 'max_kilometraje'] // Usamos la subconsulta
                 ],
+                // Filtramos solo aquellos vehículos que tienen registros de kilometraje
                 where: sequelize.literal(`EXISTS (
                     SELECT 1 
                     FROM kilometrajes k 
                     WHERE k.vehiculo_id = "Vehiculo"."id"
                 )`),
+                // Y los ordenamos por el máximo kilometraje obtenido
                 order: [
                     [sequelize.literal('max_kilometraje'), 'DESC'] // Ordenar por el resultado
                 ],
@@ -79,4 +83,5 @@ class DashboardController {
     }
 }
 
+// Exportamos el controlador
 export default DashboardController;

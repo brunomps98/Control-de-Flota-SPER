@@ -57,7 +57,7 @@ describe('User Repository', () => {
         expect(mockDao.getAllUsers).toHaveBeenCalledWith(mockFilters);
         expect(result).toHaveLength(2);
     });
-
+    
     test('deleteUser debe retornar lo que devuelva el DAO', async () => {
         mockDao.deleteUser.mockResolvedValue({ success: true });
 

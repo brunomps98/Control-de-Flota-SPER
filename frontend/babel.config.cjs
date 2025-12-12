@@ -1,8 +1,5 @@
 // Archivo de configuración de Babel
-
 // Toma el codigo moderno (react, jsx, es6) y los reescribe para poder correr los tests
-
-// Los tests corren en node no en el navegador 
 module.exports = {
     presets: [
       ['@babel/preset-env', { targets: { node: 'current' } }], // Aseguramos compatibilidad con Node

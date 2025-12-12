@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import apiClient from '../../api/axiosConfig';
-import './Case.css'; 
+import './Case.css';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import MySwal from '../../utils/swal';
 
+// Montamos el componente principal
 const Case = () => {
     const { ticketId } = useParams();
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const [ticket, setTicket] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -23,7 +24,7 @@ const Case = () => {
                 setTicket(response.data.ticket);
             } catch (err) {
                 if (!ticket) {
-                     setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
+                    setError(err.response?.data?.message || 'No se pudo encontrar el caso de soporte.');
                 }
             } finally {
                 setLoading(false);
@@ -35,14 +36,14 @@ const Case = () => {
     // Lógica de Capacitor
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
-        
+
         let backButtonListener;
         const handleBackButton = () => navigate('/support-tickets');
 
         const setupListener = async () => {
             backButtonListener = await App.addListener('backButton', handleBackButton);
         };
-        
+
         setupListener();
 
         return () => {
@@ -50,7 +51,7 @@ const Case = () => {
                 backButtonListener.remove();
             }
         };
-    }, [navigate]); 
+    }, [navigate]);
 
     // Para eliminar ticket de soporte de la DB
     const handleDelete = () => {
@@ -67,15 +68,17 @@ const Case = () => {
             if (result.isConfirmed) {
                 setError(null);
                 try {
+                    // Eliminar el ticket
                     await apiClient.delete(`/api/support/${ticketId}`);
                     MySwal.fire(
                         '¡Eliminado!',
                         'El caso de soporte ha sido eliminado.',
                         'success'
                     ).then(() => {
-                         navigate('/support-tickets');
+                        navigate('/support-tickets');
                     });
                 } catch (err) {
+                    // Manejo de errores
                     const errorMessage = err.response?.data?.message || 'No se pudo eliminar el ticket.';
                     setError(errorMessage);
                     MySwal.fire('Error', `No se pudo eliminar el ticket: ${errorMessage}`, 'error');
@@ -94,12 +97,13 @@ const Case = () => {
                     <p className="error-message">Error: {error}</p>
                 )}
                 {!loading && !ticket && !error && (
-                     <p className="error-message">No se encontró el ticket.</p>
+                    <p className="error-message">No se encontró el ticket.</p>
                 )}
 
+                {/* Mostrar detalles del ticket si está disponible */}
                 {ticket && (
-                    <div className="case-container"> 
-                        {error && <p className="error-message" style={{marginBottom: '15px'}}>Error: {error}</p>}
+                    <div className="case-container">
+                        {error && <p className="error-message" style={{ marginBottom: '15px' }}>Error: {error}</p>}
 
                         <h1>Detalle del Caso de Soporte</h1>
                         <div className="ticket-header">
@@ -113,7 +117,7 @@ const Case = () => {
                             <p>{ticket.problem_description}</p>
                         </div>
                         <hr />
-                        
+                        {/* Galería de imágenes adjuntas */}
                         {ticket.archivos && ticket.archivos.length > 0 && (
                             <div className="image-gallery-section">
                                 <h3>Imágenes Adjuntas:</h3>
@@ -121,7 +125,7 @@ const Case = () => {
                                     {ticket.archivos.map((fileObj) => (
                                         <a href={fileObj.url_archivo} target="_blank" rel="noopener noreferrer" key={fileObj.id}>
                                             <img
-                                                src={fileObj.url_archivo} 
+                                                src={fileObj.url_archivo}
                                                 alt={`Imagen del caso ${fileObj.id}`}
                                             />
                                         </a>
@@ -129,7 +133,7 @@ const Case = () => {
                                 </div>
                             </div>
                         )}
-
+                        {/* Acciones del ticket */}
                         <div className="ticket-actions">
                             <Link to="/support-tickets" className="btn-action btn-view-case">Volver a la Lista</Link>
                             <button className="btn-action btn-delete-case" onClick={handleDelete}>

@@ -5,15 +5,15 @@ import { useEffect } from 'react';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
+// Montamos el componente principal
 const Home = () => {
   // Use effect de Capacitor
   useEffect(() => {
     if (Capacitor.getPlatform() === 'web') return;
-    // Si apretamos atras, cerramos la app en android 
     const handleBackButton = () => {
         App.exitApp();
     };
-
+    // Añadimos el listener para el botón de retroceso
     const listener = App.addListener('backButton', handleBackButton);
 
     return () => {
@@ -22,6 +22,8 @@ const Home = () => {
   }, []); 
 
   return (
+    // Estructura principal de la página de inicio
+    
     <div className="home-container"> 
       <header className="top-bar">
         <div className="top-bar-left">

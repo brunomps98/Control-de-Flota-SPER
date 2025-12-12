@@ -1,21 +1,21 @@
-# IMAGEN BASE
+# Imagen Base
 FROM node:20-alpine
 
-# DIRECTORIO DE TRABAJO
+# Nuestro directorio de trabajo
 WORKDIR /usr/src/app
 
-# COPIAR ARCHIVOS DE DEPENDENCIAS
-# Copiamos package.json y package-lock.json PRIMERO
+# Copiar archivos de dependencias
+# Primero copiar package.json y package-lock.json
 COPY package.json package-lock.json ./
 
-# INSTALAR DEPENDENCIAS
+# Instalar dependencias
 RUN npm ci --only=production
 
-# COPIAR EL RESTO DEL CÓDIGO
+# Copiar todo el resto del codigo
 COPY . .
 
-# EXPONER EL PUERTO
+# Exponer el puerto en el que la aplicación correra
 EXPOSE 8080
 
-# COMANDO DE INICIO
+# Comando de inicio de la aplicación
 CMD [ "node", "src/server.js" ]

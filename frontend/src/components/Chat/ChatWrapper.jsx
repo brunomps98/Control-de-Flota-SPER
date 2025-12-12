@@ -21,6 +21,8 @@ const SendIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" view
 const UserIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="60" height="60"><path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>);
 const NewChatIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19.005 3.175H4.674C3.642 3.175 3 3.789 3 4.821V21.02l3.544-3.514h12.461c1.033 0 2.064-1.06 2.064-2.093V4.821C21.068 3.789 20.037 3.175 19.005 3.175ZM14.016 11.5H11.5v2.5h-1v-2.5H8v-1h2.5V8h1v2.5h2.516v1Z" /></svg>);
 
+// Formateador de fechas
+
 const formatTimestamp = (isoDateString) => {
     if (!isoDateString) return '';
     try {
@@ -30,6 +32,8 @@ const formatTimestamp = (isoDateString) => {
         return format(date, 'P', { locale: es });
     } catch (error) { return ''; }
 };
+
+// Componente principal del chat
 
 const ChatWindow = ({ onClose }) => {
     const navigate = useNavigate();
@@ -68,6 +72,7 @@ const ChatWindow = ({ onClose }) => {
         return () => { selectedFiles.forEach(file => { if (file.preview) URL.revokeObjectURL(file.preview); }); };
     }, [selectedFiles]);
 
+
     useEffect(() => {
         if (!socket) return;
         const handleShowTyping = () => setIsOtherUserTyping(true);
@@ -84,6 +89,8 @@ const ChatWindow = ({ onClose }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [guestMessages, adminMessages, selectedFiles]);
 
+    // Manejo de selección de archivos
+
     const handleFileSelect = (e) => {
         if (e.target.files) {
             const files = Array.from(e.target.files);
@@ -99,6 +106,8 @@ const ChatWindow = ({ onClose }) => {
     const handleRemoveFile = (index) => setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     const handleClearFiles = () => { setSelectedFiles([]); if (fileInputRef.current) fileInputRef.current.value = ""; };
 
+    // Manejo de grabación de audio
+    
     const startRecording = async () => {
         try {
             handleClearFiles();
@@ -129,7 +138,7 @@ const ChatWindow = ({ onClose }) => {
         } catch (error) {
             console.error("Error al iniciar grabación:", error);
 
-            // Si es web normal (no Capacitor) y no es seguro, mostramos el error de HTTPS.
+            // Si es web normal (no Capacitor) y no es seguro, mostramos el error de HTTPS
             // Si es Capacitor, mostramos el error real 
             if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost' && Capacitor.getPlatform() === 'web') {
                 toast.error("Requiere HTTPS para grabar audio.");
@@ -143,6 +152,8 @@ const ChatWindow = ({ onClose }) => {
     const stopRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); } };
     const cancelRecording = () => { if (mediaRecorder && isRecording) { mediaRecorder.stop(); clearInterval(recordingInterval.current); setMediaRecorder(null); setIsRecording(false); setRecordingTime(0); } };
     const formatTime = (seconds) => { const mins = Math.floor(seconds / 60); const secs = seconds % 60; return `${mins}:${secs < 10 ? '0' : ''}${secs}`; };
+
+    // Manejo de envio de mensajes
 
     const handleSendMessage = async (e) => {
         if (e) e.preventDefault();
@@ -186,6 +197,8 @@ const ChatWindow = ({ onClose }) => {
         finally { setIsUploading(false); }
     };
 
+    // Manejo de escritura de mensajes
+    
     const handleTypingChange = (e) => {
         setNewMessage(e.target.value);
         const targetRoomId = user.admin ? selectedRoom?.id : guestRoom?.id;
@@ -195,6 +208,8 @@ const ChatWindow = ({ onClose }) => {
         typingTimerRef.current = setTimeout(() => { socket.emit('typing_stop', { roomId: targetRoomId }); typingTimerRef.current = null; }, 2000);
     };
 
+    // Manejo de eventos de socket
+    
     const handleSelectRoom = async (room) => {
         try {
             setIsChatLoading(true);
@@ -206,6 +221,8 @@ const ChatWindow = ({ onClose }) => {
         } catch (error) { console.error(error); }
         finally { setIsChatLoading(false); }
     };
+
+    // Iniciar nuevo chat
 
     const handleStartNewChat = async (targetUser) => {
         try {
@@ -269,6 +286,7 @@ const ChatWindow = ({ onClose }) => {
     };
     const handleOpenUserInfo = () => { if (user.admin && selectedRoom) setCurrentView('info'); };
 
+    // Manejo de eliminación de mensajes
     const handleDelete = (messageId) => {
         setOpenMenuId(null);
         Swal.fire({ title: '¿Borrar mensaje?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Sí' }).then((result) => {
@@ -276,6 +294,7 @@ const ChatWindow = ({ onClose }) => {
         });
     };
 
+    // Manejo de eliminación de chat
     const handleDeleteChat = () => {
         setIsHeaderMenuOpen(false);
 
@@ -290,10 +309,11 @@ const ChatWindow = ({ onClose }) => {
         // Textos personalizados según el rol
         const title = user.admin ? '¿Eliminar chat permanentemente?' : '¿Vaciar mi historial?';
         const text = user.admin
-            ? "Esta acción borrará la sala y los mensajes de la base de datos para AMBOS. Es irreversible."
+            ? "Esta acción borrará la sala y los mensajes de la base de datos para ambos. Es irreversible."
             : "Se borrarán los mensajes de tu vista. El administrador aún conservará el registro.";
         const confirmButtonText = user.admin ? 'Eliminar Todo' : 'Vaciar Historial';
 
+        // Disparo de alerta de swal con confirmación de usuario
         Swal.fire({
             title,
             text,
@@ -314,6 +334,8 @@ const ChatWindow = ({ onClose }) => {
         });
     };
 
+    // Efecto de conexión de sockets para recibir mensajes y notificaciones
+
     const renderMessageContent = (msg) => (
         <div className="message-content-wrapper">
             {msg.file_url && (
@@ -327,6 +349,8 @@ const ChatWindow = ({ onClose }) => {
             {msg.content && <p className="message-text">{msg.content}</p>}
         </div>
     );
+
+    // Renderizado de la lista de mensajes
 
     const renderMessageList = (messages) => (
         <div className="message-list">
@@ -354,6 +378,8 @@ const ChatWindow = ({ onClose }) => {
             <div ref={messagesEndRef} />
         </div>
     );
+
+    // Renderizado de vista de información de usuario
 
     const renderUserInfo = () => {
         const targetUser = selectedRoom?.user;
@@ -457,6 +483,7 @@ const ChatWindow = ({ onClose }) => {
         );
     };
 
+    // Renderizado del cuerpo del chat según la vista actual
     const renderChatBody = () => {
         if (isLoading) return <p>Cargando...</p>;
 
@@ -547,6 +574,7 @@ const ChatWindow = ({ onClose }) => {
         return guestMessages.length === 0 ? <p style={{ padding: '15px', color: '#bbb' }}>Inicia la conversación...</p> : renderMessageList(guestMessages);
     };
 
+    // Renderizado del footer del chat 
     const renderChatFooter = () => {
         // Ocultar footer en bandeja, info Y en la foto de perfil
         if (user.admin && (currentView === 'inbox' || currentView === 'info' || currentView === 'profile_pic')) return null;
@@ -565,6 +593,7 @@ const ChatWindow = ({ onClose }) => {
                         ))}
                     </div>
                 )}
+                {/* Footer de grabación o envío normal */}
                 {isRecording ? (
                     <div className="chat-footer recording-mode">
                         <button type="button" className="chat-btn-cancel-record" onClick={cancelRecording}><CancelIcon /></button>
@@ -591,6 +620,7 @@ const ChatWindow = ({ onClose }) => {
     let chatPartnerUser = null;
     let isOnline = false;
 
+    // Lógica de título del header según vista y rol
     if (user.admin) {
         if (currentView === 'inbox') {
             headerTitle = showContactList ? 'Seleccionar contacto' : 'Bandeja';
@@ -606,6 +636,7 @@ const ChatWindow = ({ onClose }) => {
         }
     }
 
+    // Lógica para mostrar opciones de menú en el header
     const showOptions = (!user.admin) || (user.admin && currentView === 'chat');
 
     return (
@@ -667,6 +698,7 @@ const ChatWindow = ({ onClose }) => {
     );
 };
 
+// Componente ChatWrapper que envuelve el ChatWindow y el botón de burbuja
 const ChatWrapper = ({ hideButton }) => {
     const { user, isChatOpen, unreadChatCount, toggleChat, selectRoom, activeRooms } = useChat(); // Removed setIsChatOpen from here as it might not be available
     const [popping, setPopping] = useState(false);
@@ -700,6 +732,8 @@ const ChatWrapper = ({ hideButton }) => {
         };
     }, [activeRooms, isChatOpen, selectRoom, toggleChat]);
 
+
+    // Si no hay usuario, no renderizamos nada
     if (!user) return null;
     return (
         <div className="chat-wrapper-container">

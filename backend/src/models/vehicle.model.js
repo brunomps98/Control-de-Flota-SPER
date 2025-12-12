@@ -2,13 +2,18 @@ import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
 import Usuario from './user.model.js'; 
 
-// Modelo Principal: Vehiculo 
+// Creamos el modelo Vehiculo
+
 const Vehiculo = sequelize.define('Vehiculo', {
+    // Definimos los atributos del modelo
+
+    // ID del vehiculo
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
+    // ID del usuario propietario
     user_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -17,6 +22,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
             key: 'id'
         }
     },
+    // Dominio unico del vehiculo
     dominio: {
         type: DataTypes.STRING(20),
         unique: true,
@@ -36,6 +42,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
     allowNull: true
 }
 }, {
+    // Opciones del modelo
     tableName: 'vehiculos',
     timestamps: true,
     createdAt: 'created_at',
@@ -44,6 +51,7 @@ const Vehiculo = sequelize.define('Vehiculo', {
 
 // Modelos Hijos para los arrays
 
+// Kilometrajes
 const Kilometraje = sequelize.define('Kilometraje', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -51,6 +59,7 @@ const Kilometraje = sequelize.define('Kilometraje', {
     fecha_registro: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, { tableName: 'kilometrajes', timestamps: false });
 
+// Services
 const Service = sequelize.define('Service', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -58,6 +67,7 @@ const Service = sequelize.define('Service', {
     fecha_service: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, { tableName: 'services', timestamps: false });
 
+// Reparaciones
 const Reparacion = sequelize.define('Reparacion', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -65,6 +75,7 @@ const Reparacion = sequelize.define('Reparacion', {
     fecha_reparacion: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, { tableName: 'reparaciones', timestamps: false });
 
+// Destinos
 const Destino = sequelize.define('Destino', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -72,6 +83,7 @@ const Destino = sequelize.define('Destino', {
     fecha_destino: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, { tableName: 'destinos', timestamps: false });
 
+// Rodados
 const Rodado = sequelize.define('Rodado', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -79,12 +91,14 @@ const Rodado = sequelize.define('Rodado', {
     fecha_rodado: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
 }, { tableName: 'rodados', timestamps: false });
 
+// Miniatura
 const Thumbnail = sequelize.define('Thumbnail', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
     url_imagen: { type: DataTypes.TEXT, allowNull: false }
 }, { tableName: 'thumbnails', timestamps: false });
 
+// Descripciones
 const Descripcion = sequelize.define('Descripcion', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     vehiculo_id: { type: DataTypes.INTEGER, allowNull: false },
@@ -114,7 +128,7 @@ Descripcion.belongsTo(Vehiculo, { foreignKey: 'vehiculo_id' });
 Vehiculo.belongsTo(Usuario, { foreignKey: 'user_id', as: 'owner' });
 
 
-// Exportación de todos los modelos
+// Exportación de todos los modelos (padre e hijos)
 export {
     Vehiculo,
     Kilometraje,

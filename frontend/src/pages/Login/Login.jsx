@@ -23,7 +23,7 @@ const EyeClosedIcon = () => (
     </svg>
 );
 
-
+// Montamos el componente principal
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -49,7 +49,7 @@ const Login = () => {
         };
     }, [navigate]);
 
-    // UseEffect para el captcha
+    // UseEffect para manejar la visibilidad del reCaptcha
     useEffect(() => {
         const showBadge = () => {
             const badge = document.querySelector('.grecaptcha-badge');
@@ -59,6 +59,7 @@ const Login = () => {
             }
         };
 
+        // Función para ocultarlo
         const hideBadge = () => {
             const badge = document.querySelector('.grecaptcha-badge');
             if (badge) {
@@ -77,6 +78,7 @@ const Login = () => {
     }, []); // Se ejecuta solo al montar y desmontar
 
 
+    // Manejador del submit
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -107,12 +109,13 @@ const Login = () => {
 
             // Enviamos el payload
             const response = await apiClient.post('/api/login', payload);
-
+            // Si la respuesta es correcta, guardamos el token y redirigimos
             const { user, token } = response.data;
             localStorage.setItem('token', token);
             const destinationPath = '/vehicle';
             redirectTo(destinationPath);
         } catch (err) {
+            // Manejo de errores
             console.error("Login Error:", err);
             toast.error(err.response?.data?.message || 'Error al iniciar sesión');
         }
@@ -123,12 +126,12 @@ const Login = () => {
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
-
+                    {/* Título y subtítulo del formulario de login */}
                     <h2 className="form-title">Iniciar sesión</h2>
                     <p className="form-subtitle">Bienvenido, por favor ingresa tus datos.</p>
-
                     <form onSubmit={handleSubmit} className="login-form">
                         <div className="mb-3">
+                            {/* Campo de usuario */}
                             <label htmlFor="usernameInput" className="form-label">Usuario</label>
                             <input
                                 type="text"
@@ -139,7 +142,7 @@ const Login = () => {
                                 required
                             />
                         </div>
-
+                        {/* Campo de contraseña con toggle de visibilidad */}
                         <div className="mb-3">
                             <label htmlFor="passwordInput" className="form-label">Contraseña</label>
                             <div className="input-wrapper">
@@ -151,6 +154,7 @@ const Login = () => {
                                     onChange={(e) => setPassword(e.target.value)}
                                     required
                                 />
+                                {/* Toggle de visibilidad de contraseña */}
                                 <button
                                     type="button"
                                     className="password-toggle-btn"
@@ -160,10 +164,11 @@ const Login = () => {
                                 </button>
                             </div>
                         </div>
-
+                        {/* Botón de inicio de sesión */}
                         <button type="submit" className="login-submit-btn">
                             Iniciar sesión
                         </button>
+                        {/* Enlace para recuperar contraseña, lleva a ForgotPassword */}
                         <div className="forgot-password-link-container">
                             <Link to="/forgot-password" className="forgot-password-link">
                                 ¿Olvidaste tu contraseña?

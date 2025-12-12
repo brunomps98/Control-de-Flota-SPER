@@ -107,6 +107,8 @@ describe('ChatController', () => {
             expect(res.status).toHaveBeenCalledWith(400);
         });
 
+        // Test
+
         test('Debe retornar 500 si Supabase falla', async () => {
             const req = mockRequest({}, {}, {}, null, [
                 { originalname: 'fail.png', buffer: Buffer.from('fake'), mimetype: 'image/png' }

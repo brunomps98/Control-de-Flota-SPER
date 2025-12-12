@@ -11,6 +11,7 @@ const BellIcon = () => (
   </svg>
 );
 
+// Componente de campana de notificaciones
 const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll, extraClasses = '' }) => {
   if (!user.admin) return null;
   return (
@@ -42,7 +43,6 @@ const NotificationBell = ({ user, unreadCount, onBellClick, notifications, isNot
 };
 
 // Navbar y botón de logout
-
 const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll }) => {
   const navigate = useNavigate();
   if (!user) return null;
@@ -54,6 +54,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
 
   const bellProps = { user, unreadCount, onBellClick, notifications, isNotificationOpen, onNotificationClick, onDeleteOne, onClearAll };
 
+  // Al clickear una opción en mobile, cerramos el menú
   const handleMobileLinkClick = () => {
     const toggler = document.querySelector('.navbar-toggler');
     const collapseMenu = document.querySelector('#navbarSupportedContent');
@@ -147,6 +148,7 @@ const Navbar = ({ user, unreadCount, onBellClick, notifications, isNotificationO
                </Link>
             </li>
 
+            {/* Botón de logout en mobile */}
             <li className="nav-item d-lg-none">
               <button className="nav-link btn btn-link w-100 text-center" onClick={() => {
                 handleMobileLinkClick();

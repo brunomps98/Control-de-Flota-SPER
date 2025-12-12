@@ -1,16 +1,19 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../config/configServer.js';
-import Usuario from './user.model.js'; 
+import Usuario from './user.model.js';
 
 // Definición del Modelo ChatRoom
 const ChatRoom = sequelize.define('ChatRoom', {
+    // ID de la sala de chat
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    // ID del usuario asociado a la sala de chat
     user_id: {
         type: DataTypes.INTEGER,
         references: { model: 'usuarios', key: 'id' },
         allowNull: false,
         unique: true
     },
+    // Último mensaje en la sala de chat
     last_message: { type: DataTypes.TEXT, allowNull: true }
 }, {
     tableName: 'chat_rooms',
@@ -21,29 +24,36 @@ const ChatRoom = sequelize.define('ChatRoom', {
 
 // Definición del Modelo ChatMessage
 const ChatMessage = sequelize.define('ChatMessage', {
+    // ID del mensaje
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    // ID de la sala de chat
     room_id: {
         type: DataTypes.INTEGER,
         references: { model: 'chat_rooms', key: 'id' },
         allowNull: false
     },
+    // ID del remitente
     sender_id: {
         type: DataTypes.INTEGER,
         references: { model: 'usuarios', key: 'id' },
         allowNull: false
     },
+    // Contenido del mensaje
     content: {
         type: DataTypes.TEXT,
-        allowNull: true 
+        allowNull: true
     },
+    // Tipo de mensaje
     type: {
         type: DataTypes.STRING,
-        defaultValue: 'text' // 'text', 'image', 'video', 'audio', 'file'
+        defaultValue: 'text' // Puede ser texto, image, video, audio, file
     },
+    // Url del archivo
     file_url: {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    // Indicador de si el mensaje ha sido leído
     read: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
     tableName: 'chat_messages',
@@ -60,4 +70,5 @@ Usuario.hasOne(ChatRoom, { foreignKey: 'user_id', as: 'chatRoom' });
 Usuario.hasMany(ChatMessage, { foreignKey: 'sender_id', as: 'sentMessages' });
 ChatRoom.hasMany(ChatMessage, { foreignKey: 'room_id', as: 'messages' });
 
+// Exportamos los modelos
 export { ChatRoom, ChatMessage };

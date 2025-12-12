@@ -7,6 +7,7 @@ import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { toast } from 'react-toastify';
 
+// Montamos el componente principal
 const Support = () => {
     const navigate = useNavigate();
     
@@ -32,6 +33,7 @@ const Support = () => {
         };
     }, [navigate]);
 
+    // Manejo de cambios en los campos del formulario
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         setFormData(prevState => ({
@@ -47,6 +49,7 @@ const Support = () => {
         try {
             let response;
             if (hasFiles) {
+                // Envío con archivos adjuntos
                 const dataToSend = new FormData();
                 Object.keys(formData).forEach(key => {
                     if (key === 'files') {
@@ -59,12 +62,16 @@ const Support = () => {
                 });
                 response = await apiClient.post('/api/support', dataToSend);
             } else {
+                // Envío sin archivos adjuntos
                 const { files, ...textData } = formData;
                 response = await apiClient.post('/api/support-no-files', textData);
             }
+            // Éxito en el envío
             toast.success(response.data.message);
+            // Vaciado de formulario
             handleReset();
         } catch (error) {
+            // Manejo de errores
             toast.error(error.response?.data?.message || 'Hubo un error al enviar el caso.');
         } finally {
             setIsSubmitting(false);
@@ -87,10 +94,12 @@ const Support = () => {
 
                 <div className="login-card support-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
+                    {/* Título y subtítulo del formulario de soporte */}
                     <h2 className="form-title">Soporte</h2>
                     <p className="form-subtitle">Complete el siguiente formulario para recibir ayuda.</p>
                     <form onSubmit={handleSubmit}>
                         <div className="mb-3">
+                            {/* Campo de Nombre */}
                             <label htmlFor="exampleName" className="form-label">Nombre</label>
                             <input
                                 type="text"
@@ -103,6 +112,7 @@ const Support = () => {
                                 onChange={handleChange}
                             />
                         </div>
+                        {/* Campo de Apellido */}
                         <div className="mb-3">
                             <label htmlFor="exampleSurname" className="form-label">Apellido</label>
                             <input
@@ -117,6 +127,7 @@ const Support = () => {
                             />
                         </div>
                         <div className="mb-3">
+                            {/* Campo de Email */}
                             <label htmlFor="exampleEmail" className="form-label">Email</label>
                             <input
                                 type="email"
@@ -130,6 +141,7 @@ const Support = () => {
                             />
                         </div>
                         <div className="mb-3">
+                            {/* Campo de Teléfono */}
                             <label htmlFor="phone" className="form-label">Número de teléfono</label>
                             <input
                                 type="tel"
@@ -145,6 +157,7 @@ const Support = () => {
                             />
                         </div>
                         <div className="mb-3">
+                            {/* Campo de Descripción del Problema */}
                             <label htmlFor="exampleDescription" className="form-label">Descripción del Problema</label>
                             <textarea
                                 className="form-control"
@@ -158,6 +171,7 @@ const Support = () => {
                             ></textarea>
                         </div>
                         <div className="mb-3">
+                            {/* Campo de Subida de Archivos */}
                             <label htmlFor="exampleFile" className="form-label">Capturas de pantalla (Opcional)</label>
                             <input
                                 type="file"
@@ -169,6 +183,7 @@ const Support = () => {
                                 onChange={handleChange}
                             />
                         </div>
+                        {/* Botones de Enviar y Limpiar Campos */}
                         <div className="button-container">
                             <button className="login-submit-btn" type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Enviando...' : 'Enviar Caso'}

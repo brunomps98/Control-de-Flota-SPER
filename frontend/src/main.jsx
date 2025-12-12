@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './styles.css';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+// Importamos las paginas y los componentes
 import Layout from './components/Layout/Layout';
 import AdminRoute from './components/common/AdminRoute/AdminRoute';
 import Home from './pages/Home/Home';

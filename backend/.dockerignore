@@ -1,7 +1,7 @@
-# Ignorar las dependencias de tu PC (se instalan DENTRO del contenedor)
+# Ignorar las dependencias de la PC
 node_modules
 
-# Ignorar el archivo .env (las variables se configuran en Render)
+# Ignorar el archivo .env (Configuramos las variables de entorno en Render)
 .env
 
 # Ignorar archivos de logs
@@ -13,7 +13,7 @@ __mocks__
 jest.config.cjs
 babel.config.cjs
 
-# Ignorar archivos de Git y GitHub (no necesarios en producción)
+# Ignorar archivos de Git y GitHub (no los necesitamos en producción)
 .git
 .gitignore
 .github

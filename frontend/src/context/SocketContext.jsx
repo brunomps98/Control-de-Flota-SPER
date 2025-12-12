@@ -4,18 +4,25 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
 
+// Detectamos la plataforma
+
 const platform = Capacitor.getPlatform();
 // Seteamos URL y variables de entorno para que funcione en capacitor tambien
 const SOCKET_URL = platform === 'android' 
     ? 'https://control-de-flota-backend.onrender.com' 
     : import.meta.env.VITE_API_URL;
 
+// Creamos el contexto del socket
 
 const SocketContext = createContext();
+
+// Hook para usar el contexto del socket
 
 export const useSocket = () => {
     return useContext(SocketContext);
 };
+
+// Proveedor del contexto del socket
 
 export const SocketProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);

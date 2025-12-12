@@ -13,6 +13,7 @@ const MySwal = withReactContent(Swal);
 // Componente de historial
 const HistorySection = ({ title, historyData, loading, error, fieldName = 'descripcion', unit = '', vehicleId, onDelete, historyType, onDeleteAll, fetchHistory, labelName, isAdmin }) => {
 
+    // Formateo de fechas
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
@@ -26,6 +27,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
         }
     };
 
+    // Placeholder para cargar historial
     if (!historyData && !loading && !error) {
         return (
             <div className="history-section-placeholder">
@@ -47,6 +49,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
             <div className="history-header">
                 <h3>{title}</h3>
                 {isAdmin && historyData && historyData.length > 0 && (
+                    // Botón para eliminar todo el historial
                     <button className="btn-history-delete-all" onClick={() => onDeleteAll(historyType)}>
                         Eliminar Todo
                     </button>
@@ -55,20 +58,22 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
             <table>
                 <thead>
                     <tr>
+                        {/* Encabezados dinámicos según el tipo de historial */}
                         <th style={{ width: (historyType === 'descripciones' || historyType === 'services' || historyType === 'rodados') ? 'auto' : '60%' }}>
                             {labelName || (fieldName === 'kilometraje' ? 'Kilometraje' : 'Descripción')} {unit}
                         </th>
-
+                        {/* Mostrar columna de fecha solo si aplica */}
                         {historyType !== 'descripciones' && historyType !== 'services' && historyType !== 'rodados' && <th>Fecha</th>}
-
+                        {/* Columna de acción para admins */}
                         {isAdmin && <th className="action-col">Borrar</th>}
                     </tr>
                 </thead>
                 <tbody>
+                    {/* Renderizado de los registros del historial en orden inverso (más reciente primero) */}
                     {[...historyData].reverse().map((item) => (
                         <tr key={item.id}>
                             <td>{item[fieldName]}</td>
-
+                            {/* Mostrar fecha solo si aplica */}
                             {historyType !== 'descripciones' && historyType !== 'services' && historyType !== 'rodados' && (
                                 <td>
                                     {
@@ -83,6 +88,7 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
                                     }
                                 </td>
                             )}
+                            {/* Botón de eliminar registro para admins */}
                             {isAdmin && (
                                 <td className="action-col">
                                     <button
@@ -102,14 +108,12 @@ const HistorySection = ({ title, historyData, loading, error, fieldName = 'descr
     );
 };
 
-// Componente principal
+// Montamos el componente principal
 const VehicleDetail = () => {
     const { cid } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
-
     const { user } = useOutletContext();
-
     const [vehicle, setVehicle] = useState(null);
     const [loadingVehicle, setLoadingVehicle] = useState(true);
     const [errorVehicle, setErrorVehicle] = useState(null);
@@ -128,11 +132,12 @@ const VehicleDetail = () => {
         setErrorVehicle(null);
         setLoadingVehicle(true);
         try {
-            // Esperamos los datos del vehiculo
+            // Esperamos los datos del vehiculo desde el backend
             const response = await apiClient.get(`/api/vehicle/${cid}`);
             const vehiclePayload = response.data.vehicle ? response.data.vehicle : response.data;
+            // Seteamos los datos del vehiculo
             setVehicle(vehiclePayload);
-
+            // Seteamos la imagen seleccionada
             if (vehiclePayload.thumbnails && vehiclePayload.thumbnails.length > 0) {
                 // Mostramos las imagenes de la DB
                 setSelectedImage(vehiclePayload.thumbnails[0].url_imagen);
@@ -149,6 +154,7 @@ const VehicleDetail = () => {
         }
     };
 
+    // UseEffect para cargar datos del vehiculo
     useEffect(() => {
         fetchVehicleData();
     }, [cid, location.key]);
@@ -163,10 +169,12 @@ const VehicleDetail = () => {
         descripciones: setDescripciones,
     };
 
+    // Función genérica para traer historiales
     const fetchHistory = async (historyType) => {
         const stateSetter = historyStateSetters[historyType];
         if (!stateSetter) return;
 
+        // Seteamos estado de carga
         stateSetter(prev => ({ ...prev, loading: true, error: null }));
         try {
             // Intentamos traer el historial del vehiculo
@@ -180,6 +188,7 @@ const VehicleDetail = () => {
         }
     };
 
+    // UseEffect para cargar historiales al montar el componente
     useEffect(() => {
         if (!cid) return;
         fetchHistory('kilometrajes');
@@ -191,14 +200,14 @@ const VehicleDetail = () => {
     }, [cid, location.key]);
 
     // Acciones
-    
+
     // Editar vehiculo (redirección a eddit-vehicle)
     const handleEdit = () => navigate(`/eddit-vehicle/${cid}`);
 
     // Eliminar vehiculo
     const handleDeleteVehicle = () => {
         MySwal.fire({
-            // Confirmación
+            // Mensaje de confirmación al usuario con Swal
             title: '¿Estás seguro?',
             text: "¡Vas a eliminar este vehículo! No podrás revertir esto.",
             icon: 'warning',
@@ -225,12 +234,13 @@ const VehicleDetail = () => {
     const handleDeleteAllHistory = (historyType) => {
         const stateSetter = historyStateSetters[historyType];
         MySwal.fire({
-            // Confirmación para hacerlo
+            // Mensaje de confirmación enviada al usuario
             title: '¿Estás seguro?',
             text: `Vas a eliminar TODO el historial de "${historyType}". ¡No podrás revertir esto!`,
             icon: 'warning',
             showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
         }).then(async (result) => {
+            {/* Si el usuario confirma la acción */ }
             if (result.isConfirmed) {
                 stateSetter(prev => ({ ...prev, error: null }));
                 try {
@@ -252,11 +262,12 @@ const VehicleDetail = () => {
     const handleDeleteOneHistoryEntry = (historyId, historyType) => {
         const stateSetter = historyStateSetters[historyType];
         MySwal.fire({
-            // Mostramos confirmación al usuario
+            // Mostramos mensaje de confirmación al usuario
             title: '¿Eliminar este registro?',
             text: "Esta acción es irreversible.",
             icon: 'warning',
             showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Sí, ¡eliminar!', cancelButtonText: 'Cancelar'
+            // Si el usuario confirma la acción
         }).then(async (result) => {
             if (result.isConfirmed) {
                 stateSetter(prev => ({ ...prev, error: null }));
@@ -276,7 +287,7 @@ const VehicleDetail = () => {
         });
     };
 
-    // UseEffect de Capacitor
+    // UseEffect de Capacitor con manejo de botón físico de volver atrás
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
         const handleBackButton = () => navigate('/vehicle');
@@ -297,7 +308,8 @@ const VehicleDetail = () => {
         return fallbackValue || 'N/A';
     };
 
-    // Renderizado condicional de carga o error
+    // Renderizado condicional según estado de carga y errores
+    // Cargando vehículo
     if (loadingVehicle) {
         return (
             <div className="login-page">
@@ -307,7 +319,7 @@ const VehicleDetail = () => {
             </div>
         );
     }
-
+    // Error al cargar vehículo
     if (errorVehicle && !vehicle) {
         return (
             <div className="login-page">
@@ -317,7 +329,7 @@ const VehicleDetail = () => {
             </div>
         );
     }
-
+    // Vehículo no encontrado
     if (!vehicle) {
         return (
             <div className="login-page">
@@ -347,11 +359,12 @@ const VehicleDetail = () => {
                 {errorVehicle && <p className="detail-error-message" style={{ marginBottom: '15px' }}>{errorVehicle}</p>}
 
                 <div className="detail-header-grid">
-
+                    {/* Galería de imágenes del vehículo */}
                     <div className="gallery-container">
                         <div className="main-image-wrapper">
                             <img src={selectedImage} alt="Vehículo principal" className="main-image" />
                         </div>
+                        {/* Miniaturas si hay más de una imagen */}
                         {allImages.length > 1 && (
                             <div className="thumbnail-list">
                                 {allImages.map((imgObj) => (
@@ -366,13 +379,13 @@ const VehicleDetail = () => {
                             </div>
                         )}
                     </div>
-
+                    {/* Información y acciones del vehículo */}
                     <div className="info-actions-container">
                         <div className="info-card">
                             <h2>Ficha del Vehículo</h2>
-
                             <p><strong>Subido por:</strong>
                                 <span>
+                                    {/* Enlace al perfil del creador si existe */}
                                     {vehicle.owner ? (
                                         <Link to={`/profile/${vehicle.owner.id}`} className="creator-link">
                                             {vehicle.owner.username}
@@ -382,14 +395,12 @@ const VehicleDetail = () => {
                                     )}
                                 </span>
                             </p>
-
+                            {/* Detalles del vehículo */}
                             <p><strong>Dominio:</strong> <span>{vehicle.dominio}</span></p>
                             <p><strong>Año:</strong> <span>{vehicle.anio}</span></p>
-
                             <p><strong>Kilometraje:</strong> <span>{latestKilometraje} km</span></p>
                             <p><strong>Destino:</strong> <span>{latestDestino}</span></p>
                             <p><strong>Chofer:</strong> <span>{latestChofer}</span></p>
-
                             <p><strong>Establecimiento:</strong> <span>{vehicle.title}</span></p>
                             <p><strong>Tipo:</strong> <span>{vehicle.tipo}</span></p>
                             <hr />
@@ -400,22 +411,26 @@ const VehicleDetail = () => {
 
                         <div className="actions-card">
                             <h2>Acciones</h2>
+                            {/* Botones de acción */}
+                            {/* Volver a la lista */}
                             <Link to="/vehicle" className="btn-action btn-secondary">Volver a Lista</Link>
+                            {/* Imprimir página */}
                             <button className="btn-action btn-secondary" onClick={() => window.print()}>Imprimir</button>
-
+                            {/* Editar vehículo */}
                             <button className="btn-action btn-primary" onClick={handleEdit}>Añadir Historial</button>
-
+                            {/* Eliminar vehículo (solo para admins) */}
                             {user && user.admin && (
                                 <button className="btn-action btn-destructive" onClick={handleDeleteVehicle}>Eliminar Vehículo</button>
                             )}
                         </div>
                     </div>
                 </div>
-
+                {/* Sección de historiales del vehículo */}
                 <div className="history-grid-title">
                     <h2>Historiales del Móvil</h2>
                 </div>
                 <div className="history-grid">
+                    {/* Sección de historial de kilometrajes */}
                     <HistorySection
                         title="Kilometraje"
                         historyData={kilometrajes.data}
@@ -428,6 +443,7 @@ const VehicleDetail = () => {
                         fetchHistory={fetchHistory}
                         isAdmin={user?.admin}
                     />
+                    {/* Sección de historial de services */}
                     <HistorySection
                         title="Services"
                         historyData={services.data}
@@ -441,6 +457,7 @@ const VehicleDetail = () => {
                         fetchHistory={fetchHistory}
                         isAdmin={user?.admin}
                     />
+                    {/* Sección de historial de reparaciones */}
                     <HistorySection
                         title="Reparaciones"
                         historyData={reparaciones.data}
@@ -453,6 +470,7 @@ const VehicleDetail = () => {
                         fetchHistory={fetchHistory}
                         isAdmin={user?.admin}
                     />
+                    {/* Sección de historial de destinos */}
                     <HistorySection
                         title="Destinos"
                         historyData={destinos.data}
@@ -465,6 +483,7 @@ const VehicleDetail = () => {
                         fetchHistory={fetchHistory}
                         isAdmin={user?.admin}
                     />
+                    {/* Sección de historial de rodados */}
                     <HistorySection
                         title="Rodados"
                         historyData={rodados.data}
@@ -478,6 +497,7 @@ const VehicleDetail = () => {
                         fetchHistory={fetchHistory}
                         isAdmin={user?.admin}
                     />
+                    {/* Sección de historial de choferes */}
                     <HistorySection
                         title="Historial de Choferes"
                         historyData={descripciones.data}

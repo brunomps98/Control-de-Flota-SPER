@@ -1,6 +1,8 @@
+// Importamos Sequelize y dotenv para manejar variables de entorno
 import { Sequelize } from 'sequelize';
 import dotenv from "dotenv";
 
+// Configuramos dotenv para leer el archivo .env
 dotenv.config();
 
 // Obtenemos la url de la base de datos del archivo.env
@@ -13,11 +15,11 @@ if (!databaseUrl) {
 }
 
 // Creación de constante para poder conectarse a postgresql mediante Sequelize
-
 const sequelize = new Sequelize(databaseUrl, {
     dialect: 'postgres',
     logging: false, 
-    
+
+    // Configuración del pool de conexiones
     pool: {
         max: 5,         // Máximo de conexiones simultáneas
         min: 0,         // Mínimo de conexiones (0 permite desconectar si no hay uso)
@@ -25,6 +27,7 @@ const sequelize = new Sequelize(databaseUrl, {
         idle: 10000     // Tiempo máximo que una conexión puede estar inactiva (10s)
     },
 
+    // Opciones específicas para PostgreSQL
     dialectOptions: { 
         ssl: {
             require: true,
@@ -35,15 +38,18 @@ const sequelize = new Sequelize(databaseUrl, {
 });
 
 // Conectamos a la DB y sino arrojamos error 
-
 const connectToDB = async () => {
     try {
+        // Intentamos autenticar la conexión
         await sequelize.authenticate();
+        // Si la autenticación es exitosa, mostramos un mensaje en consola
         console.log(` Conectado exitosamente a PostgreSQL (Supabase)`);
     } catch (error) {
+        // Si hay un error, lo mostramos en consola
         console.error(' No se pudo conectar a la base de datos:', error);
         throw error;
     }
 };
 
+// Exportamos la instancia de Sequelize y la función de conexión
 export { sequelize, connectToDB };

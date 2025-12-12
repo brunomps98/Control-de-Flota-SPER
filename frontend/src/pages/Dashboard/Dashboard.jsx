@@ -7,8 +7,10 @@ import './Dashboard.css';
 import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 
+// Registro de los componentes necesarios de ChartJS
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
+// Montamos el componente principal
 const Dashboard = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -20,6 +22,7 @@ const Dashboard = () => {
         if (Capacitor.isPluginAvailable('App')) {
 
             // Si está disponible, añadimos el listener
+            // Manejador para el botón de retroceso en dispositivos móviles
             const handleBackButton = () => navigate('/vehicle');
             const listenerPromise = App.addListener('backButton', handleBackButton);
 
@@ -117,6 +120,7 @@ const Dashboard = () => {
 
 
     // Renderizado
+    // Carga
     if (loading) {
         return (
             <div className="login-page">
@@ -124,6 +128,7 @@ const Dashboard = () => {
             </div>
         );
     }
+    // Error
     if (error) {
         return (
             <div className="login-page">
@@ -131,6 +136,7 @@ const Dashboard = () => {
             </div>
         );
     }
+    // Sin datos
     if (!stats) {
         return (
             <div className="login-page">
@@ -140,6 +146,7 @@ const Dashboard = () => {
     }
 
     return (
+        // Renderizado del dashboard con gráficos
         <div className="login-page">
             <div className="dashboard-container">
 

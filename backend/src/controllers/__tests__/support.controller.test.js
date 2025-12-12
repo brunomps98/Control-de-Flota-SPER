@@ -108,6 +108,7 @@ describe('SupportController', () => {
         });
 
         // Test
+        
         test('Debe responder 500 si falla el repositorio', async () => {
             const req = mockRequest();
             const res = mockResponse();
@@ -136,6 +137,7 @@ describe('SupportController', () => {
         });
 
         //Test
+
         test('Debe responder 404 si el ticket no existe', async () => {
             const req = mockRequest({}, { ticketId: '999' });
             const res = mockResponse();
@@ -214,6 +216,7 @@ describe('SupportController', () => {
         });
 
         // Test 
+
         test('Debe responder 404 si el ticket no existe', async () => {
             const req = mockRequest({}, { pid: '99' });
             const res = mockResponse();

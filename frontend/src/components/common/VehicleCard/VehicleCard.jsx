@@ -5,6 +5,7 @@ import Tilt from 'react-parallax-tilt';
 // Recibimos props 
 const VehicleCard = ({ vehicle, isAdmin, onDelete }) => {
     
+    // Determinamos la URL de la imagen del vehiculo
     const imageUrl = (vehicle.thumbnail && Array.isArray(vehicle.thumbnail) && vehicle.thumbnail.length > 0)
     ? vehicle.thumbnail[0] 
     : "https://via.placeholder.com/400x300.png?text=Sin+Imagen"; 

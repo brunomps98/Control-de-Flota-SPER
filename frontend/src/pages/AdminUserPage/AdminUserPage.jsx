@@ -54,6 +54,7 @@ const unidadesPermitidas = [
     "Tratamiento",
 ];
 
+// Creamos el componente principal
 const AdminUserPage = () => {
     const [users, setUsers] = useState([]);
     const navigate = useNavigate();
@@ -77,6 +78,7 @@ const AdminUserPage = () => {
         profile_picture: null
     });
 
+    // Filtros y búsqueda
     const [searchParams, setSearchParams] = useSearchParams();
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [filters, setFilters] = useState({
@@ -87,7 +89,7 @@ const AdminUserPage = () => {
         admin: false
     });
 
-    // UseEffect
+    // UseEffects para cargar usuarios y manejar filtros
 
     useEffect(() => {
         setFilters({
@@ -99,6 +101,7 @@ const AdminUserPage = () => {
         });
     }, [searchParams]);
 
+    // Cargar usuarios según los parámetros de búsqueda
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -119,6 +122,7 @@ const AdminUserPage = () => {
         fetchUsers();
     }, [searchParams]);
 
+    // Actualizar URL cuando cambian los filtros, con debounce
     useEffect(() => {
         const timer = setTimeout(() => {
             const query = {};
@@ -148,6 +152,7 @@ const AdminUserPage = () => {
         return () => clearTimeout(timer);
     }, [filters, setSearchParams, searchParams]);
 
+    // Manejo del botón físico de volver atras en móviles
     useEffect(() => {
         if (Capacitor.isPluginAvailable('App')) {
             const handleBackButton = () => {
@@ -165,6 +170,9 @@ const AdminUserPage = () => {
         }
     }, [navigate, viewingImage]);
 
+    // Manejadores de eventos
+
+    // Para los campos de filtro
     const handleFilterChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFilters(prev => ({
@@ -194,7 +202,7 @@ const AdminUserPage = () => {
             profile_picture: null
         });
     };
-    
+
     // Para el botón de cancelar edición
     const handleCancelEdit = () => {
         setEditingUserId(null);
@@ -209,6 +217,7 @@ const AdminUserPage = () => {
         });
     };
 
+    // Para los campos del formulario de edición
     const handleFormChange = (e) => {
         const { name, value, type, checked, files } = e.target;
         if (name === 'profile_picture' && files) {
@@ -259,6 +268,7 @@ const AdminUserPage = () => {
             });
 
         } catch (err) {
+            // Manejo de errores
             const errorMsg = err.response?.data?.message || 'Error al guardar los cambios.';
             toast.error(errorMsg);
             console.error("Error al guardar:", err);
@@ -267,6 +277,7 @@ const AdminUserPage = () => {
 
     // Para eliminar un usuario de la DB
     const handleDelete = (userId, username) => {
+        // Disparo de alerta de confirmación de Swal
         Swal.fire({
             title: `¿Estás seguro?`,
             text: `Vas a eliminar permanentemente al usuario "${username}". ¡No podrás revertir esto!`,
@@ -389,6 +400,7 @@ const AdminUserPage = () => {
                         </thead>
 
                         <tbody>
+                            {/* Filas de usuarios y sus datos */}
                             {users.map(user => (
                                 <tr key={user.id}>
 
@@ -435,7 +447,7 @@ const AdminUserPage = () => {
                                                     )}
                                                 </div>
                                             </td>
-
+                                            {/* Campos editables */}
                                             <td data-label="Username">
                                                 <input
                                                     type="text"
@@ -485,6 +497,7 @@ const AdminUserPage = () => {
                                                     onChange={handleFormChange}
                                                 />
                                             </td>
+                                            {/* Acciones de guardar y cancelar */}
                                             <td data-label="Acciones">
                                                 <div className="table-edit-actions">
                                                     <button
@@ -519,15 +532,15 @@ const AdminUserPage = () => {
                                                     <span style={{ color: '#777', fontSize: '0.8rem' }}>N/A</span>
                                                 )}
                                             </td>
-
+                                                {/* Username con link al perfil */}
                                             <td data-label="Username">
                                                 <Link
                                                     to={`/profile/${user.id}`}
                                                     style={{
-                                                        color: 'inherit',       
-                                                        textDecoration: 'none', 
-                                                        fontWeight: 'bold',    
-                                                        cursor: 'pointer'       
+                                                        color: 'inherit',
+                                                        textDecoration: 'none',
+                                                        fontWeight: 'bold',
+                                                        cursor: 'pointer'
                                                     }}
                                                     title="Ver perfil completo"
                                                 >
@@ -544,6 +557,7 @@ const AdminUserPage = () => {
                                             <td data-label="Contraseña" className="password-placeholder-cell">
                                                 <LockIcon />
                                             </td>
+                                            {/* Acciones de editar y eliminar */}
                                             <td data-label="Acciones">
                                                 <button
                                                     className="btn btn-sm btn-primary me-2"

@@ -33,6 +33,7 @@ const VEHICLE_DATA = {
     "Otro": ["Otro"]
 };
 
+// Montamos el componente principal
 const RealTimeVehicle = () => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -82,6 +83,7 @@ const RealTimeVehicle = () => {
                     setFormData(prevState => ({ ...prevState, title: initialTitle }));
                 }
             } catch (error) {
+                // Manejo de errores
                 console.error("No se pudo obtener la sesión del usuario:", error);
                 toast.error("Error al cargar datos de usuario.");
             } finally {
@@ -91,6 +93,7 @@ const RealTimeVehicle = () => {
         fetchUserData();
     }, []);
 
+    // Manejador de cambios en los formularios
     const handleChange = (e) => {
         const { name, value, files } = e.target;
 
@@ -121,6 +124,7 @@ const RealTimeVehicle = () => {
         }));
     };
 
+    // Manejador de envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
@@ -131,6 +135,7 @@ const RealTimeVehicle = () => {
             return;
         }
 
+        // Envío de datos al backend
         try {
             const dataToSend = new FormData();
             for (const key in formData) {
@@ -138,12 +143,14 @@ const RealTimeVehicle = () => {
                     dataToSend.append(key, formData[key]);
                 }
             }
+            // Adjuntar múltiples archivos si existen
             if (formData.thumbnail && formData.thumbnail.length > 0) {
                 for (let i = 0; i < formData.thumbnail.length; i++) {
                     dataToSend.append('thumbnail', formData.thumbnail[i]);
                 }
             }
 
+            // Realizar la petición POST
             const response = await apiClient.post('/api/addVehicleWithImage', dataToSend);
             toast.success(response.data.message);
 
@@ -156,11 +163,11 @@ const RealTimeVehicle = () => {
                 thumbnail: null
             });
             setModelosOptions([]); // Resetear modelos
-
             const fileInput = document.getElementById('thumbnail');
             if (fileInput) fileInput.value = '';
 
         } catch (error) {
+            // Manejo de errores
             if (error.response && error.response.status === 403) {
                 toast.error('Permiso denegado: No puede agregar vehículos a esa unidad.');
             } else {
@@ -171,6 +178,7 @@ const RealTimeVehicle = () => {
         }
     };
 
+    // Renderizado condicional mientras se cargan datos del usuario
     if (loading || !user) {
         return (
             <div className="login-page vehicle-form-page">
@@ -185,6 +193,7 @@ const RealTimeVehicle = () => {
         <div className="login-page vehicle-form-page">
             <main className="login-main">
                 <div className="login-card vehicle-form-card">
+                    {/* Formulario de carga de vehículo */}
                     <h2 className="form-title">Cargar Vehículo</h2>
 
                     <form onSubmit={handleSubmit} className="vehicle-form-grid">
@@ -201,6 +210,7 @@ const RealTimeVehicle = () => {
                                 required
                                 disabled={!user.admin}
                             >
+                                {/* Opciones basadas en permisos del usuario */}
                                 <option value="">-- Seleccione --</option>
                                 {(user.admin || user.dg) && <option value="Direccion General">Dirección General</option>}
                                 {(user.admin || user.up1) && <option value="Unidad Penal 1">Unidad Penal 1</option>}
@@ -215,6 +225,7 @@ const RealTimeVehicle = () => {
                                 {(user.admin || user.trat) && <option value="Tratamiento">Tratamiento</option>}
                             </select>
                         </div>
+                        {/* Descripción del estado del vehículo */}
                         <div className="form-group span-2">
                             <label htmlFor="description" className="form-label">Descripción de estado</label>
                             <input id="description" className="form-control" type="text" name="description" value={formData.description} onChange={handleChange} placeholder="Ej: Operativo, En taller..." required />
@@ -230,7 +241,7 @@ const RealTimeVehicle = () => {
                                 ))}
                             </select>
                         </div>
-
+                        {/* Modelo dinámico según marca */}
                         <div className="form-group span-1">
                             <label htmlFor="modelo" className="form-label">Modelo</label>
                             {modelosOptions.length > 0 ? (
@@ -244,7 +255,7 @@ const RealTimeVehicle = () => {
                                 <input id="modelo" className="form-control" type="text" name="modelo" value={formData.modelo} onChange={handleChange} placeholder={formData.marca === 'Otro' ? "Especifique modelo" : "Seleccione marca primero"} disabled={!formData.marca} required />
                             )}
                         </div>
-
+                        {/* Año del vehículo */}
                         <div className="form-group span-1">
                             <label htmlFor="anio" className="form-label">Año</label>
                             <select id="anio" className="form-control" name="anio" value={formData.anio} onChange={handleChange} required>
@@ -265,7 +276,7 @@ const RealTimeVehicle = () => {
                                 ))}
                             </select>
                         </div>
-
+                        {/* Dominio del vehículo */}
                         <div className="form-group span-1">
                             <label htmlFor="dominio" className="form-label">Patente</label>
                             <input
@@ -280,7 +291,7 @@ const RealTimeVehicle = () => {
                                 style={{ textTransform: 'uppercase' }}
                             />
                         </div>
-
+                        {/* Kilometraje del vehículo */}
                         <div className="form-group span-1">
                             <label htmlFor="kilometros" className="form-label">Kilómetros</label>
                             <input id="kilometros" className="form-control" type="number" min="0" name="kilometros" value={formData.kilometros} onChange={handleChange} placeholder="0" required />
@@ -329,7 +340,7 @@ const RealTimeVehicle = () => {
                             <label htmlFor="thumbnail" className="form-label">Imágenes</label>
                             <input id="thumbnail" className="form-control" type="file" name="thumbnail" onChange={handleChange} multiple title="Seleccione imágenes..." />
                         </div>
-
+                        {/* Botón de envío del formulario */}
                         <div className="form-group span-3">
                             <button className="login-submit-btn" type="submit" disabled={isSubmitting}>
                                 {isSubmitting ? 'Registrando...' : 'Registrar Vehículo'}

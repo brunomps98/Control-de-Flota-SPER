@@ -3,7 +3,11 @@ import { useSocket } from './SocketContext';
 import apiClient from '../api/axiosConfig';
 import { toast } from 'react-toastify';
 
+// Creamos el contexto del chat
+
 const ChatContext = createContext();
+
+// Hook para usar el contexto del chat
 
 export const useChat = () => useContext(ChatContext);
 
@@ -59,6 +63,8 @@ export const ChatProvider = ({ children, user }) => {
     useEffect(() => {
         if (!socket || !user) return;
 
+        // Manejo de nuevos mensajes
+
         const handleNewMessage = (message) => {
             if (!user.admin && message.room_id === guestRoom?.id) {
                 setGuestMessages((prev) => [...prev, message]);
@@ -111,6 +117,8 @@ export const ChatProvider = ({ children, user }) => {
             if (user.admin && selectedRoom?.id === roomId) setAdminMessages(prev => prev.filter(m => m.id !== messageId));
             if (!user.admin && guestRoom?.id === roomId) setGuestMessages(prev => prev.filter(m => m.id !== messageId));
         };
+
+        // Manejo de sala eliminada
 
         const handleRoomDeleted = ({ roomId }) => {
             if (user.admin) {
@@ -175,6 +183,8 @@ export const ChatProvider = ({ children, user }) => {
         setIsChatOpen(prev => !prev);
     };
 
+    // Valores del contexto
+
     const value = {
         user, socket,
         guestRoom, guestMessages, setGuestMessages,
@@ -190,5 +200,7 @@ export const ChatProvider = ({ children, user }) => {
         selectRoom, startNewChat, toggleChat
     };
 
+    // Proveemos el contexto a los hijos
+    
     return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };

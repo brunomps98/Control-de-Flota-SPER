@@ -75,7 +75,7 @@ const startServer = async () => {
     try {
       // Primero conectamos a la base de datos
         await connectToDB(); 
-        // Si la DB conecta, levantamos el error
+        // Si la DB conecta, iniciamos el servidor HTTP
         httpServer.listen(PORT, HOST, () => { 
             console.log(`Servidor HTTP y Sockets escuchando en http://localhost:${PORT}/\n`);
         });

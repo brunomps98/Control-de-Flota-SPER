@@ -144,6 +144,7 @@ const Layout = () => {
     useEffect(() => {
         if (Capacitor.getPlatform() === 'web') return;
 
+        // Función para registrar notificaciones
         const registerForNotifications = async () => {
             try {
                 let permStatus = await PushNotifications.checkPermissions();
@@ -198,6 +199,7 @@ const Layout = () => {
 
         registerForNotifications();
 
+        // Limpiamos los listeners al desmontar
         return () => {
             PushNotifications.removeAllListeners();
         };
@@ -222,6 +224,7 @@ const Layout = () => {
         return () => { listener.remove(); };
     }, [navigate, location]);
 
+    // UseEffect para manejo de inactividad en web
     useEffect(() => {
         if (!user || Capacitor.getPlatform() !== 'web') return;
         const events = ['mousemove', 'keydown', 'touchstart', 'scroll', 'click'];
@@ -249,6 +252,7 @@ const Layout = () => {
         return null;
     };
 
+    // Cargamos notificaciones al iniciar sesión solo si el usuario es admin
     useEffect(() => {
         if (user && user.admin) {
             apiClient.get('/api/notifications').then(res => {
@@ -269,6 +273,7 @@ const Layout = () => {
         );
     }
 
+    // Si no hay usuario, redirigimos al login
     if (!user) return null;
 
     // Definimos el botón para marcar las notificaciones como leidas
@@ -291,6 +296,7 @@ const Layout = () => {
         setUnreadCount(prev => (prev > 0 ? prev - 1 : 0));
         apiClient.delete(`/api/notifications/${id}`).catch(e => console.error(e));
     };
+    // Definimos el botón para eliminar todas las notificaciones 
     const handleClearAll = async () => {
         apiClient.delete('/api/notifications/clear-all').then(() => {
             setNotifications([]);

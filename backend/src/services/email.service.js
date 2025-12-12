@@ -1,20 +1,23 @@
-// Importamos resend
+// Importamos resend y dotenv para variables de entorno
 import { Resend } from 'resend';
 import dotenv from 'dotenv';
 
+// Configuramos dotenv
 dotenv.config();
 
-// Inicialización de resend para el envio de notificaciones por mail
-// Tomamos variables de entorno del .env
+// Inicializamos Resend con la clave API
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.RESEND_FROM; 
+// Email del remitente
+const FROM = process.env.RESEND_FROM;
 
-const SAFE_DEMO_EMAIL = ['controldeflotasper@gmail.com']; 
+// Emails seguro para modo demo
+const SAFE_DEMO_EMAIL = ['controldeflotasper@gmail.com'];
 
 // Nuevo ticket de soporte
 export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = []) => {
-
+    // Generamos la lista de archivos adjuntos en html
     let filesHtml = '<p>No se adjuntaron archivos.</p>';
+    // Si hay archivos, los listamos
     if (fileUrls.length > 0) {
         filesHtml = '<ul>' + fileUrls.map(url => `<li><a href="${url}">Ver Archivo Adjunto</a></li>`).join('') + '</ul>';
     }
@@ -36,11 +39,11 @@ export const sendNewTicketEmail = async (adminEmails, ticketData, fileUrls = [])
         <hr>
         <p>Ingresa al panel de administración para gestionarlo.</p>
     `;
-    // Intentamos enviar el mail
     try {
+        // Intentamos enviar el mail
         await resend.emails.send({
-            from: FROM, 
-            to: SAFE_DEMO_EMAIL, 
+            from: FROM,
+            to: SAFE_DEMO_EMAIL,
             subject: `Nuevo Ticket: ${ticketData.problem_description.substring(0, 30)}...`,
             html: htmlBody
         });
@@ -68,7 +71,7 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
         // Intentamos enviar el email
         await resend.emails.send({
             from: FROM,
-            to: SAFE_DEMO_EMAIL, 
+            to: SAFE_DEMO_EMAIL,
             subject: 'Restablecimiento de tu contraseña (Modo Demo)',
             html: htmlBody
         });
@@ -80,7 +83,6 @@ export const sendPasswordResetEmail = async (userEmail, resetLink) => {
 
 // Acción en vehiculo ( eliminación, agregado o edición de un vehiculo)
 export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehicleData) => {
-
     const subjectAction = actionType === 'CREATE' ? 'Nuevo Vehículo Cargado' : 'Vehículo Actualizado';
     const color = actionType === 'CREATE' ? '#4CAF50' : '#2196F3';
     // Cuerpo de html
@@ -97,12 +99,11 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
             </ul>
         </div>
     `;
-
     try {
         // Intentamos enviar el email
         await resend.emails.send({
             from: FROM,
-            to: SAFE_DEMO_EMAIL, 
+            to: SAFE_DEMO_EMAIL,
             subject: ` ${subjectAction}: ${vehicleData.dominio}`,
             html: htmlBody
         });
@@ -112,7 +113,7 @@ export const sendVehicleActionEmail = async (adminEmails, actionType, user, vehi
     }
 };
 
-// Mensaje de chat 
+// Mensaje de nuevo mensaje en el chat
 export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, messageContent) => {
     // Cuerpo html del mail
     const htmlBody = `
@@ -129,7 +130,7 @@ export const sendNewMessageEmail = async (adminEmails, senderName, senderUnit, m
     try {
         await resend.emails.send({
             from: FROM,
-            to: SAFE_DEMO_EMAIL, 
+            to: SAFE_DEMO_EMAIL,
             subject: `Nuevo mensaje de ${senderName}`,
             html: htmlBody
         });

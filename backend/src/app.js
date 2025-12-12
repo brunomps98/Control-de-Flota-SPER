@@ -4,6 +4,7 @@ import dbRouter from './routes/db.router.js';
 import dotenv from "dotenv";
 import cors from "cors";
 
+// Configuramos dotenv para leer las variables de entorno desde el archivo .env
 dotenv.config();
 const app = express();
 
@@ -40,8 +41,10 @@ const corsOptions = {
   origin: function(origin, callback) {
     if (!origin) {
       if (process.env.ALLOW_UNDEFINED_ORIGIN === 'true') {
+        // Permitido por Cors el origen
         return callback(null, true);
       } else {
+        // No permitido por Cors
         return callback(new Error('CORS - origin undefined not allowed'), false);
       }
     }
@@ -50,15 +53,15 @@ const corsOptions = {
     if (allowedOrigins.includes(origin) || vercelRegex.test(origin)) {
       return callback(null, true);
     }
-    
     return callback(new Error('CORS - origin not allowed: ' + origin), false);
   },
-  // Metodos DB
+  // Metodos de la base de datos permitidos
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
   optionsSuccessStatus: 200
 };
 
+// Middlewares para parsear el body de las peticiones
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -73,4 +76,5 @@ app.use("/api", cors(corsOptions), dbRouter);
 // Manejamos las peticiones OPTIONS explícitamente *solo* para /api
 app.options('/api/*', cors(corsOptions)); 
 
+// Exportamos
 export default app;

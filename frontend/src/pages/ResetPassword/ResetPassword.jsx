@@ -21,6 +21,7 @@ const EyeClosedIcon = () => (
     </svg>
 );
 
+// Montamos el componente principal
 const ResetPassword = () => {
     const { token } = useParams(); // Obtenemos el token de la URL
     const navigate = useNavigate();
@@ -31,6 +32,7 @@ const ResetPassword = () => {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
+    // Función para manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -69,6 +71,7 @@ const ResetPassword = () => {
             setError(errorMsg);
             toast.error(errorMsg);
         } finally {
+            // Dejamos de mostrar el loading
             setIsLoading(false);
         }
     };
@@ -78,12 +81,10 @@ const ResetPassword = () => {
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
-                    
+                    {/* Título y subtítulo del formulario */}
                     <h2 className="form-title">Nueva Contraseña</h2>
                     <p className="form-subtitle">Ingresa tu nueva contraseña segura.</p>
-
                     <form onSubmit={handleSubmit} className="login-form">
-                        
                         {/* Si el reseteo fue exitoso, mostramos el mensaje */}
                         {message ? (
                             <div className="alert alert-success" role="alert">
@@ -92,6 +93,7 @@ const ResetPassword = () => {
                         ) : (
                             <>
                                 <div className="mb-3">
+                                    {/* Campo para la nueva contraseña */}
                                     <label htmlFor="passwordInput" className="form-label">Nueva Contraseña</label>
                                     <div className="input-wrapper">
                                         <input
@@ -102,6 +104,7 @@ const ResetPassword = () => {
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
                                         />
+                                        {/* Botón para mostrar/ocultar la contraseña */}
                                         <button 
                                             type="button" 
                                             className="password-toggle-btn" 
@@ -112,6 +115,7 @@ const ResetPassword = () => {
                                     </div>
                                 </div>
                                 <div className="mb-3">
+                                    {/* Campo para confirmar la nueva contraseña */}
                                     <label htmlFor="confirmPasswordInput" className="form-label">Confirmar Contraseña</label>
                                     <div className="input-wrapper">
                                         <input
@@ -124,7 +128,7 @@ const ResetPassword = () => {
                                         />
                                     </div>
                                 </div>
-
+                                {/* Botón de envío del formulario (Actualizar contraseña) */}
                                 <button type="submit" className="login-submit-btn" disabled={isLoading}>
                                     {isLoading ? 'Actualizando...' : 'Guardar Contraseña'}
                                 </button>
@@ -137,7 +141,7 @@ const ResetPassword = () => {
                                 {error}
                             </div>
                         )}
-
+                        {/* Enlace para volver al login */}
                         <div className="forgot-password-link-container">
                             <Link to="/login" className="forgot-password-link">
                                 Volver a Iniciar Sesión

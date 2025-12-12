@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import logoSper from '../../assets/images/logo.png';
 import '../../pages/Login/Login.css';
 
+{/* Montamos el componente principal (de olvido de contraseña) */ }
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +22,7 @@ const ForgotPassword = () => {
         return () => listener.remove();
     }, [navigate]);
 
+    // Función para manejar el envío del formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -34,7 +36,7 @@ const ForgotPassword = () => {
             setMessage(response.data.message);
             toast.success(response.data.message);
             setEmail('');
-            // Mensaje de error 
+            // Mensaje de errores
         } catch (error) {
             console.error("Error al solicitar reseteo:", error);
             const errorMsg = error.response?.data?.message || 'Error interno del servidor.';
@@ -49,7 +51,7 @@ const ForgotPassword = () => {
             <main className="login-main">
                 <div className="login-card">
                     <img src={logoSper} alt="Logo SPER" className="login-logo" />
-
+                    {/* Título y subtitulo del formulario */}
                     <h2 className="form-title">Restablecer Contraseña</h2>
                     <p className="form-subtitle">Ingresa tu email y te enviaremos un enlace de recuperación.</p>
 
@@ -74,7 +76,7 @@ const ForgotPassword = () => {
                                         required
                                     />
                                 </div>
-                                {/* BOton para enviar mensaje y mensaje de enviando */}
+                                {/* Boton para enviar mensaje y mensaje de enviando */}
                                 <button type="submit" className="login-submit-btn" disabled={isLoading}>
                                     {isLoading ? 'Enviando...' : 'Enviar Enlace'}
                                 </button>
