@@ -163,7 +163,7 @@ cd frontend && npm test
 
 ```
 
-📂 Estructura del Proyecto
+## 📂 Estructura del Proyecto
 
 ```bash
 
@@ -172,7 +172,6 @@ cd frontend && npm test
 │   ├── src
 │   │   ├── config          # Auth middleware, DB config, Supabase, Firebase
 │   │   ├── controllers     # Lógica de Chat, Soporte, Dashboard
-│   │   ├── dao             # Data Access Objects (User, Vehicle)
 │   │   ├── models          # Modelos Sequelize
 │   │   ├── repository      # Patrón Repositorio
 │   │   ├── routes          # Definición de rutas Express API
