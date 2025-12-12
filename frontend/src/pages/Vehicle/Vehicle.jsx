@@ -248,8 +248,9 @@ const Vehicle = () => {
                             isAdmin={user?.admin}
                             onDelete={handleDeleteVehicle}
                         />
+                        
                     ))
-                ) : {/* Si no hay vehículos, mostramos mensaje */ }(
+                ) : ( // Si no hay vehiculos, mostramos mensaje o error
                     <p className="no-vehicles-message">{error ? 'Error al cargar. Intenta de nuevo.' : 'No se encontraron vehículos.'}</p>
                 )}
             </div>
