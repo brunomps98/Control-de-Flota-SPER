@@ -180,6 +180,7 @@ cd frontend && npm test
 │   │   ├── utils           # Helpers y encriptación
 │   │   └── __tests__       # Tests unitarios y de integración
 │   ├── app.js              # Configuración de Express
+│   ├── server.js           # Punto de entrada del servidor
 │   └── package.json
 │
 ├── frontend
@@ -190,7 +191,7 @@ cd frontend && npm test
 │   │   ├── context         # Estados globales (Auth)
 │   │   ├── pages           # Vistas principales
 │   │   ├── utils           # SweetAlert y formateadores
-│   │   └── App.jsx         # Router principal
+│   │   └── main.jsx         # Router principal
 │   └── package.json
 │
 └── README.md               # Documentación del proyecto
