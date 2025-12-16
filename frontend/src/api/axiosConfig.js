@@ -115,7 +115,17 @@ apiClient.interceptors.request.use(
 // Interceptor de respuesta 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => Promise.reject(error)
+  (error) => {
+    // Si el error es 401 (Token vencido o inválido) o 403
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        localStorage.removeItem('token');
+        // Redirigir a login forzosamente si estás en web
+        if (window.location.pathname !== '/login') {
+             window.location.href = '/login';
+        }
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;
